@@ -1,0 +1,1369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Owner Panel — Approvals</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700;800&family=DM+Mono:wght@400;500;600&display=swap" rel="stylesheet"/>
+  <style>
+    /* ── RESET & ROOT ───────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --primary:   #6366f1;
+      --primary-d: #4f46e5;
+      --success:   #10b981;
+      --warning:   #f59e0b;
+      --danger:    #ef4444;
+      --info:      #06b6d4;
+      --bg:        #f8fafc;
+      --bg2:       #f1f5f9;
+      --surface:   #ffffff;
+      --border:    #e2e8f0;
+      --text:      #0f172a;
+      --text2:     #475569;
+      --text3:     #94a3b8;
+         --success: #10b981;
+      --success-bg: rgba(16, 185, 129, 0.08);
+      --warning: #f59e0b;
+      --warning-bg: rgba(245, 158, 11, 0.08);
+      --danger: #ef4444;
+      --danger-bg: rgba(239, 68, 68, 0.08);
+      --info: #06b6d4;
+      --info-bg: rgba(6, 182, 212, 0.08);
+      --purple: #8b5cf6;
+      --purple-bg: rgba(139, 92, 246, 0.08);
+      --light-bg: #f1f5f9;
+      --sidebar-w: 240px;
+      --topbar-h:  56px;
+    }
+    body { font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; display:flex; }
+
+    /* ── SIDEBAR ────────────────────────────────────────────── */
+    #sidebar {
+      width: var(--sidebar-w); flex-shrink:0;
+      background: #0f172a; min-height:100vh;
+      display:flex; flex-direction:column;
+      position: fixed; left:0; top:0; bottom:0; z-index:100;
+    }
+    .sb-logo {
+      padding: 18px 20px 14px;
+      border-bottom: 1px solid rgba(255,255,255,.07);
+      display:flex; align-items:center; gap:10px;
+    }
+    .sb-logo-icon { width:32px; height:32px; background:var(--primary); border-radius:8px; display:flex; align-items:center; justify-content:center; color:#fff; font-size:16px; }
+    .sb-logo-main { font-size:15px; font-weight:800; color:#fff; }
+    .sb-logo-sub  { font-size:10px; color:#64748b; font-weight:500; }
+
+    .sb-nav { flex:1; padding:12px 10px; display:flex; flex-direction:column; gap:2px; overflow-y:auto; }
+    .sb-section { font-size:9px; font-weight:700; text-transform:uppercase; letter-spacing:.1em; color:#334155; padding:10px 10px 4px; }
+    .sb-item {
+      display:flex; align-items:center; gap:10px;
+      padding:9px 10px; border-radius:8px;
+      color:#94a3b8; font-size:13px; font-weight:500;
+      cursor:pointer; transition:all .15s; text-decoration:none;
+    }
+    .sb-item:hover  { background:rgba(255,255,255,.06); color:#e2e8f0; }
+    .sb-item.active { background:rgba(99,102,241,.18); color:#a5b4fc; font-weight:700; }
+    .sb-item-ic { font-size:15px; width:20px; text-align:center; flex-shrink:0; }
+    .sb-badge { margin-left:auto; font-size:10px; font-weight:800; background:var(--danger); color:#fff; padding:1px 7px; border-radius:99px; }
+
+    .sb-footer {
+      padding:14px 16px; border-top:1px solid rgba(255,255,255,.07);
+      display:flex; align-items:center; gap:10px;
+    }
+    .sb-av { width:32px; height:32px; border-radius:50%; background:#1e3a5f; color:#93c5fd; font-size:11px; font-weight:800; display:flex; align-items:center; justify-content:center; border:1.5px solid #1e40af; flex-shrink:0; }
+    .sb-uname { font-size:13px; font-weight:700; color:#e2e8f0; }
+    .sb-urole  { font-size:10px; color:#64748b; }
+
+    /* ── MAIN ───────────────────────────────────────────────── */
+    #main { margin-left:var(--sidebar-w); flex:1; display:flex; flex-direction:column; min-height:100vh; }
+
+    /* ── TOPBAR ─────────────────────────────────────────────── */
+    #topbar {
+      height: var(--topbar-h); background:var(--surface);
+      border-bottom:1px solid var(--border);
+      display:flex; align-items:center;
+      padding:0 24px; gap:12px;
+      position:sticky; top:0; z-index:50;
+    }
+    #page-title { font-size:16px; font-weight:800; color:var(--text); flex:1; }
+    .tb-btn {
+      display:flex; align-items:center; gap:6px;
+      padding:7px 14px; border-radius:8px; border:1px solid var(--border);
+      background:var(--surface); font-family:inherit; font-size:13px;
+      font-weight:600; color:var(--text2); cursor:pointer; transition:all .15s;
+    }
+    .tb-btn:hover { background:var(--bg2); }
+    .tb-icon { position:relative; }
+    .tb-icon-btn { width:34px; height:34px; border-radius:8px; border:1px solid var(--border); background:var(--surface); cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:16px; transition:background .15s; }
+    .tb-icon-btn:hover { background:var(--bg2); }
+    .tb-notif-dot { position:absolute; top:5px; right:5px; width:7px; height:7px; background:var(--danger); border-radius:50%; border:1.5px solid #fff; }
+    .tb-avatar { width:32px; height:32px; border-radius:50%; background:#eef2ff; color:#4338ca; font-size:11px; font-weight:800; display:flex; align-items:center; justify-content:center; cursor:pointer; border:1.5px solid #c7d2fe; }
+
+    /* ── PAGE ───────────────────────────────────────────────── */
+    .page { display:none; flex:1; }
+    .page.active { display:flex; flex-direction:column; }
+    .page-body { padding:24px; flex:1; }
+
+     .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(175px, 1fr));
+      gap: 14px;
+      margin-bottom: 22px;
+    }
+
+    .stat-card {
+      background: #fff;
+      border-radius: var(--radius);
+      padding: 18px;
+      border: 1px solid var(--border);
+      position: relative;
+      overflow: hidden;
+      transition: box-shadow .2s, transform .2s;
+    }
+
+    .stat-card:hover {
+      box-shadow: var(--shadow);
+      transform: translateY(-1px);
+    }
+
+    .sc-icon {
+      width: 38px;
+      height: 38px;
+      border-radius: 9px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 17px;
+      margin-bottom: 12px;
+    }
+
+    .sc-val {
+      font-size: 26px;
+      font-weight: 700;
+      line-height: 1;
+      margin-bottom: 4px;
+    }
+
+    .sc-label {
+      font-size: 12px;
+      color: var(--text-secondary);
+      font-weight: 500;
+    }
+
+    .sc-delta {
+      font-size: 11px;
+      margin-top: 6px;
+      font-weight: 600;
+    }
+
+    .sc-delta.up {
+      color: var(--success);
+    }
+
+    .sc-delta.down {
+      color: var(--danger);
+    }
+
+    .sc-delta.neutral {
+      color: var(--text-muted);
+    }
+
+    .stat-card::after {
+      content: '';
+      position: absolute;
+      right: -10px;
+      bottom: -10px;
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      opacity: .07;
+    }
+
+    .sc-indigo .sc-icon {
+      background: var(--accent-glow);
+      color: var(--accent);
+    }
+
+    .sc-indigo::after {
+      background: var(--accent);
+    }
+
+    .sc-green .sc-icon {
+      background: var(--success-bg);
+      color: var(--success);
+    }
+
+    .sc-green::after {
+      background: var(--success);
+    }
+
+    .sc-orange .sc-icon {
+      background: var(--warning-bg);
+      color: var(--warning);
+    }
+
+    .sc-orange::after {
+      background: var(--warning);
+    }
+
+    .sc-red .sc-icon {
+      background: var(--danger-bg);
+      color: var(--danger);
+    }
+
+    .sc-red::after {
+      background: var(--danger);
+    }
+
+    .sc-purple .sc-icon {
+      background: var(--purple-bg);
+      color: var(--purple);
+    }
+
+    .sc-purple::after {
+      background: var(--purple);
+    }
+
+    .sc-cyan .sc-icon {
+      background: var(--info-bg);
+      color: var(--info);
+    }
+
+    .sc-cyan::after {
+      background: var(--info);
+    }
+    /* ── TABLE CARD ─────────────────────────────────────────── */
+    .tcard { background:var(--surface); border:1px solid var(--border); border-radius:12px; overflow:hidden; }
+    .tcard-hd {
+      display:flex; align-items:center; justify-content:space-between;
+      padding:14px 18px; border-bottom:1px solid var(--border);
+      background:#fafbff;
+    }
+    .tcard-title { font-size:14px; font-weight:800; color:var(--text); }
+    .tcard-sub   { font-size:12px; color:var(--text3); margin-top:1px; }
+
+    /* filters */
+    .filter-bar { display:flex; align-items:center; gap:8px; padding:10px 14px; border-bottom:1px solid var(--border); flex-wrap:wrap; background:var(--bg); }
+    .f-search { position:relative; flex:1; min-width:160px; max-width:260px; }
+    .f-search input { width:100%; padding:7px 10px 7px 30px; border:1px solid var(--border); border-radius:7px; font-family:inherit; font-size:13px; outline:none; background:#fff; transition:border-color .15s; }
+    .f-search input:focus { border-color:var(--primary); }
+    .f-si { position:absolute; left:9px; top:50%; transform:translateY(-50%); color:var(--text3); font-size:13px; pointer-events:none; }
+    .f-sel { padding:7px 22px 7px 9px; border:1px solid var(--border); border-radius:7px; font-family:inherit; font-size:12px; color:var(--text); cursor:pointer; outline:none; background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='4'%3E%3Cpath d='M0 0l4 4 4-4z' fill='%2394a3b8'/%3E%3C/svg%3E") no-repeat right 6px center; -webkit-appearance:none; appearance:none; }
+    .f-sel:focus { border-color:var(--primary); }
+    .f-clr { padding:6px 10px; background:none; border:1px solid #fca5a5; border-radius:7px; font-size:12px; font-weight:700; color:var(--danger); cursor:pointer; }
+    .f-clr:hover { background:#fee2e2; }
+
+    /* table */
+    .ow-table { width:100%; border-collapse:collapse; font-size:13.5px; }
+    .ow-table thead tr { background:#f8fafc; position:sticky; top:0; z-index:1; }
+    .ow-table th { padding:10px 14px; text-align:left; font-size:10.5px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--text3); border-bottom:1px solid var(--border); white-space:nowrap; }
+    .ow-table td { padding:12px 14px; border-bottom:1px solid #f4f5f8; vertical-align:middle; }
+    .ow-table tbody tr:last-child td { border-bottom:none; }
+    .ow-row { cursor:pointer; transition:background .12s; }
+    .ow-row:hover td { background:#f5f6ff; }
+    .ow-row.ow-urgent td:first-child { border-left:3px solid var(--danger); }
+
+    /* ── CHIPS / PILLS ──────────────────────────────────────── */
+    .chip { display:inline-block; font-size:11px; font-weight:700; padding:3px 9px; border-radius:99px; white-space:nowrap; }
+    .ch-pending    { background:#fef9c3; color:#854d0e; }
+    .ch-inprogress { background:#e0f2fe; color:#0369a1; }
+    .ch-approved   { background:#ecfdf5; color:#065f46; }
+    .ch-rejected   { background:#fee2e2; color:#991b1b; }
+    .ch-sentback   { background:#ede9fe; color:#5b21b6; }
+    .ch-review     { background:#fdf4ff; color:#86198f; }
+    .ch-high       { background:#fee2e2; color:#991b1b; }
+    .ch-medium     { background:#fef9c3; color:#854d0e; }
+    .ch-low        { background:#dcfce7; color:#166534; }
+    .ch-critical   { background:#fdf2f8; color:#9d174d; }
+
+    .ow-id   { font-family:'DM Mono',monospace; font-size:11px; font-weight:600; background:#eef2ff; color:#4338ca; border:1px solid #c7d2fe; padding:2px 7px; border-radius:5px; }
+    .ow-circ { font-size:10.5px; font-weight:700; background:#eef2ff; color:#4338ca; border:1px solid #c7d2fe; padding:2px 7px; border-radius:4px; font-family:'DM Mono',monospace; }
+    .ow-av   { width:26px; height:26px; border-radius:50%; background:#eef2ff; color:#4338ca; font-size:9px; font-weight:800; display:inline-flex; align-items:center; justify-content:center; border:1.5px solid #c7d2fe; flex-shrink:0; }
+    .ow-title-cell { font-weight:600; font-size:13.5px; color:var(--text); }
+    .ow-sub-cell   { font-size:11px; color:var(--text3); margin-top:2px; }
+    .ow-due-over   { color:#dc2626; font-weight:700; font-size:12.5px; }
+    .ow-due-near   { color:#d97706; font-weight:700; font-size:12.5px; }
+    .ow-due-ok     { color:var(--text3); font-size:12.5px; }
+
+    /* ── DETAIL PAGE ────────────────────────────────────────── */
+    #page-detail .page-body { padding:0; display:flex; flex-direction:column; flex:1; }
+
+    /* detail header */
+    .det-hd {
+      padding:16px 24px 14px;
+      border-bottom:1px solid var(--border);
+      background:var(--surface);
+      position:sticky; top:var(--topbar-h); z-index:40;
+    }
+    .det-bc { display:flex; align-items:center; gap:6px; font-size:12px; margin-bottom:8px; }
+    .det-bc-link { color:var(--primary); font-weight:700; cursor:pointer; }
+    .det-bc-link:hover { text-decoration:underline; }
+    .det-bc-sep  { color:#cbd5e1; }
+    .det-hd-row  { display:flex; align-items:flex-start; justify-content:space-between; gap:12px; margin-bottom:10px; }
+    .det-hd-title{ font-size:20px; font-weight:800; color:var(--text); line-height:1.3; }
+    .det-chips   { display:flex; gap:6px; flex-wrap:wrap; align-items:center; }
+    .det-chip-blue{ font-size:11px; font-weight:700; padding:3px 9px; border-radius:99px; background:#eef2ff; color:#4338ca; border:1px solid #c7d2fe; }
+    .det-chip-grey{ font-size:11px; font-weight:700; padding:3px 9px; border-radius:99px; background:#f1f5f9; color:#64748b; border:1px solid #e2e8f0; }
+
+    /* split body */
+    .det-body { display:flex; flex:1; overflow:hidden; }
+
+    /* left: tabs + pane */
+    .det-left { flex:1; display:flex; overflow:hidden; }
+    .det-vtabs {
+      width:70px; flex-shrink:0; display:flex; flex-direction:column;
+      gap:2px; padding:12px 5px;
+      border-right:1px solid var(--border); background:#f8fafc;
+    }
+    .det-vtab {
+      display:flex; flex-direction:column; align-items:center; gap:3px;
+      padding:10px 4px; border-radius:8px; border:none;
+      background:transparent; cursor:pointer; color:var(--text3);
+      font-family:inherit; transition:all .15s; position:relative;
+    }
+    .det-vtab:hover  { background:#fff; color:var(--text2); }
+    .det-vtab.active { background:#eef2ff; color:#4338ca; }
+    .det-vt-ic  { font-size:17px; line-height:1; }
+    .det-vt-lb  { font-size:9px; font-weight:700; text-transform:uppercase; letter-spacing:.3px; text-align:center; }
+    .det-vt-bdg { position:absolute; top:5px; right:4px; background:var(--primary); color:#fff; font-size:8px; font-weight:800; padding:1px 4px; border-radius:99px; }
+
+    .det-pane { flex:1; overflow-y:auto; padding:20px 24px 40px; }
+    .det-pane::-webkit-scrollbar { width:3px; }
+    .det-pane::-webkit-scrollbar-thumb { background:#e2e8f0; border-radius:99px; }
+
+    /* right: decision panel */
+    .det-right {
+      width:300px; flex-shrink:0;
+      border-left:1px solid var(--border);
+      display:flex; flex-direction:column;
+      background:var(--surface); overflow-y:auto;
+    }
+    .det-right::-webkit-scrollbar { width:3px; }
+    .det-right::-webkit-scrollbar-thumb { background:#e2e8f0; border-radius:99px; }
+
+    /* ── PANE CONTENT ───────────────────────────────────────── */
+    .sec-label {
+      font-size:10px; font-weight:800; text-transform:uppercase;
+      letter-spacing:.08em; color:var(--text3); margin-bottom:10px;
+      display:flex; align-items:center; gap:8px;
+    }
+    .sec-label::after { content:''; flex:1; height:1px; background:var(--border); }
+
+    .dl { display:flex; flex-direction:column; gap:0; }
+    .drow { display:flex; align-items:baseline; gap:10px; padding:6px 0; border-bottom:1px solid #f1f5f9; }
+    .drow:last-child { border-bottom:none; }
+    .dlbl { font-size:11px; font-weight:700; color:var(--text3); min-width:100px; flex-shrink:0; }
+    .dval { font-size:13px; color:var(--text); }
+    .dcode { font-family:'DM Mono',monospace; font-size:11px; background:#eef2ff; color:#4338ca; border:1px solid #c7d2fe; padding:2px 6px; border-radius:4px; }
+
+    /* obligation / desc */
+    .ob-box { font-size:13px; color:var(--text2); line-height:1.7; border-left:2px solid var(--primary); padding:8px 12px; background:#f8f9ff; border-radius:0 7px 7px 0; }
+    .desc-box { font-size:13px; color:var(--text3); line-height:1.7; }
+
+    /* timeline */
+    .timeline { display:flex; flex-direction:column; gap:0; }
+    .tl-item  { display:flex; gap:12px; padding-bottom:16px; position:relative; }
+    .tl-item:last-child { padding-bottom:0; }
+    .tl-item:not(:last-child)::before { content:''; position:absolute; left:11px; top:24px; bottom:0; width:1.5px; background:#e2e8f0; }
+    .tl-dot { width:24px; height:24px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:10px; font-weight:800; flex-shrink:0; margin-top:2px; border:2px solid transparent; }
+    .tl-done { background:#ecfdf5; color:#065f46; border-color:#86efac; }
+    .tl-cur  { background:#eef2ff; color:#4338ca; border-color:#c7d2fe; box-shadow:0 0 0 3px rgba(99,102,241,.12); }
+    .tl-wait { background:#f1f5f9; color:#94a3b8; border-color:#e2e8f0; }
+    .tl-content { flex:1; }
+    .tl-role   { font-size:12px; font-weight:700; color:var(--text); }
+    .tl-who    { font-size:11px; color:var(--text3); margin-top:1px; }
+    .tl-note   { font-size:12px; color:var(--text2); margin-top:5px; background:#f8fafc; border:1px solid var(--border); border-radius:6px; padding:7px 10px; line-height:1.5; }
+    .tl-time   { font-size:10px; color:#cbd5e1; margin-top:2px; }
+
+    /* evidence table */
+    .ev-table-wrap { border:1px solid var(--border); border-radius:8px; overflow:hidden; }
+    .ev-table { width:100%; border-collapse:collapse; font-size:12.5px; }
+    .ev-table thead tr { background:#f8fafc; }
+    .ev-table th { padding:8px 12px; font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--text3); border-bottom:1px solid var(--border); }
+    .ev-table td { padding:9px 12px; border-bottom:1px solid #f4f5f8; vertical-align:middle; }
+    .ev-table tbody tr:last-child td { border-bottom:none; }
+    .ev-type { font-size:10.5px; font-weight:600; background:#f1f5f9; color:var(--text2); border:1px solid #e2e8f0; padding:2px 7px; border-radius:4px; }
+    .ev-empty { text-align:center; padding:28px; color:var(--text3); font-size:13px; }
+
+    /* comments */
+    .cmt-thread { display:flex; flex-direction:column; gap:12px; margin-bottom:16px; }
+    .cmt { display:flex; gap:9px; align-items:flex-start; }
+    .cmt-body { flex:1; background:#f8fafc; border:1px solid var(--border); border-radius:4px 10px 10px 10px; padding:10px 12px; }
+    .cmt-meta { display:flex; align-items:center; gap:6px; margin-bottom:4px; flex-wrap:wrap; }
+    .cmt-name { font-size:13px; font-weight:700; }
+    .cmt-role { font-size:11px; color:var(--text3); }
+    .cmt-time { font-size:11px; color:#cbd5e1; margin-left:auto; }
+    .cmt-text { font-size:13px; color:var(--text2); line-height:1.55; }
+    .cmt-av   { width:26px; height:26px; border-radius:50%; background:#eef2ff; color:#4338ca; font-size:9px; font-weight:800; display:inline-flex; align-items:center; justify-content:center; border:1.5px solid #c7d2fe; flex-shrink:0; }
+
+    /* ── RIGHT PANEL ────────────────────────────────────────── */
+    .rp-sec { padding:16px 16px 0; }
+    .rp-sec-label { font-size:10px; font-weight:800; text-transform:uppercase; letter-spacing:.08em; color:var(--text3); margin-bottom:10px; display:flex; align-items:center; gap:8px; }
+    .rp-sec-label::after { content:''; flex:1; height:1px; background:var(--border); }
+
+    .rp-info { padding:14px 16px; border-bottom:1px solid var(--border); }
+    .rp-row  { display:flex; align-items:baseline; gap:8px; padding:5px 0; border-bottom:1px solid #f1f5f9; }
+    .rp-row:last-child { border-bottom:none; }
+    .rp-lbl  { font-size:11px; font-weight:700; color:var(--text3); min-width:80px; flex-shrink:0; }
+    .rp-val  { font-size:13px; color:var(--text); font-weight:500; }
+
+    /* decision box */
+    .decision-box { padding:16px; border-top:1px solid var(--border); margin-top:auto; }
+    .dec-title { font-size:14px; font-weight:800; color:var(--text); margin-bottom:4px; }
+    .dec-sub   { font-size:12px; color:var(--text3); margin-bottom:14px; line-height:1.5; }
+
+    .dec-opts { display:flex; flex-direction:column; gap:8px; margin-bottom:14px; }
+    .dec-opt  {
+      display:flex; align-items:center; gap:10px;
+      padding:10px 12px; border-radius:8px;
+      border:1.5px solid var(--border); cursor:pointer;
+      transition:all .15s; background:#fff;
+    }
+    .dec-opt:hover { border-color:#c7d2fe; background:#f8f9ff; }
+    .dec-opt.sel-approve { border-color:#86efac; background:#f0fdf4; }
+    .dec-opt.sel-reject  { border-color:#fca5a5; background:#fff5f5; }
+    .dec-opt.sel-back    { border-color:#ddd6fe; background:#f5f3ff; }
+    .dec-opt-ic   { font-size:18px; flex-shrink:0; }
+    .dec-opt-title{ font-size:13px; font-weight:700; color:var(--text); }
+    .dec-opt-sub  { font-size:11px; color:var(--text3); }
+    .dec-opt-radio{ width:16px; height:16px; border-radius:50%; border:2px solid var(--border); margin-left:auto; flex-shrink:0; transition:all .15s; }
+    .dec-opt.sel-approve .dec-opt-radio { border-color:var(--success); background:var(--success); box-shadow:0 0 0 3px rgba(16,185,129,.15); }
+    .dec-opt.sel-reject  .dec-opt-radio { border-color:var(--danger);  background:var(--danger);  box-shadow:0 0 0 3px rgba(239,68,68,.15); }
+    .dec-opt.sel-back    .dec-opt-radio { border-color:#7c3aed; background:#7c3aed; box-shadow:0 0 0 3px rgba(124,58,237,.15); }
+
+    .dec-remark { width:100%; padding:9px 10px; border:1px solid var(--border); border-radius:8px; font-family:inherit; font-size:13px; outline:none; resize:vertical; min-height:72px; transition:border-color .15s; color:var(--text); background:#fff; }
+    .dec-remark:focus { border-color:var(--primary); box-shadow:0 0 0 3px rgba(99,102,241,.08); }
+    .dec-submit {
+      width:100%; margin-top:10px; padding:11px;
+      background:var(--primary); color:#fff;
+      border:none; border-radius:9px; font-family:inherit;
+      font-size:14px; font-weight:700; cursor:pointer;
+      transition:background .15s; display:flex; align-items:center;
+      justify-content:center; gap:6px;
+    }
+    .dec-submit:hover { background:var(--primary-d); }
+    .dec-submit:disabled { background:#e2e8f0; color:#94a3b8; cursor:not-allowed; }
+
+    /* decided state */
+    .decided-box { text-align:center; padding:24px 16px; }
+    .decided-icon { font-size:40px; margin-bottom:10px; }
+    .decided-title{ font-size:16px; font-weight:800; margin-bottom:4px; }
+    .decided-sub  { font-size:13px; color:var(--text3); }
+
+    /* ── BUTTONS ────────────────────────────────────────────── */
+    .btn { display:inline-flex; align-items:center; gap:5px; font-family:inherit; font-size:13px; font-weight:600; padding:8px 16px; border-radius:8px; border:none; cursor:pointer; transition:all .15s; white-space:nowrap; }
+    .btn-primary { background:var(--primary); color:#fff; }
+    .btn-primary:hover { background:var(--primary-d); }
+    .btn-ghost   { background:#fff; color:var(--text2); border:1px solid var(--border); }
+    .btn-ghost:hover { background:var(--bg2); }
+    .btn-sm { padding:5px 11px; font-size:12px; border-radius:6px; }
+
+    /* ── EMPTY ──────────────────────────────────────────────── */
+    .empty-state { text-align:center; padding:52px 24px; }
+    .empty-icon  { font-size:44px; margin-bottom:12px; }
+    .empty-title { font-size:17px; font-weight:800; margin-bottom:6px; }
+    .empty-sub   { font-size:14px; color:var(--text3); }
+
+    /* ── TOAST ──────────────────────────────────────────────── */
+    .toast-wrap { position:fixed; bottom:24px; right:24px; z-index:9999; display:flex; flex-direction:column; gap:8px; }
+    .toast { padding:11px 18px; border-radius:10px; font-size:14px; font-weight:600; color:#fff; box-shadow:0 6px 24px rgba(0,0,0,.15); animation:toastIn .2s ease; display:flex; align-items:center; gap:8px; }
+   
+   
+   
+   
+    @keyframes toastIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:none} }
+    .toast-ok   { background:#1e293b; }
+    .toast-warn { background:#f59e0b; }
+    .toast-err  { background:#ef4444; }
+
+    /* ── ANIM ───────────────────────────────────────────────── */
+    @keyframes fadeUp { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:none} }
+    .fade-up { animation:fadeUp .2s ease; }
+  </style>
+</head>
+<body>
+
+<!-- ══ SIDEBAR ══════════════════════════════════════════════ -->
+<aside id="sidebar">
+  <div class="sb-logo">
+    <div class="sb-logo-icon">⬡</div>
+    <div>
+      <div class="sb-logo-main">CMS</div>
+      <div class="sb-logo-sub">Compliance Suite</div>
+    </div>
+  </div>
+
+  <nav class="sb-nav">
+    <div class="sb-section">Workspace</div>
+    <a class="sb-item active" onclick="navigate('dashboard')">
+      <span class="sb-item-ic">◧</span> Dashboard
+    </a>
+    <a class="sb-item active" onclick="navigate('approvals')">
+      <span class="sb-item-ic">✦</span> My Approvals
+      <span class="sb-badge" id="sb-badge">3</span>
+    </a>
+    <a class="sb-item" onclick="navigate('history')">
+      <span class="sb-item-ic">◷</span> History
+    </a>
+
+    <div class="sb-section" style="margin-top:8px">Reports</div>
+    <a class="sb-item" onclick="navigate('reports')">
+      <span class="sb-item-ic">◫</span> Reports
+    </a>
+    <a class="sb-item" onclick="navigate('settings')">
+      <span class="sb-item-ic">◎</span> Settings
+    </a>
+  </nav>
+
+  <div class="sb-footer">
+    <div class="sb-av">RV</div>
+    <div>
+      <div class="sb-uname">Ravi Verma</div>
+      <div class="sb-urole">Department Owner</div>
+    </div>
+  </div>
+</aside>
+
+<!-- ══ MAIN ═════════════════════════════════════════════════ -->
+<div id="main">
+
+  <!-- TOPBAR -->
+  <header id="topbar">
+    <div id="page-title">My Approvals</div>
+    <button class="tb-btn" onclick="toast('Exported','ok')">⬇ Export</button>
+    <div class="tb-icon">
+      <button class="tb-icon-btn">🔔</button>
+      <span class="tb-notif-dot"></span>
+    </div>
+    <div class="tb-avatar">RV</div>
+  </header>
+
+  <!-- ══ PAGE: APPROVALS LIST ════════════════════════════════ -->
+  <div class="page active" id="page-approvals">
+    <div class="page-body">
+
+      <!-- Stats -->
+    
+
+      <!-- Table card -->
+      <div class="tcard">
+        <div class="tcard-hd">
+          <div>
+            <div class="tcard-title">Pending Approvals</div>
+            <div class="tcard-sub">Actions submitted for your final decision</div>
+          </div>
+        </div>
+
+        <!-- Filters -->
+        <div class="filter-bar">
+          <div class="f-search">
+            <span class="f-si">&#9906;</span>
+            <input id="f-search" placeholder="Search actions, circulars…" oninput="filterTable()"/>
+          </div>
+          <select class="f-sel" id="f-status" onchange="filterTable()">
+            <option value="">All Status</option>
+            <option>Pending Approval</option>
+            <option>Approved</option>
+            <option>Rejected</option>
+            <option>Sent Back</option>
+          </select>
+          <select class="f-sel" id="f-risk" onchange="filterTable()">
+            <option value="">All Risk</option>
+            <option>Critical</option><option>High</option>
+            <option>Medium</option><option>Low</option>
+          </select>
+          <select class="f-sel" id="f-circ" onchange="filterTable()">
+            <option value="">All Circulars</option>
+            <option>CIRC-2024-001</option>
+            <option>CIRC-2024-002</option>
+            <option>CIRC-2024-003</option>
+          </select>
+          <button class="f-clr" onclick="clearFilters()">✕ Clear</button>
+        </div>
+
+        <div style="overflow-x:auto">
+          <table class="ow-table">
+            <thead>
+              <tr>
+                <th>Action ID</th>
+                <th>Action Title</th>
+                <th>Circular</th>
+                <th>Submitted By</th>
+                <th>Risk</th>
+                <th>Due Date</th>
+                <th>Status</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="ow-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="page" id="page-dashboard">
+  <div class="page-body" style="padding:24px">
+
+    <div style="font-size:22px;font-weight:800;margin-bottom:4px">Good morning, Ravi 👋</div>
+    <div style="font-size:13px;color:var(--text3);margin-bottom:24px">Here's your approval overview for today</div>
+
+    <!-- Stats -->
+    <div class="stats-grid" style="margin-bottom:24px">
+  <div class="stat-card sc-purple">
+    <div class="sc-icon">📋</div>
+    <div class="sc-val" id="d-total">0</div>
+    <div class="sc-label">Total</div>
+    <div class="sc-delta neutral">All actions</div>
+  </div>
+  <div class="stat-card sc-red">
+    <div class="sc-icon">⏳</div>
+    <div class="sc-val" id="d-pending">0</div>
+    <div class="sc-label">Pending</div>
+    <div class="sc-delta neutral">Awaiting decision</div>
+  </div>
+  <div class="stat-card sc-green">
+    <div class="sc-icon">✓</div>
+    <div class="sc-val" id="d-complete">0</div>
+    <div class="sc-label">Complete</div>
+    <div class="sc-delta up">↑ Approved by you</div>
+  </div>
+  <div class="stat-card sc-red">
+    <div class="sc-icon">✕</div>
+    <div class="sc-val" id="d-rejected">0</div>
+    <div class="sc-label">Rejected</div>
+    <div class="sc-delta down">↓ Sent back rejected</div>
+  </div>
+  <div class="stat-card sc-purple">
+    <div class="sc-icon">↩</div>
+    <div class="sc-val" id="d-sentback">0</div>
+    <div class="sc-label">Sent Back</div>
+    <div class="sc-delta neutral">Pending revision</div>
+  </div>
+</div>
+    <!-- Two columns -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
+
+      <!-- Pending actions -->
+      <div class="tcard">
+        <div class="tcard-hd">
+          <div>
+            <div class="tcard-title">⏳ Awaiting Your Decision</div>
+            <div class="tcard-sub">Actions pending approval</div>
+          </div>
+          <button class="btn btn-primary btn-sm" onclick="navigate('approvals')">View All →</button>
+        </div>
+        <div id="d-pending-list" style="padding:0"></div>
+      </div>
+
+      <!-- Recent decisions -->
+      <div class="tcard">
+        <div class="tcard-hd">
+          <div>
+            <div class="tcard-title">✅ Recent Decisions</div>
+            <div class="tcard-sub">Your latest actions</div>
+          </div>
+        </div>
+        <div id="d-recent-list" style="padding:0"></div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+  <!-- ══ PAGE: ACTION DETAIL ══════════════════════════════════ -->
+  <div class="page" id="page-detail">
+    <div class="page-body">
+
+      <!-- Detail header -->
+      <div class="det-hd">
+        <div class="det-bc">
+          <span class="det-bc-link" id="det-bc-link" onclick="navigate('approvals')">← My Approvals</span>
+          <span class="det-bc-sep">/</span>
+          <code style="font-size:11px;color:var(--text3)" id="det-bc-id">—</code>
+        </div>
+        <div class="det-hd-row">
+          <div class="det-hd-title" id="det-title">—</div>
+          <span class="chip" id="det-status-chip">—</span>
+        </div>
+        <div class="det-chips" id="det-chips"></div>
+      </div>
+
+      <!-- Split: left tabs + right decision -->
+      <div class="det-body">
+
+        <!-- LEFT -->
+        <div class="det-left">
+          <nav class="det-vtabs">
+            <button class="det-vtab active" id="vt-overview" onclick="switchTab('overview')">
+              <span class="det-vt-ic">◈</span>
+              <span class="det-vt-lb">Overview</span>
+            </button>
+            <button class="det-vtab" id="vt-flow" onclick="switchTab('flow')">
+              <span class="det-vt-ic">⟳</span>
+              <span class="det-vt-lb">Flow</span>
+            </button>
+            <button class="det-vtab" id="vt-evidence" onclick="switchTab('evidence')">
+              <span class="det-vt-ic">📎</span>
+              <span class="det-vt-lb">Evidence</span>
+              <span class="det-vt-bdg" id="vt-ev-badge">0</span>
+            </button>
+            <button class="det-vtab" id="vt-comments" onclick="switchTab('comments')">
+              <span class="det-vt-ic">💬</span>
+              <span class="det-vt-lb">Thread</span>
+              <span class="det-vt-bdg" id="vt-cm-badge">0</span>
+            </button>
+          </nav>
+          <div class="det-pane" id="det-pane"></div>
+        </div>
+
+        <!-- RIGHT: decision -->
+        <div class="det-right" id="det-right"></div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ PAGE: HISTORY ════════════════════════════════════════ -->
+  <div class="page" id="page-history">
+    <div class="page-body">
+      <div style="font-size:22px;font-weight:800;margin-bottom:20px">History</div>
+      <div class="tcard">
+        <div style="overflow-x:auto">
+          <table class="ow-table">
+            <thead>
+              <tr><th>Action ID</th><th>Title</th><th>Decision</th><th>Decided On</th><th>Remarks</th></tr>
+            </thead>
+            <tbody id="hist-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /main -->
+
+<div class="toast-wrap" id="toast-wrap"></div>
+
+<script>
+/* ══════════════════════════════════════════════════════════
+   DATA
+   ══════════════════════════════════════════════════════════ */
+const OW_DATA = [
+  {
+    id:'ACT-001', title:'Draft Committee Charter',
+    circularId:'CIRC-2024-001', circularTitle:'Cybersecurity & IT Governance Framework',
+    clauseRef:'C1.1', dept:'IT', risk:'High', priority:'Critical',
+    dueDate:'2025-03-15', status:'Pending Approval',
+    obligation:'Establish a Board Cybersecurity Committee with defined charter, reporting lines and quarterly review mandate.',
+    description:'Prepare a detailed board committee charter covering governance structure, reporting lines to the Board, meeting cadence, and escalation protocols per RBI C1.1.',
+    submittedBy:'Raj Iyer', submittedByRole:'IT Engineer',
+    submittedOn:'08 Mar 2025',
+    decision:null, decisionRemark:'', decidedOn:'',
+    evidence:[
+      { id:'EV-001', type:'Policy Document', file:'Committee_Charter_Draft_v2.docx', uploadedBy:'Raj Iyer', date:'07 Mar 2025', status:'Submitted' },
+      { id:'EV-002', type:'Meeting Minutes', file:'Board_Meeting_Notes.pdf',          uploadedBy:'Raj Iyer', date:'07 Mar 2025', status:'Submitted' },
+    ],
+    flow:[
+      { role:'Manager',  name:'Arjun Kumar',  note:'Assigned to team for drafting.',          time:'01 Mar 2025', done:true  },
+      { role:'Assignee', name:'Raj Iyer',     note:'Charter drafted and reviewed by Legal.',  time:'07 Mar 2025', done:true  },
+      { role:'Reviewer', name:'Priya Nair',   note:'Reviewed — content meets RBI guidelines.',time:'08 Mar 2025', done:true  },
+      { role:'Owner',    name:'Ravi Verma',   note:'',                                        time:'',            done:false, current:true },
+    ],
+    comments:[
+      { author:'Arjun Kumar',  role:'Manager',           av:'AK', time:'01 Mar',  text:'Please prioritise — board review in 2 weeks.' },
+      { author:'Raj Iyer',     role:'IT Engineer',        av:'RI', time:'07 Mar',  text:'Charter complete. Legal has reviewed and approved the draft.' },
+      { author:'Priya Nair',   role:'Compliance Officer', av:'PN', time:'08 Mar',  text:'Content is solid. Verified against RBI C1.1 — ready for owner approval.' },
+    ]
+  },
+  {
+    id:'ACT-003', title:'Charter Drafting & Legal Review',
+    circularId:'CIRC-2024-001', circularTitle:'Cybersecurity & IT Governance Framework',
+    clauseRef:'C1.2', dept:'Legal', risk:'High', priority:'High',
+    dueDate:'2025-03-20', status:'Pending Approval',
+    obligation:'Document and ratify the committee charter covering governance structure, escalation paths and review cadence.',
+    description:'Complete legal review of the committee charter, ensure alignment with RBI guidelines and prepare for board ratification.',
+    submittedBy:'Karan Shah', submittedByRole:'Legal Counsel',
+    submittedOn:'09 Mar 2025',
+    decision:null, decisionRemark:'', decidedOn:'',
+    evidence:[
+      { id:'EV-003', type:'Legal Review', file:'Charter_Legal_Review_v1.pdf', uploadedBy:'Karan Shah', date:'09 Mar 2025', status:'Submitted' },
+    ],
+    flow:[
+      { role:'Manager',  name:'Arjun Kumar', note:'Assigned to Legal for review.',            time:'02 Mar 2025', done:true },
+      { role:'Assignee', name:'Karan Shah',  note:'Legal review complete.',                   time:'09 Mar 2025', done:true },
+      { role:'Reviewer', name:'Priya Nair',  note:'Verified — legal alignment confirmed.',    time:'09 Mar 2025', done:true },
+      { role:'Owner',    name:'Ravi Verma',  note:'',                                         time:'',            done:false, current:true },
+    ],
+    comments:[
+      { author:'Karan Shah', role:'Legal Counsel',      av:'KS', time:'09 Mar', text:'Legal review done. No issues found. Ready for owner sign-off.' },
+      { author:'Priya Nair', role:'Compliance Officer', av:'PN', time:'09 Mar', text:'Confirmed legal alignment with RBI circular.' },
+    ]
+  },
+  {
+    id:'ACT-007', title:'Update KYC Risk Scoring Model',
+    circularId:'CIRC-2024-002', circularTitle:'AML / KYC Policy Revised Guidelines',
+    clauseRef:'§3.1', dept:'IT', risk:'Medium', priority:'High',
+    dueDate:'2025-04-10', status:'Pending Approval',
+    obligation:'Implement risk-based KYC scoring incorporating new risk factors per revised RBI guidelines.',
+    description:'Update the KYC risk scoring algorithm and integrate with CBS. Include PEP flag, transaction velocity and geographic risk.',
+    submittedBy:'Raj Iyer', submittedByRole:'IT Engineer',
+    submittedOn:'09 Mar 2025',
+    decision:null, decisionRemark:'', decidedOn:'',
+    evidence:[],
+    flow:[
+      { role:'Manager',  name:'Arjun Kumar', note:'Assigned to IT.',           time:'05 Mar 2025', done:true },
+      { role:'Assignee', name:'Raj Iyer',    note:'Model updated and tested.', time:'09 Mar 2025', done:true },
+      { role:'Owner',    name:'Ravi Verma',  note:'',                          time:'',            done:false, current:true },
+    ],
+    comments:[
+      { author:'Raj Iyer', role:'IT Engineer', av:'RI', time:'09 Mar', text:'Model updated. UAT passed. Attaching test results.' },
+    ]
+  },
+  {
+    id:'ACT-005', title:'Schedule Inaugural Committee Meeting',
+    circularId:'CIRC-2024-001', circularTitle:'Cybersecurity & IT Governance Framework',
+    clauseRef:'C1.3', dept:'Compliance', risk:'High', priority:'Critical',
+    dueDate:'2025-03-10', status:'Approved',
+    obligation:'Convene inaugural committee meeting within 90 days and file certified minutes with Compliance.',
+    description:'Schedule and coordinate the inaugural Board Cybersecurity Committee meeting.',
+    submittedBy:'Sneha Das', submittedByRole:'Compliance Officer',
+    submittedOn:'05 Mar 2025',
+    decision:'Approved', decisionRemark:'Meeting scheduled as per RBI timeline. Approved.', decidedOn:'06 Mar 2025',
+    evidence:[
+      { id:'EV-004', type:'Calendar Invite', file:'Inaugural_Meeting_Invite.pdf', uploadedBy:'Sneha Das', date:'05 Mar 2025', status:'Verified' },
+    ],
+    flow:[
+      { role:'Manager',  name:'Arjun Kumar', note:'Assigned.',               time:'01 Mar 2025', done:true },
+      { role:'Assignee', name:'Sneha Das',   note:'Meeting scheduled.',      time:'05 Mar 2025', done:true },
+      { role:'Owner',    name:'Ravi Verma',  note:'Approved — on timeline.', time:'06 Mar 2025', done:true },
+    ],
+    comments:[
+      { author:'Sneha Das',  role:'Compliance Officer', av:'SD', time:'05 Mar', text:'Meeting booked for March 15. Invite sent to all board members.' },
+      { author:'Ravi Verma', role:'Department Owner',   av:'RV', time:'06 Mar', text:'Approved. Good work on the timeline.' },
+    ]
+  },
+];
+
+/* ══════════════════════════════════════════════════════════
+   STATE
+   ══════════════════════════════════════════════════════════ */
+let _currentId  = null;
+let _currentTab = 'overview';
+let _decision   = null; /* 'approve' | 'reject' | 'back' */
+
+/* ══════════════════════════════════════════════════════════
+   NAVIGATION
+   ══════════════════════════════════════════════════════════ */
+function navigate(page) {
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.sb-item').forEach(i=>i.classList.remove('active'));
+
+  const map = { dashboard:'page-dashboard',approvals:'page-approvals', history:'page-history', detail:'page-detail' };
+  const pid = map[page] || 'page-approvals';
+  document.getElementById(pid)?.classList.add('active');
+
+  const titles = {dashboard:'Dashboard', approvals:'My Approvals', history:'Decision History', detail:'Action Detail' };
+  document.getElementById('page-title').textContent = titles[page] || 'Owner Panel';
+
+  if (page === 'approvals') { renderTable(); renderStats(); }
+  if (page === 'history')   { renderHistory(); }
+  if (page !== 'detail') { _currentId=null; _decision=null; }
+  if (page === 'dashboard') renderDashboard();
+}
+
+/* ══════════════════════════════════════════════════════════
+   STATS
+   ══════════════════════════════════════════════════════════ */
+function renderStats() {
+  const s = id => document.getElementById(id);
+  s('stat-total').textContent    = OW_DATA.length;
+  s('stat-pending').textContent  = OW_DATA.filter(i=>i.status==='Pending Approval').length;
+  s('stat-approved').textContent = OW_DATA.filter(i=>i.status==='Approved').length;
+  s('stat-rejected').textContent = OW_DATA.filter(i=>i.status==='Rejected').length;
+  s('stat-sentback').textContent = OW_DATA.filter(i=>i.status==='Sent Back').length;
+  s('sb-badge').textContent      = OW_DATA.filter(i=>i.status==='Pending Approval').length;
+}
+
+/* ══════════════════════════════════════════════════════════
+   TABLE
+   ══════════════════════════════════════════════════════════ */
+function renderTable() {
+  const q    = (document.getElementById('f-search')?.value||'').toLowerCase();
+  const fSt  = document.getElementById('f-status')?.value||'';
+  const fRk  = document.getElementById('f-risk')?.value||'';
+  const fCi  = document.getElementById('f-circ')?.value||'';
+
+  const items = OW_DATA.filter(i=>{
+    if (fSt && i.status!==fSt)         return false;
+    if (fRk && i.risk!==fRk)           return false;
+    if (fCi && i.circularId!==fCi)     return false;
+    if (q && !`${i.id} ${i.title} ${i.circularId}`.toLowerCase().includes(q)) return false;
+    return true;
+  });
+
+  const tb = document.getElementById('ow-tbody');
+  if (!tb) return;
+
+  if (!items.length) {
+    tb.innerHTML = `<tr><td colspan="8" style="text-align:center;padding:40px;color:var(--text3);font-size:13px">No actions match</td></tr>`;
+    return;
+  }
+
+  tb.innerHTML = items.map(item=>{
+    const sc   = statusColor(item.status);
+    const rc   = riskColor(item.risk);
+    const over = isOver(item.dueDate);
+    const near = isNear(item.dueDate);
+    const av   = item.submittedBy.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
+
+    return `
+    <tr class="ow-row${item.status==='Pending Approval'&&over?' ow-urgent':''}" onclick="openAction('${item.id}')">
+      <td><code class="ow-id">${item.id}</code></td>
+      <td>
+        <div class="ow-title-cell">${item.title}</div>
+        <div class="ow-sub-cell">${item.clauseRef} · ${item.dept}</div>
+      </td>
+      <td><span class="ow-circ">${item.circularId}</span></td>
+      <td>
+        <div style="display:flex;align-items:center;gap:6px">
+          <span class="ow-av">${av}</span>
+          <div>
+            <div style="font-size:13px;font-weight:600">${item.submittedBy}</div>
+            <div style="font-size:11px;color:var(--text3)">${item.submittedOn}</div>
+          </div>
+        </div>
+      </td>
+      <td><span class="chip" style="background:${rc.bg};color:${rc.fg}">${item.risk}</span></td>
+      <td><span class="${over?'ow-due-over':near?'ow-due-near':'ow-due-ok'}">${fmt(item.dueDate)}</span></td>
+      <td><span class="chip" style="background:${sc.bg};color:${sc.fg}">${item.status}</span></td>
+      <td>
+        <button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();openAction('${item.id}')">
+          Review →
+        </button>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function filterTable() { renderTable(); }
+function clearFilters() {
+  ['f-search','f-status','f-risk','f-circ'].forEach(id=>{
+    const el=document.getElementById(id); if(el) el.value='';
+  });
+  renderTable();
+}
+
+/* ══════════════════════════════════════════════════════════
+   OPEN ACTION DETAIL
+   ══════════════════════════════════════════════════════════ */
+function openAction(id) {
+  const item = OW_DATA.find(i=>i.id===id); if(!item) return;
+  _currentId  = id;
+  _currentTab = 'overview';
+  _decision   = null;
+
+  /* header */
+  const sc = statusColor(item.status);
+  const rc = riskColor(item.risk);
+
+  document.getElementById('det-bc-id').textContent     = id;
+  document.getElementById('det-title').textContent     = item.title;
+  document.getElementById('page-title').textContent    = `Action: ${id}`;
+
+  const sch = document.getElementById('det-status-chip');
+  sch.className = 'chip'; sch.style.background=sc.bg; sch.style.color=sc.fg;
+  sch.textContent = item.status;
+
+  document.getElementById('det-chips').innerHTML = `
+    <span class="chip" style="background:${rc.bg};color:${rc.fg}">${item.risk} Risk</span>
+    <span class="det-chip-blue">${item.circularId}</span>
+    <span class="det-chip-grey">${item.clauseRef}</span>
+    <span class="det-chip-grey">${item.dept}</span>
+    <span class="det-chip-grey">Due ${fmt(item.dueDate)}</span>`;
+
+  document.getElementById('vt-ev-badge').textContent = item.evidence.length;
+  document.getElementById('vt-cm-badge').textContent = item.comments.length;
+
+  /* render right panel */
+  renderRightPanel(item);
+
+  /* show page */
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-detail').classList.add('active');
+
+  switchTab('overview');
+}
+
+/* ══════════════════════════════════════════════════════════
+   TABS
+   ══════════════════════════════════════════════════════════ */
+function switchTab(tab) {
+  _currentTab = tab;
+  document.querySelectorAll('.det-vtab').forEach(b=>b.classList.remove('active'));
+  document.getElementById(`vt-${tab}`)?.classList.add('active');
+
+  const item = OW_DATA.find(i=>i.id===_currentId); if(!item) return;
+  const pane = document.getElementById('det-pane'); if(!pane) return;
+
+  const map = { overview:paneOverview, flow:paneFlow, evidence:paneEvidence, comments:paneComments };
+  pane.innerHTML = (map[tab]||paneOverview)(item);
+  pane.classList.remove('fade-up'); void pane.offsetHeight; pane.classList.add('fade-up');
+}
+
+/* ── OVERVIEW ── */
+function paneOverview(item) {
+  const over = isOver(item.dueDate);
+  const near = isNear(item.dueDate);
+  return `
+  <div>
+    <div class="sec-label">Action Details</div>
+    <div class="dl">
+      ${dr('Action ID',     `<code class="dcode">${item.id}</code>`)}
+      ${dr('Circular',      `${item.circularId} — ${item.circularTitle}`)}
+      ${dr('Clause',        `<code class="dcode">${item.clauseRef}</code>`)}
+      ${dr('Department',    item.dept)}
+      ${dr('Risk',          item.risk)}
+      ${dr('Priority',      item.priority)}
+      ${dr('Due Date',      `<span class="${over?'ow-due-over':near?'ow-due-near':'ow-due-ok'}">${fmt(item.dueDate)}</span>`)}
+      ${dr('Submitted By',  `${item.submittedBy} — ${item.submittedByRole}`)}
+      ${dr('Submitted On',  item.submittedOn)}
+    </div>
+
+    <div class="sec-label" style="margin-top:20px">Obligation</div>
+    <div class="ob-box">${item.obligation}</div>
+
+    <div class="sec-label" style="margin-top:20px">Description</div>
+    <div class="desc-box">${item.description}</div>
+  </div>`;
+}
+
+/* ── FLOW ── */
+function paneFlow(item) {
+  return `
+  <div>
+    <div class="sec-label">Approval Flow</div>
+    <div class="timeline">
+      ${item.flow.map((s,i)=>{
+        const cls = s.done && !s.current ? 'tl-done' : s.current ? 'tl-cur' : 'tl-wait';
+        const ic  = s.done && !s.current ? '✓' : s.current ? '◎' : '○';
+        return `
+        <div class="tl-item">
+          <div class="tl-dot ${cls}">${ic}</div>
+          <div class="tl-content">
+            <div class="tl-role">${s.role}</div>
+            <div class="tl-who">${s.name}${s.current?' <span style="font-size:10px;font-weight:700;background:#eef2ff;color:#4338ca;padding:1px 6px;border-radius:99px;margin-left:4px">You</span>':''}</div>
+            ${s.note?`<div class="tl-note">${s.note}</div>`:''}
+            ${s.time?`<div class="tl-time">${s.time}</div>`:''}
+          </div>
+        </div>`;
+      }).join('')}
+    </div>
+  </div>`;
+}
+
+/* ── EVIDENCE ── */
+function paneEvidence(item) {
+  if (!item.evidence.length) return `
+  <div>
+    <div class="sec-label">Evidence Documents</div>
+    <div class="ev-empty">
+      <div style="font-size:32px;margin-bottom:10px">📎</div>
+      <div>No evidence submitted</div>
+    </div>
+  </div>`;
+
+  return `
+  <div>
+    <div class="sec-label">Evidence Documents</div>
+    <div class="ev-table-wrap">
+      <table class="ev-table">
+        <thead><tr>
+          <th>Type</th><th>File</th><th>Uploaded By</th><th>Date</th><th>Status</th>
+        </tr></thead>
+        <tbody>
+          ${item.evidence.map(ev=>{
+            const sc = ev.status==='Verified'?{bg:'#ecfdf5',fg:'#065f46'}:{bg:'#fef9c3',fg:'#854d0e'};
+            return `<tr>
+              <td><span class="ev-type">${ev.type}</span></td>
+              <td style="font-size:12.5px">📎 <a href="#" style="color:var(--primary);font-weight:600" onclick="toast('Opening ${ev.file}','ok');return false">${ev.file}</a></td>
+              <td style="font-size:12.5px">${ev.uploadedBy}</td>
+              <td style="font-size:12px;color:var(--text3)">${ev.date}</td>
+              <td><span class="chip" style="background:${sc.bg};color:${sc.fg}">${ev.status}</span></td>
+            </tr>`;
+          }).join('')}
+        </tbody>
+      </table>
+    </div>
+  </div>`;
+}
+
+/* ── COMMENTS ── */
+function paneComments(item) {
+  return `
+  <div>
+    <div class="sec-label">Discussion Thread</div>
+    <div class="cmt-thread">
+      ${item.comments.map(c=>`
+        <div class="cmt">
+          <span class="cmt-av">${c.av}</span>
+          <div class="cmt-body">
+            <div class="cmt-meta">
+              <span class="cmt-name">${c.author}</span>
+              <span class="cmt-role">${c.role}</span>
+              <span class="cmt-time">${c.time}</span>
+            </div>
+            <div class="cmt-text">${c.text}</div>
+          </div>
+        </div>`).join('')}
+    </div>
+    <div style="display:flex;gap:9px;align-items:flex-start;padding-top:12px;border-top:1px solid var(--border)">
+      <span class="cmt-av" style="background:#1e293b;color:#fff;border-color:#1e293b">RV</span>
+      <div style="flex:1">
+        <textarea class="dec-remark" id="cmt-input" style="min-height:56px" placeholder="Add a comment…"></textarea>
+        <div style="display:flex;justify-content:flex-end;margin-top:8px">
+          <button class="btn btn-primary btn-sm" onclick="postComment()">Post</button>
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+
+function postComment() {
+  const item = OW_DATA.find(i=>i.id===_currentId); if(!item) return;
+  const el   = document.getElementById('cmt-input');
+  const text = el?.value.trim();
+  if (!text) { toast('Type something first','warn'); return; }
+  item.comments.push({ author:'Ravi Verma', role:'Department Owner', av:'RV', time:'just now', text });
+  document.getElementById('vt-cm-badge').textContent = item.comments.length;
+  switchTab('comments');
+  toast('Comment posted');
+}
+
+/* ══════════════════════════════════════════════════════════
+   RIGHT PANEL — DECISION
+   ══════════════════════════════════════════════════════════ */
+function renderRightPanel(item) {
+  const rp = document.getElementById('det-right'); if(!rp) return;
+  const sc = statusColor(item.status);
+
+  /* already decided */
+  if (item.decision) {
+    const icons = { Approved:'✅', Rejected:'❌', 'Sent Back':'↩' };
+    const colors= { Approved:'#166534', Rejected:'#991b1b', 'Sent Back':'#5b21b6' };
+    rp.innerHTML = `
+    <div class="rp-info">
+      <div class="rp-sec-label">Action Info</div>
+      ${rpRow('Action ID',   `<code class="dcode">${item.id}</code>`)}
+      ${rpRow('Submitted',   item.submittedBy)}
+      ${rpRow('Due Date',    fmt(item.dueDate))}
+      ${rpRow('Circular',    item.circularId)}
+    </div>
+    <div class="decision-box" style="margin-top:0">
+      <div class="decided-box">
+        <div class="decided-icon">${icons[item.decision]||'◎'}</div>
+        <div class="decided-title" style="color:${colors[item.decision]||'#0f172a'}">${item.decision}</div>
+        <div class="decided-sub" style="margin-top:6px">${item.decisionRemark}</div>
+        <div style="font-size:11px;color:var(--text3);margin-top:8px">Decided on ${item.decidedOn}</div>
+      </div>
+    </div>`;
+    return;
+  }
+
+  rp.innerHTML = `
+  <div class="rp-info">
+    <div class="rp-sec-label">Action Info</div>
+    ${rpRow('Action ID',   `<code class="dcode">${item.id}</code>`)}
+    ${rpRow('Submitted By', item.submittedBy)}
+    ${rpRow('Submitted On', item.submittedOn)}
+    ${rpRow('Due Date',     fmt(item.dueDate))}
+    ${rpRow('Circular',     item.circularId)}
+    ${rpRow('Evidence',     `${item.evidence.length} document${item.evidence.length!==1?'s':''}`)}
+  </div>
+
+  <div class="decision-box">
+    <div class="dec-title">Your Decision</div>
+    <div class="dec-sub">Review the action details, evidence and thread before deciding.</div>
+
+    <div class="dec-opts">
+      <div class="dec-opt" id="dec-approve" onclick="selectDecision('approve')">
+        <span class="dec-opt-ic">✅</span>
+        <div>
+          <div class="dec-opt-title">Approve</div>
+          <div class="dec-opt-sub">Action is complete and satisfactory</div>
+        </div>
+        <div class="dec-opt-radio" id="radio-approve"></div>
+      </div>
+      <div class="dec-opt" id="dec-back" onclick="selectDecision('back')">
+        <span class="dec-opt-ic">↩</span>
+        <div>
+          <div class="dec-opt-title">Send Back</div>
+          <div class="dec-opt-sub">Return for revision with comments</div>
+        </div>
+        <div class="dec-opt-radio" id="radio-back"></div>
+      </div>
+      <div class="dec-opt" id="dec-reject" onclick="selectDecision('reject')">
+        <span class="dec-opt-ic">❌</span>
+        <div>
+          <div class="dec-opt-title">Reject</div>
+          <div class="dec-opt-sub">Action does not meet requirements</div>
+        </div>
+        <div class="dec-opt-radio" id="radio-reject"></div>
+      </div>
+    </div>
+
+    <div class="sec-label" style="margin-bottom:6px">Remarks <span style="font-weight:400;color:var(--text3);text-transform:none;font-size:11px;letter-spacing:0">(required)</span></div>
+    <textarea class="dec-remark" id="dec-remarks" placeholder="Add your remarks before submitting…"></textarea>
+
+    <button class="dec-submit" id="dec-submit-btn" onclick="submitDecision('${item.id}')" disabled>
+      Submit Decision
+    </button>
+  </div>`;
+
+  document.getElementById('dec-remarks').addEventListener('input', () => {
+    const hasDecision = !!_decision;
+    const hasRemark   = document.getElementById('dec-remarks')?.value.trim().length > 0;
+    const btn = document.getElementById('dec-submit-btn');
+    if (btn) btn.disabled = !(hasDecision && hasRemark);
+  });
+}
+
+function selectDecision(type) {
+  _decision = type;
+  ['approve','back','reject'].forEach(t=>{
+    const opt = document.getElementById(`dec-${t}`);
+    if (opt) opt.className = 'dec-opt' + (t===type?` sel-${t==='approve'?'approve':t==='back'?'back':'reject'}`:'');
+  });
+  const hasRemark = document.getElementById('dec-remarks')?.value.trim().length > 0;
+  const btn = document.getElementById('dec-submit-btn');
+  if (btn) btn.disabled = !hasRemark;
+}
+
+function submitDecision(id) {
+  const item    = OW_DATA.find(i=>i.id===id); if(!item) return;
+  const remarks = document.getElementById('dec-remarks')?.value.trim();
+  if (!_decision || !remarks) { toast('Select a decision and add remarks','warn'); return; }
+
+  const map = { approve:'Approved', reject:'Rejected', back:'Sent Back' };
+  item.decision      = map[_decision];
+  item.status        = map[_decision];
+  item.decisionRemark= remarks;
+  item.decidedOn     = new Date().toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'});
+
+  /* add to comment thread */
+  item.comments.push({
+    author:'Ravi Verma', role:'Department Owner', av:'RV',
+    time:'just now',
+    text:`Decision: ${map[_decision]}. ${remarks}`
+  });
+
+  renderRightPanel(item);
+  renderStats();
+
+  const msgs = { approve:'Action approved ✓', reject:'Action rejected', back:'Sent back for revision' };
+  toast(msgs[_decision]||'Decision submitted', _decision==='approve'?'ok':'warn');
+  _decision = null;
+}
+
+/* ══════════════════════════════════════════════════════════
+   HISTORY
+   ══════════════════════════════════════════════════════════ */
+function renderHistory() {
+  const decided = OW_DATA.filter(i=>i.decision);
+  const tb = document.getElementById('hist-tbody'); if(!tb) return;
+
+  if (!decided.length) {
+    tb.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:40px;color:var(--text3)">No decisions yet</td></tr>`;
+    return;
+  }
+
+  tb.innerHTML = decided.map(item=>{
+    const sc = statusColor(item.status);
+    return `
+    <tr class="ow-row" onclick="openAction('${item.id}')">
+      <td><code class="ow-id">${item.id}</code></td>
+      <td class="ow-title-cell">${item.title}</td>
+      <td><span class="chip" style="background:${sc.bg};color:${sc.fg}">${item.decision}</span></td>
+      <td style="font-size:12.5px;color:var(--text3)">${item.decidedOn}</td>
+      <td style="font-size:12.5px;color:var(--text2);max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${item.decisionRemark}</td>
+    </tr>`;
+  }).join('');
+}
+
+/* ══════════════════════════════════════════════════════════
+   HELPERS
+   ══════════════════════════════════════════════════════════ */
+function dr(l,v) { return `<div class="drow"><span class="dlbl">${l}</span><span class="dval">${v}</span></div>`; }
+function rpRow(l,v) { return `<div class="rp-row"><span class="rp-lbl">${l}</span><span class="rp-val">${v}</span></div>`; }
+function fmt(ds) { if(!ds)return'—'; return new Date(ds+'T00:00:00').toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'}); }
+function isOver(ds){ return !!ds && new Date(ds+'T00:00:00') < new Date(); }
+function isNear(ds){ if(!ds)return false; const d=Math.ceil((new Date(ds+'T00:00:00')-new Date())/86400000); return d>=0&&d<=14; }
+function statusColor(s){ return({  'Pending Approval':{bg:'#fef9c3',fg:'#854d0e'}, Approved:{bg:'#ecfdf5',fg:'#065f46'}, Rejected:{bg:'#fee2e2',fg:'#991b1b'}, 'Sent Back':{bg:'#ede9fe',fg:'#5b21b6'} })[s]||{bg:'#f1f5f9',fg:'#475569'}; }
+function riskColor(r){ return({ Critical:{bg:'#fdf2f8',fg:'#9d174d'}, High:{bg:'#fee2e2',fg:'#991b1b'}, Medium:{bg:'#fef9c3',fg:'#854d0e'}, Low:{bg:'#dcfce7',fg:'#166534'} })[r]||{bg:'#f1f5f9',fg:'#475569'}; }
+
+function toast(msg, type='ok') {
+  const wrap = document.getElementById('toast-wrap');
+  const t = document.createElement('div');
+  t.className = `toast toast-${type==='ok'?'ok':type==='warn'?'warn':'err'}`;
+  t.textContent = msg;
+  wrap.appendChild(t);
+  setTimeout(()=>{ t.style.opacity='0'; t.style.transition='opacity .3s'; setTimeout(()=>t.remove(),300); }, 2400);
+}
+function renderDashboard() {
+  document.getElementById('d-total').textContent    = OW_DATA.length;
+  document.getElementById('d-pending').textContent  = OW_DATA.filter(i=>i.status==='Pending Approval').length;
+  document.getElementById('d-complete').textContent = OW_DATA.filter(i=>i.status==='Complete').length;
+  document.getElementById('d-rejected').textContent = OW_DATA.filter(i=>i.status==='Rejected').length;
+  document.getElementById('d-sentback').textContent = OW_DATA.filter(i=>i.status==='Sent Back').length;
+
+  /* pending list */
+  const pending = OW_DATA.filter(i=>i.status==='Pending Approval').slice(0,5);
+  const pl = document.getElementById('d-pending-list');
+  if (pl) pl.innerHTML = pending.length ? pending.map(item=>{
+    const rc  = riskColor(item.risk);
+    const over= isOver(item.dueDate);
+    return `
+    <div style="display:flex;align-items:center;gap:10px;padding:11px 16px;border-bottom:1px solid #f4f5f8;cursor:pointer;transition:background .12s"
+         onmouseover="this.style.background='#f5f6ff'" onmouseout="this.style.background=''"
+         onclick="openAction('${item.id}')">
+      <code style="font-size:10px;background:#eef2ff;color:#4338ca;border:1px solid #c7d2fe;padding:2px 6px;border-radius:4px;flex-shrink:0">${item.id}</code>
+      <div style="flex:1;min-width:0">
+        <div style="font-size:13px;font-weight:600;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${item.title}</div>
+        <div style="font-size:11px;color:var(--text3)">${item.submittedBy} · ${item.circularId}</div>
+      </div>
+      <div style="text-align:right;flex-shrink:0">
+        <span class="chip" style="background:${rc.bg};color:${rc.fg};font-size:10px">${item.risk}</span>
+        <div style="font-size:11px;margin-top:2px;${over?'color:#dc2626;font-weight:700':'color:var(--text3)'}">${fmt(item.dueDate)}</div>
+      </div>
+    </div>`; }).join('')
+  : `<div style="text-align:center;padding:32px;color:var(--text3);font-size:13px">🎉 Nothing pending</div>`;
+
+  /* recent decisions */
+  const recent = OW_DATA.filter(i=>i.decision).slice(-5).reverse();
+  const rl = document.getElementById('d-recent-list');
+  if (rl) rl.innerHTML = recent.length ? recent.map(item=>{
+    const sc = statusColor(item.status);
+    return `
+    <div style="display:flex;align-items:center;gap:10px;padding:11px 16px;border-bottom:1px solid #f4f5f8;cursor:pointer;transition:background .12s"
+         onmouseover="this.style.background='#f5f6ff'" onmouseout="this.style.background=''"
+         onclick="openAction('${item.id}')">
+      <code style="font-size:10px;background:#eef2ff;color:#4338ca;border:1px solid #c7d2fe;padding:2px 6px;border-radius:4px;flex-shrink:0">${item.id}</code>
+      <div style="flex:1;min-width:0">
+        <div style="font-size:13px;font-weight:600;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${item.title}</div>
+        <div style="font-size:11px;color:var(--text3)">${item.decidedOn}</div>
+      </div>
+      <span class="chip" style="background:${sc.bg};color:${sc.fg};font-size:10px">${item.decision}</span>
+    </div>`; }).join('')
+  : `<div style="text-align:center;padding:32px;color:var(--text3);font-size:13px">No decisions yet</div>`;
+}
+/* ══════════════════════════════════════════════════════════
+   INIT
+   ══════════════════════════════════════════════════════════ */
+document.addEventListener('DOMContentLoaded', ()=>{ navigate('approvals'); });
+document.addEventListener('DOMContentLoaded', ()=>{ navigate('dashboard'); });
+</script>
+</body>
+</html>

@@ -1,0 +1,1141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Compliance Mapping Engine</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1e40af;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --info: #3b82f6;
+            --bg-primary: #ffffff;
+            --bg-secondary: #f9fafb;
+            --bg-tertiary: #f3f4f6;
+            --text-primary: #1f2937;
+            --text-secondary: #6b7280;
+            --border: #e5e7eb;
+            --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 24px;
+        }
+
+        /* ==================== PANEL CARD ==================== */
+        .table-card {
+            background: var(--bg-primary);
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow-md);
+            overflow: hidden;
+        }
+
+        .table-card-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 32px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 24px;
+        }
+
+        .table-card-header h3 {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            letter-spacing: -0.5px;
+        }
+
+        .table-card-header .subtext {
+            font-size: 14px;
+            opacity: 0.9;
+            font-weight: 500;
+        }
+
+        .view-toggle {
+            display: flex;
+            gap: 8px;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 6px;
+            border-radius: 8px;
+            backdrop-filter: blur(10px);
+        }
+
+        /* ==================== BUTTONS ==================== */
+        .btn {
+            padding: 10px 16px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            white-space: nowrap;
+        }
+
+        .btn-light {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .btn-light:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .btn-light.active {
+            background: white;
+            color: var(--primary);
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .btn-sm {
+            padding: 6px 10px;
+            font-size: 12px;
+        }
+
+        .btn-ghost {
+            background: transparent;
+            color: var(--primary);
+            border: 1px solid var(--primary);
+        }
+
+        .btn-ghost:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        /* ==================== PANEL BODY ==================== */
+        .panel-body {
+            padding: 32px;
+        }
+
+        /* ==================== FILTER BAR ==================== */
+        .filter-bar {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 28px;
+            flex-wrap: wrap;
+            align-items: flex-end;
+            padding: 20px;
+            background: var(--bg-secondary);
+            border-radius: 10px;
+            border: 1px solid var(--border);
+        }
+
+        .form-control {
+            flex: 1;
+            min-width: 200px;
+            padding: 12px 14px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 14px;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            transition: var(--transition);
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .form-control::placeholder {
+            color: var(--text-secondary);
+        }
+
+        /* ==================== CLAUSE OUTPUT ==================== */
+        .clause-output {
+            min-height: 400px;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-secondary);
+        }
+
+        .empty-state-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+        }
+
+        .empty-mini {
+            padding: 16px;
+            background: var(--bg-secondary);
+            border-radius: 8px;
+            color: var(--text-secondary);
+            font-size: 13px;
+            text-align: center;
+        }
+
+        /* ==================== CARD VIEW ==================== */
+        .clause-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(500px, 1fr));
+            gap: 20px;
+            animation: fadeIn 0.3s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .clause-card {
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            overflow: hidden;
+            background: var(--bg-primary);
+            transition: var(--transition);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .clause-card:hover {
+            box-shadow: var(--shadow-lg);
+            transform: translateY(-4px);
+        }
+
+        .clause-card-header {
+            padding: 20px;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            cursor: pointer;
+            transition: var(--transition);
+            border-bottom: 2px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 12px;
+        }
+
+        .clause-card-header:hover {
+            background: linear-gradient(135deg, #e8ecf1 0%, #b8d4e0 100%);
+        }
+
+        .breadcrumb {
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            color: var(--text-secondary);
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+        }
+
+        .clause-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 8px;
+        }
+
+        .clause-text {
+            font-size: 14px;
+            color: var(--text-primary);
+            line-height: 1.5;
+            margin-bottom: 8px;
+        }
+
+        .risk-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            white-space: nowrap;
+            min-width: 80px;
+            text-align: center;
+        }
+
+        .risk-high {
+            background: rgba(239, 68, 68, 0.15);
+            color: var(--danger);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+
+        .risk-medium {
+            background: rgba(245, 158, 11, 0.15);
+            color: var(--warning);
+            border: 1px solid rgba(245, 158, 11, 0.3);
+        }
+
+        .risk-low {
+            background: rgba(16, 185, 129, 0.15);
+            color: var(--success);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+
+        .clause-card-body {
+            padding: 20px;
+            background: var(--bg-primary);
+            display: none;
+            border-top: 1px solid var(--border);
+        }
+
+        .clause-card-body.open {
+            display: block;
+        }
+
+        /* ==================== OBLIGATION CARD ==================== */
+        .obligation-card {
+            margin-bottom: 16px;
+            padding: 16px;
+            background: var(--bg-secondary);
+            border-radius: 8px;
+            border-left: 4px solid var(--primary);
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .ob-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .ob-header strong {
+            font-size: 13px;
+            color: var(--primary);
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+
+        .ob-text {
+            font-size: 14px;
+            color: var(--text-primary);
+            line-height: 1.6;
+            margin-bottom: 12px;
+            padding: 10px;
+            background: var(--bg-primary);
+            border-radius: 6px;
+        }
+
+        /* ==================== ACTION CONTAINER ==================== */
+        .action-container {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .action-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 12px;
+            background: var(--bg-primary);
+            border-radius: 6px;
+            border: 1px solid var(--border);
+            gap: 8px;
+            font-size: 13px;
+            color: var(--text-primary);
+        }
+
+        .action-item:hover {
+            background: var(--bg-tertiary);
+        }
+
+        .regen-btn, .regen-btn-small {
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 6px 10px;
+            font-size: 11px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            white-space: nowrap;
+        }
+
+        .regen-btn {
+            padding: 8px 12px;
+            font-size: 12px;
+        }
+
+        .regen-btn:hover, .regen-btn-small:hover {
+            background: var(--primary-dark);
+            transform: scale(1.05);
+        }
+
+        /* ==================== TABLE VIEW ==================== */
+        .table-wrapper {
+            overflow-x: auto;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+        }
+
+        .clean-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: var(--bg-primary);
+        }
+
+        .clean-table thead {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .clean-table th {
+            padding: 16px;
+            text-align: left;
+            font-weight: 700;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .clean-table td {
+            padding: 14px 16px;
+            border-bottom: 1px solid var(--border);
+            font-size: 14px;
+        }
+
+        .clean-table tbody tr:hover {
+            background: var(--bg-secondary);
+        }
+
+        .clean-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        /* ==================== SCORE & STATS ==================== */
+        .stats-bar {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .stat-box {
+            flex: 1;
+            min-width: 200px;
+            padding: 16px;
+            background: var(--bg-secondary);
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            text-align: center;
+            transition: var(--transition);
+        }
+
+        .stat-box:hover {
+            border-color: var(--primary);
+            box-shadow: var(--shadow-md);
+        }
+
+        .stat-value {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 4px;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .score-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 700;
+            background: var(--bg-secondary);
+            border: 2px solid;
+        }
+
+        /* ==================== TOAST NOTIFICATIONS ==================== */
+        .toast {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            padding: 14px 20px;
+            background: var(--bg-primary);
+            border-radius: 8px;
+            box-shadow: var(--shadow-lg);
+            font-size: 14px;
+            font-weight: 600;
+            z-index: 1000;
+            animation: slideUp 0.3s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .toast.info {
+            border-left: 4px solid var(--info);
+            color: var(--info);
+        }
+
+        .toast.success {
+            border-left: 4px solid var(--success);
+            color: var(--success);
+        }
+
+        .toast.warning {
+            border-left: 4px solid var(--warning);
+            color: var(--warning);
+        }
+
+        .toast.danger {
+            border-left: 4px solid var(--danger);
+            color: var(--danger);
+        }
+
+        /* ==================== RESPONSIVE ==================== */
+        @media (max-width: 1024px) {
+            .clause-container {
+                grid-template-columns: 1fr;
+            }
+            .table-card-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .filter-bar {
+                flex-direction: column;
+            }
+            .form-control {
+                width: 100%;
+                min-width: unset;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .container {
+                padding: 12px;
+            }
+            .panel-body {
+                padding: 16px;
+            }
+            .table-card-header {
+                padding: 20px;
+            }
+            .clean-table {
+                font-size: 12px;
+            }
+            .clean-table th, .clean-table td {
+                padding: 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div id="panel-container"></div>
+    </div>
+
+    <script>
+        // ==================== DUMMY DATA ==================== 
+        const DUMMY_DATA = {
+            circulars: [
+                {
+                    id: 'RBI-2024-01',
+                    title: 'Data Protection & Privacy Framework',
+                    description: 'Compliance requirements for data handling and customer privacy',
+                    chapters: [
+                        {
+                            num: 1,
+                            title: 'Introduction & Scope',
+                            clauses: [
+                                {
+                                    id: 'CL-1.1',
+                                    text: 'All customer data must be encrypted using AES-256 standard',
+                                    risk: 'High',
+                                    department: 'IT',
+                                    score: 75,
+                                    obligations: [
+                                        {
+                                            text: 'Implement encryption algorithms across all databases',
+                                            actions: [
+                                                'Install encryption libraries',
+                                                'Deploy key management system',
+                                                'Run encryption audit'
+                                            ]
+                                        },
+                                        {
+                                            text: 'Maintain encryption certificates and rotate keys quarterly',
+                                            actions: [
+                                                'Schedule key rotation tasks',
+                                                'Document key management procedures',
+                                                'Train IT team on procedures'
+                                            ]
+                                        }
+                                    ]
+                                },
+                                {
+                                    id: 'CL-1.2',
+                                    text: 'Customer consent must be obtained before data collection',
+                                    risk: 'High',
+                                    department: 'Legal',
+                                    score: 82,
+                                    obligations: [
+                                        {
+                                            text: 'Create consent management platform',
+                                            actions: [
+                                                'Design consent forms',
+                                                'Build consent tracking system',
+                                                'Integrate with CRM'
+                                            ]
+                                        }
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            num: 2,
+                            title: 'Data Storage & Retention',
+                            clauses: [
+                                {
+                                    id: 'CL-2.1',
+                                    text: 'Personal data retention period must not exceed 5 years',
+                                    risk: 'Medium',
+                                    department: 'Compliance',
+                                    score: 68,
+                                    obligations: [
+                                        {
+                                            text: 'Establish data retention policy',
+                                            actions: [
+                                                'Document retention schedules',
+                                                'Set up automated deletion tasks',
+                                                'Review policy annually'
+                                            ]
+                                        }
+                                    ]
+                                },
+                                {
+                                    id: 'CL-2.2',
+                                    text: 'Maintain audit logs for all data access',
+                                    risk: 'High',
+                                    department: 'IT',
+                                    score: 71,
+                                    obligations: [
+                                        {
+                                            text: 'Deploy centralized logging system',
+                                            actions: [
+                                                'Configure log aggregation',
+                                                'Set up monitoring alerts',
+                                                'Archive logs securely'
+                                            ]
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    id: 'RBI-2024-02',
+                    title: 'Operational Risk Management',
+                    description: 'Framework for managing operational risks and incidents',
+                    chapters: [
+                        {
+                            num: 1,
+                            title: 'Risk Assessment',
+                            clauses: [
+                                {
+                                    id: 'CL-1.1',
+                                    text: 'Conduct quarterly risk assessment across all departments',
+                                    risk: 'Medium',
+                                    department: 'Risk',
+                                    score: 65,
+                                    obligations: [
+                                        {
+                                            text: 'Implement risk assessment methodology',
+                                            actions: [
+                                                'Define risk metrics',
+                                                'Schedule quarterly reviews',
+                                                'Document findings'
+                                            ]
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        };
+
+        // ==================== STATE MANAGEMENT ==================== 
+        const STATE = {
+            selectedCircularId: null,
+            currentView: 'card',
+            clauses: []
+        };
+
+        // ==================== UTILITY FUNCTIONS ====================
+        function showToast(message, type = 'info') {
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.textContent = message;
+            document.body.appendChild(toast);
+
+            setTimeout(() => {
+                toast.style.animation = 'slideUp 0.3s ease-out reverse';
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        // ==================== RENDER PANEL ====================
+        function renderPanel() {
+            const circularOptions = DUMMY_DATA.circulars.map(c =>
+                `<option value="${c.id}">${c.id} – ${c.title}</option>`
+            ).join('');
+
+            const html = `
+                <div class="table-card">
+                    <div class="table-card-header">
+                        <div>
+                            <h3>Clause → Obligation → Actionable</h3>
+                            <p class="subtext">Structured compliance mapping engine</p>
+                        </div>
+                        <div class="view-toggle">
+                            <button class="btn btn-light active" id="view-card">📋 Card View</button>
+                            <button class="btn btn-light" id="view-table">📊 Table View</button>
+                        </div>
+                    </div>
+
+                    <div class="panel-body">
+                        <div class="filter-bar">
+                            <select class="form-control" id="clause-circular-select">
+                                <option value="">Select Circular...</option>
+                                ${circularOptions}
+                            </select>
+
+                            <select class="form-control" id="clause-dept-filter">
+                                <option value="">All Departments</option>
+                                <option>IT</option>
+                                <option>Risk</option>
+                                <option>Compliance</option>
+                                <option>Legal</option>
+                                <option>Finance</option>
+                                <option>Operations</option>
+                                <option>HR</option>
+                                <option>Procurement</option>
+                            </select>
+
+                            <input type="text" class="form-control"
+                                id="clause-search"
+                                placeholder="Search clause text..." />
+
+                            <button class="btn btn-primary" id="btn-gen-clause">
+                                🔍 Generate
+                            </button>
+                        </div>
+
+                        <div id="stats-container"></div>
+                        <div id="clause-output" class="clause-output"></div>
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('panel-container').innerHTML = html;
+            initListeners();
+        }
+
+        // ==================== RENDER STATS ====================
+        function renderStats() {
+            const circId = document.getElementById('clause-circular-select').value;
+            if (!circId) return;
+
+            const circ = DUMMY_DATA.circulars.find(c => c.id === circId);
+            if (!circ) return;
+
+            let allClauses = [];
+            circ.chapters.forEach(ch => {
+                ch.clauses.forEach(cl => {
+                    allClauses.push(cl);
+                });
+            });
+
+            const totalClauses = allClauses.length;
+            const highRisk = allClauses.filter(c => c.risk === 'High').length;
+            const avgScore = Math.round(allClauses.reduce((sum, c) => sum + c.score, 0) / totalClauses);
+            const totalObs = allClauses.reduce((sum, c) => sum + (c.obligations?.length || 0), 0);
+
+            const html = `
+                <div class="stats-bar">
+                    <div class="stat-box">
+                        <div class="stat-value">${totalClauses}</div>
+                        <div class="stat-label">Total Clauses</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-value" style="color: var(--danger);">${highRisk}</div>
+                        <div class="stat-label">High Risk</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-value" style="color: var(--success);">${avgScore}%</div>
+                        <div class="stat-label">Avg Compliance Score</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-value" style="color: var(--primary);">${totalObs}</div>
+                        <div class="stat-label">Obligations Mapped</div>
+                    </div>
+                </div>
+            `;
+
+            const statsContainer = document.getElementById('stats-container');
+            if (statsContainer) {
+                statsContainer.innerHTML = html;
+            }
+        }
+
+        // ==================== RENDER CLAUSES ====================
+        function renderClauses(viewType = 'card') {
+            const circId = document.getElementById('clause-circular-select').value;
+            const deptFilter = document.getElementById('clause-dept-filter').value;
+            const search = document.getElementById('clause-search').value.toLowerCase();
+
+            if (!circId) {
+                showToast('Please select a circular first', 'warning');
+                return;
+            }
+
+            const circ = DUMMY_DATA.circulars.find(c => c.id === circId);
+            if (!circ) return;
+
+            let allClauses = [];
+            circ.chapters.forEach(ch => {
+                ch.clauses.forEach(cl => {
+                    allClauses.push({ chapter: ch.num, chapterTitle: ch.title, ...cl });
+                });
+            });
+
+            if (deptFilter) {
+                allClauses = allClauses.filter(cl => cl.department === deptFilter);
+            }
+
+            if (search) {
+                allClauses = allClauses.filter(cl =>
+                    cl.text.toLowerCase().includes(search) || cl.id.toLowerCase().includes(search)
+                );
+            }
+
+            STATE.clauses = allClauses;
+            STATE.currentView = viewType;
+
+            const output = document.getElementById('clause-output');
+            if (!output) return;
+
+            if (viewType === 'card') {
+                output.innerHTML = renderCardView(allClauses, circ);
+            } else {
+                output.innerHTML = renderTableView(allClauses);
+            }
+
+            renderStats();
+        }
+
+        // ==================== CARD VIEW ====================
+        function renderCardView(clauses, circ) {
+            if (!clauses.length) {
+                return `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📭</div>
+                        <h3>No Clauses Found</h3>
+                        <p>Try adjusting your filters or search criteria</p>
+                    </div>
+                `;
+            }
+
+            return `
+                <div class="clause-container">
+                    ${clauses.map((cl, i) => `
+                        <div class="clause-card">
+                            <div class="clause-card-header" onclick="toggleClauseBody(${i})">
+                                <div>
+                                    <div class="breadcrumb">${circ.id} > Chapter ${cl.chapter}</div>
+                                    <div class="clause-title">${cl.id}</div>
+                                    <div class="clause-text">${cl.text}</div>
+                                </div>
+                                <span class="risk-badge risk-${cl.risk.toLowerCase()}">
+                                    ${cl.risk}
+                                </span>
+                            </div>
+
+                            <div class="clause-card-body" id="clause-body-${i}">
+                                <div style="margin-bottom: 14px; display: flex; justify-content: space-between; align-items: center;">
+                                    <span class="score-badge" style="border-color: ${getScoreColor(cl.score)}; color: ${getScoreColor(cl.score)};">
+                                        ✓ Score: ${cl.score}%
+                                    </span>
+                                    <span style="font-size: 12px; color: var(--text-secondary);">${cl.department}</span>
+                                </div>
+                                ${renderObligations(cl)}
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+
+        // ==================== TABLE VIEW ====================
+        function renderTableView(clauses) {
+            if (!clauses.length) {
+                return `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📭</div>
+                        <h3>No Data Found</h3>
+                        <p>Try adjusting your filters or search criteria</p>
+                    </div>
+                `;
+            }
+
+            const rows = [];
+            clauses.forEach(cl => {
+                if (!cl.obligations || cl.obligations.length === 0) {
+                    rows.push(`
+                        <tr>
+                            <td><strong>${cl.id}</strong></td>
+                            <td colspan="3" style="color: var(--text-secondary); font-style: italic;">No obligations mapped</td>
+                        </tr>
+                    `);
+                } else {
+                    cl.obligations.forEach((ob, obIdx) => {
+                        if (!ob.actions || ob.actions.length === 0) {
+                            rows.push(`
+                                <tr>
+                                    <td><strong>${cl.id}</strong></td>
+                                    <td>${ob.text}</td>
+                                    <td colspan="2" style="color: var(--text-secondary); font-style: italic;">No actionables defined</td>
+                                </tr>
+                            `);
+                        } else {
+                            ob.actions.forEach((act, actIdx) => {
+                                rows.push(`
+                                    <tr>
+                                        <td><strong>${cl.id}</strong></td>
+                                        <td>${ob.text}</td>
+                                        <td>${act}</td>
+                                        <td>
+                                            <button class="btn btn-ghost btn-sm" 
+                                                onclick="regenerateActionable('${cl.id}', ${obIdx}, ${actIdx})">
+                                                🔄 Regenerate
+                                            </button>
+                                        </td>
+                                    </tr>
+                                `);
+                            });
+                        }
+                    });
+                }
+            });
+
+            return `
+                <div class="table-wrapper">
+                    <table class="clean-table">
+                        <thead>
+                            <tr>
+                                <th>Clause ID</th>
+                                <th>Obligation</th>
+                                <th>Actionable</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${rows.join('')}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+        }
+
+        // ==================== RENDER OBLIGATIONS ====================
+        function renderObligations(cl) {
+            if (!cl.obligations || cl.obligations.length === 0) {
+                return `<div class="empty-mini">✓ No obligations mapped yet</div>`;
+            }
+
+            return cl.obligations.map((ob, idx) => `
+                <div class="obligation-card">
+                    <div class="ob-header">
+                        <strong>Obligation ${idx + 1}</strong>
+                        <button onclick="regenerateObligation('${cl.id}', ${idx})" class="regen-btn">
+                            🔄 Regenerate
+                        </button>
+                    </div>
+                    <div class="ob-text">${ob.text}</div>
+                    ${renderActions(ob)}
+                </div>
+            `).join('');
+        }
+
+        // ==================== RENDER ACTIONS ====================
+        function renderActions(ob) {
+            if (!ob.actions || ob.actions.length === 0) {
+                return `<div class="empty-mini">→ No actionables defined</div>`;
+            }
+
+            return `
+                <div class="action-container">
+                    ${ob.actions.map((act, i) => `
+                        <div class="action-item">
+                            <span>→ ${act}</span>
+                            <button onclick="regenerateActionable('', 0, ${i})" class="regen-btn-small">
+                                🔄
+                            </button>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+
+        // ==================== HELPER FUNCTIONS ====================
+        function getScoreColor(score) {
+            if (score >= 80) return '#10b981';
+            if (score >= 60) return '#f59e0b';
+            return '#ef4444';
+        }
+
+        function toggleClauseBody(index) {
+            const body = document.getElementById(`clause-body-${index}`);
+            if (body) {
+                body.classList.toggle('open');
+                body.style.display = body.style.display === 'block' ? 'none' : 'block';
+            }
+        }
+
+        function regenerateObligation(clauseId, obIdx) {
+            showToast(`🔄 Regenerating obligation for ${clauseId}...`, 'info');
+            setTimeout(() => {
+                showToast(`✓ Obligation regenerated successfully`, 'success');
+            }, 1200);
+        }
+
+        function regenerateActionable(clauseId, obIdx, actIdx) {
+            showToast(`🔄 Regenerating actionable...`, 'info');
+            setTimeout(() => {
+                showToast(`✓ Actionable regenerated successfully`, 'success');
+            }, 1200);
+        }
+
+        // ==================== EVENT LISTENERS ====================
+        function initListeners() {
+            const cardViewBtn = document.getElementById('view-card');
+            const tableViewBtn = document.getElementById('view-table');
+            const generateBtn = document.getElementById('btn-gen-clause');
+            const circularSelect = document.getElementById('clause-circular-select');
+            const deptFilter = document.getElementById('clause-dept-filter');
+            const searchInput = document.getElementById('clause-search');
+
+            if (cardViewBtn) {
+                cardViewBtn.onclick = () => {
+                    cardViewBtn.classList.add('active');
+                    tableViewBtn.classList.remove('active');
+                    renderClauses('card');
+                };
+            }
+
+            if (tableViewBtn) {
+                tableViewBtn.onclick = () => {
+                    tableViewBtn.classList.add('active');
+                    cardViewBtn.classList.remove('active');
+                    renderClauses('table');
+                };
+            }
+
+            if (generateBtn) {
+                generateBtn.onclick = () => {
+                    renderClauses(STATE.currentView);
+                };
+            }
+
+            if (circularSelect) {
+                circularSelect.addEventListener('change', () => {
+                    renderClauses(STATE.currentView);
+                });
+            }
+
+            if (deptFilter) {
+                deptFilter.addEventListener('change', () => {
+                    renderClauses(STATE.currentView);
+                });
+            }
+
+            if (searchInput) {
+                searchInput.addEventListener('input', () => {
+                    renderClauses(STATE.currentView);
+                });
+            }
+
+            showToast('✨ Compliance mapping engine loaded', 'success');
+        }
+
+        // ==================== INITIALIZATION ====================
+        document.addEventListener('DOMContentLoaded', renderPanel);
+    </script>
+</body>
+</html>

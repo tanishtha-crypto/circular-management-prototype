@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>CMS — Circular Management System</title>
+  <link rel="stylesheet" href="./styles.css"/>
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=Syne:wght@600;700;800&display=swap" rel="stylesheet"/>
+</head>
+<body>
+
+  <!-- ========== SIDEBAR ========== -->
+  <aside id="sidebar">
+    <button class="sidebar-collapse-btn" id="sidebar-toggle" title="Collapse sidebar">‹</button>
+    <div class="sidebar-logo">
+      <div class="logo-icon">⬡</div>
+      <div class="logo-text">
+        <span class="logo-main">CMS</span>
+        <span class="logo-sub">Compliance Suite</span>
+      </div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <ul id="nav-menu">
+
+        <li class="nav-item active" data-page="dashboard">
+          <a href="#dashboard" class="nav-link">
+            <span class="nav-icon">▦</span>
+            <span class="nav-label">Home</span>
+          </a>
+        </li>
+
+        <!-- AI Engine with submenu -->
+        <li class="nav-item has-submenu" data-page="ai-engine">
+          <a href="#" class="nav-link submenu-toggle">
+            <span class="nav-icon">◈</span>
+            <span class="nav-label">AI Engine</span>
+            <span class="submenu-arrow">›</span>
+          </a>
+          <ul class="submenu">
+             <li data-page="ai-overview"><a href="#ai-overview">Overview</a></li>
+            <li data-page="ai-applicability"><a href="#ai-applicability">Applicability Analysis</a></li>
+            <li data-page="ai-summary"><a href="#ai-summary">Executive Summary</a></li>
+            <li data-page="ai-clause"><a href="#ai-clause">Clause Generation</a></li>
+            <li data-page="ai-evidence"><a href="#ai-evidence">Evaluate Evidence</a></li>
+          </ul>
+        </li>
+
+        <li class="nav-item has-submenu" data-page="circular-library">
+          <a href="#" class="nav-link submenu-toggle">
+            <span class="nav-icon">◫</span>
+            <span class="nav-label">Circular Library</span>
+             <span class="submenu-arrow">›</span>
+          </a>
+          <ul class="submenu">
+            <!-- <li data-page="ai-applicability"><a href="#ai-applicability"></a></li> -->
+            <li data-page="ai-suggestion"><a href="#ai-suggestion">My Library</a></li>
+            <li data-page="circular-library"><a href="#circular-library">Circular Repository</a></li>
+            <li class="nav-item" data-page="circular-explorer">
+          <a href="#circular-explorer" class="nav-link">
+            <!-- <span class="nav-icon">🌲</span> -->
+            <span class="nav-label">Circular Hierarchy</span>
+          </a>
+        </li>
+           
+            <!-- <li data-page="drafts-circular-library"><a href="#drafts-circular-library">My Circular  Drafts</a></li> -->
+            <!-- <li data-page="ai-evidence"><a href="#ai-evidence">Evaluate Evidence</a></li> -->
+          </ul>
+        </li>
+
+        <li class="nav-item has-submenu" data-page="task-management">
+          <a href="#task-management" class="nav-link">
+            <span class="nav-icon">◉</span>
+            <span class="nav-label">My Inbox</span>
+              <span class="submenu-arrow">›</span>
+          </a>
+            <ul class="submenu">
+            <!-- <li data-page="ai-applicability"><a href="#ai-applicability"></a></li> -->
+            <li data-page="my-items-obligations"><a href="#my-items-obligations">My Items - Obligations</a></li>
+            <li data-page="my-items-activity"><a href="#my-items-activity">My Items - Activities</a></li>
+            <li data-page="assign-obligation"><a href="#assign-obligation">Assign Obligation</a></li>
+            <li data-page="assign-activity"><a href="#assign-activity">Assign Activities</a></li>
+            <!-- <li data-page="drafts-circular-library"><a href="#drafts-circular-library">My Circular  Drafts</a></li> -->
+            <!-- <li data-page="ai-evidence"><a href="#ai-evidence">Evaluate Evidence</a></li> -->
+          </ul>
+        </li>
+
+        
+
+        <li class="nav-item" data-page="reports">
+          <a href="#reports" class="nav-link">
+            <span class="nav-icon">◧</span>
+            <span class="nav-label">Reports</span>
+          </a>
+        </li>
+
+        <li class="nav-item" data-page="settings">
+          <a href="#settings" class="nav-link">
+            <span class="nav-icon">◎</span>
+            <span class="nav-label">Settings</span>
+          </a>
+        </li>
+
+      </ul>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="user-mini">
+        <div class="user-avatar-sm">AK</div>
+        <div class="user-info-sm">
+          <span class="user-name-sm">Arjun Kumar</span>
+          <span class="user-role-sm">Compliance Head</span>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ========== MAIN WRAPPER ========== -->
+  <div id="main-wrapper">
+
+    <!-- TOP NAVBAR -->
+    <header id="topbar">
+      <div class="topbar-left">
+        <h1 id="page-title">Dashboard</h1>
+      </div>
+      <div class="topbar-right">
+        <!-- Global Search -->
+        <button id="global-search-btn" class="search-bar-btn" title="AI Search">
+          <span class="search-icon">⌕</span>
+          <span class="search-placeholder">Ask AI anything...</span>
+          <kbd>⌘K</kbd>
+        </button>
+        <!-- Notifications -->
+        <button class="icon-btn notif-btn" id="notif-btn" title="Notifications">
+          <span>🔔</span>
+          <span class="badge" id="notif-badge">3</span>
+        </button>
+        <!-- Profile -->
+        <div class="profile-dropdown-wrapper">
+          <button class="profile-btn" id="profile-btn">
+            <div class="user-avatar">AK</div>
+            <span class="profile-name">Arjun Kumar</span>
+            <span class="dropdown-arrow">▾</span>
+          </button>
+          <div class="profile-dropdown" id="profile-dropdown">
+            <div class="profile-dropdown-header">
+              <div class="user-avatar lg">AK</div>
+              <div>
+                <div class="pd-name">Arjun Kumar</div>
+                <div class="pd-email"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="08697a627d66486b676578696671266b6765">[email&#160;protected]</a></div>
+              </div>
+            </div>
+            <hr/>
+            <a href="#" class="pd-item">My Profile</a>
+            <a href="#" class="pd-item">Account Settings</a>
+            <a href="#" class="pd-item">Audit Log</a>
+            <hr/>
+            <a href="#" class="pd-item danger">Sign Out</a>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- ========== PAGE CONTENT ========== -->
+    <main id="content-area">
+      <!-- Pages rendered dynamically by JS -->
+    </main>
+
+  </div><!-- /main-wrapper -->
+
+  <!-- ========== GLOBAL AI SEARCH MODAL ========== -->
+  <div id="search-modal" class="modal-overlay hidden">
+    <div class="search-modal-box">
+      <div class="search-modal-header">
+        <span class="search-modal-icon">◈</span>
+        <input type="text" id="ai-search-input" placeholder="Ask AI: 'Show cybersecurity circulars' or 'Which circular applies to Finance?'" autocomplete="off"/>
+        <button id="close-search-modal" class="close-btn">✕</button>
+      </div>
+      <div class="search-modal-body" id="search-modal-body">
+        <div class="search-hint">
+          <p>Try asking:</p>
+          <div class="search-suggestions">
+            <span class="suggestion-chip" data-q="Show cybersecurity related circulars">🔒 Cybersecurity circulars</span>
+            <span class="suggestion-chip" data-q="Which circular applies to Finance department?">💰 Finance circulars</span>
+            <span class="suggestion-chip" data-q="Show high risk overdue tasks">⚠️ High risk overdue tasks</span>
+            <span class="suggestion-chip" data-q="Master circulars summary">📋 Master circulars</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== NOTIFICATION PANEL ========== -->
+  <div id="notif-panel" class="notif-panel hidden">
+    <div class="notif-header">
+      <span>Notifications</span>
+      <button id="close-notif" class="close-btn-sm">✕</button>
+    </div>
+    <div id="notif-list"></div>
+  </div>
+
+  <!-- ========== GENERIC MODAL (Circular Detail, Add Task) ========== -->
+  <div id="generic-modal" class="modal-overlay hidden">
+    <div class="generic-modal-box" id="generic-modal-box">
+      <div class="generic-modal-header">
+        <h3 id="generic-modal-title">Modal</h3>
+        <button class="close-btn" id="close-generic-modal">✕</button>
+      </div>
+      <div class="generic-modal-body" id="generic-modal-body"></div>
+    </div>
+  </div>
+
+  <!-- JS Modules -->
+  <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script src="js/data.js"></script>
+  <script src="./data.js"></script>
+  <script src="./dashboard.js"></script>
+    <script src="./overview-panel.js"></script>
+  <script src="shared-circular.js"></script>
+<script src="applicability-panel.js"></script>
+<script src="summary-panel.js"></script>
+<script src="clause-panel.js"></script>
+<script src="evidence-panel.js"></script>
+<script src="ai-engine.js"></script>
+  <script src="./circular-library.js"></script>
+   <script src="./my-items-obligations.js"></script>
+     <script src="./my-items-activity.js"></script>
+     <script src="./assign-action.js"></script>
+     <script src="./action-screen.js"></script>
+      <script src="./action-screen-activity.js"></script>
+ 
+ 
+  <script src="./app.js"></script>
+  <script src="./ai-suggestion.js"></script>
+  <script src="./drafts-circular-library.js"></script>
+   
+   <script src="./assign-activity.js"></script>
+   <script src="./assign-obligation.js"></script>
+  <script src="./circular-explorer.js"></script>
+
+
+  
+</body>
+</htm.

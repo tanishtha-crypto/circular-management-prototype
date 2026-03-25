@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Compliance Mapping Engine</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;0,600;0,700;1,400&family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:         #f5f6f8;
+  --surface:    #ffffff;
+  --surface-2:  #f9fafb;
+  --border:     #e4e7ed;
+  --border-2:   #d0d5e0;
+  --text-primary:   #1a1d2e;
+  --text-secondary: #4a5068;
+  --text-muted:     #9399b0;
+  --accent:     #2952e3;
+  --accent-bg:  #eef2ff;
+  --accent-mid: #c7d2fe;
+  --success:    #0d9f65;
+  --success-bg: #ecfdf5;
+  --success-mid:#a7f3d0;
+  --warning:    #b45309;
+  --warning-bg: #fffbeb;
+  --warning-mid:#fde68a;
+  --danger:     #c4303e;
+  --danger-bg:  #fef2f2;
+  --danger-mid: #fecaca;
+  --purple:     #6d28d9;
+  --purple-bg:  #f5f3ff;
+  --purple-mid: #ddd6fe;
+  --radius:     10px;
+  --radius-sm:  6px;
+  --shadow-sm:  0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+  --shadow:     0 4px 12px rgba(0,0,0,0.07), 0 2px 4px rgba(0,0,0,0.05);
+  --font-display: 'Fraunces', serif;
+  --font-body:    'Outfit', sans-serif;
+  --font-mono:    'JetBrains Mono', monospace;
+}
+
+body {
+  font-family: var(--font-body);
+  background: var(--bg);
+  color: var(--text-primary);
+  min-height: 100vh;
+  padding: 28px 24px 60px;
+  line-height: 1.6;
+}
+
+/* PAGE HEADER */
+.page-header {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  margin-bottom: 24px; flex-wrap: wrap; gap: 12px;
+}
+.page-header h1 {
+  font-family: var(--font-display);
+  font-size: 22px; font-weight: 700;
+  color: var(--text-primary); letter-spacing: -0.3px;
+}
+.page-header p { font-size: 13px; color: var(--text-muted); margin-top: 2px; }
+
+.next-tab-btn {
+  display: inline-flex; align-items: center; gap: 7px;
+  background: var(--accent); color: #fff;
+  border: none; border-radius: var(--radius-sm);
+  font-family: var(--font-body); font-size: 13px; font-weight: 600;
+  padding: 9px 18px; cursor: pointer;
+  box-shadow: 0 2px 10px rgba(41,82,227,0.22);
+  transition: all 0.15s;
+}
+.next-tab-btn:hover {
+  background: #1e3fc2;
+  transform: translateY(-1px);
+  box-shadow: 0 5px 16px rgba(41,82,227,0.28);
+}
+.next-tab-btn svg { width: 14px; height: 14px; flex-shrink: 0; }
+
+/* FILTER BAR */
+.filter-bar {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  display: flex; gap: 10px; flex-wrap: wrap; align-items: center;
+  margin-bottom: 20px;
+  box-shadow: var(--shadow-sm);
+}
+.filter-bar select, .filter-bar input[type=text] {
+  flex: 1; min-width: 150px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  font-family: var(--font-body); font-size: 13px;
+  padding: 8px 11px; outline: none;
+  transition: border-color 0.18s, box-shadow 0.18s;
+}
+.filter-bar select:focus, .filter-bar input[type=text]:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(41,82,227,0.08);
+}
+.filter-bar select option { background: #fff; }
+.btn-load {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: var(--accent); color: #fff;
+  border: none; border-radius: var(--radius-sm);
+  font-family: var(--font-body); font-size: 13px; font-weight: 600;
+  padding: 8px 18px; cursor: pointer;
+  transition: background 0.15s;
+}
+.btn-load:hover { background: #1e3fc2; }
+
+/* STATS */
+.stats-row {
+  display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px;
+}
+.stat-pill {
+  display: flex; align-items: center; gap: 7px;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 100px; padding: 5px 13px;
+  font-size: 12px; color: var(--text-secondary);
+  box-shadow: var(--shadow-sm);
+}
+.stat-pill .num { font-family: var(--font-display); font-weight: 700; font-size: 14px; }
+.stat-pill .dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+
+/* CIRCULAR HEADER */
+.circular-header {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px 18px;
+  display: flex; align-items: center; gap: 14px;
+  margin-bottom: 14px;
+  box-shadow: var(--shadow-sm);
+}
+.circular-badge {
+  font-family: var(--font-mono); font-size: 11px; font-weight: 500;
+  padding: 4px 10px; border-radius: 5px;
+  background: var(--accent-bg); color: var(--accent); border: 1px solid var(--accent-mid);
+  white-space: nowrap;
+}
+.circular-title { font-family: var(--font-display); font-size: 15px; font-weight: 600; }
+.circular-meta  { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+
+/* CLAUSE CARD */
+.clause-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); margin-bottom: 8px; overflow: hidden;
+  box-shadow: var(--shadow-sm); transition: border-color 0.18s, box-shadow 0.18s;
+}
+.clause-card:hover { border-color: var(--border-2); }
+.clause-card.open {
+  border-color: var(--accent-mid);
+  box-shadow: 0 0 0 3px rgba(41,82,227,0.05), var(--shadow-sm);
+}
+
+.clause-head {
+  display: flex; align-items: flex-start; gap: 12px;
+  padding: 13px 16px; cursor: pointer; user-select: none;
+}
+.clause-id {
+  font-family: var(--font-mono); font-size: 10px; font-weight: 500;
+  color: var(--accent); background: var(--accent-bg); border: 1px solid var(--accent-mid);
+  padding: 2px 8px; border-radius: 4px;
+  white-space: nowrap; margin-top: 2px; flex-shrink: 0;
+}
+.clause-text-wrap { flex: 1; min-width: 0; }
+.clause-text { font-size: 13px; color: var(--text-primary); line-height: 1.55; }
+.clause-meta { display: flex; gap: 6px; align-items: center; margin-top: 7px; flex-wrap: wrap; }
+
+.chip { font-size: 10px; font-weight: 600; letter-spacing: 0.3px; padding: 2px 8px; border-radius: 4px; border: 1px solid transparent; }
+.chip-high     { background: var(--danger-bg);  color: var(--danger);  border-color: var(--danger-mid); }
+.chip-medium   { background: var(--warning-bg); color: var(--warning); border-color: var(--warning-mid); }
+.chip-low      { background: var(--success-bg); color: var(--success); border-color: var(--success-mid); }
+.chip-dept     { background: var(--surface-2);  color: var(--text-muted); border-color: var(--border); font-family: var(--font-mono); font-size: 10px; }
+.chip-complete     { background: var(--success-bg); color: var(--success); border-color: var(--success-mid); }
+.chip-in-progress  { background: var(--warning-bg); color: var(--warning); border-color: var(--warning-mid); }
+.chip-open         { background: var(--surface-2);  color: var(--text-muted); border-color: var(--border); }
+
+.chevron { font-size: 9px; color: var(--text-muted); margin-top: 4px; flex-shrink: 0; transition: transform 0.2s; }
+.clause-card.open .chevron { transform: rotate(180deg); }
+
+/* CLAUSE BODY */
+.clause-body { display: none; border-top: 1px solid var(--border); }
+.clause-card.open .clause-body { display: block; }
+
+/* OBLIGATION */
+.obligation-block {
+  padding: 14px 18px; border-bottom: 1px solid var(--border); background: var(--surface-2);
+}
+.section-label {
+  font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;
+  color: var(--text-muted); margin-bottom: 8px;
+  display: flex; align-items: center; gap: 8px;
+}
+.section-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+.obligation-text {
+  font-size: 13px; color: var(--text-secondary); line-height: 1.65;
+  border-left: 3px solid var(--accent);
+  padding: 8px 12px; border-radius: 0 6px 6px 0;
+  background: var(--surface);
+}
+
+/* ACTIONS */
+.actions-block { padding: 14px 18px; }
+
+.action-row {
+  border: 1px solid var(--border); border-radius: var(--radius-sm);
+  margin-bottom: 8px; overflow: hidden;
+  background: var(--surface); transition: border-color 0.18s;
+}
+.action-row:last-child { margin-bottom: 0; }
+.action-row.drawer-open { border-color: var(--purple-mid); }
+
+.action-summary {
+  display: flex; align-items: flex-start; gap: 10px; padding: 10px 13px;
+}
+.action-num {
+  font-family: var(--font-mono); font-size: 10px; font-weight: 500;
+  color: var(--text-muted); background: var(--surface-2); border: 1px solid var(--border);
+  padding: 2px 6px; border-radius: 3px;
+  margin-top: 1px; flex-shrink: 0;
+}
+.action-desc { flex: 1; font-size: 13px; color: var(--text-primary); line-height: 1.5; }
+
+/* EVIDENCE PILL */
+.ev-pill {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-size: 11px; font-weight: 600;
+  padding: 3px 11px; border-radius: 100px;
+  white-space: nowrap; flex-shrink: 0; margin-top: 1px;
+  cursor: pointer; border: 1px solid transparent;
+  transition: all 0.15s; user-select: none;
+}
+.ev-pill-needed { background: var(--purple-bg); color: var(--purple); border-color: var(--purple-mid); }
+.ev-pill-added  { background: var(--success-bg); color: var(--success); border-color: var(--success-mid); }
+.ev-pill:hover  { filter: brightness(0.95); transform: translateY(-1px); }
+
+/* EVIDENCE DRAWER */
+.evidence-drawer {
+  display: none;
+  padding: 14px 16px;
+  background: var(--surface-2);
+  border-top: 1px solid var(--border);
+  animation: slideDown 0.18s ease;
+}
+@keyframes slideDown { from { opacity:0; transform:translateY(-5px);} to { opacity:1; transform:none;} }
+.action-row.drawer-open .evidence-drawer { display: block; }
+
+/* AI EVIDENCE DETAIL CARD */
+.ev-detail-card {
+  background: var(--surface); border: 1px solid var(--purple-mid);
+  border-radius: var(--radius-sm); overflow: hidden; margin-bottom: 12px;
+}
+.ev-detail-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 9px 14px;
+  background: var(--purple-bg); border-bottom: 1px solid var(--purple-mid);
+}
+.ev-ai-label {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;
+  color: var(--purple);
+}
+.ev-detail-body { padding: 12px 14px; }
+
+.ev-items { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+.ev-item {
+  display: flex; align-items: flex-start; gap: 10px;
+  font-size: 12.5px; color: var(--text-secondary); line-height: 1.55;
+  padding-bottom: 10px; border-bottom: 1px solid var(--border);
+}
+.ev-items li:last-child { border-bottom: none; padding-bottom: 0; }
+.ev-item-num {
+  flex-shrink: 0; width: 20px; height: 20px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 10px; font-weight: 700; font-family: var(--font-mono);
+  background: var(--purple-bg); color: var(--purple); border: 1px solid var(--purple-mid);
+  margin-top: 1px;
+}
+.ev-item-content strong {
+  font-size: 12px; font-weight: 600; color: var(--text-primary);
+  display: block; margin-bottom: 2px;
+}
+
+/* EXTRACTED CLAIM TAGS */
+.ev-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border); }
+.ev-tag {
+  font-size: 10.5px; font-weight: 500; font-family: var(--font-mono);
+  padding: 2px 9px; border-radius: 4px;
+  background: var(--accent-bg); color: var(--accent); border: 1px solid var(--accent-mid);
+}
+
+/* DRAWER FOOTER */
+.drawer-footer {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border);
+}
+.drawer-footer-info { font-size: 11px; color: var(--text-muted); }
+
+.btn-close-ev {
+  background: transparent; border: 1px solid var(--border); color: var(--text-muted);
+  border-radius: var(--radius-sm); font-family: var(--font-body); font-size: 12px; font-weight: 500;
+  padding: 6px 12px; cursor: pointer; transition: all 0.15s;
+}
+.btn-close-ev:hover { border-color: var(--border-2); color: var(--text-secondary); }
+
+.btn-library {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: var(--text-primary); color: #fff;
+  border: none; border-radius: var(--radius-sm);
+  font-family: var(--font-body); font-size: 12px; font-weight: 600;
+  padding: 7px 14px; cursor: pointer;
+  transition: all 0.15s;
+}
+.btn-library:hover {
+  background: #2d3150;
+  transform: translateY(-1px);
+  box-shadow: 0 3px 10px rgba(0,0,0,0.12);
+}
+.btn-library.saved {
+  background: var(--success-bg); color: var(--success);
+  border: 1px solid var(--success-mid); box-shadow: none; transform: none;
+}
+
+/* EMPTY / NO MAP */
+.empty-state { text-align: center; padding: 48px 24px; color: var(--text-muted); }
+.empty-state .icon { font-size: 36px; margin-bottom: 12px; }
+.empty-state p { font-size: 13px; }
+.no-map { padding: 12px 18px; font-size: 13px; color: var(--text-muted); font-style: italic; }
+
+/* TOAST */
+.toast {
+  position: fixed; bottom: 24px; right: 24px; z-index: 9999;
+  padding: 10px 16px; border-radius: 8px;
+  font-size: 12px; font-weight: 600; color: #fff;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.13);
+  animation: toastIn 0.25s ease;
+  display: flex; align-items: center; gap: 8px;
+}
+@keyframes toastIn { from { opacity:0; transform:translateY(8px);} to { opacity:1; transform:none;} }
+
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border-2); border-radius: 99px; }
+</style>
+</head>
+<body>
+
+<!-- PAGE HEADER -->
+<div class="page-header">
+  <div>
+    <h1>Compliance Mapping Engine</h1>
+    <p>Circular → Clause → Obligation → Actions → Evidence</p>
+  </div>
+  <!-- <button class="next-tab-btn" onclick="navigateNextTab()">
+    Continue to Evidence Review
+    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M3 8h10M9 4l4 4-4 4"/>
+    </svg>
+  </button> -->
+   <button id="btn-next-to-draft" class="next-tab-btn" onclick="this.innerText='Saved'; this.disabled=true;">
+  Save to AI Suggestion
+</button>
+</div>
+
+<!-- FILTER BAR -->
+<div class="filter-bar">
+  <select id="circ-select">
+    <option value="">Select Circular…</option>
+    <option value="RBI-2024-01">RBI/2024/01 – Digital Lending Guidelines</option>
+    <option value="RBI-2024-02">RBI/2024/02 – Cybersecurity Framework</option>
+    <option value="SEBI-2024-03">SEBI/2024/03 – Data Governance Policy</option>
+  </select>
+  <select id="dept-filter">
+    <option value="">All Departments</option>
+    <option>IT</option><option>Risk</option><option>Compliance</option>
+    <option>Legal</option><option>Finance</option><option>Operations</option>
+  </select>
+  <input type="text" id="search-input" placeholder="Search clause text or ID…" />
+  <button class="btn-load" onclick="renderClauses()">Load Circular</button>
+</div>
+
+<!-- STATS -->
+<div class="stats-row" id="stats-row" style="display:none;"></div>
+
+<!-- OUTPUT -->
+<div id="output"></div>
+
+<script>
+const CMS_DATA = {
+  circulars: [
+    {
+      id: 'RBI-2024-01', title: 'Digital Lending Guidelines', issued: 'Jan 15, 2024',
+      chapters: [
+        {
+          num: '1', title: 'Customer Onboarding & KYC',
+          clauses: [
+            {
+              id: 'CL-1.1', risk: 'High', status: 'In Progress', department: 'Compliance',
+              text: 'All digital lending platforms must implement a robust KYC process compliant with RBI Master Direction on KYC.',
+              obligation: 'Maintain a documented KYC policy reviewed annually. Ensure all customer data is verified against Aadhaar/PAN before loan disbursement.',
+              actionable: 'Update KYC policy document; Integrate NSDL/UIDAI API for real-time verification; Train onboarding team on new verification checks',
+              evidenceNeeded: [
+                { type: 'KYC Policy Document', desc: 'Version-controlled KYC policy, dated within last 12 months, signed by Chief Compliance Officer.' },
+                { type: 'API Integration Logs', desc: 'NSDL/UIDAI API test logs showing successful real-time PAN/Aadhaar verification with sample transaction records.' },
+                { type: 'Training Records', desc: 'Attendance register and completion certificates for onboarding team covering new KYC procedures.' },
+                { type: 'KYC Audit Trail', desc: 'Sample KYC completion records for at least 10 recent customers showing full verification workflow.' }
+              ],
+              extractedClaims: ['Annual policy review mandatory', 'Aadhaar/PAN verification pre-disbursement', 'RBI Master Direction compliance'],
+              evidenceAdded: false
+            },
+            {
+              id: 'CL-1.2', risk: 'Medium', status: 'Open', department: 'IT',
+              text: 'Digital platforms must maintain audit logs of all customer interactions for a minimum of 5 years.',
+              obligation: 'Implement immutable audit logging. Ensure logs are tamper-proof and accessible for regulatory inspection at any time.',
+              actionable: 'Set up centralized log management (SIEM); Define log retention policy; Test log integrity quarterly',
+              evidenceNeeded: [
+                { type: 'SIEM Configuration Report', desc: 'Documentation confirming centralized log ingestion from all customer-facing systems.' },
+                { type: 'Retention Policy Document', desc: 'Formally approved log retention policy specifying 5-year minimum with archival procedures.' },
+                { type: 'Integrity Test Results', desc: 'Quarterly log integrity test reports showing hash verification and tamper-detection results.' }
+              ],
+              extractedClaims: ['5-year minimum retention', 'All customer interaction logs', 'Tamper-proof requirement'],
+              evidenceAdded: false
+            }
+          ]
+        },
+        {
+          num: '2', title: 'Data Privacy & Security',
+          clauses: [
+            {
+              id: 'CL-2.1', risk: 'High', status: 'Open', department: 'IT',
+              text: 'Customer data must be stored exclusively. No cross-border data transfer without explicit.',
+              obligation: 'Ensure all cloud infrastructure is India-hosted. Document data flow diagrams. Obtain granular user consent for any data sharing.',
+              actionable: null,
+              evidenceNeeded: null,
+              extractedClaims: ['India-only data storage', 'Explicit written consent required', 'Data flow documentation'],
+              evidenceAdded: false
+            },
+            {
+              id: 'CL-2.2', risk: 'Medium', status: 'Complete', department: 'Legal',
+              text: 'A comprehensive privacy policy must be published and presented to customers at the point of onboarding.',
+              obligation: 'Publish a DPDP-compliant privacy policy. Maintain version history and change logs.',
+              actionable: 'Draft DPDP-compliant policy; Legal review and sign-off; Publish on website and app; Maintain version history',
+              evidenceNeeded: [
+                { type: 'Published Privacy Policy', desc: 'URL and timestamped screenshot of live privacy policy on website and app.' },
+                { type: 'Legal Sign-off Memo', desc: 'Email or memo from Legal confirming DPDP compliance review and approval with date.' },
+                { type: 'Version History Log', desc: 'Document showing all policy versions, dates, authors, and change summaries.' },
+                { type: 'Consent Flow Screenshots', desc: 'Onboarding flow screenshots showing privacy policy presentation before account creation.' }
+              ],
+              extractedClaims: ['DPDP Act compliance', 'Point-of-onboarding presentation', 'Version history mandatory'],
+              evidenceAdded: true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      id: 'RBI-2024-02', title: 'Cybersecurity Framework', issued: 'Mar 01, 2024',
+      chapters: [
+        {
+          num: '1', title: 'Security Controls',
+          clauses: [
+            {
+              id: 'CL-1.1', risk: 'High', status: 'In Progress', department: 'IT',
+              text: 'Multi-factor authentication is mandatory for all internet-facing systems that handle customer data or financial transactions.',
+              obligation: 'Enable MFA on all production systems. Document exception handling process with CISO approval.',
+              actionable: 'Inventory all internet-facing systems; Enable MFA on each; Document CISO-approved exceptions; Schedule quarterly review',
+              evidenceNeeded: [
+                { type: 'System Inventory Report', desc: 'Complete list of all internet-facing systems with MFA status (enabled / pending / exception).' },
+                { type: 'MFA Configuration Screenshots', desc: 'Admin console screenshots or exports confirming MFA is enabled on each in-scope system.' },
+                { type: 'Exception Register', desc: 'CISO-signed exception log for systems where MFA cannot be enabled, with risk acceptance and remediation timeline.' }
+              ],
+              extractedClaims: ['Mandatory MFA for internet-facing systems', 'Covers customer data systems', 'Financial transaction systems in scope'],
+              evidenceAdded: false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      id: 'SEBI-2024-03', title: 'Data Governance Policy', issued: 'Feb 10, 2024',
+      chapters: [
+        {
+          num: '1', title: 'Data Classification',
+          clauses: [
+            {
+              id: 'CL-1.1', risk: 'Low', status: 'Complete', department: 'Risk',
+              text: 'All market-sensitive data must be classified and tagged according to the SEBI data classification framework.',
+              obligation: 'Implement a data classification taxonomy. Assign data owners for each category.',
+              actionable: 'Define taxonomy; Assign data owners; Tag all existing datasets; Conduct quarterly classification audit',
+              evidenceNeeded: [
+                { type: 'Classification Taxonomy', desc: 'Approved data classification taxonomy aligned to SEBI framework showing all categories and sensitivity levels.' },
+                { type: 'Data Owner Register', desc: 'Register of data assets with assigned owners, their acknowledgements, and contact details.' },
+                { type: 'Tagging Completion Report', desc: 'Report showing % of datasets tagged, completion date, and any outstanding items.' },
+                { type: 'Quarterly Audit Report', desc: 'Latest quarterly classification audit report signed by Risk team lead.' }
+              ],
+              extractedClaims: ['SEBI classification framework alignment', 'Data owner assignment required', 'Quarterly audit cadence'],
+              evidenceAdded: true
+            }
+          ]
+        }
+      ]
+    }
+  ]
+};
+
+const libraryItems = {};
+
+function parseActions(str) {
+  if (!str) return [];
+  let parts = str.split(';').map(s => s.trim()).filter(Boolean);
+  if (parts.length === 1 && str.includes(',')) {
+    parts = str.split(',').map(s => s.trim()).filter(Boolean);
+  }
+  return parts.length ? parts : [str.trim()];
+}
+
+function riskClass(r)   { return r === 'High' ? 'chip-high' : r === 'Medium' ? 'chip-medium' : 'chip-low'; }
+function statusClass(s) { return ({Complete:'chip-complete','In Progress':'chip-in-progress',Open:'chip-open'})[s] || 'chip-open'; }
+
+function showToast(msg, color) {
+  const t = document.createElement('div');
+  t.className = 'toast';
+  t.innerHTML = msg;
+  t.style.background = color || '#1a1d2e';
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 3000);
+}
+
+function toggleClause(id) {
+  const el = document.getElementById(id);
+  if (el) el.classList.toggle('open');
+}
+
+function toggleDrawer(id) {
+  const el = document.getElementById(id);
+  if (el) el.classList.toggle('drawer-open');
+}
+
+function saveToLibrary(circId, clauseId, actionIdx) {
+  const key = `${circId}_${clauseId}_${actionIdx}`;
+  if (libraryItems[key]) { showToast('✓ Already in your AI Circular Library', '#0d9f65'); return; }
+  libraryItems[key] = { circId, clauseId, actionIdx, savedAt: new Date().toISOString() };
+  const btn = document.getElementById(`lib-btn-${circId}-${clauseId.replace(/\./g,'-')}-${actionIdx}`);
+  if (btn) { btn.classList.add('saved'); btn.innerHTML = '✓ Saved to Library'; }
+  showToast('📚 Saved to My AI Circular Library', '#2952e3');
+}
+
+function navigateNextTab() {
+  if (typeof navigateToEvidenceTab === 'function') navigateToEvidenceTab('evidence');
+  showToast('→ Moving to Evidence Review…', '#2952e3');
+}
+
+function renderClauses() {
+  const circId     = document.getElementById('circ-select').value;
+  const deptFilter = document.getElementById('dept-filter').value;
+  const search     = document.getElementById('search-input').value.toLowerCase();
+  const output     = document.getElementById('output');
+  const statsRow   = document.getElementById('stats-row');
+
+  if (!circId) { showToast('⚠ Please select a circular', '#b45309'); return; }
+
+  const circ = CMS_DATA.circulars.find(c => c.id === circId);
+  if (!circ) return;
+
+  let clauses = [];
+  circ.chapters.forEach(ch => ch.clauses.forEach(cl => clauses.push({ ...cl })));
+  if (deptFilter) clauses = clauses.filter(c => c.department === deptFilter);
+  if (search)     clauses = clauses.filter(c =>
+    c.text.toLowerCase().includes(search) || c.id.toLowerCase().includes(search)
+  );
+
+  const hi   = clauses.filter(c => c.risk === 'High').length;
+  const done = clauses.filter(c => c.status === 'Complete').length;
+  const ip   = clauses.filter(c => c.status === 'In Progress').length;
+
+  statsRow.innerHTML = `
+    <div class="stat-pill"><span class="dot" style="background:#9399b0"></span><span class="num">${clauses.length}</span> Clauses</div>
+    <div class="stat-pill"><span class="dot" style="background:#c4303e"></span><span class="num">${hi}</span> High Risk</div>
+    <div class="stat-pill"><span class="dot" style="background:#0d9f65"></span><span class="num">${done}</span> Complete</div>
+    <div class="stat-pill"><span class="dot" style="background:#b45309"></span><span class="num">${ip}</span> In Progress</div>
+  `;
+  statsRow.style.display = 'flex';
+
+  if (!clauses.length) {
+    output.innerHTML = `<div class="empty-state"><div class="icon">📭</div><p>No clauses match your filters.</p></div>`;
+    return;
+  }
+
+  let html = `
+    <div class="circular-header">
+      <span class="circular-badge">${circ.id}</span>
+      <div>
+        <div class="circular-title">${circ.title}</div>
+        <div class="circular-meta">Issued ${circ.issued} · ${clauses.length} clause${clauses.length !== 1 ? 's' : ''} shown</div>
+      </div>
+    </div>
+  `;
+
+  clauses.forEach(cl => {
+    const safeId  = cl.id.replace(/\./g, '-');
+    const cardId  = `card__${circId}__${safeId}`;
+    const actions = parseActions(cl.actionable);
+    const hasOb   = !!cl.obligation;
+    const hasActs = actions.length > 0;
+
+    html += `
+    <div class="clause-card" id="${cardId}">
+      <div class="clause-head" onclick="toggleClause('${cardId}')">
+        <span class="clause-id">${cl.id}</span>
+        <div class="clause-text-wrap">
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+  <div class="clause-text">${cl.text}</div>
+  <button id="btn-next-to-draft" class="next-tab-btn" onclick="this.innerText='Saved'; this.disabled=true;">🔁 Regenerate</button>
+</div>
+
+          
+          <div class="clause-meta">
+            <span class="chip ${riskClass(cl.risk)}">${cl.risk} Risk</span>
+            <span class="chip chip-dept">${cl.department || '—'}</span>
+            <span class="chip ${statusClass(cl.status || 'Open')}">${cl.status || 'Open'}</span>
+          </div>
+        </div>
+        <span class="chevron">▼</span>
+      </div>
+
+      <div class="clause-body">
+    `;
+
+    if (!hasOb) {
+      html += `<div class="no-map">No obligation mapped for this clause yet.</div>`;
+    } else {
+      html += `
+        <div class="obligation-block">
+          <div class="section-label">Obligation</div>
+          <div class="obligation-text">${cl.obligation}</div>
+        </div>
+      `;
+
+      if (!hasActs) {
+        html += `<div class="no-map">No actions defined for this obligation.</div>`;
+      } else {
+        html += `<div class="actions-block"><div class="section-label">Actions & Evidence Required</div>`;
+
+        actions.forEach((act, ai) => {
+          const rowId  = `arow__${circId}__${safeId}__${ai}`;
+          const libId  = `lib-btn-${circId}-${safeId}-${ai}`;
+          const evs    = cl.evidenceNeeded || [];
+          const tags   = cl.extractedClaims || [];
+          const hasEv  = cl.evidenceAdded || false;
+          const saved  = !!libraryItems[`${circId}_${cl.id}_${ai}`];
+          const hasEvData = evs.length > 0;
+
+          const pillClass = hasEv ? 'ev-pill-added' : 'ev-pill-needed';
+          const pillLabel = hasEv ? '✓ Evidence Added' : '✦ Evidence Needed';
+
+          html += `
+          <div class="action-row${hasEvData && false ? ' drawer-open' : ''}" id="${rowId}">
+            <div class="action-summary">
+              <span class="action-num">${ai + 1}</span>
+              <span class="action-desc">${act}</span>
+              ${hasEvData ? `<span class="ev-pill ${pillClass}" onclick="toggleDrawer('${rowId}')">${pillLabel}</span>` : ''}
+            </div>
+          `;
+
+          if (hasEvData) {
+            html += `
+            <div class="evidence-drawer">
+              <div class="ev-detail-card">
+                <div class="ev-detail-header">
+                  <span class="ev-ai-label">✦ AI-Identified Evidence Required</span>
+                  <span style="font-size:11px;color:var(--purple);opacity:0.65;">Extracted from circular</span>
+                </div>
+                <div class="ev-detail-body">
+                  <ul class="ev-items">
+                    ${evs.map((ev, ei) => `
+                      <li class="ev-item">
+                        <span class="ev-item-num">${ei + 1}</span>
+                        <div class="ev-item-content">
+                          <strong>${ev.type}</strong>
+                          ${ev.desc}
+                        </div>
+                      </li>
+                    `).join('')}
+                  </ul>
+                  ${tags.length ? `
+                    <div class="ev-tags">
+                      ${tags.map(t => `<span class="ev-tag">${t}</span>`).join('')}
+                    </div>
+                  ` : ''}
+                </div>
+              </div>
+
+              <div class="drawer-footer">
+                <span class="drawer-footer-info">${evs.length} evidence item${evs.length !== 1 ? 's' : ''} required</span>
+                <div style="display:flex;gap:8px;">
+                  <button class="btn-close-ev" onclick="toggleDrawer('${rowId}')">Close</button>
+                  <button class="btn-library ${saved ? 'saved' : ''}" id="${libId}"
+                    onclick="saveToLibrary('${circId}','${cl.id}',${ai})">
+                    ${saved ? '✓ Saved to Library' : '📚 Save to My Ai Suggestion'}
+                  </button>
+                </div>
+              </div>
+            </div>
+            `;
+          }
+
+          html += `</div>`;
+        });
+
+        html += `</div>`;
+      }
+    }
+
+    html += `</div></div>`;
+  });
+
+  output.innerHTML = html;
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  ['dept-filter','search-input'].forEach(id => {
+    document.getElementById(id)?.addEventListener('input', () => {
+      if (document.getElementById('circ-select').value) renderClauses();
+    });
+  });
+});
+</script>
+</body>
+</html>

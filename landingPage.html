@@ -1,0 +1,771 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Circular Management - Login</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --primary: #0f5a7d;
+            --primary-light: #1b7fa5;
+            --accent: #e67e22;
+            --text-dark: #1a1a1a;
+            --text-light: #6b7280;
+            --bg-light: #fafaf8;
+            --bg-white: #ffffff;
+            --border: #e5e5e5;
+            --error: #dc2626;
+            --success: #10b981;
+        }
+        html, body { height: 100vh; width: 100%; overflow: hidden; }
+        body { font-family: 'Inter', sans-serif; background: var(--bg-light); display: flex; flex-direction: column; }
+        .main-wrapper { display: flex; flex: 1; overflow: hidden; }
+
+        /* LEFT */
+        .left-section {
+            flex: 0 0 48%; background: linear-gradient(135deg, var(--primary) 0%, #0a3d54 100%);
+            color: #fff; padding: 45px 40px; display: flex; flex-direction: column;
+            justify-content: space-between; position: relative; overflow: hidden;
+        }
+        .left-section::before {
+            content: ''; position: absolute; top: -35%; right: -15%;
+            width: 450px; height: 450px;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            border-radius: 50%;
+        }
+        .branding-box { position: relative; z-index: 2; }
+        .logo {
+            width: 56px; height: 56px;
+            background: linear-gradient(135deg, var(--accent) 0%, #f39c12 100%);
+            border-radius: 12px; display: flex; align-items: center; justify-content: center;
+            font-size: 28px; font-weight: 700; margin-bottom: 20px;
+            box-shadow: 0 8px 20px rgba(230,126,34,0.3);
+        }
+        .app-name { font-family: 'Playfair Display', serif; font-size: 32px; font-weight: 700; margin-bottom: 12px; letter-spacing: -0.5px; }
+        .app-desc { font-size: 15px; color: rgba(255,255,255,0.85); line-height: 1.6; max-width: 380px; }
+        .features-container { position: relative; z-index: 2; }
+        .features-heading { font-size: 12px; text-transform: uppercase; letter-spacing: 1.2px; color: rgba(255,255,255,0.65); margin-bottom: 20px; font-weight: 600; }
+        .feature-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .feature-item { display: flex; flex-direction: column; gap: 8px; }
+        .feature-icon { width: 28px; height: 28px; border-radius: 6px; background: rgba(255,255,255,0.15); display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 14px; }
+        .feature-title { font-size: 14px; font-weight: 600; color: #fff; }
+        .feature-desc { font-size: 12px; color: rgba(255,255,255,0.8); line-height: 1.5; }
+
+        /* RIGHT */
+        .right-section {
+            flex: 0 0 52%; background: var(--bg-light); padding: 30px 40px;
+            display: flex; align-items: flex-start; justify-content: center;
+            overflow-y: auto; padding-top: 40px;
+        }
+        .form-wrapper { width: 100%; max-width: 540px; }
+        .form-card {
+            background: var(--bg-white); border-radius: 16px; padding: 48px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1); position: relative;
+        }
+        .form-card::before {
+            content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px;
+            background: linear-gradient(90deg, var(--primary) 0%, var(--accent) 100%);
+            border-radius: 16px 16px 0 0;
+        }
+        .form-header { margin-bottom: 28px; }
+        .form-title { font-family: 'Playfair Display', serif; font-size: 28px; font-weight: 700; margin-bottom: 6px; color: var(--text-dark); }
+        .form-subtitle { font-size: 14px; color: var(--text-light); }
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+        .form-group { display: flex; flex-direction: column; gap: 8px; grid-column: 1 / -1; }
+        .form-group.half { grid-column: span 1; }
+        .label { font-size: 12px; font-weight: 600; color: var(--text-dark); text-transform: uppercase; letter-spacing: 0.5px; }
+        .input {
+            padding: 12px 14px; border: 1.5px solid var(--border); border-radius: 10px;
+            font-size: 14px; font-family: 'Inter', sans-serif; transition: all 0.3s ease; background: var(--bg-white);
+        }
+        .input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(15,90,125,0.1); }
+        .input::placeholder { color: var(--text-light); }
+        .input.error { border-color: var(--error); background: rgba(220,38,38,0.03); }
+        .error-msg { display: none; font-size: 11px; color: var(--error); font-weight: 500; margin-top: 2px; }
+        .error-msg.show { display: block; }
+        .checkbox-group { display: flex; align-items: flex-start; gap: 10px; grid-column: 1 / -1; margin-bottom: 4px; }
+        .checkbox { width: 18px; height: 18px; margin-top: 3px; cursor: pointer; accent-color: var(--primary); flex-shrink: 0; }
+        .checkbox-label { font-size: 12px; color: var(--text-dark); cursor: pointer; line-height: 1.5; }
+        .checkbox-label a { color: var(--primary); text-decoration: none; font-weight: 500; }
+        .btn-submit {
+            width: 100%; padding: 13px 24px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            color: #fff; border: none; border-radius: 10px; font-size: 15px; font-weight: 600;
+            cursor: pointer; transition: all 0.3s ease; position: relative; overflow: hidden;
+            box-shadow: 0 4px 12px rgba(15,90,125,0.2); grid-column: 1 / -1;
+        }
+        .btn-submit:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(15,90,125,0.3); }
+        .btn-submit:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+        .btn-submit.loading { color: transparent; }
+        .btn-submit.loading::after {
+            content: ''; position: absolute; width: 16px; height: 16px;
+            top: 50%; left: 50%; margin-left: -8px; margin-top: -8px;
+            border: 2px solid rgba(255,255,255,0.3); border-radius: 50%;
+            border-top-color: #fff; animation: spin 0.8s linear infinite;
+        }
+        .form-footer { text-align: center; margin-top: 18px; font-size: 12px; color: var(--text-light); }
+        .form-footer a { color: var(--primary); text-decoration: none; font-weight: 600; cursor: pointer; }
+        .form-footer a:hover { color: var(--primary-light); }
+        .hidden { display: none !important; }
+
+        /* ── ACCOUNT TYPE SELECTOR ── */
+        .account-type-wrap { grid-column: 1 / -1; margin-bottom: 4px; }
+        .account-type-label { font-size: 12px; font-weight: 600; color: var(--text-dark); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px; }
+        .account-type-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .account-type-card {
+            border: 1.5px solid var(--border); border-radius: 10px; padding: 14px 12px;
+            cursor: pointer; transition: all 0.2s ease; background: #fff; text-align: left;
+            display: flex; flex-direction: column; gap: 4px;
+        }
+        .account-type-card:hover { border-color: var(--primary); background: rgba(15,90,125,0.03); }
+        .account-type-card.selected { border-color: var(--primary); background: rgba(15,90,125,0.06); box-shadow: 0 0 0 3px rgba(15,90,125,0.1); }
+        .at-icon { font-size: 22px; margin-bottom: 4px; }
+        .at-title { font-size: 13px; font-weight: 700; color: var(--text-dark); }
+        .at-desc  { font-size: 11px; color: var(--text-light); line-height: 1.4; }
+        .at-badge { display: inline-block; margin-top: 4px; font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 99px; background: rgba(15,90,125,0.1); color: var(--primary); }
+
+        /* ── STEP INDICATOR ── */
+        .step-bar { display: flex; align-items: center; gap: 0; margin-bottom: 24px; }
+        .step-item { display: flex; align-items: center; gap: 6px; flex: 1; }
+        .step-item:last-child { flex: 0; }
+        .step-dot {
+            width: 26px; height: 26px; border-radius: 50%; border: 2px solid var(--border);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 11px; font-weight: 700; color: var(--text-light); flex-shrink: 0;
+            transition: all 0.3s ease;
+        }
+        .step-dot.active { border-color: var(--primary); background: var(--primary); color: #fff; }
+        .step-dot.done   { border-color: var(--success); background: var(--success); color: #fff; }
+        .step-line { flex: 1; height: 2px; background: var(--border); transition: background 0.3s; }
+        .step-line.done { background: var(--success); }
+        .step-lbl { font-size: 10px; font-weight: 600; color: var(--text-light); white-space: nowrap; }
+        .step-lbl.active { color: var(--primary); }
+
+        /* FOOTER */
+        .footer {
+            background: var(--text-dark); color: rgba(255,255,255,0.7); padding: 16px 40px;
+            font-size: 12px; border-top: 1px solid rgba(255,255,255,0.1);
+            display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 24px; align-items: center; flex-shrink: 0;
+        }
+        .footer-col { display: flex; flex-direction: column; gap: 6px; }
+        .footer-col.center { text-align: center; }
+        .footer-col.right  { text-align: right; }
+        .footer-heading { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: rgba(255,255,255,0.9); margin-bottom: 4px; }
+        .footer-links { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; font-size: 11px; }
+        .footer-col.center .footer-links { justify-content: center; }
+        .footer-col.right  .footer-links { justify-content: flex-end; }
+        .footer-link { color: rgba(255,255,255,0.8); text-decoration: none; font-weight: 500; white-space: nowrap; }
+        .footer-link:hover { color: #fff; }
+        .footer-divider { color: rgba(255,255,255,0.3); }
+        .footer-text { color: rgba(255,255,255,0.7); font-size: 10px; line-height: 1.4; }
+        .footer-brand { color: var(--accent); font-weight: 600; }
+
+        /* MODAL */
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; opacity: 0; transition: opacity 0.3s ease; align-items: center; justify-content: center; }
+        .modal.show { display: flex; opacity: 1; }
+        .modal-box { background: var(--bg-white); border-radius: 16px; padding: 36px; max-width: 420px; width: 90%; box-shadow: 0 15px 50px rgba(0,0,0,0.2); position: relative; animation: modalSlide 0.3s ease-out; }
+        .modal-box::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px; background: linear-gradient(90deg, var(--primary) 0%, var(--accent) 100%); border-radius: 16px 16px 0 0; }
+        .modal-close { position: absolute; top: 16px; right: 16px; width: 32px; height: 32px; background: transparent; border: none; font-size: 24px; color: var(--text-light); cursor: pointer; transition: all 0.3s ease; }
+        .modal-close:hover { color: var(--text-dark); transform: rotate(90deg); }
+        .modal-header { margin-bottom: 24px; }
+        .modal-title { font-family: 'Playfair Display', serif; font-size: 24px; font-weight: 700; margin-bottom: 6px; color: var(--text-dark); }
+        .modal-subtitle { font-size: 13px; color: var(--text-light); }
+        .modal-form { display: flex; flex-direction: column; gap: 16px; }
+        .modal-success { display: none; background: rgba(16,185,129,0.1); border: 1px solid var(--success); color: var(--success); padding: 12px 14px; border-radius: 8px; font-size: 12px; font-weight: 500; text-align: center; margin-bottom: 16px; }
+        .modal-success.show { display: block; }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+        @keyframes modalSlide { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+        .fade-in { animation: fadeIn 0.25s ease; }
+
+        @media (max-width: 768px) {
+            .main-wrapper { flex-direction: column; }
+            .left-section { flex: 0 0 auto; max-height: 40vh; padding: 30px 24px; justify-content: center; }
+            .right-section { flex: 1; padding: 25px 20px; }
+            .form-card { padding: 28px; }
+            .account-type-grid { grid-template-columns: 1fr 1fr; }
+            .footer { padding: 12px 20px; grid-template-columns: 1fr; gap: 8px; }
+        }
+        @media (max-width: 480px) {
+            .form-grid { grid-template-columns: 1fr; }
+            .form-group.half { grid-column: 1 / -1; }
+            .account-type-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+<div class="main-wrapper">
+
+    <!-- LEFT SECTION -->
+    <div class="left-section">
+        <div class="branding-box">
+            <div class="logo">◆</div>
+            <h1 class="app-name">Circular Management</h1>
+            <p class="app-desc" id="leftDescription">Streamline your compliance workflows with intelligent automation and real-time tracking across your entire organization.</p>
+        </div>
+        <div class="features-container">
+            <h3 class="features-heading" id="leftHeading">Key Benefits</h3>
+            <div class="feature-grid">
+                <div class="feature-item">
+                    <div class="feature-icon">📋</div>
+                    <div>
+                        <div class="feature-title" id="feature1Title">Circular Tracking</div>
+                        <div class="feature-desc"  id="feature1Desc">Manage RBI & regulatory circulars end to end</div>
+                    </div>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon">🤖</div>
+                    <div>
+                        <div class="feature-title" id="feature2Title">AI Engine</div>
+                        <div class="feature-desc"  id="feature2Desc">Auto-extract obligations & suggest actions</div>
+                    </div>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon">📊</div>
+                    <div>
+                        <div class="feature-title" id="feature3Title">Real-Time Reports</div>
+                        <div class="feature-desc"  id="feature3Desc">Track compliance posture across departments</div>
+                    </div>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon">🔒</div>
+                    <div>
+                        <div class="feature-title" id="feature4Title">Role-Based Access</div>
+                        <div class="feature-desc"  id="feature4Desc">CO, Manager, Reviewer, Assignee, Owner</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- RIGHT SECTION -->
+    <div class="right-section">
+        <div class="form-wrapper">
+
+            <!-- ══ LOGIN FORM ══ -->
+            <div class="form-card" id="loginForm">
+                <div class="form-header">
+                    <h2 class="form-title">Welcome Back</h2>
+                    <p class="form-subtitle">Sign in to access your dashboard</p>
+                </div>
+                <form onsubmit="handleLogin(event)" class="form-grid">
+                    <div class="form-group">
+                        <label class="label">Username or Email</label>
+                        <input type="text" id="loginUsername" class="input" placeholder="Enter your username or email" autocomplete="username">
+                        <div class="error-msg" id="loginUsernameError"></div>
+                    </div>
+                    <div class="form-group">
+                        <label class="label">Password</label>
+                        <input type="password" id="loginPassword" class="input" placeholder="Enter your password" autocomplete="current-password">
+                        <div class="error-msg" id="loginPasswordError"></div>
+                    </div>
+                    <button type="submit" class="btn-submit" id="signinBtn">Sign In</button>
+                </form>
+                <div class="form-footer">
+                    <a onclick="openResetModal()">Forgot password?</a>
+                    <span id="signupSpan"> • <a onclick="showAccountTypePicker()">Create account</a></span>
+                </div>
+            </div>
+
+            <!-- ══ STEP 0: ACCOUNT TYPE PICKER ══ -->
+            <div class="form-card hidden fade-in" id="accountTypeForm">
+                <div class="form-header">
+                    <h2 class="form-title">Get Started</h2>
+                    <p class="form-subtitle">Choose how you want to use the platform</p>
+                </div>
+                <div class="account-type-wrap">
+                    <div class="account-type-grid">
+                        <div class="account-type-card" id="at-org" onclick="selectAccountType('org')">
+                            <div class="at-icon">🏦</div>
+                            <div class="at-title">Organization</div>
+                            <div class="at-desc">Banks, NBFCs, MoE departments, financial institutions</div>
+                            <span class="at-badge">Super Admin</span>
+                        </div>
+                        <div class="account-type-card" id="at-individual" onclick="selectAccountType('individual')">
+                            <div class="at-icon">👤</div>
+                            <div class="at-title">Individual</div>
+                            <div class="at-desc">Consultants, advisors providing compliance services</div>
+                            <span class="at-badge">Personal</span>
+                        </div>
+                    </div>
+                </div>
+                <div style="margin-top:24px">
+                    <button class="btn-submit" onclick="proceedFromTypePicker()" id="typePickerBtn" disabled>Continue →</button>
+                </div>
+                <div class="form-footer">
+                    <a onclick="showLogin()">← Back to login</a>
+                </div>
+            </div>
+
+            <!-- ══ ORG REGISTRATION: STEP 1 — Admin Details ══ -->
+            <div class="form-card hidden fade-in" id="orgStep1Form">
+                <div class="step-bar" id="orgStepBar1">
+                    <div class="step-item"><div class="step-dot active" id="sd1">1</div><div class="step-line" id="sl1"></div></div>
+                    <div class="step-item"><div class="step-dot" id="sd2">2</div><div class="step-line" id="sl2"></div></div>
+                    <div class="step-item"><div class="step-dot" id="sd3">3</div></div>
+                </div>
+                <div class="form-header">
+                    <h2 class="form-title">Admin Account</h2>
+                    <p class="form-subtitle">Your Super Admin credentials</p>
+                </div>
+                <form onsubmit="orgStep1Next(event)" class="form-grid">
+                    <div class="form-group half">
+                        <label class="label">First Name</label>
+                        <input type="text" id="o1-fname" class="input" placeholder="First name">
+                        <div class="error-msg" id="o1-fnameError"></div>
+                    </div>
+                    <div class="form-group half">
+                        <label class="label">Last Name</label>
+                        <input type="text" id="o1-lname" class="input" placeholder="Last name">
+                        <div class="error-msg" id="o1-lnameError"></div>
+                    </div>
+                    <div class="form-group">
+                        <label class="label">Work Email</label>
+                        <input type="email" id="o1-email" class="input" placeholder="admin@yourorg.com">
+                        <div class="error-msg" id="o1-emailError"></div>
+                    </div>
+                    <div class="form-group half">
+                        <label class="label">Password</label>
+                        <input type="password" id="o1-pass" class="input" placeholder="Min 8 characters">
+                        <div class="error-msg" id="o1-passError"></div>
+                    </div>
+                    <div class="form-group half">
+                        <label class="label">Confirm Password</label>
+                        <input type="password" id="o1-confirm" class="input" placeholder="Re-enter password">
+                        <div class="error-msg" id="o1-confirmError"></div>
+                    </div>
+                    <button type="submit" class="btn-submit">Next: Organization Details →</button>
+                </form>
+                <div class="form-footer"><a onclick="showAccountTypePicker()">← Back</a></div>
+            </div>
+
+            <!-- ══ ORG REGISTRATION: STEP 2 — Org Profile ══ -->
+            <div class="form-card hidden fade-in" id="orgStep2Form">
+                <div class="step-bar">
+                    <div class="step-item"><div class="step-dot done">✓</div><div class="step-line done"></div></div>
+                    <div class="step-item"><div class="step-dot active">2</div><div class="step-line" id="sl2b"></div></div>
+                    <div class="step-item"><div class="step-dot">3</div></div>
+                </div>
+                <div class="form-header">
+                    <h2 class="form-title">Organization Profile</h2>
+                    <p class="form-subtitle">Tell us about your organization</p>
+                </div>
+                <form onsubmit="orgStep2Next(event)" class="form-grid">
+                    <div class="form-group">
+                        <label class="label">Organization Name</label>
+                        <input type="text" id="o2-orgname" class="input" placeholder="e.g. HDFC Bank Ltd.">
+                        <div class="error-msg" id="o2-orgnameError"></div>
+                    </div>
+                    <div class="form-group half">
+                        <label class="label">Industry / Nature of Business</label>
+                        <select id="o2-industry" class="input">
+                            <option value="">Select industry</option>
+                            <option>Commercial Bank</option>
+                            <option>NBFC</option>
+                            <option>Insurance</option>
+                            <option>Asset Management</option>
+                            <option>Payment Institution</option>
+                            <option>Government / Ministry</option>
+                            <option>Other Financial Institution</option>
+                        </select>
+                        <div class="error-msg" id="o2-industryError"></div>
+                    </div>
+                    <div class="form-group half">
+                        <label class="label">Business Size</label>
+                        <select id="o2-size" class="input">
+                            <option value="">Select size</option>
+                            <option>Small (1–50 employees)</option>
+                            <option>Medium (51–500)</option>
+                            <option>Large (501–5000)</option>
+                            <option>Enterprise (5000+)</option>
+                        </select>
+                        <div class="error-msg" id="o2-sizeError"></div>
+                    </div>
+                    <div class="form-group half">
+                        <label class="label">PAN / CIN Number</label>
+                        <input type="text" id="o2-pan" class="input" placeholder="e.g. AAAAA1234A">
+                        <div class="error-msg" id="o2-panError"></div>
+                    </div>
+                    <div class="form-group half">
+                        <label class="label">Regulator</label>
+                        <select id="o2-regulator" class="input">
+                            <option value="">Select regulator</option>
+                            <option>RBI</option>
+                            <option>SEBI</option>
+                            <option>IRDAI</option>
+                            <option>PFRDA</option>
+                            <option>MoF</option>
+                            <option>MoE</option>
+                            <option>Multiple</option>
+                        </select>
+                        <div class="error-msg" id="o2-regulatorError"></div>
+                    </div>
+                    <div class="form-group">
+                        <label class="label">Registered Address</label>
+                        <input type="text" id="o2-address" class="input" placeholder="Street, City, State, PIN">
+                        <div class="error-msg" id="o2-addressError"></div>
+                    </div>
+                    <div class="form-group half">
+                        <label class="label">City</label>
+                        <input type="text" id="o2-city" class="input" placeholder="e.g. Mumbai">
+                        <div class="error-msg" id="o2-cityError"></div>
+                    </div>
+                    <div class="form-group half">
+                        <label class="label">State</label>
+                        <input type="text" id="o2-state" class="input" placeholder="e.g. Maharashtra">
+                        <div class="error-msg" id="o2-stateError"></div>
+                    </div>
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="o2-terms" class="checkbox">
+                        <label for="o2-terms" class="checkbox-label">
+                            I agree to the <a href="#" onclick="event.preventDefault()">Terms of Service</a> and <a href="#" onclick="event.preventDefault()">Privacy Policy</a>
+                        </label>
+                    </div>
+                    <div class="error-msg" id="o2-termsError"></div>
+                    <button type="submit" class="btn-submit">Complete Registration →</button>
+                </form>
+                <div class="form-footer"><a onclick="showOrgStep1()">← Back</a></div>
+            </div>
+
+            <!-- ══ ORG REGISTRATION: STEP 3 — Success ══ -->
+            <div class="form-card hidden fade-in" id="orgStep3Form">
+                <div class="step-bar">
+                    <div class="step-item"><div class="step-dot done">✓</div><div class="step-line done"></div></div>
+                    <div class="step-item"><div class="step-dot done">✓</div><div class="step-line done"></div></div>
+                    <div class="step-item"><div class="step-dot done">✓</div></div>
+                </div>
+                <div style="text-align:center;padding:20px 0 10px">
+                    <div style="font-size:52px;margin-bottom:16px">🎉</div>
+                    <h2 class="form-title" style="margin-bottom:8px">Organization Registered!</h2>
+                    <p class="form-subtitle" style="margin-bottom:24px">Your organization has been set up. Now let's onboard your team and configure modules.</p>
+                    <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:14px;margin-bottom:24px;text-align:left">
+                        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:#166534;margin-bottom:8px">What's next</div>
+                        <div style="font-size:13px;color:#166534;display:flex;flex-direction:column;gap:6px">
+                            <div>✓ Add team members &amp; assign roles</div>
+                            <div>✓ Enable or disable modules</div>
+                            <div>✓ Start managing compliance circulars</div>
+                        </div>
+                    </div>
+                    <button class="btn-submit" style="grid-column:unset;width:100%" onclick="window.location.href='super_admin_panel.html'">
+                        Go to Admin Panel →
+                    </button>
+                </div>
+            </div>
+
+            <!-- ══ INDIVIDUAL REGISTRATION ══ -->
+            <div class="form-card hidden fade-in" id="individualForm">
+                <div class="form-header">
+                    <h2 class="form-title">Individual Account</h2>
+                    <p class="form-subtitle">Create your personal consultant workspace</p>
+                </div>
+                <form onsubmit="handleIndividualSignup(event)" class="form-grid">
+                    <div class="form-group half">
+                        <label class="label">First Name</label>
+                        <input type="text" id="i-fname" class="input" placeholder="First name">
+                        <div class="error-msg" id="i-fnameError"></div>
+                    </div>
+                    <div class="form-group half">
+                        <label class="label">Last Name</label>
+                        <input type="text" id="i-lname" class="input" placeholder="Last name">
+                        <div class="error-msg" id="i-lnameError"></div>
+                    </div>
+                    <div class="form-group">
+                        <label class="label">Email Address</label>
+                        <input type="email" id="i-email" class="input" placeholder="your@email.com">
+                        <div class="error-msg" id="i-emailError"></div>
+                    </div>
+                    <div class="form-group">
+                        <label class="label">Area of Expertise</label>
+                        <select id="i-expertise" class="input">
+                            <option value="">Select expertise</option>
+                            <option>Regulatory Compliance</option>
+                            <option>Risk Management</option>
+                            <option>Legal &amp; Advisory</option>
+                            <option>IT Compliance</option>
+                            <option>Audit &amp; Assurance</option>
+                            <option>Other</option>
+                        </select>
+                        <div class="error-msg" id="i-expertiseError"></div>
+                    </div>
+                    <div class="form-group half">
+                        <label class="label">Password</label>
+                        <input type="password" id="i-pass" class="input" placeholder="Min 8 characters">
+                        <div class="error-msg" id="i-passError"></div>
+                    </div>
+                    <div class="form-group half">
+                        <label class="label">Confirm Password</label>
+                        <input type="password" id="i-confirm" class="input" placeholder="Re-enter">
+                        <div class="error-msg" id="i-confirmError"></div>
+                    </div>
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="i-terms" class="checkbox">
+                        <label for="i-terms" class="checkbox-label">
+                            I agree to the <a href="#" onclick="event.preventDefault()">Terms</a> and <a href="#" onclick="event.preventDefault()">Privacy Policy</a>
+                        </label>
+                    </div>
+                    <div class="error-msg" id="i-termsError"></div>
+                    <button type="submit" class="btn-submit" id="indvBtn">Create Account</button>
+                </form>
+                <div class="form-footer"><a onclick="showAccountTypePicker()">← Back</a></div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<!-- FOOTER -->
+<footer class="footer" id="footer">
+    <div class="footer-col">
+        <div class="footer-heading">Product</div>
+        <div class="footer-links">
+            <a href="#" class="footer-link">Features</a><span class="footer-divider">•</span>
+            <a href="#" class="footer-link">Pricing</a><span class="footer-divider">•</span>
+            <a href="#" class="footer-link">Documentation</a>
+        </div>
+    </div>
+    <div class="footer-col center">
+        <div class="footer-heading">Company</div>
+        <div class="footer-links">
+            <a href="#" class="footer-link">About</a><span class="footer-divider">•</span>
+            <a href="#" class="footer-link">Contact</a><span class="footer-divider">•</span>
+            <a href="#" class="footer-link">Support</a>
+        </div>
+    </div>
+    <div class="footer-col right">
+        <div class="footer-heading">Legal</div>
+        <div class="footer-links">
+            <a href="#" class="footer-link">Privacy</a><span class="footer-divider">•</span>
+            <a href="#" class="footer-link">Terms</a>
+        </div>
+        <div class="footer-text">© 2024 Circular Management™ | Powered by <span class="footer-brand">CMS</span></div>
+    </div>
+</footer>
+
+<!-- RESET MODAL -->
+<div class="modal" id="resetModal">
+    <div class="modal-box">
+        <button class="modal-close" onclick="closeResetModal()">×</button>
+        <div class="modal-header">
+            <h3 class="modal-title">Reset Password</h3>
+            <p class="modal-subtitle">Enter your email to receive a reset link</p>
+        </div>
+        <div class="modal-success" id="resetSuccess">✓ Reset link sent! Check your email.</div>
+        <form onsubmit="handleReset(event)" class="modal-form">
+            <div class="form-group">
+                <label class="label">Email Address</label>
+                <input type="email" id="resetEmail" class="input" placeholder="your@email.com" autocomplete="email">
+                <div class="error-msg" id="resetEmailError"></div>
+            </div>
+            <button type="submit" class="btn-submit" id="resetBtn">Send Reset Link</button>
+        </form>
+    </div>
+</div>
+
+<script>
+const CONFIG = { enableSignUp: true, enableFooter: true };
+let _selectedAccountType = null;
+
+/* ── SHOW / HIDE HELPERS ── */
+const FORMS = ['loginForm','accountTypeForm','orgStep1Form','orgStep2Form','orgStep3Form','individualForm'];
+function showOnly(id) {
+    FORMS.forEach(f => {
+        const el = document.getElementById(f);
+        if (el) el.classList.toggle('hidden', f !== id);
+    });
+    document.querySelector('.right-section').scrollTop = 0;
+}
+function showLogin()           { showOnly('loginForm'); updateLeftContent('login'); }
+function showAccountTypePicker(){ showOnly('accountTypeForm'); updateLeftContent('signup'); }
+function showOrgStep1()        { showOnly('orgStep1Form'); }
+function showOrgStep2()        { showOnly('orgStep2Form'); }
+function showOrgStep3()        { showOnly('orgStep3Form'); }
+function showIndividual()      { showOnly('individualForm'); }
+
+/* ── ACCOUNT TYPE PICKER ── */
+function selectAccountType(type) {
+    _selectedAccountType = type;
+    document.getElementById('at-org').classList.toggle('selected', type === 'org');
+    document.getElementById('at-individual').classList.toggle('selected', type === 'individual');
+    document.getElementById('typePickerBtn').disabled = false;
+}
+function proceedFromTypePicker() {
+    if (!_selectedAccountType) return;
+    if (_selectedAccountType === 'org') showOrgStep1();
+    else showIndividual();
+}
+
+/* ── LEFT CONTENT ── */
+function updateLeftContent(mode) {
+    if (mode === 'signup') {
+        document.getElementById('leftHeading').textContent = 'Start Your Journey';
+        document.getElementById('leftDescription').textContent = 'Join CMS to manage regulatory circulars, automate compliance workflows and empower every role in your organization.';
+        document.getElementById('feature1Title').textContent = 'Organization Setup';
+        document.getElementById('feature1Desc').textContent = 'Configure your org, users and roles in minutes';
+        document.getElementById('feature2Title').textContent = 'Module Control';
+        document.getElementById('feature2Desc').textContent = 'Enable only the modules your team needs';
+        document.getElementById('feature3Title').textContent = 'Role-Based Panels';
+        document.getElementById('feature3Desc').textContent = 'Each role gets their own dedicated workspace';
+        document.getElementById('feature4Title').textContent = 'Consultant Access';
+        document.getElementById('feature4Desc').textContent = 'Individuals can serve multiple client orgs';
+    } else {
+        document.getElementById('leftHeading').textContent = 'Key Benefits';
+        document.getElementById('leftDescription').textContent = 'Streamline your compliance workflows with intelligent automation and real-time tracking across your entire organization.';
+        document.getElementById('feature1Title').textContent = 'Circular Tracking';
+        document.getElementById('feature1Desc').textContent = 'Manage RBI & regulatory circulars end to end';
+        document.getElementById('feature2Title').textContent = 'AI Engine';
+        document.getElementById('feature2Desc').textContent = 'Auto-extract obligations & suggest actions';
+        document.getElementById('feature3Title').textContent = 'Real-Time Reports';
+        document.getElementById('feature3Desc').textContent = 'Track compliance posture across departments';
+        document.getElementById('feature4Title').textContent = 'Role-Based Access';
+        document.getElementById('feature4Desc').textContent = 'CO, Manager, Reviewer, Assignee, Owner';
+    }
+}
+
+/* ── LOGIN ── */
+function handleLogin(event) {
+    event.preventDefault();
+    const username = document.getElementById('loginUsername').value.trim();
+    const password = document.getElementById('loginPassword').value.trim();
+    clearErrors(['loginUsernameError','loginPasswordError']);
+    if (!username) { showError('loginUsernameError','Username required'); return; }
+    if (!password) { showError('loginPasswordError','Password required'); return; }
+
+    const routes = {
+        co:         './co.html',
+        dept_head:  'dept_head.html',
+        reviewer:   'reviewer_panel.html',
+        filer:      'filer_panel.html',
+        owner:      'owner_panel.html',
+        assignee:   'assignee_panel.html',
+        superadmin: 'super_admin_panel.html',
+    };
+    if (routes[username] && password === '1234') {
+        window.location.href = routes[username];
+    } else {
+        showError('loginPasswordError','Invalid username or password');
+    }
+}
+
+/* ── ORG STEP 1 ── */
+function orgStep1Next(event) {
+    event.preventDefault();
+    const fname   = document.getElementById('o1-fname').value.trim();
+    const lname   = document.getElementById('o1-lname').value.trim();
+    const email   = document.getElementById('o1-email').value.trim();
+    const pass    = document.getElementById('o1-pass').value;
+    const confirm = document.getElementById('o1-confirm').value;
+    const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    clearErrors(['o1-fnameError','o1-lnameError','o1-emailError','o1-passError','o1-confirmError']);
+    if (!fname) { showError('o1-fnameError','Required'); return; }
+    if (!lname) { showError('o1-lnameError','Required'); return; }
+    if (!email || !emailRe.test(email)) { showError('o1-emailError','Valid email required'); return; }
+    if (!pass || pass.length < 8) { showError('o1-passError','Min 8 characters'); return; }
+    if (pass !== confirm) { showError('o1-confirmError','Passwords do not match'); return; }
+    showOrgStep2();
+}
+
+/* ── ORG STEP 2 ── */
+function orgStep2Next(event) {
+    event.preventDefault();
+    const orgname   = document.getElementById('o2-orgname').value.trim();
+    const industry  = document.getElementById('o2-industry').value;
+    const size      = document.getElementById('o2-size').value;
+    const pan       = document.getElementById('o2-pan').value.trim();
+    const regulator = document.getElementById('o2-regulator').value;
+    const address   = document.getElementById('o2-address').value.trim();
+    const city      = document.getElementById('o2-city').value.trim();
+    const state     = document.getElementById('o2-state').value.trim();
+    const terms     = document.getElementById('o2-terms').checked;
+    clearErrors(['o2-orgnameError','o2-industryError','o2-sizeError','o2-panError','o2-regulatorError','o2-addressError','o2-cityError','o2-stateError','o2-termsError']);
+    if (!orgname)   { showError('o2-orgnameError','Required'); return; }
+    if (!industry)  { showError('o2-industryError','Required'); return; }
+    if (!size)      { showError('o2-sizeError','Required'); return; }
+    if (!pan)       { showError('o2-panError','Required'); return; }
+    if (!regulator) { showError('o2-regulatorError','Required'); return; }
+    if (!address)   { showError('o2-addressError','Required'); return; }
+    if (!city)      { showError('o2-cityError','Required'); return; }
+    if (!state)     { showError('o2-stateError','Required'); return; }
+    if (!terms)     { showError('o2-termsError','You must accept the terms'); return; }
+
+    const btn = event.submitter;
+    btn.classList.add('loading'); btn.disabled = true;
+    setTimeout(() => { btn.classList.remove('loading'); btn.disabled = false; showOrgStep3(); }, 1200);
+}
+
+/* ── INDIVIDUAL ── */
+function handleIndividualSignup(event) {
+    event.preventDefault();
+    const fname  = document.getElementById('i-fname').value.trim();
+    const lname  = document.getElementById('i-lname').value.trim();
+    const email  = document.getElementById('i-email').value.trim();
+    const exp    = document.getElementById('i-expertise').value;
+    const pass   = document.getElementById('i-pass').value;
+    const conf   = document.getElementById('i-confirm').value;
+    const terms  = document.getElementById('i-terms').checked;
+    const emailRe= /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    clearErrors(['i-fnameError','i-lnameError','i-emailError','i-expertiseError','i-passError','i-confirmError','i-termsError']);
+    if (!fname)  { showError('i-fnameError','Required'); return; }
+    if (!lname)  { showError('i-lnameError','Required'); return; }
+    if (!email || !emailRe.test(email)) { showError('i-emailError','Valid email required'); return; }
+    if (!exp)    { showError('i-expertiseError','Required'); return; }
+    if (!pass || pass.length < 8) { showError('i-passError','Min 8 characters'); return; }
+    if (pass !== conf) { showError('i-confirmError','Passwords do not match'); return; }
+    if (!terms)  { showError('i-termsError','You must accept the terms'); return; }
+
+    const btn = document.getElementById('indvBtn');
+    btn.classList.add('loading'); btn.disabled = true;
+    setTimeout(() => { btn.classList.remove('loading'); btn.disabled = false; window.location.href='assignee_panel.html'; }, 1200);
+}
+
+/* ── RESET ── */
+function handleReset(event) {
+    event.preventDefault();
+    const email = document.getElementById('resetEmail').value.trim();
+    const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const errEl = document.getElementById('resetEmailError');
+    errEl.classList.remove('show');
+    if (!email || !emailRe.test(email)) { errEl.textContent='Valid email required'; errEl.classList.add('show'); return; }
+    const btn = document.getElementById('resetBtn');
+    btn.disabled = true; btn.textContent = 'Sending...';
+    setTimeout(() => {
+        document.getElementById('resetSuccess').classList.add('show');
+        document.querySelector('#resetModal .modal-form').style.display = 'none';
+        setTimeout(closeResetModal, 2000);
+    }, 800);
+}
+function openResetModal() {
+    document.getElementById('resetEmail').value = '';
+    document.getElementById('resetEmailError').classList.remove('show');
+    document.getElementById('resetSuccess').classList.remove('show');
+    document.querySelector('#resetModal .modal-form').style.display = 'block';
+    document.getElementById('resetBtn').textContent = 'Send Reset Link';
+    document.getElementById('resetBtn').disabled = false;
+    document.getElementById('resetModal').classList.add('show');
+}
+function closeResetModal() { document.getElementById('resetModal').classList.remove('show'); }
+
+/* ── UTILITIES ── */
+function showError(id, msg) {
+    const err = document.getElementById(id);
+    const inputId = id.replace('Error','');
+    const input = document.getElementById(inputId);
+    if (err) { err.textContent = msg; err.classList.add('show'); }
+    if (input) input.classList.add('error');
+}
+function clearErrors(ids) {
+    ids.forEach(id => {
+        const err = document.getElementById(id);
+        const input = document.getElementById(id.replace('Error',''));
+        if (err) err.classList.remove('show');
+        if (input) input.classList.remove('error');
+    });
+}
+
+document.getElementById('resetModal').addEventListener('click', function(e) { if (e.target===this) closeResetModal(); });
+document.addEventListener('keydown', e => { if (e.key==='Escape') closeResetModal(); });
+</script>
+</body>
+</html>

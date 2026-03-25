@@ -1,0 +1,1735 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dept Head - Circular Compliance Management System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #0f172a;
+            --primary-light: #1e293b;
+            --accent: #3b82f6;
+            --accent-dark: #2563eb;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --info: #06b6d4;
+            --light-bg: #f8fafc;
+            --white: #ffffff;
+            --border: #e2e8f0;
+            --text-primary: #0f172a;
+            --text-secondary: #64748b;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--light-bg);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            overflow-x: hidden;
+            /* overflow: hidden; */
+        }
+
+        /* ===== SIDEBAR ===== */
+        #sidebar {
+            width: 280px;
+            background: var(--primary);
+            color: white;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 2px 0 8px rgba(0, 0, 0, 0.15);
+            transition: all 0.3s ease;
+            overflow-y: auto;
+        }
+
+        #sidebar.collapsed {
+            width: 80px;
+        }
+
+        .sidebar-collapse-btn {
+            position: absolute;
+            right: -12px;
+            top: 20px;
+            width: 24px;
+            height: 24px;
+            background: var(--accent);
+            border: none;
+            border-radius: 50%;
+            color: white;
+            font-size: 1.2em;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .sidebar-logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            margin-bottom: 20px;
+        }
+
+        .logo-icon {
+            font-size: 1.8em;
+            min-width: 32px;
+            text-align: center;
+        }
+
+        .logo-text {
+            display: flex;
+            flex-direction: column;
+            white-space: nowrap;
+        }
+
+        .logo-main {
+            font-weight: 700;
+            font-size: 1.1em;
+        }
+
+        .logo-sub {
+            font-size: 0.75em;
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        #sidebar.collapsed .logo-text {
+            display: none;
+        }
+
+        .sidebar-nav {
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        #nav-menu {
+            list-style: none;
+            padding: 0 10px;
+        }
+
+        .nav-item {
+            margin-bottom: 8px;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            border-radius: 8px;
+            color: rgba(255, 255, 255, 0.7);
+            text-decoration: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            font-size: 0.95em;
+        }
+
+        .nav-link:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+
+        .nav-item.active>.nav-link {
+            background: var(--accent);
+            color: white;
+        }
+
+        .nav-icon {
+            font-size: 1.2em;
+            min-width: 24px;
+            text-align: center;
+        }
+
+        .nav-label {
+            white-space: nowrap;
+            overflow: hidden;
+            flex: 1;
+        }
+
+        #sidebar.collapsed .nav-label {
+            display: none;
+        }
+
+        .submenu-arrow {
+            font-size: 0.9em;
+            transition: transform 0.3s ease;
+        }
+
+        .nav-item.has-submenu.open>.nav-link .submenu-arrow {
+            transform: rotate(90deg);
+        }
+
+        .submenu {
+            list-style: none;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            margin: 8px 16px;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+        }
+
+        .nav-item.has-submenu.open>.submenu {
+            max-height: 500px;
+        }
+
+        .submenu li {
+            margin: 0;
+        }
+
+        .submenu a {
+            display: block;
+            padding: 10px 16px;
+            color: rgba(255, 255, 255, 0.6);
+            text-decoration: none;
+            font-size: 0.9em;
+            transition: all 0.3s ease;
+            border-left: 3px solid transparent;
+            cursor: pointer;
+        }
+
+        .submenu a:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border-left-color: var(--accent);
+        }
+
+        .sidebar-footer {
+            padding: 15px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            margin-top: auto;
+        }
+
+        .user-mini {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .user-avatar-sm {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: var(--accent);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.9em;
+        }
+
+        .user-info-sm {
+            display: flex;
+            flex-direction: column;
+            font-size: 0.8em;
+            min-width: 0;
+        }
+
+        .user-name-sm {
+            font-weight: 600;
+            color: white;
+            white-space: nowrap;
+        }
+
+        .user-role-sm {
+            color: rgba(255, 255, 255, 0.6);
+            white-space: nowrap;
+        }
+
+        #sidebar.collapsed .user-info-sm {
+            display: none;
+        }
+
+        /* ===== MAIN WRAPPER ===== */
+        #main-wrapper {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* ===== TOPBAR ===== */
+        #topbar {
+            background: white;
+            border-bottom: 1px solid var(--border);
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .topbar-left h1 {
+            font-size: 1.8em;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .topbar-right {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .search-bar-btn {
+            background: var(--light-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 8px 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            font-size: 0.9em;
+            color: var(--text-secondary);
+            transition: all 0.3s ease;
+            min-width: 300px;
+            justify-content: space-between;
+        }
+
+        .search-bar-btn:hover {
+            border-color: var(--accent);
+            background: white;
+        }
+
+        .icon-btn {
+            background: none;
+            border: none;
+            font-size: 1.3em;
+            cursor: pointer;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .badge {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: var(--danger);
+            color: white;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7em;
+            font-weight: 700;
+        }
+
+        .profile-dropdown-wrapper {
+            position: relative;
+        }
+
+        .profile-btn {
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 6px 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        .profile-btn:hover {
+            border-color: var(--accent);
+            background: var(--light-bg);
+        }
+
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: var(--accent);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+        }
+
+        .user-avatar.lg {
+            width: 48px;
+            height: 48px;
+        }
+
+        .profile-dropdown {
+            position: absolute;
+            right: 0;
+            top: 100%;
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            min-width: 250px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            display: none;
+            z-index: 1000;
+            margin-top: 10px;
+        }
+
+        .profile-dropdown.active {
+            display: block;
+        }
+
+        .profile-dropdown-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 16px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .pd-name {
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .pd-email {
+            font-size: 0.85em;
+            color: var(--text-secondary);
+        }
+
+        .pd-item {
+            display: block;
+            padding: 12px 16px;
+            color: var(--text-primary);
+            text-decoration: none;
+            transition: all 0.3s ease;
+            font-size: 0.9em;
+        }
+
+        .pd-item:hover {
+            background: var(--light-bg);
+            color: var(--accent);
+        }
+
+        .pd-item.danger {
+            color: var(--danger);
+        }
+
+        /* ===== CONTENT AREA ===== */
+        .content-area {
+            flex: 1;
+            overflow-y: auto;
+            padding: 30px;
+        }
+
+        .page-section {
+            display: none;
+        }
+
+        .page-section.active {
+            display: block;
+        }
+
+        /* Dashboard KPIs */
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .kpi-card {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            border-left: 4px solid var(--accent);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .kpi-card.high-risk {
+            border-left-color: var(--danger);
+        }
+
+        .kpi-card.pending {
+            border-left-color: var(--warning);
+        }
+
+        .kpi-card.completed {
+            border-left-color: var(--success);
+        }
+
+        .kpi-label {
+            color: var(--text-secondary);
+            font-size: 0.85em;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .kpi-value {
+            font-size: 2.5em;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .kpi-change {
+            font-size: 0.85em;
+            color: var(--success);
+            margin-top: 8px;
+        }
+
+        /* Team Overview */
+        .team-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .team-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            border: 1px solid var(--border);
+        }
+
+        .team-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 15px;
+        }
+
+        .team-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--accent);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+        }
+
+        .team-info {
+            flex: 1;
+        }
+
+        .team-name {
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .team-role {
+            font-size: 0.85em;
+            color: var(--text-secondary);
+        }
+
+        .team-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            padding-top: 15px;
+            border-top: 1px solid var(--border);
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-label {
+            font-size: 0.75em;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+        }
+
+        .stat-value {
+            font-size: 1.5em;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        /* Tables */
+        .table-wrapper {
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            margin-bottom: 25px;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .data-table th {
+            background: var(--light-bg);
+            padding: 15px;
+            text-align: left;
+            font-weight: 700;
+            font-size: 0.85em;
+            color: var(--primary);
+            border-bottom: 2px solid var(--border);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .data-table td {
+            padding: 15px;
+            border-bottom: 1px solid var(--border);
+            font-size: 0.9em;
+        }
+
+        .data-table tr:hover {
+            background: var(--light-bg);
+        }
+
+        .badge-style {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 0.75em;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .badge-high {
+            background: rgba(220, 38, 38, 0.1);
+            color: #dc2626;
+        }
+
+        .badge-progress {
+            background: rgba(245, 158, 11, 0.1);
+            color: #f59e0b;
+        }
+
+        .badge-open {
+            background: rgba(59, 130, 246, 0.1);
+            color: #3b82f6;
+        }
+
+        .action-id {
+            font-weight: 700;
+            color: var(--accent);
+            cursor: pointer;
+        }
+
+        .action-id:hover {
+            text-decoration: underline;
+        }
+
+        .action-btn {
+            padding: 6px 12px;
+            border: 1px solid var(--border);
+            background: white;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.8em;
+            transition: all 0.3s ease;
+        }
+
+        .action-btn:hover {
+            background: var(--accent);
+            color: white;
+            border-color: var(--accent);
+        }
+
+        .btn-submit {
+            padding: 8px 16px;
+            background: var(--accent);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-submit:hover {
+            background: var(--accent-dark);
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 800px;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .modal-title {
+            font-size: 1.4em;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 1.5em;
+            cursor: pointer;
+            color: var(--text-secondary);
+        }
+
+        .modal-section {
+            margin-bottom: 25px;
+        }
+
+        .modal-section-title {
+            font-size: 1.1em;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-size: 0.9em;
+        }
+
+        .modal-field {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 10px;
+            font-size: 0.9em;
+        }
+
+        .modal-field-label {
+            font-weight: 600;
+            color: var(--text-secondary);
+            min-width: 150px;
+        }
+
+        .modal-field-value {
+            color: var(--text-primary);
+        }
+
+        .clause-box {
+            background: var(--light-bg);
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid var(--accent);
+            margin-top: 12px;
+        }
+
+        .clause-label {
+            font-weight: 600;
+            color: var(--primary);
+            margin-bottom: 8px;
+        }
+
+        .clause-content {
+            color: var(--text-secondary);
+            line-height: 1.5;
+            font-size: 0.9em;
+        }
+
+        .action-log {
+            background: var(--light-bg);
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 12px;
+        }
+
+        .log-entry {
+            padding: 10px 0;
+            border-bottom: 1px solid var(--border);
+            font-size: 0.9em;
+        }
+
+        .log-entry:last-child {
+            border-bottom: none;
+        }
+
+        .log-who {
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        .log-action {
+            color: var(--text-secondary);
+        }
+
+        .log-time {
+            font-size: 0.8em;
+            color: var(--text-secondary);
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: var(--success);
+            color: white;
+            padding: 16px 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            animation: slideIn 0.3s ease;
+            z-index: 3000;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        hr {
+            border: none;
+            border-top: 1px solid var(--border);
+            margin: 8px 0;
+        }
+
+        @media (max-width: 768px) {
+            #sidebar {
+                width: 80px;
+            }
+
+            .search-bar-btn {
+                min-width: auto;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- SIDEBAR -->
+    <aside id="sidebar">
+        <button class="sidebar-collapse-btn" id="sidebar-toggle">‹</button>
+        <div class="sidebar-logo">
+            <div class="logo-icon">⬡</div>
+            <div class="logo-text">
+                <span class="logo-main">CMS</span>
+                <span class="logo-sub">Compliance Suite</span>
+            </div>
+        </div>
+
+        <nav class="sidebar-nav">
+            <ul id="nav-menu">
+                <li class="nav-item active" data-page="dashboard">
+                    <a href="#" class="nav-link" onclick="navigateTo('dashboard'); return false;">
+                        <span class="nav-icon">▦</span>
+                        <span class="nav-label">Home</span>
+                    </a>
+                </li>
+
+                <li class="nav-item has-submenu" data-page="inbox">
+                    <a href="#" class="nav-link submenu-toggle" onclick="return false;">
+                        <span class="nav-icon">◈</span>
+                        <span class="nav-label">My Inbox</span>
+                        <span class="submenu-arrow">›</span>
+                    </a>
+                    <ul class="submenu">
+                        <li><a href="#" onclick="navigateTo('dept-my-items'); return false;">My Items</a>
+                        </li>
+                        <li><a href="#" onclick="navigateTo('approval-required'); return false;">Items for Closure</a>
+                        </li>
+                        <li><a href="#" onclick="navigateTo('escalations'); return false;">Escalations</a></li>
+                        <!-- <li><a href="#" onclick="navigateTo('reassignments'); return false;">Reassignment Requests</a></li> -->
+                    </ul>
+                </li>
+
+                <li class="nav-item has-submenu" data-page="manage-tasks">
+                    <a href="#" class="nav-link submenu-toggle" onclick="navigateTo('actions');">
+                        <span class="nav-icon">◫</span>
+                        <span class="nav-label">Team Actions</span>
+                        <!-- <span class="submenu-arrow">›</span> -->
+                    </a>
+                    <!-- <ul class="submenu">
+                        <li><a href="#" onclick="navigateTo('master-actions'); return false;">Assignee</a>
+                        </li>
+                        <li><a href="#" onclick="navigateTo('role-mapping'); return false;">Role Mapping</a></li>
+                    </ul> -->
+                </li>
+
+                <li class="nav-item" data-page="team">
+                    <a href="#" class="nav-link" onclick="navigateTo('team'); return false;">
+                        <span class="nav-icon">◉</span>
+                        <span class="nav-label">Team Overview</span>
+                    </a>
+                </li>
+
+                <li class="nav-item" data-page="reports">
+                    <a href="#" class="nav-link" onclick="navigateTo('reports'); return false;">
+                        <span class="nav-icon">◧</span>
+                        <span class="nav-label">Reports</span>
+                    </a>
+                </li>
+
+                <li class="nav-item" data-page="settings">
+                    <a href="#" class="nav-link" onclick="navigateTo('settings'); return false;">
+                        <span class="nav-icon">◎</span>
+                        <span class="nav-label">Settings</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+
+        <div class="sidebar-footer">
+            <div class="user-mini">
+                <div class="user-avatar-sm">RK</div>
+                <div class="user-info-sm">
+                    <span class="user-name-sm">Raj Kumar</span>
+                    <span class="user-role-sm">Dept Head</span>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- MAIN WRAPPER -->
+    <div id="main-wrapper">
+        <!-- TOPBAR -->
+        <header id="topbar">
+            <div class="topbar-left">
+                <h1 id="page-title">Dashboard</h1>
+            </div>
+            <div class="topbar-right">
+                <button class="search-bar-btn">
+                    <span>⌕</span>
+                    <span>Ask AI anything...</span>
+                    <kbd>⌘K</kbd>
+                </button>
+                <button class="icon-btn">
+                    <span>🔔</span>
+                    <span class="badge">3</span>
+                </button>
+                <div class="profile-dropdown-wrapper">
+                    <button class="profile-btn" id="profile-btn">
+                        <div class="user-avatar">RK</div>
+                        <span>Raj Kumar</span>
+                        <span>▾</span>
+                    </button>
+                    <div class="profile-dropdown" id="profile-dropdown">
+                        <div class="profile-dropdown-header">
+                            <div class="user-avatar lg">RK</div>
+                            <div>
+                                <div class="pd-name">Raj Kumar</div>
+                                <div class="pd-email"><a href="/cdn-cgi/l/email-protection" class="__cf_email__"
+                                        data-cfemail="6f1d0e0541041a020e1d2f0c00021f0e0116410c0002">[email&#160;protected]</a>
+                                </div>
+                            </div>
+                        </div>
+                        <hr />
+                        <a href="#" class="pd-item">My Profile</a>
+                        <a href="#" class="pd-item">Account Settings</a>
+                        <a href="#" class="pd-item">Audit Log</a>
+                        <hr />
+                        <a href="#" class="pd-item danger">Sign Out</a>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- CONTENT AREA -->
+        <div class="content-area">
+            <!-- DASHBOARD -->
+            <div id="dashboard" class="page-section active">
+                <h2 style="margin-bottom: 20px; color: var(--primary);">Welcome, Raj Kumar</h2>
+
+                <h3 style="margin: 20px 0 15px 0; color: var(--primary);">📊 Key Performance Indicators</h3>
+                <div class="kpi-grid">
+                    <div class="kpi-card">
+                        <div class="kpi-label">Total Actions Assigned</div>
+                        <div class="kpi-value">48</div>
+                        <div class="kpi-change">↑ 5 this week</div>
+                    </div>
+                    <div class="kpi-card pending">
+                        <div class="kpi-label">Pending Actions</div>
+                        <div class="kpi-value">12</div>
+                        <div class="kpi-change">⚠️ Requires attention</div>
+                    </div>
+                    <div class="kpi-card high-risk">
+                        <div class="kpi-label">Over Due Actions</div>
+                        <div class="kpi-value">8</div>
+                        <div class="kpi-change">↑ 2 new</div>
+                    </div>
+                    <div class="kpi-card completed">
+                        <div class="kpi-label">Completed</div>
+                        <div class="kpi-value">28</div>
+                        <div class="kpi-change">✅ 58% completion</div>
+                    </div>
+                </div>
+                <div style="background:white;border:1px solid #e5e7eb;border-radius:10px;padding:16px;margin-top:20px;">
+
+                    <div style="font-weight:600;font-size:16px;margin-bottom:12px;">
+                        ⚡ My Action Required
+                    </div>
+
+                    <table style="width:100%;border-collapse:collapse;font-size:13px;">
+
+                        <thead>
+                            <tr style="background:#f8fafc;text-align:left;">
+                                <th style="padding:8px;border-bottom:1px solid #e5e7eb;">Action ID</th>
+                                <th style="padding:8px;border-bottom:1px solid #e5e7eb;">Action Name</th>
+                                <th style="padding:8px;border-bottom:1px solid #e5e7eb;">Requested By</th>
+                                <th style="padding:8px;border-bottom:1px solid #e5e7eb;">Action Required</th>
+                                <th style="padding:8px;border-bottom:1px solid #e5e7eb;">Due Date</th>
+                                <th style="padding:8px;border-bottom:1px solid #e5e7eb;">Status</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+
+                            <tr>
+                                <td style="padding:8px;">Action-102</td>
+                                <td style="padding:8px;">Update AML Policy</td>
+                                <td style="padding:8px;">Compliance Officer</td>
+                                <td style="padding:8px;color:#f59e0b;font-weight:600;">Review Evidence</td>
+                                <td style="padding:8px;">12 Jul 2026</td>
+                                <td style="padding:8px;">
+                                    <button
+                                        style="font-size:12px;padding:4px 10px;border-radius:6px;border:none;background:#6366f1;color:white;cursor:pointer;">
+                                        Open
+                                    </button>
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td style="padding:8px;">Action-108</td>
+                                <td style="padding:8px;">KYC Verification Process</td>
+                                <td style="padding:8px;">Compliance Officer</td>
+                                <td style="padding:8px;color:#ef4444;font-weight:600;">Approve Completion</td>
+                                <td style="padding:8px;">10 Jul 2026</td>
+                                <td style="padding:8px;">
+                                    <button
+                                        style="font-size:12px;padding:4px 10px;border-radius:6px;border:none;background:#6366f1;color:white;cursor:pointer;">
+                                        Open
+                                    </button>
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td style="padding:8px;">Action-110</td>
+                                <td style="padding:8px;">Risk Assessment Report</td>
+                                <td style="padding:8px;">Compliance Officer</td>
+                                <td style="padding:8px;color:#6366f1;font-weight:600;">Provide Clarification</td>
+                                <td style="padding:8px;">15 Jul 2026</td>
+                                <td style="padding:8px;">
+                                    <button
+                                        style="font-size:12px;padding:4px 10px;border-radius:6px;border:none;background:#6366f1;color:white;cursor:pointer;">
+                                        Open
+                                    </button>
+                                </td>
+                            </tr>
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+                <!-- <h3 style="margin: 30px 0 15px 0; color: var(--primary);">👥 Team Overview</h3>
+                <div class="team-grid">
+                    <div class="team-card">
+                        <div class="team-header">
+                            <div class="team-avatar">RS</div>
+                            <div class="team-info">
+                                <div class="team-name">Ravi Sharma</div>
+                                <div class="team-role">Assignee / IT Manager</div>
+                            </div>
+                        </div>
+                        <div class="team-stats">
+                            <div class="stat-item">
+                                <div class="stat-label">Assigned</div>
+                                <div class="stat-value">6</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-label">Completed</div>
+                                <div class="stat-value">4</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-label">In Progress</div>
+                                <div class="stat-value">2</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="team-card">
+                        <div class="team-header">
+                            <div class="team-avatar">PS</div>
+                            <div class="team-info">
+                                <div class="team-name">Priya Singh</div>
+                                <div class="team-role">Reviewer / Compliance Manager</div>
+                            </div>
+                        </div>
+                        <div class="team-stats">
+                            <div class="stat-item">
+                                <div class="stat-label">To Review</div>
+                                <div class="stat-value">5</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-label">Approved</div>
+                                <div class="stat-value">18</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-label">Rejected</div>
+                                <div class="stat-value">2</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="team-card">
+                        <div class="team-header">
+                            <div class="team-avatar">AC</div>
+                            <div class="team-info">
+                                <div class="team-name">Amit Chopra</div>
+                                <div class="team-role">Filer / Records Manager</div>
+                            </div>
+                        </div>
+                        <div class="team-stats">
+                            <div class="stat-item">
+                                <div class="stat-label">To File</div>
+                                <div class="stat-value">3</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-label">Filed</div>
+                                <div class="stat-value">25</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-label">Pending</div>
+                                <div class="stat-value">1</div>
+                            </div>
+                        </div>
+                    </div>
+                </div> -->
+            </div>
+
+            <!-- APPROVAL REQUIRED -->
+            <div id="approval-required" class="page-section">
+                <h2 style="margin-bottom: 20px; color: var(--primary);">✅ Approvals Required</h2>
+                <div class="table-wrapper">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Action ID</th>
+                                <th>Title</th>
+                                <th>Submitted By</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><span class="action-id" onclick="showActionDetails('SK-001')">SK-001</span></td>
+                                <td>Establish Board Cybersecurity Committee</td>
+                                <td>Ravi Sharma</td>
+                                <td><span class="badge-style badge-progress">In Progress</span></td>
+                                <td><button class="action-btn" onclick="showActionDetails('SK-001')">View
+                                        Details</button></td>
+                            </tr>
+                            <tr>
+                                <td><span class="action-id" onclick="showActionDetails('SK-002')">SK-002</span></td>
+                                <td>Data Privacy Compliance Review</td>
+                                <td>Priya Singh</td>
+                                <td><span class="badge-style badge-progress">Pending</span></td>
+                                <td><button class="action-btn" onclick="showActionDetails('SK-002')">View
+                                        Details</button></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+<div id="dept-my-items" class="page-section">
+  
+</div>
+           
+
+            <!-- Dept My Items  -->
+            <!-- <div style="background:white;border:1px solid #e5e7eb;border-radius:10px;padding:16px;" id="dept-my-items">
+
+              
+
+            </div> -->
+            <!-- ESCALATIONS -->
+            <div id="escalations" class="page-section">
+                <h2 style="margin-bottom: 20px; color: var(--primary);">🚨 Escalations</h2>
+                <div class="table-wrapper">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Action ID</th>
+                                <th>Title</th>
+                                <th>Escalated By</th>
+                                <th>Reason</th>
+                                <th>Escalation Level</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><span class="action-id" onclick="showActionDetails('SK-007')">SK-007</span></td>
+                                <td>Vendor Security Assessment - CRITICAL</td>
+                                <td>Ravi Sharma</td>
+                                <td>Critical security vulnerability discovered - Immediate remediation required</td>
+                                <td><span class="badge-style badge-high">CRITICAL</span></td>
+                                <td><button class="action-btn" onclick="showActionDetails('SK-007')">View
+                                        Details</button></td>
+                            </tr>
+                            <tr>
+                                <td><span class="action-id" onclick="showActionDetails('SK-008')">SK-008</span></td>
+                                <td>Regulatory Change - Deadline Impact</td>
+                                <td>Priya Singh</td>
+                                <td>New regulatory requirement changes action deadline - Legal review needed</td>
+                                <td><span class="badge-style badge-high">URGENT</span></td>
+                                <td><button class="action-btn" onclick="showActionDetails('SK-008')">View
+                                        Details</button></td>
+                            </tr>
+                            <tr>
+                                <td><span class="action-id" onclick="showActionDetails('SK-009')">SK-009</span></td>
+                                <td>Budget Constraint - Resource Reallocation</td>
+                                <td>Amit Chopra</td>
+                                <td>Budget cuts require resource reallocation and timeline adjustment</td>
+                                <td><span class="badge-style badge-progress">HIGH</span></td>
+                                <td><button class="action-btn" onclick="showActionDetails('SK-009')">View
+                                        Details</button></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- REASSIGNMENTS -->
+            <div id="reassignments" class="page-section">
+                <h2 style="margin-bottom: 20px; color: var(--primary);">🔄 Reassignment Requests</h2>
+                <div class="table-wrapper">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Action ID</th>
+                                <th>Title</th>
+                                <th>Current Assignee</th>
+                                <th>Requested Reason</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><span class="action-id" onclick="showActionDetails('SK-003')">SK-003</span></td>
+                                <td>Policy Framework Update</td>
+                                <td>Ravi Sharma</td>
+                                <td>Workload overload - 8 active items</td>
+                                <td><span class="badge-style badge-progress">Pending</span></td>
+                                <td><button class="action-btn" onclick="showActionDetails('SK-003')">View
+                                        Details</button></td>
+                            </tr>
+                            <tr>
+                                <td><span class="action-id" onclick="showActionDetails('SK-006')">SK-006</span></td>
+                                <td>Compliance Training Program</td>
+                                <td>Priya Singh</td>
+                                <td>Leave starting next month</td>
+                                <td><span class="badge-style badge-progress">Pending</span></td>
+                                <td><button class="action-btn" onclick="showActionDetails('SK-006')">View
+                                        Details</button></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- MASTER ACTIONS TABLE -->
+            <div id="actions" class="page-section">
+                <h2 style="margin-bottom: 20px; color: var(--primary);">Master Action Table (From Compliance Officer)
+                </h2>
+                <div class="table-wrapper">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Action ID</th>
+                                <th>Title</th>
+                                <th>Circular Ref</th>
+                                <th>Clause</th>
+                                <th>Assignee</th>
+                                <th>Reviewer</th>
+                                <th>Filer</th>
+                                <th>Due Date</th>
+                                <th>Status</th>
+                                <th>Risk</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><span class="action-id" onclick="showActionDetails('SK-007')">SK-001</span></td>
+                                <td>Establish Board Cybersecurity Committee</td>
+                                <td>CIRC-2024-001</td>
+                                <td>C1.1</td>
+                                <td>Ravi Sharma</td>
+                                <td>Priya Singh</td>
+                                <td>Amit Chopra</td>
+                                <td>15 Jun 2024</td>
+                                <td><span class="badge-style badge-progress">In Progress</span></td>
+                                <td><span class="badge-style badge-high">High</span></td>
+                            </tr>
+                            <tr>
+                                <td><span class="action-id" onclick="showActionDetails('SK-007')">SK-002</span></td>
+                                <td>Data Privacy Compliance Review</td>
+                                <td>CIRC-2024-002</td>
+                                <td>C2.3</td>
+                                <td>Ravi Sharma</td>
+                                <td>Priya Singh</td>
+                                <td>Amit Chopra</td>
+                                <td>20 Jun 2024</td>
+                                <td><span class="badge-style badge-progress">In Progress</span></td>
+                                <td><span class="badge-style badge-high">High</span></td>
+                            </tr>
+                            <tr>
+                                <td><span class="action-id" onclick="showActionDetails('SK-003')">SK-003</span></td>
+                                <td>Policy Framework Update</td>
+                                <td>CIRC-2024-003</td>
+                                <td>C1.5</td>
+                                <td>Ravi Sharma</td>
+                                <td>Priya Singh</td>
+                                <td>Amit Chopra</td>
+                                <td>10 Jun 2024</td>
+                                <td><span class="badge-style badge-progress">In Progress</span></td>
+                                <td><span class="badge-style badge-progress">Medium</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- ROLE MAPPING TABLE -->
+            <div id="role-mapping" class="page-section">
+                <h2 style="margin-bottom: 20px; color: var(--primary);">Role Mapping & Assignment</h2>
+                <div class="table-wrapper">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Action ID</th>
+                                <th>Title</th>
+                                <th>Owner</th>
+                                <th>Assignee</th>
+                                <th>Reviewer</th>
+                                <th>Filer</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>SK-001</td>
+                                <td>Establish Board Cybersecurity Committee</td>
+                                <td>
+                                    <select style="padding: 6px; border-radius: 4px; border: 1px solid var(--border);">
+                                        <option selected>CISO</option>
+                                        <option>IT Head</option>
+                                    </select>
+                                </td>
+                                <td>
+                                    <select style="padding: 6px; border-radius: 4px; border: 1px solid var(--border);">
+                                        <option selected>Ravi Sharma</option>
+                                        <option>Priya Singh</option>
+                                    </select>
+                                </td>
+                                <td>
+                                    <select style="padding: 6px; border-radius: 4px; border: 1px solid var(--border);">
+                                        <option selected>Priya Singh</option>
+                                        <option>Audit Manager</option>
+                                    </select>
+                                </td>
+                                <td>
+                                    <select style="padding: 6px; border-radius: 4px; border: 1px solid var(--border);">
+                                        <option selected>Amit Chopra</option>
+                                        <option>Documentation Controller</option>
+                                    </select>
+                                </td>
+                                <td><button class="btn-submit" onclick="submitRoleMapping('SK-001')">Save</button></td>
+                            </tr>
+                            <tr>
+                                <td>SK-002</td>
+                                <td>Data Privacy Compliance Review</td>
+                                <td>
+                                    <select style="padding: 6px; border-radius: 4px; border: 1px solid var(--border);">
+                                        <option selected>Privacy Officer</option>
+                                        <option>CISO</option>
+                                    </select>
+                                </td>
+                                <td>
+                                    <select style="padding: 6px; border-radius: 4px; border: 1px solid var(--border);">
+                                        <option selected>Ravi Sharma</option>
+                                        <option>Priya Singh</option>
+                                    </select>
+                                </td>
+                                <td>
+                                    <select style="padding: 6px; border-radius: 4px; border: 1px solid var(--border);">
+                                        <option selected>Priya Singh</option>
+                                        <option>Legal Manager</option>
+                                    </select>
+                                </td>
+                                <td>
+                                    <select style="padding: 6px; border-radius: 4px; border: 1px solid var(--border);">
+                                        <option selected>Amit Chopra</option>
+                                        <option>Records Manager</option>
+                                    </select>
+                                </td>
+                                <td><button class="btn-submit" onclick="submitRoleMapping('SK-002')">Save</button></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- TEAM OVERVIEW -->
+            <div id="team" class="page-section">
+                <h2 style="margin-bottom: 20px; color: var(--primary);">👥 Team Overview & Performance</h2>
+                <div class="team-grid">
+                    <div class="team-card">
+                        <div class="team-header">
+                            <div class="team-avatar">RS</div>
+                            <div class="team-info">
+                                <div class="team-name">Ravi Sharma</div>
+                                <div class="team-role">Assignee / IT Manager</div>
+                            </div>
+                        </div>
+                        <div class="team-stats">
+                            <div class="stat-item">
+                                <div class="stat-label">Assigned</div>
+                                <div class="stat-value">6</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-label">Completed</div>
+                                <div class="stat-value">4</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-label">In Progress</div>
+                                <div class="stat-value">2</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="team-card">
+                        <div class="team-header">
+                            <div class="team-avatar">PS</div>
+                            <div class="team-info">
+                                <div class="team-name">Priya Singh</div>
+                                <div class="team-role">Reviewer / Compliance Manager</div>
+                            </div>
+                        </div>
+                        <div class="team-stats">
+                            <div class="stat-item">
+                                <div class="stat-label">To Review</div>
+                                <div class="stat-value">5</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-label">Approved</div>
+                                <div class="stat-value">18</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-label">Rejected</div>
+                                <div class="stat-value">2</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="team-card">
+                        <div class="team-header">
+                            <div class="team-avatar">AC</div>
+                            <div class="team-info">
+                                <div class="team-name">Amit Chopra</div>
+                                <div class="team-role">Filer / Records Manager</div>
+                            </div>
+                        </div>
+                        <div class="team-stats">
+                            <div class="stat-item">
+                                <div class="stat-label">To File</div>
+                                <div class="stat-value">3</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-label">Filed</div>
+                                <div class="stat-value">25</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-label">Pending</div>
+                                <div class="stat-value">1</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- REPORTS -->
+            <div id="reports" class="page-section">
+                <h2 style="margin-bottom: 20px; color: var(--primary);">Reports</h2>
+                <p style="color: var(--text-secondary);">Reports section coming soon.</p>
+            </div>
+
+            <!-- SETTINGS -->
+            <div id="settings" class="page-section">
+                <h2 style="margin-bottom: 20px; color: var(--primary);">Settings</h2>
+                <p style="color: var(--text-secondary);">Settings section coming soon.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ACTION DETAILS MODAL -->
+    <div id="actionModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title" id="modalTitle">Action Details</h2>
+                <button class="modal-close" onclick="closeModal()">✕</button>
+            </div>
+
+            <div class="modal-section" id="basicInfoSection">
+                <div class="modal-section-title">Basic Information</div>
+                <div class="modal-field">
+                    <span class="modal-field-label">Action ID:</span>
+                    <span class="modal-field-value" id="modalActionId">SK-001</span>
+                </div>
+                <div class="modal-field">
+                    <span class="modal-field-label">Title:</span>
+                    <span class="modal-field-value" id="modalTitle2">Establish Board Cybersecurity Committee</span>
+                </div>
+                <div class="modal-field">
+                    <span class="modal-field-label">Circular Reference:</span>
+                    <span class="modal-field-value" id="modalCircular">CIRC-2024-001</span>
+                </div>
+                <div class="modal-field">
+                    <span class="modal-field-label">Assigned To:</span>
+                    <span class="modal-field-value" id="modalAssignee">Ravi Sharma</span>
+                </div>
+                <div class="modal-field">
+                    <span class="modal-field-label">Due Date:</span>
+                    <span class="modal-field-value" id="modalDueDate">15 Jun 2024</span>
+                </div>
+                <div class="modal-field">
+                    <span class="modal-field-label">Status:</span>
+                    <span class="modal-field-value" id="modalStatus">In Progress</span>
+                </div>
+            </div>
+
+            <div class="modal-section">
+                <div class="modal-section-title">📋 Clause / Obligation Reference</div>
+                <div class="clause-box">
+                    <div class="clause-label">Clause Reference:</div>
+                    <div class="clause-content">C1.1 - Board Oversight of Cybersecurity</div>
+                </div>
+                <div class="clause-box">
+                    <div class="clause-label">Obligation Name:</div>
+                    <div class="clause-content">Establish Board-level Cybersecurity Committee</div>
+                </div>
+                <div class="clause-box">
+                    <div class="clause-label">Regulation Source:</div>
+                    <div class="clause-content">Information Security & Cybersecurity Governance</div>
+                </div>
+                <div class="clause-box">
+                    <div class="clause-label">Detailed Description:</div>
+                    <div class="clause-content">The Board of Directors must establish an oversight committee or
+                        designate board-level responsibility for reviewing, evaluating and directing the organization's
+                        management of cybersecurity risks and strategies, including the organization's cybersecurity
+                        policies, practices and governance structure.</div>
+                </div>
+            </div>
+
+            <div class="modal-section" id="actionsSection">
+                <div class="modal-section-title">📝 Actions Performed</div>
+                <div class="action-log">
+                    <div class="log-entry">
+                        <div class="log-who">Ravi Sharma (Assignee)</div>
+                        <div class="log-action">Started work on task</div>
+                        <div class="log-time">March 5, 2024 - 9:15 AM</div>
+                    </div>
+                    <div class="log-entry">
+                        <div class="log-who">Ravi Sharma (Assignee)</div>
+                        <div class="log-action">Updated progress to 60%</div>
+                        <div class="log-time">March 8, 2024 - 2:30 PM</div>
+                    </div>
+                    <div class="log-entry">
+                        <div class="log-who">Priya Singh (Reviewer)</div>
+                        <div class="log-action">Reviewed submission and requested changes</div>
+                        <div class="log-time">March 9, 2024 - 10:45 AM</div>
+                    </div>
+                    <div class="log-entry">
+                        <div class="log-who">Ravi Sharma (Assignee)</div>
+                        <div class="log-action">Resubmitted with corrections</div>
+                        <div class="log-time">March 10, 2024 - 1:20 PM</div>
+                    </div>
+                    <div class="log-entry">
+                        <div class="log-who">Priya Singh (Reviewer)</div>
+                        <div class="log-action">Approved for filing</div>
+                        <div class="log-time">March 11, 2024 - 11:00 AM</div>
+                    </div>
+                    <div class="log-entry">
+                        <div class="log-who">Amit Chopra (Filer)</div>
+                        <div class="log-action">Document filed and archived</div>
+                        <div class="log-time">March 12, 2024 - 9:30 AM</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-section" id="buttonSection">
+                <button class="btn-submit" onclick="approveAction(); return false;" style="width: 100%;">✅
+                    Approve</button>
+            </div>
+        </div>
+    </div>
+
+    <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script>
+    <script>
+        // Sidebar Toggle
+        document.getElementById('sidebar-toggle').addEventListener('click', function () {
+            document.getElementById('sidebar').classList.toggle('collapsed');
+        });
+
+        // Submenu Toggle
+        document.querySelectorAll('.nav-link.submenu-toggle').forEach(link => {
+            link.addEventListener('click', function (e) {
+                e.preventDefault();
+                this.closest('.nav-item').classList.toggle('open');
+            });
+        });
+
+        // Profile Dropdown
+        document.getElementById('profile-btn').addEventListener('click', function () {
+            document.getElementById('profile-dropdown').classList.toggle('active');
+        });
+
+        document.addEventListener('click', function (e) {
+            if (!e.target.closest('.profile-dropdown-wrapper')) {
+                document.getElementById('profile-dropdown').classList.remove('active');
+            }
+        });
+
+        // Navigation
+        function navigateTo(page) {
+            document.querySelectorAll('.page-section').forEach(s => s.classList.remove('active'));
+            document.getElementById(page).classList.add('active');
+            document.getElementById('page-title').textContent = getTitleForPage(page);
+            if (page === 'dept-my-items') renderManagerMyItems();
+            if (page === 'approval-required') renderApprovalRequired();
+            if (page === 'actions') renderDeptActions();
+        }
+
+        function getTitleForPage(page) {
+            const titles = {
+                'dashboard': 'Dashboard',
+                'approval-required': 'Approvals Required',
+                'dept-my-items': 'My Items',
+                'escalations': 'Escalations',
+                'reassignments': 'Reassignment Requests',
+                'master-actions': 'Master Action Table',
+                'role-mapping': 'Role Mapping',
+                'team': 'Team Overview',
+                'reports': 'Reports',
+                'settings': 'Settings'
+            };
+            return titles[page] || 'Dashboard';
+        }
+
+        // Modal Functions
+        function showActionDetails(actionId) {
+            const modal = document.getElementById('actionModal');
+            const submitBtn = modal.querySelector('#buttonSection .btn-submit');
+            const basicInfoSection = modal.querySelector('#basicInfoSection');
+            const actionsSection = modal.querySelector('#actionsSection');
+            const buttonSection = modal.querySelector('#buttonSection');
+
+            // Check if called from role mapping (by checking if this is within role-mapping section)
+            const currentSection = document.querySelector('.page-section.active').id;
+
+            if (currentSection === 'role-mapping') {
+                // Role Mapping view - show only circular details
+                basicInfoSection.style.display = 'none';
+                actionsSection.style.display = 'none';
+                buttonSection.style.display = 'none';
+            } else if (actionId.startsWith('SK-007') || actionId.startsWith('SK-008') || actionId.startsWith('SK-009')) {
+                // Escalation - show Submit button
+                basicInfoSection.style.display = 'block';
+                actionsSection.style.display = 'none';
+                buttonSection.style.display = 'block';
+                submitBtn.textContent = '📤 Submit';
+                submitBtn.onclick = function () { submitEscalation(); return false; };
+            } else {
+                // Approval - show all sections with Approve button
+                basicInfoSection.style.display = 'block';
+                actionsSection.style.display = 'block';
+                buttonSection.style.display = 'block';
+                submitBtn.textContent = '✅ Approve';
+                submitBtn.onclick = function () { approveAction(); return false; };
+            }
+
+            document.getElementById('modalActionId').textContent = actionId;
+            modal.classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('actionModal').classList.remove('active');
+        }
+
+        function approveAction() {
+            showToast('✅ Action approved successfully!');
+            closeModal();
+        }
+
+        function submitEscalation() {
+            showToast('📤 Escalation submitted for management review!');
+            closeModal();
+        }
+
+        function submitRoleMapping(actionId) {
+            showToast(`💾 Role mapping saved for ${actionId}`);
+        }
+
+        function showToast(message) {
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+        }
+
+        // Close modal on overlay click
+        document.getElementById('actionModal').addEventListener('click', function (e) {
+            if (e.target === this) closeModal();
+        });
+    </script>
+    <script src="./dept-my-items.js"></script>
+    <script src="./dept-approval.js"></script>
+    <script src="./dept-actions.js"></script>
+</body>
+
+</html>

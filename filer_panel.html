@@ -1,0 +1,1484 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Filer Panel — CMS Compliance Suite</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --primary:#0f172a;--primary-light:#1e293b;
+  --accent:#3b82f6;--accent-dark:#2563eb;--accent-glow:rgba(59,130,246,0.15);
+  --success:#10b981;--success-bg:rgba(16,185,129,0.08);
+  --warning:#f59e0b;--warning-bg:rgba(245,158,11,0.08);
+  --danger:#ef4444;--danger-bg:rgba(239,68,68,0.08);
+  --info:#06b6d4;--info-bg:rgba(6,182,212,0.08);
+  --purple:#8b5cf6;--purple-bg:rgba(139,92,246,0.08);
+  --teal:#14b8a6;--teal-bg:rgba(20,184,166,0.08);
+  --light-bg:#f1f5f9;--white:#fff;
+  --border:#e2e8f0;--border-light:#f1f5f9;
+  --text-primary:#0f172a;--text-secondary:#64748b;--text-muted:#94a3b8;
+  --sidebar-w:240px;--topbar-h:60px;
+  --radius:10px;--shadow:0 4px 16px rgba(0,0,0,0.08);--shadow-lg:0 10px 40px rgba(0,0,0,0.12);
+}
+body{font-family:'DM Sans',sans-serif;background:var(--light-bg);color:var(--text-primary);min-height:100vh;display:flex;font-size:14px;line-height:1.5;}
+
+/* ── SIDEBAR ── */
+#sidebar{width:var(--sidebar-w);min-width:var(--sidebar-w);height:100vh;position:fixed;left:0;top:0;background:var(--primary);display:flex;flex-direction:column;z-index:100;transition:width .25s,min-width .25s;overflow:hidden;}
+#sidebar.collapsed{width:60px;min-width:60px;}
+.sb-collapse-btn{position:absolute;top:19px;right:-11px;width:22px;height:22px;border-radius:50%;background:var(--accent);border:none;color:#fff;cursor:pointer;font-size:11px;display:flex;align-items:center;justify-content:center;z-index:10;box-shadow:0 2px 8px rgba(59,130,246,.4);transition:transform .25s;}
+#sidebar.collapsed .sb-collapse-btn{transform:rotate(180deg);}
+.sb-logo{display:flex;align-items:center;gap:10px;padding:20px 16px 22px;border-bottom:1px solid rgba(255,255,255,.06);}
+.sb-logo-icon{width:34px;height:34px;min-width:34px;background:var(--teal);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:17px;color:#fff;}
+.sb-logo-text{overflow:hidden;white-space:nowrap;}
+.sb-logo-main{display:block;font-weight:700;font-size:15px;color:#fff;letter-spacing:.02em;}
+.sb-logo-sub{display:block;font-size:10px;color:rgba(255,255,255,.38);letter-spacing:.07em;text-transform:uppercase;}
+.sb-nav{flex:1;padding:14px 10px;overflow-y:auto;overflow-x:hidden;}
+.sb-nav ul{list-style:none;display:flex;flex-direction:column;gap:2px;}
+.nav-item>a{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:7px;color:rgba(255,255,255,.52);text-decoration:none;font-size:13px;font-weight:500;transition:all .2s;white-space:nowrap;cursor:pointer;}
+.nav-item>a:hover{background:rgba(255,255,255,.07);color:#fff;}
+.nav-item.active>a{background:var(--teal);color:#fff;box-shadow:0 2px 12px rgba(20,184,166,.3);}
+.nav-icon{font-size:15px;min-width:20px;text-align:center;}
+.nav-label{flex:1;}
+.submenu-arrow{font-size:11px;margin-left:auto;transition:transform .2s;}
+.nav-item.open>.nav-link .submenu-arrow{transform:rotate(90deg);}
+.submenu{list-style:none;padding-left:32px;overflow:hidden;max-height:0;transition:max-height .3s ease;}
+.nav-item.open .submenu{max-height:220px;}
+.submenu li a{display:block;padding:7px 10px;color:rgba(255,255,255,.42);text-decoration:none;font-size:12.5px;border-radius:5px;transition:all .2s;white-space:nowrap;}
+.submenu li a:hover{color:#fff;background:rgba(255,255,255,.06);}
+.submenu li.active a{color:#fff;background:rgba(20,184,166,.35);}
+.sb-section-label{font-size:10px;font-weight:700;color:rgba(255,255,255,.25);text-transform:uppercase;letter-spacing:.08em;padding:14px 12px 4px;}
+.sb-footer{padding:14px 12px;border-top:1px solid rgba(255,255,255,.06);}
+.user-mini{display:flex;align-items:center;gap:10px;overflow:hidden;}
+.user-av-sm{width:32px;height:32px;min-width:32px;border-radius:8px;background:var(--teal);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;}
+.user-info-sm{overflow:hidden;white-space:nowrap;}
+.user-name-sm{display:block;font-size:12.5px;font-weight:600;color:#fff;}
+.user-role-sm{display:block;font-size:11px;color:rgba(255,255,255,.38);}
+
+/* ── MAIN ── */
+#main-wrapper{margin-left:var(--sidebar-w);flex:1;display:flex;flex-direction:column;min-height:100vh;transition:margin-left .25s;}
+#sidebar.collapsed~#main-wrapper{margin-left:60px;}
+
+/* ── TOPBAR ── */
+#topbar{height:var(--topbar-h);background:#fff;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 24px;position:sticky;top:0;z-index:50;}
+.topbar-left h1{font-size:16px;font-weight:600;}
+.topbar-right{display:flex;align-items:center;gap:12px;}
+.search-bar-btn{display:flex;align-items:center;gap:8px;padding:7px 14px;background:var(--light-bg);border:1px solid var(--border);border-radius:8px;cursor:pointer;color:var(--text-secondary);font-size:13px;font-family:'DM Sans',sans-serif;transition:all .2s;}
+.search-bar-btn:hover{border-color:var(--teal);}
+.search-placeholder{color:var(--text-muted);}
+kbd{background:#e2e8f0;border-radius:4px;padding:1px 5px;font-size:11px;font-family:'DM Mono',monospace;}
+.icon-btn{background:none;border:none;cursor:pointer;width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;position:relative;transition:background .2s;font-size:16px;}
+.icon-btn:hover{background:var(--light-bg);}
+.notif-badge{position:absolute;top:4px;right:4px;background:var(--danger);color:#fff;width:16px;height:16px;border-radius:50%;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;}
+.profile-wrap{position:relative;}
+.profile-btn{display:flex;align-items:center;gap:8px;background:none;border:none;cursor:pointer;padding:5px 8px;border-radius:8px;transition:background .2s;}
+.profile-btn:hover{background:var(--light-bg);}
+.user-av{width:30px;height:30px;border-radius:8px;background:var(--teal);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;}
+.user-av.lg{width:40px;height:40px;font-size:13px;}
+.profile-name{font-size:13px;font-weight:600;}
+.drop-arrow{font-size:10px;color:var(--text-muted);}
+.profile-dd{position:absolute;top:calc(100% + 8px);right:0;width:220px;background:#fff;border:1px solid var(--border);border-radius:12px;box-shadow:var(--shadow-lg);padding:8px;z-index:200;opacity:0;pointer-events:none;transform:translateY(-6px);transition:all .2s;}
+.profile-dd.open{opacity:1;pointer-events:all;transform:translateY(0);}
+.pd-head{display:flex;align-items:center;gap:10px;padding:8px;}
+.pd-name{font-weight:600;font-size:13px;}
+.pd-email{font-size:11px;color:var(--text-muted);}
+.profile-dd hr{border:none;border-top:1px solid var(--border);margin:6px 0;}
+.pd-item{display:block;padding:8px 12px;border-radius:7px;font-size:13px;color:var(--text-primary);text-decoration:none;transition:background .15s;}
+.pd-item:hover{background:var(--light-bg);}
+.pd-item.danger{color:var(--danger);}
+
+/* ── CONTENT ── */
+#content-area{flex:1;padding:24px;overflow-y:auto;}
+.page{display:none;animation:fadeIn .2s ease;}
+.page.active{display:block;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+
+/* ── STAT CARDS ── */
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(175px,1fr));gap:14px;margin-bottom:22px;}
+.stat-card{background:#fff;border-radius:var(--radius);padding:18px;border:1px solid var(--border);position:relative;overflow:hidden;transition:box-shadow .2s,transform .2s;}
+.stat-card:hover{box-shadow:var(--shadow);transform:translateY(-1px);}
+.sc-icon{width:38px;height:38px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:17px;margin-bottom:12px;}
+.sc-val{font-size:26px;font-weight:700;line-height:1;margin-bottom:4px;}
+.sc-label{font-size:12px;color:var(--text-secondary);font-weight:500;}
+.sc-delta{font-size:11px;margin-top:6px;font-weight:600;}
+.sc-delta.up{color:var(--success);}
+.sc-delta.down{color:var(--danger);}
+.sc-delta.neutral{color:var(--text-muted);}
+.stat-card::after{content:'';position:absolute;right:-10px;bottom:-10px;width:60px;height:60px;border-radius:50%;opacity:.07;}
+.sc-teal .sc-icon{background:var(--teal-bg);color:var(--teal);} .sc-teal::after{background:var(--teal);}
+.sc-blue .sc-icon{background:var(--accent-glow);color:var(--accent);} .sc-blue::after{background:var(--accent);}
+.sc-green .sc-icon{background:var(--success-bg);color:var(--success);} .sc-green::after{background:var(--success);}
+.sc-orange .sc-icon{background:var(--warning-bg);color:var(--warning);} .sc-orange::after{background:var(--warning);}
+.sc-red .sc-icon{background:var(--danger-bg);color:var(--danger);} .sc-red::after{background:var(--danger);}
+.sc-purple .sc-icon{background:var(--purple-bg);color:var(--purple);} .sc-purple::after{background:var(--purple);}
+.sc-cyan .sc-icon{background:var(--info-bg);color:var(--info);} .sc-cyan::after{background:var(--info);}
+
+/* ── LAYOUT ── */
+.dash-row{display:grid;grid-template-columns:1fr 330px;gap:16px;margin-bottom:16px;}
+@media(max-width:1150px){.dash-row{grid-template-columns:1fr;}}
+.card{background:#fff;border-radius:var(--radius);border:1px solid var(--border);overflow:hidden;}
+.card-hd{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--border-light);}
+.card-title{font-size:13.5px;font-weight:600;}
+.card-link{font-size:12px;color:var(--teal);text-decoration:none;font-weight:500;cursor:pointer;}
+.card-link:hover{text-decoration:underline;}
+.card-body{padding:18px;}
+
+/* Deadline list */
+.deadline-list{display:flex;flex-direction:column;gap:8px;}
+.dl-item{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:8px;background:var(--light-bg);cursor:pointer;transition:background .2s;}
+.dl-item:hover{background:#e2f0ef;}
+.dl-dot{width:8px;height:8px;min-width:8px;border-radius:50%;}
+.dl-dot.critical{background:var(--danger);}
+.dl-dot.high{background:var(--warning);}
+.dl-dot.normal{background:var(--success);}
+.dl-info{flex:1;}
+.dl-title{font-size:13px;font-weight:500;}
+.dl-meta{font-size:11.5px;color:var(--text-muted);}
+.dl-due{font-size:11px;font-weight:600;white-space:nowrap;}
+.dl-due.overdue{color:var(--danger);}
+.dl-due.soon{color:var(--warning);}
+
+/* Activity */
+.activity-feed{display:flex;flex-direction:column;}
+.act-item{display:flex;gap:12px;padding:11px 0;border-bottom:1px solid var(--border-light);}
+.act-item:last-child{border-bottom:none;}
+.act-dot{width:28px;height:28px;min-width:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;margin-top:1px;}
+.act-dot.filed{background:var(--teal-bg);color:var(--teal);}
+.act-dot.clarif{background:var(--warning-bg);color:var(--warning);}
+.act-dot.rejected{background:var(--danger-bg);color:var(--danger);}
+.act-dot.received{background:var(--accent-glow);color:var(--accent);}
+.act-dot.ack{background:var(--success-bg);color:var(--success);}
+.act-text{font-size:13px;line-height:1.4;}
+.act-time{font-size:11px;color:var(--text-muted);margin-top:2px;}
+
+/* Progress */
+.prog-row{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+.prog-label{font-size:12px;color:var(--text-secondary);width:120px;flex-shrink:0;}
+.prog-wrap{flex:1;background:var(--light-bg);border-radius:99px;height:6px;overflow:hidden;}
+.prog-bar{height:100%;border-radius:99px;}
+.prog-val{font-size:12px;font-weight:600;width:36px;text-align:right;}
+
+/* Filing ring */
+.ring-wrap{width:86px;height:86px;position:relative;margin:0 auto 8px;}
+.ring-wrap svg{transform:rotate(-90deg);}
+.ring-val{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:17px;font-weight:700;color:var(--teal);}
+.ring-lbl{text-align:center;font-size:12px;color:var(--text-secondary);}
+
+/* Outcome bars */
+.outcome-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;}
+.oc-label{font-size:11px;color:var(--text-muted);font-weight:700;text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px;}
+.oc-val{font-size:26px;font-weight:700;}
+.meter-wrap{background:var(--light-bg);border-radius:99px;height:6px;margin-top:8px;overflow:hidden;}
+.meter-bar{height:100%;border-radius:99px;}
+.oc-sub{font-size:12px;color:var(--text-muted);margin-top:4px;}
+
+/* ── TABLE ── */
+.table-toolbar{display:flex;align-items:center;gap:8px;margin-bottom:14px;flex-wrap:wrap;}
+.search-input{flex:1;min-width:180px;padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:13px;outline:none;transition:border-color .2s;}
+.search-input:focus{border-color:var(--teal);}
+.filter-sel{padding:7px 11px;border:1px solid var(--border);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:13px;outline:none;color:var(--text-primary);background:#fff;cursor:pointer;}
+.filter-sel:focus{border-color:var(--teal);}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 15px;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;cursor:pointer;border:none;transition:all .2s;}
+.btn-teal{background:var(--teal);color:#fff;}
+.btn-teal:hover{background:#0d9488;}
+.btn-ghost{background:none;border:1px solid var(--border);color:var(--text-primary);}
+.btn-ghost:hover{background:var(--light-bg);}
+.btn-sm{padding:5px 11px;font-size:12px;}
+.btn-success{background:var(--success);color:#fff;}
+.btn-success:hover{background:#059669;}
+.btn-danger{background:var(--danger);color:#fff;}
+.btn-danger:hover{background:#dc2626;}
+.btn-warning{background:var(--warning);color:#fff;}
+.btn-warning:hover{background:#d97706;}
+.btn-accent{background:var(--accent);color:#fff;}
+.btn-accent:hover{background:var(--accent-dark);}
+.btn-purple{background:var(--purple);color:#fff;}
+.btn-purple:hover{background:#7c3aed;}
+
+.tbl-wrap{overflow-x:auto;}
+table{width:100%;border-collapse:collapse;}
+thead tr{background:var(--light-bg);}
+th{padding:10px 13px;text-align:left;font-size:11px;font-weight:700;color:var(--text-secondary);letter-spacing:.04em;text-transform:uppercase;border-bottom:1px solid var(--border);white-space:nowrap;}
+td{padding:12px 13px;font-size:13px;border-bottom:1px solid var(--border-light);vertical-align:middle;}
+tr:last-child td{border-bottom:none;}
+tbody tr{transition:background .15s;}
+tbody tr:hover{background:#f6fffe;}
+tr.overdue-row td:first-child{border-left:3px solid var(--danger);}
+tr.soon-row td:first-child{border-left:3px solid var(--warning);}
+
+/* Chips */
+.chip{display:inline-flex;align-items:center;gap:3px;padding:3px 9px;border-radius:99px;font-size:11.5px;font-weight:600;}
+.ch-pending{background:var(--warning-bg);color:#92400e;}
+.ch-filed{background:var(--teal-bg);color:#0f766e;}
+.ch-ack{background:var(--success-bg);color:#065f46;}
+.ch-rejected{background:var(--danger-bg);color:#991b1b;}
+.ch-clarif{background:var(--purple-bg);color:#5b21b6;}
+.ch-inprogress{background:var(--info-bg);color:#0e7490;}
+.ch-overdue{background:var(--danger-bg);color:#991b1b;}
+.ch-rereview{background:var(--warning-bg);color:#92400e;}
+.ch-critical{background:#fce7f3;color:#9d174d;}
+.ch-high{background:var(--danger-bg);color:#991b1b;}
+.ch-medium{background:var(--warning-bg);color:#92400e;}
+.ch-low{background:var(--success-bg);color:#065f46;}
+.ch-rbi{background:#eff6ff;color:#1e40af;}
+.ch-sebi{background:#f0fdf4;color:#14532d;}
+.ch-irdai{background:#fdf4ff;color:#6b21a8;}
+.ch-int{background:#f8fafc;color:#475569;}
+
+.pdot{width:6px;height:6px;border-radius:50%;display:inline-block;}
+.pdot.critical{background:#ec4899;}
+.pdot.high{background:var(--danger);}
+.pdot.medium{background:var(--warning);}
+.pdot.low{background:var(--success);}
+
+.tag{display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;background:var(--light-bg);color:var(--text-secondary);font-weight:500;}
+
+.tbl-btn{padding:4px 11px;border-radius:6px;border:1px solid var(--teal);background:none;color:var(--teal);font-size:12px;font-weight:600;cursor:pointer;transition:all .2s;font-family:'DM Sans',sans-serif;}
+.tbl-btn:hover{background:var(--teal);color:#fff;}
+
+/* Pagination */
+.pagination{display:flex;align-items:center;gap:5px;padding-top:14px;}
+.pg-btn{width:30px;height:30px;border-radius:6px;border:1px solid var(--border);background:#fff;cursor:pointer;font-size:12px;font-weight:500;transition:all .2s;display:flex;align-items:center;justify-content:center;}
+.pg-btn:hover{border-color:var(--teal);color:var(--teal);}
+.pg-btn.active{background:var(--teal);color:#fff;border-color:var(--teal);}
+.pg-info{font-size:12px;color:var(--text-muted);margin-left:auto;}
+
+/* Section header */
+.sec-hd{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:20px;}
+.sec-hd h2{font-size:17px;font-weight:700;}
+.sec-hd p{font-size:13px;color:var(--text-muted);margin-top:2px;}
+
+/* ── FILING DETAIL ── */
+.detail-topbar{display:flex;align-items:center;gap:12px;margin-bottom:20px;flex-wrap:wrap;}
+.back-btn{display:flex;align-items:center;gap:6px;background:none;border:1px solid var(--border);padding:7px 13px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:500;color:var(--text-secondary);font-family:'DM Sans',sans-serif;transition:all .2s;}
+.back-btn:hover{border-color:var(--teal);color:var(--teal);}
+.breadcrumb{display:flex;align-items:center;gap:5px;font-size:12px;color:var(--text-muted);margin-bottom:3px;}
+.breadcrumb a{color:var(--teal);text-decoration:none;cursor:pointer;}
+.detail-title-big{font-size:18px;font-weight:700;}
+.detail-layout{display:grid;grid-template-columns:1fr 360px;gap:18px;align-items:start;}
+@media(max-width:1100px){.detail-layout{grid-template-columns:1fr;}}
+
+.d-card{background:#fff;border-radius:var(--radius);border:1px solid var(--border);margin-bottom:14px;overflow:hidden;}
+.d-card-hd{padding:13px 16px;border-bottom:1px solid var(--border-light);font-size:13px;font-weight:600;display:flex;align-items:center;gap:7px;}
+.d-card-body{padding:16px;}
+
+.meta-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.meta-item label{display:block;font-size:10.5px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:3px;}
+.meta-item span{font-size:13px;font-weight:500;}
+
+/* Circular ref */
+.circ-box{background:linear-gradient(135deg,#f0fdfa,#e0f2fe);border:1px solid #99f6e4;border-radius:8px;padding:13px;margin-bottom:12px;}
+.circ-ref-lbl{font-size:11px;font-weight:700;color:var(--teal);margin-bottom:4px;text-transform:uppercase;letter-spacing:.05em;}
+.circ-ref-id{font-size:13px;font-family:'DM Mono',monospace;margin-bottom:5px;color:var(--text-primary);}
+.circ-ref-desc{font-size:12.5px;color:var(--text-secondary);line-height:1.5;}
+
+/* Clause list */
+.clause-list{display:flex;flex-direction:column;gap:10px;}
+.clause-row{background:var(--light-bg);border-radius:8px;padding:12px 13px;border-left:3px solid var(--teal);}
+.clause-hd{display:flex;align-items:center;gap:8px;margin-bottom:5px;}
+.clause-ref{font-size:11.5px;font-family:'DM Mono',monospace;color:var(--teal);font-weight:500;}
+.clause-text{font-size:13px;line-height:1.5;}
+.clause-compliance{margin-top:8px;display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text-secondary);}
+.clause-compliance select{padding:3px 8px;border:1px solid var(--border);border-radius:5px;font-size:12px;font-family:'DM Sans',sans-serif;outline:none;}
+
+/* Document list */
+.doc-list{display:flex;flex-direction:column;gap:8px;}
+.doc-item{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--light-bg);border-radius:8px;cursor:pointer;transition:background .2s;}
+.doc-item:hover{background:#e0f2f0;}
+.doc-icon{width:32px;height:32px;min-width:32px;border-radius:6px;background:var(--teal-bg);display:flex;align-items:center;justify-content:center;font-size:14px;}
+.doc-name{font-size:13px;font-weight:500;flex:1;}
+.doc-type{font-size:11px;color:var(--text-muted);}
+.doc-size{font-size:11px;color:var(--text-muted);}
+.doc-actions{display:flex;gap:6px;}
+.doc-btn{font-size:11px;font-weight:600;color:var(--teal);cursor:pointer;background:none;border:none;font-family:'DM Sans',sans-serif;padding:0;}
+.doc-btn.red{color:var(--danger);}
+
+/* Upload zone */
+.upload-zone{border:2px dashed var(--border);border-radius:8px;padding:24px;text-align:center;cursor:pointer;transition:all .2s;color:var(--text-muted);}
+.upload-zone:hover{border-color:var(--teal);background:var(--teal-bg);}
+.upload-zone .upload-icon{font-size:28px;margin-bottom:8px;}
+.upload-zone p{font-size:13px;}
+.upload-zone span{font-size:11px;color:var(--text-muted);}
+
+/* Pre-filing checklist */
+.checklist-items{display:flex;flex-direction:column;gap:8px;}
+.chk-row{display:flex;align-items:flex-start;gap:9px;padding:9px 11px;border-radius:7px;border:1px solid var(--border-light);transition:border-color .2s;}
+.chk-row:has(input:checked){border-color:var(--teal);background:var(--teal-bg);}
+.chk-row input{width:15px;height:15px;cursor:pointer;margin-top:2px;accent-color:var(--teal);}
+.chk-row label{font-size:13px;cursor:pointer;line-height:1.4;}
+.chk-progress{display:flex;align-items:center;gap:10px;margin-bottom:14px;}
+.chk-prog-bar{flex:1;background:var(--light-bg);border-radius:99px;height:6px;overflow:hidden;}
+.chk-prog-fill{height:100%;background:var(--teal);border-radius:99px;transition:width .3s;}
+.chk-prog-label{font-size:12px;color:var(--text-secondary);white-space:nowrap;}
+
+/* Audit trail timeline */
+.timeline{display:flex;flex-direction:column;gap:0;position:relative;}
+.timeline::before{content:'';position:absolute;left:15px;top:20px;bottom:20px;width:2px;background:var(--border);}
+.tl-item{display:flex;gap:14px;padding:0 0 18px 0;position:relative;}
+.tl-dot{width:32px;height:32px;min-width:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;z-index:1;border:2px solid #fff;}
+.tl-dot.filed{background:var(--teal-bg);color:var(--teal);border-color:var(--teal);}
+.tl-dot.clarif{background:var(--warning-bg);color:var(--warning);border-color:var(--warning);}
+.tl-dot.rejected{background:var(--danger-bg);color:var(--danger);border-color:var(--danger);}
+.tl-dot.received{background:var(--accent-glow);color:var(--accent);border-color:var(--accent);}
+.tl-dot.ack{background:var(--success-bg);color:var(--success);border-color:var(--success);}
+.tl-dot.assigned{background:var(--purple-bg);color:var(--purple);border-color:var(--purple);}
+.tl-content{flex:1;padding-top:4px;}
+.tl-title{font-size:13px;font-weight:600;margin-bottom:2px;}
+.tl-desc{font-size:12.5px;color:var(--text-secondary);line-height:1.5;}
+.tl-time{font-size:11px;color:var(--text-muted);margin-top:3px;}
+
+/* Filing actions panel */
+.filing-actions{display:flex;flex-direction:column;gap:10px;}
+.action-card{border:1px solid var(--border);border-radius:8px;padding:14px;cursor:pointer;transition:all .2s;}
+.action-card:hover{border-color:var(--teal);box-shadow:0 2px 12px rgba(20,184,166,.12);}
+.action-card.selected{border-color:var(--teal);background:var(--teal-bg);}
+.ac-title{font-size:13.5px;font-weight:600;margin-bottom:3px;display:flex;align-items:center;gap:8px;}
+.ac-desc{font-size:12px;color:var(--text-secondary);line-height:1.5;}
+
+/* Form */
+.feedback-form{display:flex;flex-direction:column;gap:11px;}
+.form-label{display:block;font-size:12px;font-weight:600;color:var(--text-secondary);margin-bottom:5px;}
+.form-input,.form-select,.form-textarea{width:100%;padding:8px 11px;border:1px solid var(--border);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:13px;outline:none;transition:border-color .2s;background:#fff;color:var(--text-primary);}
+.form-input:focus,.form-select:focus,.form-textarea:focus{border-color:var(--teal);}
+.form-textarea{resize:vertical;min-height:80px;line-height:1.5;}
+
+/* Sub tabs */
+.sub-tabs{display:flex;gap:0;border-bottom:2px solid var(--border);margin-bottom:16px;}
+.sub-tab{padding:9px 18px;background:none;border:none;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;color:var(--text-secondary);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;transition:all .2s;}
+.sub-tab.active{color:var(--teal);border-bottom-color:var(--teal);}
+
+/* History expand */
+.h-detail{margin-top:5px;padding:11px 13px;background:var(--light-bg);border-radius:7px;font-size:13px;line-height:1.6;color:var(--text-secondary);display:none;}
+.h-detail.open{display:block;}
+.expand-btn{background:none;border:none;cursor:pointer;color:var(--teal);font-size:11px;font-weight:600;padding:0;font-family:'DM Sans',sans-serif;}
+
+/* Metrics */
+.metrics-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px;margin-bottom:22px;}
+.metric-block{background:#fff;border:1px solid var(--border);border-radius:var(--radius);padding:16px;}
+.mb-lbl{font-size:11.5px;color:var(--text-secondary);margin-bottom:4px;}
+.mb-val{font-size:30px;font-weight:700;margin-bottom:2px;}
+.mb-trend{font-size:12px;font-weight:600;margin-top:6px;}
+.mb-trend.up{color:var(--success);}
+.mb-trend.down{color:var(--danger);}
+
+/* Inbox badge */
+.inbox-count{background:var(--danger);color:#fff;border-radius:99px;padding:1px 7px;font-size:10px;margin-left:4px;}
+
+/* Toast */
+.toast-wrap{position:fixed;bottom:22px;right:22px;display:flex;flex-direction:column;gap:7px;z-index:9999;}
+.toast{padding:11px 16px;border-radius:10px;font-size:13px;font-weight:500;color:#fff;box-shadow:var(--shadow-lg);animation:slideUp .25s ease;}
+.toast.success{background:var(--success);}
+.toast.error{background:var(--danger);}
+.toast.info{background:var(--teal);}
+.toast.warning{background:var(--warning);}
+@keyframes slideUp{from{transform:translateY(14px);opacity:0;}to{transform:translateY(0);opacity:1;}}
+
+::-webkit-scrollbar{width:4px;height:4px;}
+::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:99px;}
+</style>
+</head>
+<body>
+
+<!-- ═══════════ SIDEBAR ═══════════ -->
+<aside id="sidebar">
+  <button class="sb-collapse-btn" id="sb-toggle">‹</button>
+  <div class="sb-logo">
+    <div class="sb-logo-icon">⬡</div>
+    <div class="sb-logo-text">
+      <span class="sb-logo-main">CMS</span>
+      <span class="sb-logo-sub">Compliance Suite</span>
+    </div>
+  </div>
+
+  <nav class="sb-nav">
+    <ul>
+      <li class="nav-item active" id="nav-dashboard">
+        <a href="#" onclick="navigate('dashboard');return false;">
+          <span class="nav-icon">▦</span><span class="nav-label">Dashboard</span>
+        </a>
+      </li>
+
+      <li class="nav-item has-submenu open" id="nav-inbox">
+        <a href="#" class="nav-link" onclick="toggleSub('nav-inbox');return false;">
+          <span class="nav-icon">📥</span><span class="nav-label">My Inbox</span>
+          <span class="submenu-arrow">›</span>
+        </a>
+        <ul class="submenu">
+          <li id="sub-pending"><a href="#" onclick="navigate('pending');return false;">Pending Filing <span class="inbox-count">6</span></a></li>
+          <li id="sub-inprogress"><a href="#" onclick="navigate('inprogress');return false;">In Progress <span class="inbox-count" style="background:var(--warning);">3</span></a></li>
+          <li id="sub-clarif"><a href="#" onclick="navigate('clarif');return false;">Clarification Requested</a></li>
+          <li id="sub-myitems"><a href="#" onclick="navigate('myitems');return false;">My Items</a></li>
+        </ul>
+      </li>
+
+      <li class="nav-item" id="nav-audit">
+        <a href="#" onclick="navigate('audit');return false;">
+          <span class="nav-icon">📋</span><span class="nav-label">Audit Trail</span>
+        </a>
+      </li>
+
+      <li class="nav-item" id="nav-archive">
+        <a href="#" onclick="navigate('archive');return false;">
+          <span class="nav-icon">🗄</span><span class="nav-label">Archive</span>
+        </a>
+      </li>
+
+      <div class="sb-section-label">Platform</div>
+
+      <!-- <li class="nav-item has-submenu" id="nav-ai">
+        <a href="#" class="nav-link" onclick="toggleSub('nav-ai');return false;">
+          <span class="nav-icon">◈</span><span class="nav-label">AI Engine</span>
+          <span class="submenu-arrow">›</span>
+        </a>
+        <ul class="submenu">
+          <li><a href="#">Applicability Analysis</a></li>
+          <li><a href="#">Executive Summary</a></li>
+          <li><a href="#">Clause Generation</a></li>
+        </ul>
+      </li> -->
+
+
+      <li class="nav-item" id="nav-reports">
+        <a href="#"><span class="nav-icon">◧</span><span class="nav-label">Reports</span></a>
+      </li>
+      <li class="nav-item" id="nav-settings">
+        <a href="#"><span class="nav-icon">⚙</span><span class="nav-label">Settings</span></a>
+      </li>
+    </ul>
+  </nav>
+
+  <div class="sb-footer">
+    <div class="user-mini">
+      <div class="user-av-sm">RV</div>
+      <div class="user-info-sm">
+        <span class="user-name-sm">Riya Verma</span>
+        <span class="user-role-sm">Compliance Filer</span>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<!-- ═══════════ MAIN ═══════════ -->
+<div id="main-wrapper">
+  <header id="topbar">
+    <div class="topbar-left"><h1 id="page-title">Dashboard</h1></div>
+    <div class="topbar-right">
+      <button class="search-bar-btn">
+        <span style="font-size:16px;">⌕</span>
+        <span class="search-placeholder">Ask AI anything...</span>
+        <kbd>⌘K</kbd>
+      </button>
+      <button class="icon-btn">🔔<span class="notif-badge">4</span></button>
+      <div class="profile-wrap">
+        <button class="profile-btn" id="profile-btn">
+          <div class="user-av">RV</div>
+          <span class="profile-name">Riya Verma</span>
+          <span class="drop-arrow">▾</span>
+        </button>
+        <div class="profile-dd" id="profile-dd">
+          <div class="pd-head">
+            <div class="user-av lg">RV</div>
+            <div><div class="pd-name">Riya Verma</div><div class="pd-email">riya@cms.co.in</div></div>
+          </div>
+          <hr/>
+          <a href="#" class="pd-item">My Profile</a>
+          <a href="#" class="pd-item">Filing Preferences</a>
+          <a href="#" class="pd-item">Audit Log</a>
+          <hr/>
+          <a href="#" class="pd-item danger">Sign Out</a>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div id="content-area">
+
+    <!-- ══════════════════════════════════
+         DASHBOARD
+    ══════════════════════════════════ -->
+    <div class="page active" id="page-dashboard">
+      <div class="stats-grid">
+        <div class="stat-card sc-teal"><div class="sc-icon">📤</div><div class="sc-val">6</div><div class="sc-label">Pending Filing</div><div class="sc-delta down">3 overdue</div></div>
+        <div class="stat-card sc-orange"><div class="sc-icon">⚡</div><div class="sc-val">2</div><div class="sc-label">Overdue Filings</div><div class="sc-delta down">Past deadline</div></div>
+        <div class="stat-card sc-blue"><div class="sc-icon">🔄</div><div class="sc-val">3</div><div class="sc-label">In Progress</div><div class="sc-delta neutral">Drafts saved</div></div>
+        <div class="stat-card sc-purple"><div class="sc-icon">💬</div><div class="sc-val">2</div><div class="sc-label">Clarif. Requested</div><div class="sc-delta neutral">Awaiting response</div></div>
+        <div class="stat-card sc-green"><div class="sc-icon">✅</div><div class="sc-val">31</div><div class="sc-label">Filed (Mar)</div><div class="sc-delta up">↑ 8% vs Feb</div></div>
+
+      </div>
+
+      <div class="dash-row">
+        <!-- Upcoming deadlines -->
+        <div class="card">
+          <div class="card-hd">
+            <span class="card-title">⏰ Upcoming Filing Deadlines</span>
+            <a class="card-link" onclick="navigate('pending')">View All →</a>
+          </div>
+          <div class="card-body">
+            <div class="deadline-list">
+              <div class="dl-item" onclick="openFiling('FIL-009')">
+                <div class="dl-dot critical"></div>
+                <div class="dl-info"><div class="dl-title">FIL-009 — RBI Annual Return on AML</div><div class="dl-meta">Circular: RBI/2024/AML/045 · RBI Portal</div></div>
+                <div class="dl-due overdue">2d overdue</div>
+              </div>
+              <div class="dl-item" onclick="openFiling('FIL-013')">
+                <div class="dl-dot critical"></div>
+                <div class="dl-info"><div class="dl-title">FIL-013 — SEBI Half-Yearly Compliance Report</div><div class="dl-meta">Circular: SEBI/HO/2024/088 · SEBI SCORES</div></div>
+                <div class="dl-due overdue">1d overdue</div>
+              </div>
+              <div class="dl-item" onclick="openFiling('FIL-017')">
+                <div class="dl-dot high"></div>
+                <div class="dl-info"><div class="dl-title">FIL-017 — IRDAI Quarterly Solvency Statement</div><div class="dl-meta">Circular: IRDAI/F&A/CIR/2025/01 · IRDAI Portal</div></div>
+                <div class="dl-due soon">Due tomorrow</div>
+              </div>
+              <div class="dl-item" onclick="openFiling('FIL-021')">
+                <div class="dl-dot high"></div>
+                <div class="dl-info"><div class="dl-title">FIL-021 — RBI CRAR Return Q4</div><div class="dl-meta">Circular: RBI/CRAR/2025/01 · RBI XBRL</div></div>
+                <div class="dl-due soon">Due in 2 days</div>
+              </div>
+              <div class="dl-item" onclick="openFiling('FIL-025')">
+                <div class="dl-dot normal"></div>
+                <div class="dl-info"><div class="dl-title">FIL-025 — Internal GDPR Processing Register</div><div class="dl-meta">Circular: GDPR/Art35/2024 · Internal DMS</div></div>
+                <div class="dl-due" style="color:var(--text-muted);">Due in 5 days</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right col -->
+        <div>
+          <!-- Filing rate ring -->
+          <div class="card" style="margin-bottom:14px;">
+            <div class="card-hd"><span class="card-title">📈 On-Time Filing Rate</span></div>
+            <div class="card-body" style="text-align:center;padding:18px 16px;">
+              <div class="ring-wrap">
+                <svg width="86" height="86" viewBox="0 0 86 86">
+                  <circle cx="43" cy="43" r="35" fill="none" stroke="#e2e8f0" stroke-width="8"/>
+                  <circle cx="43" cy="43" r="35" fill="none" stroke="#14b8a6" stroke-width="8" stroke-dasharray="220" stroke-dashoffset="7" stroke-linecap="round"/>
+                </svg>
+                <div class="ring-val">97%</div>
+              </div>
+              <div class="ring-lbl">Filings on time this month</div>
+              <div style="margin-top:14px;">
+                <div class="prog-row"><span class="prog-label">RBI Returns</span><div class="prog-wrap"><div class="prog-bar" style="width:100%;background:var(--teal);"></div></div><span class="prog-val" style="color:var(--teal);">100%</span></div>
+                <div class="prog-row"><span class="prog-label">SEBI Reports</span><div class="prog-wrap"><div class="prog-bar" style="width:92%;background:var(--warning);"></div></div><span class="prog-val" style="color:var(--warning);">92%</span></div>
+                <div class="prog-row"><span class="prog-label">IRDAI Filings</span><div class="prog-wrap"><div class="prog-bar" style="width:95%;background:var(--success);"></div></div><span class="prog-val" style="color:var(--success);">95%</span></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Recent activity -->
+          <div class="card">
+            <div class="card-hd"><span class="card-title">🕐 Recent Activity</span></div>
+            <div class="card-body" style="padding:12px 16px;">
+              <div class="activity-feed">
+                <div class="act-item"><div class="act-dot filed">↑</div><div><div class="act-text">Filed <strong>FIL-007</strong> — KYC Returns</div><div class="act-time">Today, 11:30 AM</div></div></div>
+                <div class="act-item"><div class="act-dot clarif">?</div><div><div class="act-text">Clarification sent for <strong>FIL-013</strong></div><div class="act-time">Yesterday, 4:15 PM</div></div></div>
+                <div class="act-item"><div class="act-dot ack">✓</div><div><div class="act-text">Acknowledgement received: <strong>FIL-005</strong></div><div class="act-time">Mar 3, 2:00 PM</div></div></div>
+                <div class="act-item"><div class="act-dot received">↓</div><div><div class="act-text">New filing assigned: <strong>FIL-021</strong></div><div class="act-time">Mar 2, 9:00 AM</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Outcome distribution -->
+      <div class="card">
+        <div class="card-hd"><span class="card-title">📊 Filing Outcome Distribution — March 2025</span></div>
+        <div class="card-body">
+          <div class="outcome-grid">
+            <div><div class="oc-label">Filed & Ack'd</div><div class="oc-val" style="color:var(--teal);">22</div><div class="meter-wrap"><div class="meter-bar" style="width:71%;background:var(--teal);"></div></div><div class="oc-sub">71% of total</div></div>
+            <div><div class="oc-label">In Progress</div><div class="oc-val" style="color:var(--info);">3</div><div class="meter-wrap"><div class="meter-bar" style="width:10%;background:var(--info);"></div></div><div class="oc-sub">10% of total</div></div>
+            <div><div class="oc-label">Clarification</div><div class="oc-val" style="color:var(--purple);">2</div><div class="meter-wrap"><div class="meter-bar" style="width:6%;background:var(--purple);"></div></div><div class="oc-sub">6% of total</div></div>
+            <div><div class="oc-label">Pending</div><div class="oc-val" style="color:var(--warning);">4</div><div class="meter-wrap"><div class="meter-bar" style="width:13%;background:var(--warning);"></div></div><div class="oc-sub">13% of total</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════
+         PENDING FILING
+    ══════════════════════════════════ -->
+    <div class="page" id="page-pending">
+      <div class="sec-hd">
+        <div><h2>Pending Filing</h2><p>Items ready for submission — click File to open the filing screen</p></div>
+        <button class="btn btn-teal btn-sm">+ New Filing</button>
+      </div>
+      <div class="card">
+        <div class="card-body" style="padding:16px;">
+          <div class="table-toolbar">
+            <input class="search-input" placeholder="🔍  Search by ID, title, regulator…">
+            <select class="filter-sel"><option value="">All Regulators</option><option>RBI</option><option>SEBI</option><option>IRDAI</option><option>Internal</option></select>
+            <select class="filter-sel"><option value="">All Priorities</option><option>Critical</option><option>High</option><option>Medium</option><option>Low</option></select>
+            <select class="filter-sel"><option value="">All Deadlines</option><option>Overdue</option><option>Today</option><option>This Week</option><option>This Month</option></select>
+            <select class="filter-sel"><option value="">Filing Type</option><option>Return</option><option>Report</option><option>Statement</option><option>Register</option></select>
+            <button class="btn btn-ghost btn-sm">⬇ Export</button>
+          </div>
+          <div class="tbl-wrap">
+            <table>
+              <thead><tr><th>Filing ID</th><th>Title</th><th>Regulator</th><th>Circular Ref</th><th>Filing Portal</th><th>Priority</th><th>Deadline</th><th>Status</th><th>Action</th></tr></thead>
+              <tbody>
+                <tr class="overdue-row">
+                  <td><span style="font-family:'DM Mono',monospace;font-size:12px;">FIL-009</span></td>
+                  <td><strong>Annual Return on AML</strong></td>
+                  <td><span class="chip ch-rbi">RBI</span></td>
+                  <td><span style="font-family:'DM Mono',monospace;font-size:11.5px;color:var(--teal);">RBI/2024/AML/045</span></td>
+                  <td><span class="tag">RBI Portal</span></td>
+                  <td><span class="chip ch-critical"><span class="pdot critical"></span> Critical</span></td>
+                  <td style="color:var(--danger);font-weight:600;">Mar 1, 2025</td>
+                  <td><span class="chip ch-overdue">Overdue</span></td>
+                  <td><button class="tbl-btn" onclick="openFiling('FIL-009')">File Now</button></td>
+                </tr>
+                <tr class="overdue-row">
+                  <td><span style="font-family:'DM Mono',monospace;font-size:12px;">FIL-013</span></td>
+                  <td><strong>Half-Yearly Compliance Report</strong></td>
+                  <td><span class="chip ch-sebi">SEBI</span></td>
+                  <td><span style="font-family:'DM Mono',monospace;font-size:11.5px;color:var(--teal);">SEBI/HO/2024/088</span></td>
+                  <td><span class="tag">SEBI SCORES</span></td>
+                  <td><span class="chip ch-high"><span class="pdot high"></span> High</span></td>
+                  <td style="color:var(--danger);font-weight:600;">Mar 2, 2025</td>
+                  <td><span class="chip ch-overdue">Overdue</span></td>
+                  <td><button class="tbl-btn" onclick="openFiling('FIL-013')">File Now</button></td>
+                </tr>
+                <tr class="soon-row">
+                  <td><span style="font-family:'DM Mono',monospace;font-size:12px;">FIL-017</span></td>
+                  <td><strong>Quarterly Solvency Statement</strong></td>
+                  <td><span class="chip ch-irdai">IRDAI</span></td>
+                  <td><span style="font-family:'DM Mono',monospace;font-size:11.5px;color:var(--teal);">IRDAI/F&A/CIR/2025/01</span></td>
+                  <td><span class="tag">IRDAI Portal</span></td>
+                  <td><span class="chip ch-high"><span class="pdot high"></span> High</span></td>
+                  <td style="color:var(--warning);font-weight:600;">Mar 6, 2025</td>
+                  <td><span class="chip ch-inprogress">In Progress</span></td>
+                  <td><button class="tbl-btn" onclick="openFiling('FIL-017')">Continue</button></td>
+                </tr>
+                <tr>
+                  <td><span style="font-family:'DM Mono',monospace;font-size:12px;">FIL-021</span></td>
+                  <td><strong>CRAR Return Q4 FY25</strong></td>
+                  <td><span class="chip ch-rbi">RBI</span></td>
+                  <td><span style="font-family:'DM Mono',monospace;font-size:11.5px;color:var(--teal);">RBI/CRAR/2025/01</span></td>
+                  <td><span class="tag">RBI XBRL</span></td>
+                  <td><span class="chip ch-medium"><span class="pdot medium"></span> Medium</span></td>
+                  <td>Mar 7, 2025</td>
+                  <td><span class="chip ch-pending">Pending</span></td>
+                  <td><button class="tbl-btn" onclick="openFiling('FIL-021')">File Now</button></td>
+                </tr>
+                <tr>
+                  <td><span style="font-family:'DM Mono',monospace;font-size:12px;">FIL-025</span></td>
+                  <td><strong>GDPR Processing Register</strong></td>
+                  <td><span class="chip ch-int">Internal</span></td>
+                  <td><span style="font-family:'DM Mono',monospace;font-size:11.5px;color:var(--teal);">GDPR/Art35/2024</span></td>
+                  <td><span class="tag">Internal DMS</span></td>
+                  <td><span class="chip ch-low"><span class="pdot low"></span> Low</span></td>
+                  <td>Mar 10, 2025</td>
+                  <td><span class="chip ch-pending">Pending</span></td>
+                  <td><button class="tbl-btn" onclick="openFiling('FIL-025')">File Now</button></td>
+                </tr>
+                <tr>
+                  <td><span style="font-family:'DM Mono',monospace;font-size:12px;">FIL-028</span></td>
+                  <td><strong>Anti-Corruption Training Certificate</strong></td>
+                  <td><span class="chip ch-int">Internal</span></td>
+                  <td><span style="font-family:'DM Mono',monospace;font-size:11.5px;color:var(--teal);">INT/HR/ANTI-COR/24</span></td>
+                  <td><span class="tag">Internal DMS</span></td>
+                  <td><span class="chip ch-low"><span class="pdot low"></span> Low</span></td>
+                  <td>Mar 12, 2025</td>
+                  <td><span class="chip ch-pending">Pending</span></td>
+                  <td><button class="tbl-btn" onclick="openFiling('FIL-028')">File Now</button></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="pagination">
+            <button class="pg-btn active">1</button><button class="pg-btn">2</button>
+            <span class="pg-info">Showing 6 of 6 items</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════
+         IN PROGRESS
+    ══════════════════════════════════ -->
+    <div class="page" id="page-inprogress">
+      <div class="sec-hd">
+        <div><h2>In Progress</h2><p>Filings with saved drafts — resume where you left off</p></div>
+      </div>
+      <div class="card">
+        <div class="card-body" style="padding:16px;">
+          <div class="table-toolbar">
+            <input class="search-input" placeholder="🔍  Search in-progress filings…">
+            <select class="filter-sel"><option value="">All Regulators</option><option>RBI</option><option>SEBI</option><option>IRDAI</option><option>Internal</option></select>
+            <select class="filter-sel"><option value="">All Deadlines</option><option>Today</option><option>This Week</option></select>
+          </div>
+          <div class="tbl-wrap">
+            <table>
+              <thead><tr><th>Filing ID</th><th>Title</th><th>Regulator</th><th>Circular Ref</th><th>Progress</th><th>Last Saved</th><th>Deadline</th><th>Action</th></tr></thead>
+              <tbody>
+                <tr class="soon-row">
+                  <td><span style="font-family:'DM Mono',monospace;font-size:12px;">FIL-017</span></td>
+                  <td><strong>Quarterly Solvency Statement</strong></td>
+                  <td><span class="chip ch-irdai">IRDAI</span></td>
+                  <td><span style="font-family:'DM Mono',monospace;font-size:11.5px;color:var(--teal);">IRDAI/F&A/CIR/2025/01</span></td>
+                  <td>
+                    <div style="display:flex;align-items:center;gap:8px;">
+                      <div class="prog-wrap" style="width:80px;"><div class="prog-bar" style="width:70%;background:var(--teal);"></div></div>
+                      <span style="font-size:12px;font-weight:600;color:var(--teal);">70%</span>
+                    </div>
+                  </td>
+                  <td style="font-size:12px;color:var(--text-muted);">Today, 9:45 AM</td>
+                  <td style="color:var(--warning);font-weight:600;">Mar 6, 2025</td>
+                  <td><button class="tbl-btn" onclick="openFiling('FIL-017')">Resume</button></td>
+                </tr>
+                <tr>
+                  <td><span style="font-family:'DM Mono',monospace;font-size:12px;">FIL-021</span></td>
+                  <td><strong>CRAR Return Q4 FY25</strong></td>
+                  <td><span class="chip ch-rbi">RBI</span></td>
+                  <td><span style="font-family:'DM Mono',monospace;font-size:11.5px;color:var(--teal);">RBI/CRAR/2025/01</span></td>
+                  <td>
+                    <div style="display:flex;align-items:center;gap:8px;">
+                      <div class="prog-wrap" style="width:80px;"><div class="prog-bar" style="width:35%;background:var(--warning);"></div></div>
+                      <span style="font-size:12px;font-weight:600;color:var(--warning);">35%</span>
+                    </div>
+                  </td>
+                  <td style="font-size:12px;color:var(--text-muted);">Yesterday, 5:30 PM</td>
+                  <td>Mar 7, 2025</td>
+                  <td><button class="tbl-btn" onclick="openFiling('FIL-021')">Resume</button></td>
+                </tr>
+                <tr>
+                  <td><span style="font-family:'DM Mono',monospace;font-size:12px;">FIL-025</span></td>
+                  <td><strong>GDPR Processing Register</strong></td>
+                  <td><span class="chip ch-int">Internal</span></td>
+                  <td><span style="font-family:'DM Mono',monospace;font-size:11.5px;color:var(--teal);">GDPR/Art35/2024</span></td>
+                  <td>
+                    <div style="display:flex;align-items:center;gap:8px;">
+                      <div class="prog-wrap" style="width:80px;"><div class="prog-bar" style="width:50%;background:var(--info);"></div></div>
+                      <span style="font-size:12px;font-weight:600;color:var(--info);">50%</span>
+                    </div>
+                  </td>
+                  <td style="font-size:12px;color:var(--text-muted);">Mar 4, 3:10 PM</td>
+                  <td>Mar 10, 2025</td>
+                  <td><button class="tbl-btn" onclick="openFiling('FIL-025')">Resume</button></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════
+         CLARIFICATION REQUESTED
+    ══════════════════════════════════ -->
+    <div class="page" id="page-clarif">
+      <div class="sec-hd">
+        <div><h2>Clarification Requested</h2><p>Items where you've raised queries — awaiting response from reviewer or regulator</p></div>
+      </div>
+      <div class="card">
+        <div class="card-body" style="padding:16px;">
+          <div class="tbl-wrap">
+            <table>
+              <thead><tr><th>Filing ID</th><th>Title</th><th>Regulator</th><th>Clarification Sent To</th><th>Query Summary</th><th>Sent On</th><th>Status</th><th>Action</th></tr></thead>
+              <tbody>
+                <tr>
+                  <td><span style="font-family:'DM Mono',monospace;font-size:12px;">FIL-013</span></td>
+                  <td><strong>Half-Yearly Compliance Report</strong></td>
+                  <td><span class="chip ch-sebi">SEBI</span></td>
+                  <td>Arjun Kumar (Reviewer)</td>
+                  <td style="max-width:220px;font-size:12.5px;color:var(--text-secondary);">Seeking clarification on Clause 4.3 — disclosure format for related-party transactions under SEBI LODR.</td>
+                  <td style="font-size:12px;color:var(--text-muted);">Mar 2, 2025</td>
+                  <td><span class="chip ch-clarif">Pending Response</span></td>
+                  <td><button class="tbl-btn" onclick="openFiling('FIL-013')">View</button></td>
+                </tr>
+                <tr>
+                  <td><span style="font-family:'DM Mono',monospace;font-size:12px;">FIL-009</span></td>
+                  <td><strong>Annual Return on AML</strong></td>
+                  <td><span class="chip ch-rbi">RBI</span></td>
+                  <td>RBI Helpdesk</td>
+                  <td style="max-width:220px;font-size:12.5px;color:var(--text-secondary);">Format ambiguity in Schedule III — whether to include digital wallet transactions in the suspicious transaction count.</td>
+                  <td style="font-size:12px;color:var(--text-muted);">Mar 1, 2025</td>
+                  <td><span class="chip ch-clarif">Pending Response</span></td>
+                  <td><button class="tbl-btn" onclick="openFiling('FIL-009')">View</button></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════
+         MY ITEMS
+    ══════════════════════════════════ -->
+    <div class="page" id="page-myitems">
+      <div class="sec-hd">
+        <div><h2>My Items</h2><p>All filings assigned to you — track status at a glance</p></div>
+      </div>
+      <div class="stats-grid" style="grid-template-columns:repeat(4,1fr);margin-bottom:18px;">
+        <div class="stat-card sc-teal"><div class="sc-icon">📤</div><div class="sc-val">6</div><div class="sc-label">Pending</div></div>
+        <div class="stat-card sc-blue"><div class="sc-icon">🔄</div><div class="sc-val">3</div><div class="sc-label">In Progress</div></div>
+        <div class="stat-card sc-green"><div class="sc-icon">✅</div><div class="sc-val">31</div><div class="sc-label">Filed</div></div>
+        <div class="stat-card sc-purple"><div class="sc-icon">💬</div><div class="sc-val">2</div><div class="sc-label">Clarification</div></div>
+      </div>
+      <div class="sub-tabs">
+        <button class="sub-tab active" onclick="switchMyTab('pending',this)">Pending (6)</button>
+        <button class="sub-tab" onclick="switchMyTab('inprogress',this)">In Progress (3)</button>
+        <button class="sub-tab" onclick="switchMyTab('filed',this)">Filed (31)</button>
+        <button class="sub-tab" onclick="switchMyTab('clarif',this)">Clarification (2)</button>
+        <button class="sub-tab" onclick="switchMyTab('overdue',this)">Overdue (2)</button>
+      </div>
+      <div class="card">
+        <div class="card-body" style="padding:16px;">
+          <div class="table-toolbar">
+            <input class="search-input" placeholder="🔍  Search my items…">
+            <select class="filter-sel"><option value="">All Regulators</option><option>RBI</option><option>SEBI</option><option>IRDAI</option><option>Internal</option></select>
+            <select class="filter-sel"><option value="">All Priorities</option><option>Critical</option><option>High</option><option>Medium</option><option>Low</option></select>
+          </div>
+          <div class="tbl-wrap"><table><thead><tr><th>Filing ID</th><th>Title</th><th>Regulator</th><th>Circular Ref</th><th>Priority</th><th>Deadline</th><th>Status</th><th>Action</th></tr></thead>
+            <tbody id="my-items-tbody"></tbody>
+          </table></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════
+         AUDIT TRAIL
+    ══════════════════════════════════ -->
+    <div class="page" id="page-audit">
+      <div class="sec-hd">
+        <div><h2>Audit Trail</h2><p>Complete chronological log of all filing actions</p></div>
+        <button class="btn btn-ghost btn-sm">⬇ Export PDF</button>
+      </div>
+      <div class="card" style="margin-bottom:16px;">
+        <div class="card-body" style="padding:16px;">
+          <div class="table-toolbar">
+            <input class="search-input" placeholder="🔍  Search audit events…">
+            <select class="filter-sel"><option value="">All Actions</option><option>Filed</option><option>Draft Saved</option><option>Clarification Sent</option><option>Acknowledgement Received</option><option>Rejected</option><option>Re-review Sent</option></select>
+            <select class="filter-sel"><option value="">All Regulators</option><option>RBI</option><option>SEBI</option><option>IRDAI</option><option>Internal</option></select>
+            <select class="filter-sel"><option value="">All Time</option><option>Today</option><option>This Week</option><option>This Month</option><option>Last 3 Months</option></select>
+            <select class="filter-sel"><option value="">All Users</option><option>Riya Verma</option><option>System</option></select>
+            <button class="btn btn-ghost btn-sm">⬇ Export</button>
+          </div>
+          <div class="tbl-wrap">
+            <table>
+              <thead><tr><th>Timestamp</th><th>Filing ID</th><th>Title</th><th>Action</th><th>Performed By</th><th>Regulator</th><th>Remarks</th><th>Ref Doc</th></tr></thead>
+              <tbody>
+                <tr>
+                  <td style="font-family:'DM Mono',monospace;font-size:11.5px;color:var(--text-muted);">Mar 5 · 11:30 AM</td>
+                  <td><span style="font-family:'DM Mono',monospace;font-size:12px;">FIL-007</span></td>
+                  <td><strong>KYC Returns Q4</strong></td>
+                  <td><span class="chip ch-filed">↑ Filed</span></td>
+                  <td>Riya Verma</td>
+                  <td><span class="chip ch-rbi">RBI</span></td>
+                  <td style="font-size:12.5px;color:var(--text-secondary);">Successfully submitted to RBI portal. Submission ref: RBI-2025-KYC-3310</td>
+                  <td><button class="expand-btn">↓ Receipt</button></td>
+                </tr>
+                <tr>
+                  <td style="font-family:'DM Mono',monospace;font-size:11.5px;color:var(--text-muted);">Mar 4 · 4:15 PM</td>
+                  <td><span style="font-family:'DM Mono',monospace;font-size:12px;">FIL-013</span></td>
+                  <td><strong>Half-Yearly Compliance Report</strong></td>
+                  <td><span class="chip ch-clarif">? Clarification</span></td>
+                  <td>Riya Verma</td>
+                  <td><span class="chip ch-sebi">SEBI</span></td>
+                  <td style="font-size:12.5px;color:var(--text-secondary);">Sent clarification to reviewer re: Clause 4.3 format</td>
+                  <td><button class="expand-btn" onclick="toggleH(this)">+ View</button><div class="h-detail">Query: Disclosure format for related-party transactions under SEBI LODR. Pending response from Arjun Kumar.</div></td>
+                </tr>
+                <tr>
+                  <td style="font-family:'DM Mono',monospace;font-size:11.5px;color:var(--text-muted);">Mar 3 · 2:00 PM</td>
+                  <td><span style="font-family:'DM Mono',monospace;font-size:12px;">FIL-005</span></td>
+                  <td><strong>Insider Trading Policy Update</strong></td>
+                  <td><span class="chip ch-ack">✓ Acknowledged</span></td>
+                  <td>System</td>
+                  <td><span class="chip ch-sebi">SEBI</span></td>
+                  <td style="font-size:12.5px;color:var(--text-secondary);">Acknowledgement received from SEBI SCORES portal</td>
+                  <td><button class="expand-btn">↓ Ack</button></td>
+                </tr>
+                <tr>
+                  <td style="font-family:'DM Mono',monospace;font-size:11.5px;color:var(--text-muted);">Mar 3 · 10:45 AM</td>
+                  <td><span style="font-family:'DM Mono',monospace;font-size:12px;">FIL-005</span></td>
+                  <td><strong>Insider Trading Policy Update</strong></td>
+                  <td><span class="chip ch-filed">↑ Filed</span></td>
+                  <td>Riya Verma</td>
+                  <td><span class="chip ch-sebi">SEBI</span></td>
+                  <td style="font-size:12.5px;color:var(--text-secondary);">Filed to SEBI SCORES. Documents: 3 files attached.</td>
+                  <td><button class="expand-btn">↓ Receipt</button></td>
+                </tr>
+                <tr>
+                  <td style="font-family:'DM Mono',monospace;font-size:11.5px;color:var(--text-muted);">Mar 2 · 3:20 PM</td>
+                  <td><span style="font-family:'DM Mono',monospace;font-size:12px;">FIL-004</span></td>
+                  <td><strong>Liquidity Coverage Ratio Return</strong></td>
+                  <td><span class="chip ch-rereview">↺ Re-review</span></td>
+                  <td>Riya Verma</td>
+                  <td><span class="chip ch-rbi">RBI</span></td>
+                  <td style="font-size:12.5px;color:var(--text-secondary);">Sent back for re-review — data discrepancy in LCR numerator values</td>
+                  <td><button class="expand-btn" onclick="toggleH(this)">+ View</button><div class="h-detail">LCR numerator values in row 14 do not match supporting schedule. Requires correction before submission to RBI XBRL portal.</div></td>
+                </tr>
+                <tr>
+                  <td style="font-family:'DM Mono',monospace;font-size:11.5px;color:var(--text-muted);">Mar 2 · 9:00 AM</td>
+                  <td><span style="font-family:'DM Mono',monospace;font-size:12px;">FIL-021</span></td>
+                  <td><strong>CRAR Return Q4 FY25</strong></td>
+                  <td><span class="chip ch-inprogress">→ Assigned</span></td>
+                  <td>System</td>
+                  <td><span class="chip ch-rbi">RBI</span></td>
+                  <td style="font-size:12.5px;color:var(--text-secondary);">Assigned to Riya Verma from Compliance Head</td>
+                  <td>—</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="pagination">
+            <button class="pg-btn active">1</button><button class="pg-btn">2</button><button class="pg-btn">3</button>
+            <span class="pg-info">Showing 6 of 48 events · <a href="#" style="color:var(--teal);">Load more</a></span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════
+         ARCHIVE
+    ══════════════════════════════════ -->
+    <div class="page" id="page-archive">
+      <div class="sec-hd">
+        <div><h2>Archive</h2><p>All historical filings — acknowledged, rejected, and returned items</p></div>
+        <button class="btn btn-ghost btn-sm">⬇ Export</button>
+      </div>
+      <div class="sub-tabs">
+        <button class="sub-tab active" onclick="switchArchiveTab('all',this)">All (68)</button>
+        <button class="sub-tab" onclick="switchArchiveTab('ack',this)">Acknowledged (54)</button>
+        <button class="sub-tab" onclick="switchArchiveTab('rejected',this)">Rejected (8)</button>
+        <button class="sub-tab" onclick="switchArchiveTab('returned',this)">Returned (6)</button>
+      </div>
+      <div class="card">
+        <div class="card-body" style="padding:16px;">
+          <div class="table-toolbar">
+            <input class="search-input" placeholder="🔍  Search archive…">
+            <select class="filter-sel"><option value="">All Regulators</option><option>RBI</option><option>SEBI</option><option>IRDAI</option><option>Internal</option></select>
+            <select class="filter-sel"><option value="">All Outcomes</option><option>Acknowledged</option><option>Rejected</option><option>Returned</option></select>
+            <select class="filter-sel"><option value="">All Time</option><option>This Month</option><option>Last 3 Months</option><option>FY 2024–25</option><option>FY 2023–24</option></select>
+            <select class="filter-sel"><option value="">Filing Type</option><option>Return</option><option>Report</option><option>Statement</option></select>
+          </div>
+          <div class="tbl-wrap">
+            <table>
+              <thead><tr><th>Filing ID</th><th>Title</th><th>Regulator</th><th>Circular Ref</th><th>Filed On</th><th>Outcome</th><th>Ack / Ref No.</th><th>Remarks</th><th>Docs</th></tr></thead>
+              <tbody>
+                <tr>
+                  <td><span style="font-family:'DM Mono',monospace;font-size:12px;">FIL-007</span></td>
+                  <td><strong>KYC Returns Q4</strong></td>
+                  <td><span class="chip ch-rbi">RBI</span></td>
+                  <td><span style="font-family:'DM Mono',monospace;font-size:11.5px;color:var(--teal);">RBI/KYC/2024/031</span></td>
+                  <td>Mar 5, 2025</td>
+                  <td><span class="chip ch-ack">✓ Acknowledged</span></td>
+                  <td><span style="font-family:'DM Mono',monospace;font-size:11.5px;">RBI-2025-KYC-3310</span></td>
+                  <td style="font-size:12px;color:var(--text-secondary);">Processed successfully</td>
+                  <td><button class="expand-btn">↓ Docs</button><div class="h-detail">KYC_Return_Q4_FY25_Final.pdf · KYC_Data_Annexure.xlsx · Board_Resolution.pdf</div></td>
+                </tr>
+                <tr>
+                  <td><span style="font-family:'DM Mono',monospace;font-size:12px;">FIL-005</span></td>
+                  <td><strong>Insider Trading Policy Update</strong></td>
+                  <td><span class="chip ch-sebi">SEBI</span></td>
+                  <td><span style="font-family:'DM Mono',monospace;font-size:11.5px;color:var(--teal);">SEBI/HO/MIRSD/2024</span></td>
+                  <td>Mar 3, 2025</td>
+                  <td><span class="chip ch-ack">✓ Acknowledged</span></td>
+                  <td><span style="font-family:'DM Mono',monospace;font-size:11.5px;">SEBI-SCORES-98771</span></td>
+                  <td style="font-size:12px;color:var(--text-secondary);">Accepted with observations noted</td>
+                  <td><button class="expand-btn" onclick="toggleH(this)">↓ Docs</button><div class="h-detail">Insider_Trading_Policy_v2.pdf · Board_Approval_Minutes.pdf · SEBI_Acknowledgement.pdf</div></td>
+                </tr>
+                <tr>
+                  <td><span style="font-family:'DM Mono',monospace;font-size:12px;">FIL-003</span></td>
+                  <td><strong>AML Policy — Interim Submission</strong></td>
+                  <td><span class="chip ch-rbi">RBI</span></td>
+                  <td><span style="font-family:'DM Mono',monospace;font-size:11.5px;color:var(--teal);">RBI/2024/AML/031</span></td>
+                  <td>Feb 20, 2025</td>
+                  <td><span class="chip ch-rejected">✕ Rejected</span></td>
+                  <td>—</td>
+                  <td style="font-size:12px;color:var(--danger);">Incomplete Schedule IV — resubmission required</td>
+                  <td><button class="expand-btn" onclick="toggleH(this)">↓ Docs</button><div class="h-detail">AML_Policy_Feb25_v1.pdf — REJECTED. Reason: Schedule IV incomplete. Missing: suspicious transaction threshold matrix. Resubmit with FIL-009.</div></td>
+                </tr>
+                <tr>
+                  <td><span style="font-family:'DM Mono',monospace;font-size:12px;">FIL-002</span></td>
+                  <td><strong>Annual Compliance Certificate</strong></td>
+                  <td><span class="chip ch-irdai">IRDAI</span></td>
+                  <td><span style="font-family:'DM Mono',monospace;font-size:11.5px;color:var(--teal);">IRDAI/LIFE/CIR/2024</span></td>
+                  <td>Feb 15, 2025</td>
+                  <td><span class="chip ch-ack">✓ Acknowledged</span></td>
+                  <td><span style="font-family:'DM Mono',monospace;font-size:11.5px;">IRDAI-ACC-2025-114</span></td>
+                  <td style="font-size:12px;color:var(--text-secondary);">Filed on time. No observations.</td>
+                  <td><button class="expand-btn" onclick="toggleH(this)">↓ Docs</button><div class="h-detail">Annual_Compliance_Cert_FY25.pdf · Auditor_Sign_Off.pdf · IRDAI_Receipt.pdf</div></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="pagination">
+            <button class="pg-btn active">1</button><button class="pg-btn">2</button><button class="pg-btn">3</button>
+            <span class="pg-info">Showing 4 of 68 items · <a href="#" style="color:var(--teal);">Load more</a></span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════
+         FILING DETAIL (in-page screen)
+    ══════════════════════════════════ -->
+    <div class="page" id="page-filing-detail">
+      <div class="detail-topbar">
+        <button class="back-btn" id="detail-back-btn">← Back</button>
+        <div>
+          <div class="breadcrumb">
+            <a id="detail-bc-link">Pending Filing</a><span>›</span><span id="detail-bc-id">FIL-009</span>
+          </div>
+          <div class="detail-title-big" id="detail-main-title">Annual Return on AML</div>
+        </div>
+        <div style="margin-left:auto;display:flex;gap:8px;align-items:center;">
+          <span id="detail-reg-chip" class="chip ch-rbi">RBI</span>
+          <span id="detail-priority-chip" class="chip ch-critical">Critical</span>
+          <span id="detail-status-chip" class="chip ch-overdue">Overdue</span>
+        </div>
+      </div>
+
+      <div class="detail-layout">
+        <!-- LEFT COLUMN -->
+        <div>
+          <!-- Metadata -->
+          <div class="d-card">
+            <div class="d-card-hd">ℹ Filing Details</div>
+            <div class="d-card-body">
+              <div class="meta-grid">
+                <div class="meta-item"><label>Filing ID</label><span id="d-id" style="font-family:'DM Mono',monospace;">FIL-009</span></div>
+                <div class="meta-item"><label>Regulator</label><span id="d-regulator">Reserve Bank of India</span></div>
+                <div class="meta-item"><label>Filing Portal</label><span id="d-portal">RBI Portal</span></div>
+                <div class="meta-item"><label>Submission Deadline</label><span id="d-deadline" style="color:var(--danger);font-weight:600;">Mar 1, 2025</span></div>
+                <div class="meta-item"><label>Filing Type</label><span id="d-type">Annual Return</span></div>
+                <div class="meta-item"><label>Assigned By</label><span id="d-assigned">Arjun Kumar</span></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Circular reference -->
+          <div class="d-card">
+            <div class="d-card-hd">📜 Circular Reference</div>
+            <div class="d-card-body">
+              <div class="circ-box">
+                <div class="circ-ref-lbl">Regulatory Circular</div>
+                <div class="circ-ref-id" id="d-circ-ref">RBI/2024/AML/045</div>
+                <div class="circ-ref-desc" id="d-circ-desc">Reserve Bank of India — Anti-Money Laundering (AML) Policy Framework Guidelines. Effective January 1, 2025. All regulated entities must file the Annual Return on AML by March 1 each year, covering suspicious transaction reporting, CDD statistics, and staff training records.</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Clauses / filing requirements -->
+          <div class="d-card">
+            <div class="d-card-hd">📄 Applicable Clauses & Filing Requirements</div>
+            <div class="d-card-body">
+              <div class="clause-list" id="d-clauses">
+                <div class="clause-row">
+                  <div class="clause-hd"><span class="clause-ref">Clause 4.2.1</span><span class="chip ch-pending" style="margin-left:auto;">Pending</span></div>
+                  <div class="clause-text">Schedule I — Customer Due Diligence statistics including count of CDD verifications, enhanced due diligence, and failed verifications for the year.</div>
+                  <div class="clause-compliance"><label>Compliance status:</label>
+                    <select onchange="updateClauseStatus(this)"><option>-- Mark status --</option><option>Addressed</option><option>Partially Addressed</option><option>Not Applicable</option></select>
+                  </div>
+                </div>
+                <div class="clause-row">
+                  <div class="clause-hd"><span class="clause-ref">Clause 4.3.5</span><span class="chip ch-pending" style="margin-left:auto;">Pending</span></div>
+                  <div class="clause-text">Schedule III — Suspicious Transaction Reports (STRs) filed during the year, broken down by transaction type, amount band, and outcome.</div>
+                  <div class="clause-compliance"><label>Compliance status:</label>
+                    <select onchange="updateClauseStatus(this)"><option>-- Mark status --</option><option>Addressed</option><option>Partially Addressed</option><option>Not Applicable</option></select>
+                  </div>
+                </div>
+                <div class="clause-row">
+                  <div class="clause-hd"><span class="clause-ref">Clause 6.1</span><span class="chip ch-ack" style="margin-left:auto;">Addressed</span></div>
+                  <div class="clause-text">Annexure B — AML training completion records. All front-line staff must have completed training. Certification evidence to be appended.</div>
+                  <div class="clause-compliance"><label>Compliance status:</label>
+                    <select onchange="updateClauseStatus(this)"><option>Addressed</option><option>Partially Addressed</option><option>Not Applicable</option></select>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Associated documents -->
+          <div class="d-card">
+            <div class="d-card-hd">📂 Associated Documents
+              <button class="btn btn-teal btn-sm" style="margin-left:auto;" onclick="toast('Document upload feature — attach files here','info')">+ Attach</button>
+            </div>
+            <div class="d-card-body">
+              <div class="doc-list">
+                <div class="doc-item">
+                  <div class="doc-icon">📄</div>
+                  <div class="doc-name">AML_Return_Form_2025_Draft.pdf</div>
+                  <span class="doc-type">Form</span>
+                  <span class="doc-size">1.8 MB</span>
+                  <div class="doc-actions">
+                    <button class="doc-btn">↓ View</button>
+                    <button class="doc-btn red">✕</button>
+                  </div>
+                </div>
+                <div class="doc-item">
+                  <div class="doc-icon">📊</div>
+                  <div class="doc-name">STR_Statistics_FY25.xlsx</div>
+                  <span class="doc-type">Supporting</span>
+                  <span class="doc-size">540 KB</span>
+                  <div class="doc-actions">
+                    <button class="doc-btn">↓ View</button>
+                    <button class="doc-btn red">✕</button>
+                  </div>
+                </div>
+                <div class="doc-item">
+                  <div class="doc-icon">📋</div>
+                  <div class="doc-name">CDD_Verification_Log_Q4.xlsx</div>
+                  <span class="doc-type">Supporting</span>
+                  <span class="doc-size">720 KB</span>
+                  <div class="doc-actions">
+                    <button class="doc-btn">↓ View</button>
+                    <button class="doc-btn red">✕</button>
+                  </div>
+                </div>
+                <div class="doc-item">
+                  <div class="doc-icon">🖊</div>
+                  <div class="doc-name">Board_Resolution_AML_2025.pdf</div>
+                  <span class="doc-type">Authorisation</span>
+                  <span class="doc-size">310 KB</span>
+                  <div class="doc-actions">
+                    <button class="doc-btn">↓ View</button>
+                    <button class="doc-btn red">✕</button>
+                  </div>
+                </div>
+              </div>
+              <div class="upload-zone" style="margin-top:12px;" onclick="toast('Browse for files to attach','info')">
+                <div class="upload-icon">📎</div>
+                <p>Drag & drop files here or click to browse</p>
+                <span>PDF, XLSX, DOCX up to 25 MB each</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Item audit timeline -->
+          <div class="d-card">
+            <div class="d-card-hd">🕐 Filing Activity Timeline</div>
+            <div class="d-card-body">
+              <div class="timeline">
+                <div class="tl-item">
+                  <div class="tl-dot received">↓</div>
+                  <div class="tl-content">
+                    <div class="tl-title">Filing assigned</div>
+                    <div class="tl-desc">Assigned to Riya Verma by Arjun Kumar (Compliance Head)</div>
+                    <div class="tl-time">Feb 28, 2025 · 9:00 AM</div>
+                  </div>
+                </div>
+                <div class="tl-item">
+                  <div class="tl-dot assigned">✏</div>
+                  <div class="tl-content">
+                    <div class="tl-title">Draft saved</div>
+                    <div class="tl-desc">Form partially completed — Schedule I and Annexure B filled.</div>
+                    <div class="tl-time">Mar 1, 2025 · 10:30 AM</div>
+                  </div>
+                </div>
+                <div class="tl-item">
+                  <div class="tl-dot clarif">?</div>
+                  <div class="tl-content">
+                    <div class="tl-title">Clarification requested</div>
+                    <div class="tl-desc">Query raised on Schedule III — digital wallet transaction scope. Sent to RBI Helpdesk.</div>
+                    <div class="tl-time">Mar 1, 2025 · 2:15 PM</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- RIGHT COLUMN -->
+        <div>
+          <!-- Pre-filing checklist -->
+          <div class="d-card">
+            <div class="d-card-hd">☑ Pre-Filing Checklist</div>
+            <div class="d-card-body">
+              <div class="chk-progress">
+                <div class="chk-prog-bar"><div class="chk-prog-fill" id="chk-prog-fill" style="width:16%;"></div></div>
+                <span class="chk-prog-label" id="chk-prog-label">1 / 6 complete</span>
+              </div>
+              <div class="checklist-items" id="prefiling-checklist">
+                <div class="chk-row"><input type="checkbox" id="pf1" onchange="updateChkProgress()"><label for="pf1">All prescribed schedules completed and verified</label></div>
+                <div class="chk-row"><input type="checkbox" id="pf2" checked onchange="updateChkProgress()"><label for="pf2">Supporting documents attached (minimum 3 required)</label></div>
+                <div class="chk-row"><input type="checkbox" id="pf3" onchange="updateChkProgress()"><label for="pf3">Data reconciled with previous period returns</label></div>
+                <div class="chk-row"><input type="checkbox" id="pf4" onchange="updateChkProgress()"><label for="pf4">Board resolution / authorisation letter attached</label></div>
+                <div class="chk-row"><input type="checkbox" id="pf5" onchange="updateChkProgress()"><label for="pf5">Digital signature / DSC applied</label></div>
+                <div class="chk-row"><input type="checkbox" id="pf6" onchange="updateChkProgress()"><label for="pf6">Reviewed by Compliance Head (if required)</label></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Filing action selection -->
+          <div class="d-card">
+            <div class="d-card-hd">🚀 Filing Action</div>
+            <div class="d-card-body">
+              <div class="filing-actions">
+                <div class="action-card selected" id="ac-filenow" onclick="selectAction('filenow')">
+                  <div class="ac-title">📤 File Now <span class="chip ch-filed" style="font-size:10px;">Recommended</span></div>
+                  <div class="ac-desc">Submit the filing directly to the regulatory portal. All attached documents will be included in the submission.</div>
+                </div>
+                <div class="action-card" id="ac-clarif" onclick="selectAction('clarif')">
+                  <div class="ac-title">💬 Request Clarification</div>
+                  <div class="ac-desc">Raise a query to the reviewer or the regulatory authority before submitting. Filing will be paused until response received.</div>
+                </div>
+                <div class="action-card" id="ac-rereview" onclick="selectAction('rereview')">
+                  <div class="ac-title">↺ Send for Re-review</div>
+                  <div class="ac-desc">Return this item to the reviewer or compliance head to re-examine the content before you proceed with filing.</div>
+                </div>
+                <div class="action-card" id="ac-draft" onclick="selectAction('draft')">
+                  <div class="ac-title">💾 Save as Draft</div>
+                  <div class="ac-desc">Save your current progress without submitting. You can resume from My Inbox → In Progress.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Contextual form -->
+          <div class="d-card" id="action-form-card">
+            <div class="d-card-hd" id="action-form-title">📤 Confirm Filing Submission</div>
+            <div class="d-card-body">
+              <div class="feedback-form" id="action-form-filenow">
+                <div><label class="form-label">Filing Portal Confirmation</label>
+                  <select class="form-select"><option>RBI Portal — Online submission</option><option>RBI Portal — XBRL upload</option><option>Email submission</option></select>
+                </div>
+                <div><label class="form-label">Submission Notes (optional)</label>
+                  <textarea class="form-textarea" placeholder="Add any notes for record-keeping…"></textarea>
+                </div>
+                <div><label class="form-label">Notify After Filing</label>
+                  <select class="form-select"><option>Yes — notify Arjun Kumar (Compliance Head)</option><option>No notification</option></select>
+                </div>
+                <button class="btn btn-teal" style="width:100%;justify-content:center;font-size:14px;padding:11px;" onclick="submitFiling('file')">📤 Submit Filing</button>
+              </div>
+
+              <div class="feedback-form" id="action-form-clarif" style="display:none;">
+                <div><label class="form-label">Send Clarification To</label>
+                  <select class="form-select"><option>Arjun Kumar — Compliance Head (Reviewer)</option><option>RBI Helpdesk</option><option>Legal Team</option></select>
+                </div>
+                <div><label class="form-label">Query / Clarification Details</label>
+                  <textarea class="form-textarea" placeholder="Describe your query in detail — be specific about the clause or schedule in question…" style="min-height:110px;"></textarea>
+                </div>
+                <div><label class="form-label">Expected Response By</label>
+                  <input type="date" class="form-input">
+                </div>
+                <button class="btn btn-purple" style="width:100%;justify-content:center;padding:11px;" onclick="submitFiling('clarif')">💬 Send Clarification</button>
+              </div>
+
+              <div class="feedback-form" id="action-form-rereview" style="display:none;">
+                <div><label class="form-label">Return To</label>
+                  <select class="form-select"><option>Arjun Kumar — Compliance Head</option><option>Original Assignee</option><option>Legal Team</option></select>
+                </div>
+                <div><label class="form-label">Reason for Re-review</label>
+                  <select class="form-select"><option value="">Select reason…</option><option>Data discrepancy found</option><option>Missing documentation</option><option>Policy interpretation issue</option><option>Regulatory format change</option><option>Other</option></select>
+                </div>
+                <div><label class="form-label">Remarks</label>
+                  <textarea class="form-textarea" placeholder="Explain what needs to be corrected or re-examined…"></textarea>
+                </div>
+                <button class="btn btn-warning" style="width:100%;justify-content:center;padding:11px;" onclick="submitFiling('rereview')">↺ Send for Re-review</button>
+              </div>
+
+              <div class="feedback-form" id="action-form-draft" style="display:none;">
+                <div><label class="form-label">Save Note</label>
+                  <textarea class="form-textarea" placeholder="Add a note about where you left off…"></textarea>
+                </div>
+                <button class="btn btn-ghost" style="width:100%;justify-content:center;padding:11px;" onclick="submitFiling('draft')">💾 Save Draft</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /content-area -->
+</div><!-- /main-wrapper -->
+
+<div class="toast-wrap" id="toast-wrap"></div>
+
+<script>
+// ── SIDEBAR ──
+document.getElementById('sb-toggle').addEventListener('click',()=>document.getElementById('sidebar').classList.toggle('collapsed'));
+
+function toggleSub(id){document.getElementById(id).classList.toggle('open');}
+
+// ── PROFILE ──
+document.getElementById('profile-btn').addEventListener('click',()=>document.getElementById('profile-dd').classList.toggle('open'));
+document.addEventListener('click',e=>{if(!e.target.closest('.profile-wrap'))document.getElementById('profile-dd').classList.remove('open');});
+
+// ── NAVIGATION ──
+let prevPage='pending';
+
+function navigate(page){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-'+page).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.querySelectorAll('.submenu li').forEach(n=>n.classList.remove('active'));
+
+  const titles={dashboard:'Dashboard',pending:'Pending Filing',inprogress:'In Progress',clarif:'Clarification Requested',myitems:'My Items',audit:'Audit Trail',archive:'Archive'};
+  document.getElementById('page-title').textContent=titles[page]||page;
+
+  const inboxPages=['pending','inprogress','clarif','myitems'];
+  if(page==='dashboard'){document.getElementById('nav-dashboard').classList.add('active');}
+  else if(inboxPages.includes(page)){document.getElementById('nav-inbox').classList.add('open');const m={pending:'sub-pending',inprogress:'sub-inprogress',clarif:'sub-clarif',myitems:'sub-myitems'};if(m[page])document.getElementById(m[page]).classList.add('active');}
+  else if(page==='audit'){document.getElementById('nav-audit').classList.add('active');}
+  else if(page==='archive'){document.getElementById('nav-archive').classList.add('active');}
+}
+
+// ── FILING DETAIL ──
+const filingData={
+  'FIL-009':{title:'Annual Return on AML',regulator:'Reserve Bank of India',regClass:'ch-rbi',regLabel:'RBI',portal:'RBI Portal',deadline:'Mar 1, 2025',deadlineColor:'var(--danger)',type:'Annual Return',assignedBy:'Arjun Kumar',circRef:'RBI/2024/AML/045',circDesc:'RBI Anti-Money Laundering Policy Framework Guidelines. Effective January 1, 2025. All regulated entities must file the Annual Return covering suspicious transaction reporting, CDD statistics, and staff training records.',priority:'Critical',priorityClass:'ch-critical',status:'Overdue',statusClass:'ch-overdue'},
+  'FIL-013':{title:'Half-Yearly Compliance Report',regulator:'SEBI',regClass:'ch-sebi',regLabel:'SEBI',portal:'SEBI SCORES',deadline:'Mar 2, 2025',deadlineColor:'var(--danger)',type:'Periodic Report',assignedBy:'Meena Iyer',circRef:'SEBI/HO/2024/088',circDesc:'SEBI Circular on half-yearly compliance reporting by listed entities under SEBI LODR Regulations 2015. Includes disclosure of related-party transactions, compliance certificate, and corporate governance report.',priority:'High',priorityClass:'ch-high',status:'Overdue',statusClass:'ch-overdue'},
+  'FIL-017':{title:'Quarterly Solvency Statement',regulator:'IRDAI',regClass:'ch-irdai',regLabel:'IRDAI',portal:'IRDAI Portal',deadline:'Mar 6, 2025',deadlineColor:'var(--warning)',type:'Quarterly Statement',assignedBy:'Arjun Kumar',circRef:'IRDAI/F&A/CIR/2025/01',circDesc:'IRDAI Circular on quarterly solvency margin reporting. Insurers must maintain and file solvency ratio above 1.5x as per IRDAI (Assets, Liabilities and Solvency Margin) Regulations 2016.',priority:'High',priorityClass:'ch-high',status:'In Progress',statusClass:'ch-inprogress'},
+  'FIL-021':{title:'CRAR Return Q4 FY25',regulator:'Reserve Bank of India',regClass:'ch-rbi',regLabel:'RBI',portal:'RBI XBRL',deadline:'Mar 7, 2025',deadlineColor:'var(--text-primary)',type:'Quarterly Return',assignedBy:'Arjun Kumar',circRef:'RBI/CRAR/2025/01',circDesc:'RBI Circular on Capital Adequacy Ratio (CRAR) reporting under Basel III framework. Banks must maintain and report minimum CRAR of 10.5%. Q4 FY2024-25 return due by March 7.',priority:'Medium',priorityClass:'ch-medium',status:'Pending',statusClass:'ch-pending'},
+  'FIL-025':{title:'GDPR Processing Register',regulator:'Internal',regClass:'ch-int',regLabel:'Internal',portal:'Internal DMS',deadline:'Mar 10, 2025',deadlineColor:'var(--text-primary)',type:'Register Update',assignedBy:'Priya Sharma',circRef:'GDPR/Art35/2024',circDesc:'Internal compliance requirement to update the GDPR Article 30 records of processing activities and Article 35 DPIA register for Q1 2025. Filed to Internal Document Management System.',priority:'Low',priorityClass:'ch-low',status:'Pending',statusClass:'ch-pending'},
+  'FIL-028':{title:'Anti-Corruption Training Certificate',regulator:'Internal',regClass:'ch-int',regLabel:'Internal',portal:'Internal DMS',deadline:'Mar 12, 2025',deadlineColor:'var(--text-primary)',type:'Certificate',assignedBy:'Neha Rao',circRef:'INT/HR/ANTI-COR/24',circDesc:'Internal circular requiring filing of employee anti-corruption training completion certificate with the Compliance Department. All 248 employees must show completion.',priority:'Low',priorityClass:'ch-low',status:'Pending',statusClass:'ch-pending'},
+};
+
+function openFiling(id, from){
+  const d=filingData[id]; if(!d) return;
+  prevPage=from||'pending';
+  document.getElementById('detail-bc-id').textContent=id;
+  document.getElementById('detail-bc-link').textContent=prevPage==='myitems'?'My Items':prevPage==='inprogress'?'In Progress':prevPage==='clarif'?'Clarification':'Pending Filing';
+  document.getElementById('detail-main-title').textContent=d.title;
+  document.getElementById('d-id').textContent=id;
+  document.getElementById('d-regulator').textContent=d.regulator;
+  document.getElementById('d-portal').textContent=d.portal;
+  document.getElementById('d-deadline').textContent=d.deadline;
+  document.getElementById('d-deadline').style.color=d.deadlineColor;
+  document.getElementById('d-type').textContent=d.type;
+  document.getElementById('d-assigned').textContent=d.assignedBy;
+  document.getElementById('d-circ-ref').textContent=d.circRef;
+  document.getElementById('d-circ-desc').textContent=d.circDesc;
+  const rc=document.getElementById('detail-reg-chip'); rc.className='chip '+d.regClass; rc.textContent=d.regLabel;
+  const pc=document.getElementById('detail-priority-chip'); pc.className='chip '+d.priorityClass; pc.textContent=d.priority;
+  const sc=document.getElementById('detail-status-chip'); sc.className='chip '+d.statusClass; sc.textContent=d.status;
+  // reset
+  document.querySelectorAll('#page-filing-detail input[type=checkbox]').forEach(c=>{if(c.id!=='pf2')c.checked=false;});
+  document.getElementById('pf2').checked=true;
+  updateChkProgress();
+  selectAction('filenow');
+  document.getElementById('detail-back-btn').onclick=()=>navigate(prevPage);
+  document.getElementById('detail-bc-link').onclick=(e)=>{e.preventDefault();navigate(prevPage);};
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-filing-detail').classList.add('active');
+  document.getElementById('page-title').textContent='File: '+id;
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('nav-inbox').classList.add('open');
+}
+
+// ── PRE-FILING CHECKLIST PROGRESS ──
+function updateChkProgress(){
+  const boxes=document.querySelectorAll('#prefiling-checklist input[type=checkbox]');
+  const checked=[...boxes].filter(b=>b.checked).length;
+  const pct=Math.round((checked/boxes.length)*100);
+  document.getElementById('chk-prog-fill').style.width=pct+'%';
+  document.getElementById('chk-prog-label').textContent=checked+' / '+boxes.length+' complete';
+}
+
+// ── ACTION CARD SELECTION ──
+function selectAction(key){
+  ['filenow','clarif','rereview','draft'].forEach(k=>{
+    document.getElementById('ac-'+k).classList.toggle('selected',k===key);
+    document.getElementById('action-form-'+k).style.display=k===key?'flex':'none';
+    if(k===key) document.getElementById('action-form-'+k).style.flexDirection='column';
+  });
+  const titles={filenow:'📤 Confirm Filing Submission',clarif:'💬 Request Clarification',rereview:'↺ Send for Re-review',draft:'💾 Save as Draft'};
+  document.getElementById('action-form-title').textContent=titles[key];
+}
+
+// ── CLAUSE STATUS ──
+function updateClauseStatus(sel){
+  const chip=sel.closest('.clause-row').querySelector('.chip');
+  const map={'Addressed':'ch-ack Addressed','Partially Addressed':'ch-rereview Partially Addressed','Not Applicable':'ch-int Not Applicable','-- Mark status --':'ch-pending Pending'};
+  const [cls,txt]=(map[sel.value]||'ch-pending Pending').split(' ').reduce((a,v,i)=>i===0?[v,a[1]]:i===1?[a[0],v]:[a[0],a[1]+' '+v],['','']);
+  chip.className='chip '+map[sel.value].split(' ')[0];
+  chip.textContent=sel.value==='-- Mark status --'?'Pending':sel.value;
+}
+
+// ── SUBMIT FILING ──
+function submitFiling(action){
+  const msgs={
+    file:{msg:'📤 Filing submitted successfully! Awaiting acknowledgement from portal.',type:'success'},
+    clarif:{msg:'💬 Clarification request sent. Filing paused pending response.',type:'info'},
+    rereview:{msg:'↺ Item sent for re-review. Reviewer has been notified.',type:'warning'},
+    draft:{msg:'💾 Draft saved. Resume anytime from My Inbox → In Progress.',type:'info'}
+  };
+  toast(msgs[action].msg,msgs[action].type);
+  if(action!=='draft') setTimeout(()=>navigate(prevPage),1800);
+}
+
+// ── MY ITEMS DATA ──
+const myData={
+  pending:[
+    {id:'FIL-009',title:'Annual Return on AML',reg:'RBI',regClass:'ch-rbi',circRef:'RBI/2024/AML/045',priority:'Critical',pClass:'ch-critical',deadline:'Mar 1, 2025',overdue:true,status:'Overdue',sClass:'ch-overdue'},
+    {id:'FIL-013',title:'Half-Yearly Compliance Report',reg:'SEBI',regClass:'ch-sebi',circRef:'SEBI/HO/2024/088',priority:'High',pClass:'ch-high',deadline:'Mar 2, 2025',overdue:true,status:'Overdue',sClass:'ch-overdue'},
+    {id:'FIL-017',title:'Quarterly Solvency Statement',reg:'IRDAI',regClass:'ch-irdai',circRef:'IRDAI/F&A/CIR/2025/01',priority:'High',pClass:'ch-high',deadline:'Mar 6, 2025',overdue:false,status:'In Progress',sClass:'ch-inprogress'},
+    {id:'FIL-021',title:'CRAR Return Q4 FY25',reg:'RBI',regClass:'ch-rbi',circRef:'RBI/CRAR/2025/01',priority:'Medium',pClass:'ch-medium',deadline:'Mar 7, 2025',overdue:false,status:'Pending',sClass:'ch-pending'},
+    {id:'FIL-025',title:'GDPR Processing Register',reg:'Internal',regClass:'ch-int',circRef:'GDPR/Art35/2024',priority:'Low',pClass:'ch-low',deadline:'Mar 10, 2025',overdue:false,status:'Pending',sClass:'ch-pending'},
+    {id:'FIL-028',title:'Anti-Corruption Training Cert.',reg:'Internal',regClass:'ch-int',circRef:'INT/HR/ANTI-COR/24',priority:'Low',pClass:'ch-low',deadline:'Mar 12, 2025',overdue:false,status:'Pending',sClass:'ch-pending'},
+  ],
+  inprogress:[
+    {id:'FIL-017',title:'Quarterly Solvency Statement',reg:'IRDAI',regClass:'ch-irdai',circRef:'IRDAI/F&A/CIR/2025/01',priority:'High',pClass:'ch-high',deadline:'Mar 6, 2025',overdue:false,status:'In Progress',sClass:'ch-inprogress'},
+    {id:'FIL-021',title:'CRAR Return Q4 FY25',reg:'RBI',regClass:'ch-rbi',circRef:'RBI/CRAR/2025/01',priority:'Medium',pClass:'ch-medium',deadline:'Mar 7, 2025',overdue:false,status:'In Progress',sClass:'ch-inprogress'},
+    {id:'FIL-025',title:'GDPR Processing Register',reg:'Internal',regClass:'ch-int',circRef:'GDPR/Art35/2024',priority:'Low',pClass:'ch-low',deadline:'Mar 10, 2025',overdue:false,status:'In Progress',sClass:'ch-inprogress'},
+  ],
+  filed:[
+    {id:'FIL-007',title:'KYC Returns Q4',reg:'RBI',regClass:'ch-rbi',circRef:'RBI/KYC/2024/031',priority:'High',pClass:'ch-high',deadline:'Mar 5, 2025',overdue:false,status:'Filed',sClass:'ch-filed'},
+    {id:'FIL-005',title:'Insider Trading Policy Update',reg:'SEBI',regClass:'ch-sebi',circRef:'SEBI/HO/MIRSD/2024',priority:'High',pClass:'ch-high',deadline:'Mar 3, 2025',overdue:false,status:'Acknowledged',sClass:'ch-ack'},
+    {id:'FIL-002',title:'Annual Compliance Certificate',reg:'IRDAI',regClass:'ch-irdai',circRef:'IRDAI/LIFE/CIR/2024',priority:'Medium',pClass:'ch-medium',deadline:'Feb 15, 2025',overdue:false,status:'Acknowledged',sClass:'ch-ack'},
+  ],
+  clarif:[
+    {id:'FIL-013',title:'Half-Yearly Compliance Report',reg:'SEBI',regClass:'ch-sebi',circRef:'SEBI/HO/2024/088',priority:'High',pClass:'ch-high',deadline:'Mar 2, 2025',overdue:true,status:'Clarification',sClass:'ch-clarif'},
+    {id:'FIL-009',title:'Annual Return on AML',reg:'RBI',regClass:'ch-rbi',circRef:'RBI/2024/AML/045',priority:'Critical',pClass:'ch-critical',deadline:'Mar 1, 2025',overdue:true,status:'Clarification',sClass:'ch-clarif'},
+  ],
+  overdue:[
+    {id:'FIL-009',title:'Annual Return on AML',reg:'RBI',regClass:'ch-rbi',circRef:'RBI/2024/AML/045',priority:'Critical',pClass:'ch-critical',deadline:'Mar 1, 2025',overdue:true,status:'Overdue',sClass:'ch-overdue'},
+    {id:'FIL-013',title:'Half-Yearly Compliance Report',reg:'SEBI',regClass:'ch-sebi',circRef:'SEBI/HO/2024/088',priority:'High',pClass:'ch-high',deadline:'Mar 2, 2025',overdue:true,status:'Overdue',sClass:'ch-overdue'},
+  ]
+};
+
+function switchMyTab(key,btn){
+  document.querySelectorAll('.sub-tabs .sub-tab').forEach(t=>t.classList.remove('active'));
+  btn.classList.add('active');
+  renderMyItems(key);
+}
+
+function renderMyItems(key){
+  const rows=myData[key]||[];
+  document.getElementById('my-items-tbody').innerHTML=rows.length?rows.map(r=>`
+    <tr ${r.overdue?'class="overdue-row"':''}>
+      <td><span style="font-family:'DM Mono',monospace;font-size:12px;">${r.id}</span></td>
+      <td><strong>${r.title}</strong></td>
+      <td><span class="chip ${r.regClass}">${r.reg}</span></td>
+      <td><span style="font-family:'DM Mono',monospace;font-size:11.5px;color:var(--teal);">${r.circRef}</span></td>
+      <td><span class="chip ${r.pClass}">${r.priority}</span></td>
+      <td style="${r.overdue?'color:var(--danger);font-weight:600;':''}">${r.deadline}</td>
+      <td><span class="chip ${r.sClass}">${r.status}</span></td>
+      <td><button class="tbl-btn" onclick="openFiling('${r.id}','myitems')">Open</button></td>
+    </tr>`).join('')
+    :`<tr><td colspan="8" style="text-align:center;padding:32px;color:var(--text-muted);">No items in this category</td></tr>`;
+}
+
+// ── ARCHIVE TABS ──
+function switchArchiveTab(key,btn){
+  document.querySelectorAll('.sub-tabs .sub-tab').forEach(t=>t.classList.remove('active'));
+  btn.classList.add('active');
+  // filter logic would go here in a real implementation
+  toast('Filtering archive by: '+(key==='all'?'All items':key.charAt(0).toUpperCase()+key.slice(1)),'info');
+}
+
+// ── HISTORY EXPAND ──
+function toggleH(btn){
+  const p=btn.nextElementSibling;
+  p.classList.toggle('open');
+  btn.textContent=p.classList.contains('open')?'− Hide':'+ View';
+}
+
+// ── TOAST ──
+function toast(msg,type='success'){
+  const w=document.getElementById('toast-wrap');
+  const t=document.createElement('div');
+  t.className='toast '+type; t.textContent=msg; w.appendChild(t);
+  setTimeout(()=>{t.style.opacity='0';t.style.transition='opacity .3s';setTimeout(()=>t.remove(),300);},3200);
+}
+
+// ── INIT ──
+navigate('dashboard');
+renderMyItems('pending');
+</script>
+</body>
+</html>

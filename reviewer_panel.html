@@ -1,0 +1,1143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Reviewer Panel — CMS Compliance Suite</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --primary:#0f172a;--primary-light:#1e293b;
+  --accent:#3b82f6;--accent-dark:#2563eb;--accent-glow:rgba(59,130,246,0.15);
+  --success:#10b981;--success-bg:rgba(16,185,129,0.08);
+  --warning:#f59e0b;--warning-bg:rgba(245,158,11,0.08);
+  --danger:#ef4444;--danger-bg:rgba(239,68,68,0.08);
+  --info:#06b6d4;--info-bg:rgba(6,182,212,0.08);
+  --purple:#8b5cf6;--purple-bg:rgba(139,92,246,0.08);
+  --light-bg:#f1f5f9;--white:#fff;
+  --border:#e2e8f0;--border-light:#f1f5f9;
+  --text-primary:#0f172a;--text-secondary:#64748b;--text-muted:#94a3b8;
+  --sidebar-w:240px;--topbar-h:60px;
+  --radius:10px;--shadow:0 4px 16px rgba(0,0,0,0.08);--shadow-lg:0 10px 40px rgba(0,0,0,0.12);
+}
+body{font-family:'DM Sans',sans-serif;background:var(--light-bg);color:var(--text-primary);min-height:100vh;display:flex;font-size:14px;line-height:1.5;}
+
+/* ── SIDEBAR ── */
+#sidebar{width:var(--sidebar-w);min-width:var(--sidebar-w);height:100vh;position:fixed;left:0;top:0;background:var(--primary);display:flex;flex-direction:column;z-index:100;transition:width .25s,min-width .25s;overflow:hidden;}
+#sidebar.collapsed{width:60px;min-width:60px;}
+
+.sb-collapse-btn{position:absolute;top:19px;right:-11px;width:22px;height:22px;border-radius:50%;background:var(--accent);border:none;color:#fff;cursor:pointer;font-size:11px;display:flex;align-items:center;justify-content:center;z-index:10;box-shadow:0 2px 8px rgba(59,130,246,.4);transition:transform .25s;}
+#sidebar.collapsed .sb-collapse-btn{transform:rotate(180deg);}
+
+.sb-logo{display:flex;align-items:center;gap:10px;padding:20px 16px 22px;border-bottom:1px solid rgba(255,255,255,.06);}
+.sb-logo-icon{width:34px;height:34px;min-width:34px;background:var(--accent);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:17px;color:#fff;}
+.sb-logo-text{overflow:hidden;white-space:nowrap;}
+.sb-logo-main{display:block;font-weight:700;font-size:15px;color:#fff;letter-spacing:.02em;}
+.sb-logo-sub{display:block;font-size:10px;color:rgba(255,255,255,.38);letter-spacing:.07em;text-transform:uppercase;}
+
+.sb-nav{flex:1;padding:14px 10px;overflow-y:auto;overflow-x:hidden;}
+.sb-nav ul{list-style:none;display:flex;flex-direction:column;gap:2px;}
+
+.nav-item>a{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:7px;color:rgba(255,255,255,.52);text-decoration:none;font-size:13px;font-weight:500;transition:all .2s;white-space:nowrap;cursor:pointer;position:relative;}
+.nav-item>a:hover{background:rgba(255,255,255,.07);color:#fff;}
+.nav-item.active>a{background:var(--accent);color:#fff;box-shadow:0 2px 12px rgba(59,130,246,.3);}
+.nav-icon{font-size:15px;min-width:20px;text-align:center;}
+.nav-label{flex:1;}
+.submenu-arrow{font-size:11px;margin-left:auto;transition:transform .2s;}
+.nav-item.open>.nav-link .submenu-arrow{transform:rotate(90deg);}
+
+.submenu{list-style:none;padding-left:32px;overflow:hidden;max-height:0;transition:max-height .3s ease;}
+.nav-item.open .submenu{max-height:200px;}
+.submenu li a{display:block;padding:7px 10px;color:rgba(255,255,255,.42);text-decoration:none;font-size:12.5px;border-radius:5px;transition:all .2s;white-space:nowrap;}
+.submenu li a:hover{color:#fff;background:rgba(255,255,255,.06);}
+.submenu li.active a{color:#fff;background:rgba(59,130,246,.35);}
+
+.sb-section-label{font-size:10px;font-weight:700;color:rgba(255,255,255,.25);text-transform:uppercase;letter-spacing:.08em;padding:14px 12px 4px;}
+
+.sb-footer{padding:14px 12px;border-top:1px solid rgba(255,255,255,.06);}
+.user-mini{display:flex;align-items:center;gap:10px;overflow:hidden;}
+.user-av-sm{width:32px;height:32px;min-width:32px;border-radius:8px;background:var(--accent);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;}
+.user-info-sm{overflow:hidden;white-space:nowrap;}
+.user-name-sm{display:block;font-size:12.5px;font-weight:600;color:#fff;}
+.user-role-sm{display:block;font-size:11px;color:rgba(255,255,255,.38);}
+
+/* ── MAIN WRAPPER ── */
+#main-wrapper{margin-left:var(--sidebar-w);flex:1;display:flex;flex-direction:column;min-height:100vh;transition:margin-left .25s;}
+#sidebar.collapsed~#main-wrapper{margin-left:60px;}
+
+/* ── TOPBAR ── */
+#topbar{height:var(--topbar-h);background:#fff;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 24px;position:sticky;top:0;z-index:50;}
+.topbar-left h1{font-size:16px;font-weight:600;}
+.topbar-right{display:flex;align-items:center;gap:12px;}
+.search-bar-btn{display:flex;align-items:center;gap:8px;padding:7px 14px;background:var(--light-bg);border:1px solid var(--border);border-radius:8px;cursor:pointer;color:var(--text-secondary);font-size:13px;font-family:'DM Sans',sans-serif;transition:all .2s;}
+.search-bar-btn:hover{border-color:var(--accent);}
+.search-placeholder{color:var(--text-muted);}
+kbd{background:#e2e8f0;border-radius:4px;padding:1px 5px;font-size:11px;font-family:'DM Mono',monospace;}
+.icon-btn{background:none;border:none;cursor:pointer;width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;position:relative;transition:background .2s;font-size:16px;}
+.icon-btn:hover{background:var(--light-bg);}
+.notif-badge{position:absolute;top:4px;right:4px;background:var(--danger);color:#fff;width:16px;height:16px;border-radius:50%;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;}
+.profile-wrap{position:relative;}
+.profile-btn{display:flex;align-items:center;gap:8px;background:none;border:none;cursor:pointer;padding:5px 8px;border-radius:8px;transition:background .2s;}
+.profile-btn:hover{background:var(--light-bg);}
+.user-av{width:30px;height:30px;border-radius:8px;background:var(--accent);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;}
+.user-av.lg{width:40px;height:40px;font-size:13px;}
+.profile-name{font-size:13px;font-weight:600;}
+.drop-arrow{font-size:10px;color:var(--text-muted);}
+.profile-dd{position:absolute;top:calc(100% + 8px);right:0;width:220px;background:#fff;border:1px solid var(--border);border-radius:12px;box-shadow:var(--shadow-lg);padding:8px;z-index:200;opacity:0;pointer-events:none;transform:translateY(-6px);transition:all .2s;}
+.profile-dd.open{opacity:1;pointer-events:all;transform:translateY(0);}
+.pd-head{display:flex;align-items:center;gap:10px;padding:8px;}
+.pd-name{font-weight:600;font-size:13px;}
+.pd-email{font-size:11px;color:var(--text-muted);}
+.profile-dd hr{border:none;border-top:1px solid var(--border);margin:6px 0;}
+.pd-item{display:block;padding:8px 12px;border-radius:7px;font-size:13px;color:var(--text-primary);text-decoration:none;transition:background .15s;}
+.pd-item:hover{background:var(--light-bg);}
+.pd-item.danger{color:var(--danger);}
+
+/* ── CONTENT ── */
+#content-area{flex:1;padding:24px;overflow-y:auto;}
+.page{display:none;animation:fadeIn .2s ease;}
+.page.active{display:block;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+
+/* ── CARDS ── */
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(175px,1fr));gap:14px;margin-bottom:22px;}
+.stat-card{background:#fff;border-radius:var(--radius);padding:18px;border:1px solid var(--border);position:relative;overflow:hidden;transition:box-shadow .2s,transform .2s;cursor:default;}
+.stat-card:hover{box-shadow:var(--shadow);transform:translateY(-1px);}
+.sc-icon{width:38px;height:38px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:17px;margin-bottom:12px;}
+.sc-val{font-size:26px;font-weight:700;line-height:1;margin-bottom:4px;}
+.sc-label{font-size:12px;color:var(--text-secondary);font-weight:500;}
+.sc-delta{font-size:11px;margin-top:6px;font-weight:600;}
+.sc-delta.up{color:var(--success);}
+.sc-delta.down{color:var(--danger);}
+.sc-delta.neutral{color:var(--text-muted);}
+.stat-card::after{content:'';position:absolute;right:-10px;bottom:-10px;width:60px;height:60px;border-radius:50%;opacity:.07;}
+.sc-blue .sc-icon{background:var(--accent-glow);color:var(--accent);}
+.sc-blue::after{background:var(--accent);}
+.sc-green .sc-icon{background:var(--success-bg);color:var(--success);}
+.sc-green::after{background:var(--success);}
+.sc-orange .sc-icon{background:var(--warning-bg);color:var(--warning);}
+.sc-orange::after{background:var(--warning);}
+.sc-red .sc-icon{background:var(--danger-bg);color:var(--danger);}
+.sc-red::after{background:var(--danger);}
+.sc-purple .sc-icon{background:var(--purple-bg);color:var(--purple);}
+.sc-purple::after{background:var(--purple);}
+.sc-cyan .sc-icon{background:var(--info-bg);color:var(--info);}
+.sc-cyan::after{background:var(--info);}
+
+/* ── DASHBOARD LAYOUT ── */
+.dash-row{display:grid;grid-template-columns:1fr 330px;gap:16px;margin-bottom:16px;}
+@media(max-width:1150px){.dash-row{grid-template-columns:1fr;}}
+.card{background:#fff;border-radius:var(--radius);border:1px solid var(--border);overflow:hidden;}
+.card-hd{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--border-light);}
+.card-title{font-size:13.5px;font-weight:600;}
+.card-link{font-size:12px;color:var(--accent);text-decoration:none;font-weight:500;cursor:pointer;}
+.card-link:hover{text-decoration:underline;}
+.card-body{padding:18px;}
+
+/* Urgency list */
+.urgency-list{display:flex;flex-direction:column;gap:8px;}
+.urgency-item{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:8px;background:var(--light-bg);cursor:pointer;transition:background .2s;}
+.urgency-item:hover{background:#e2eaf5;}
+.udot{width:8px;height:8px;min-width:8px;border-radius:50%;}
+.udot.high{background:var(--danger);}
+.udot.medium{background:var(--warning);}
+.udot.low{background:var(--success);}
+.u-info{flex:1;}
+.u-title{font-size:13px;font-weight:500;}
+.u-meta{font-size:11.5px;color:var(--text-muted);}
+.u-due{font-size:11px;font-weight:600;white-space:nowrap;}
+.u-due.overdue{color:var(--danger);}
+.u-due.soon{color:var(--warning);}
+
+/* Activity */
+.activity-feed{display:flex;flex-direction:column;}
+.act-item{display:flex;gap:12px;padding:11px 0;border-bottom:1px solid var(--border-light);}
+.act-item:last-child{border-bottom:none;}
+.act-dot{width:28px;height:28px;min-width:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;margin-top:1px;}
+.act-dot.approved{background:var(--success-bg);color:var(--success);}
+.act-dot.rejected{background:var(--danger-bg);color:var(--danger);}
+.act-dot.revision{background:var(--warning-bg);color:var(--warning);}
+.act-dot.assigned{background:var(--accent-glow);color:var(--accent);}
+.act-text{font-size:13px;line-height:1.4;}
+.act-time{font-size:11px;color:var(--text-muted);margin-top:2px;}
+
+/* Progress */
+.prog-row{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+.prog-label{font-size:12px;color:var(--text-secondary);width:110px;flex-shrink:0;}
+.prog-wrap{flex:1;background:var(--light-bg);border-radius:99px;height:6px;overflow:hidden;}
+.prog-bar{height:100%;border-radius:99px;}
+.prog-val{font-size:12px;font-weight:600;width:36px;text-align:right;}
+
+/* SLA ring */
+.sla-ring{width:86px;height:86px;position:relative;margin:0 auto 8px;}
+.sla-ring svg{transform:rotate(-90deg);}
+.sla-ring-val{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:17px;font-weight:700;color:var(--success);}
+.sla-lbl{text-align:center;font-size:12px;color:var(--text-secondary);}
+
+/* Outcome bars */
+.outcome-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;}
+.outcome-col .oc-label{font-size:11px;color:var(--text-muted);font-weight:700;text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px;}
+.outcome-col .oc-val{font-size:26px;font-weight:700;}
+.meter-wrap{background:var(--light-bg);border-radius:99px;height:6px;margin-top:8px;overflow:hidden;}
+.meter-bar{height:100%;border-radius:99px;}
+.oc-sub{font-size:12px;color:var(--text-muted);margin-top:4px;}
+
+/* ── TABLE ── */
+.table-toolbar{display:flex;align-items:center;gap:8px;margin-bottom:14px;flex-wrap:wrap;}
+.search-input{flex:1;min-width:180px;padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:13px;outline:none;transition:border-color .2s;}
+.search-input:focus{border-color:var(--accent);}
+.filter-sel{padding:7px 11px;border:1px solid var(--border);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:13px;outline:none;color:var(--text-primary);background:#fff;cursor:pointer;}
+.filter-sel:focus{border-color:var(--accent);}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 15px;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;cursor:pointer;border:none;transition:all .2s;}
+.btn-primary{background:var(--accent);color:#fff;}
+.btn-primary:hover{background:var(--accent-dark);}
+.btn-ghost{background:none;border:1px solid var(--border);color:var(--text-primary);}
+.btn-ghost:hover{background:var(--light-bg);}
+.btn-sm{padding:5px 11px;font-size:12px;}
+.btn-success{background:var(--success);color:#fff;}
+.btn-success:hover{background:#059669;}
+.btn-danger{background:var(--danger);color:#fff;}
+.btn-danger:hover{background:#dc2626;}
+.btn-warning{background:var(--warning);color:#fff;}
+.btn-warning:hover{background:#d97706;}
+
+.tbl-wrap{overflow-x:auto;}
+table{width:100%;border-collapse:collapse;}
+thead tr{background:var(--light-bg);}
+th{padding:10px 13px;text-align:left;font-size:11px;font-weight:700;color:var(--text-secondary);letter-spacing:.04em;text-transform:uppercase;border-bottom:1px solid var(--border);white-space:nowrap;}
+td{padding:12px 13px;font-size:13px;border-bottom:1px solid var(--border-light);vertical-align:middle;}
+tr:last-child td{border-bottom:none;}
+tbody tr{transition:background .15s;}
+tbody tr:hover{background:#f7f9ff;}
+tr.overdue-row td:first-child{border-left:3px solid var(--danger);}
+tr.soon-row td:first-child{border-left:3px solid var(--warning);}
+
+/* Chips */
+.chip{display:inline-flex;align-items:center;gap:3px;padding:3px 9px;border-radius:99px;font-size:11.5px;font-weight:600;}
+.ch-pending{background:var(--warning-bg);color:#92400e;}
+.ch-approved{background:var(--success-bg);color:#065f46;}
+.ch-rejected{background:var(--danger-bg);color:#991b1b;}
+.ch-revision{background:var(--purple-bg);color:#5b21b6;}
+.ch-inreview{background:var(--info-bg);color:#0e7490;}
+.ch-overdue{background:var(--danger-bg);color:#991b1b;}
+.ch-critical{background:#fce7f3;color:#9d174d;}
+.ch-high{background:var(--danger-bg);color:#991b1b;}
+.ch-medium{background:var(--warning-bg);color:#92400e;}
+.ch-low{background:var(--success-bg);color:#065f46;}
+
+.pdot{width:6px;height:6px;border-radius:50%;display:inline-block;}
+.pdot.critical{background:#ec4899;}
+.pdot.high{background:var(--danger);}
+.pdot.medium{background:var(--warning);}
+.pdot.low{background:var(--success);}
+
+.tag{display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;background:var(--light-bg);color:var(--text-secondary);font-weight:500;}
+.tbl-btn{padding:4px 12px;border-radius:6px;border:1px solid var(--accent);background:none;color:var(--accent);font-size:12px;font-weight:600;cursor:pointer;transition:all .2s;font-family:'DM Sans',sans-serif;}
+.tbl-btn:hover{background:var(--accent);color:#fff;}
+
+/* Pagination */
+.pagination{display:flex;align-items:center;gap:5px;padding-top:14px;}
+.pg-btn{width:30px;height:30px;border-radius:6px;border:1px solid var(--border);background:#fff;cursor:pointer;font-size:12px;font-weight:500;transition:all .2s;display:flex;align-items:center;justify-content:center;}
+.pg-btn:hover{border-color:var(--accent);color:var(--accent);}
+.pg-btn.active{background:var(--accent);color:#fff;border-color:var(--accent);}
+.pg-info{font-size:12px;color:var(--text-muted);margin-left:auto;}
+
+/* Section header */
+.sec-hd{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:20px;}
+.sec-hd h2{font-size:17px;font-weight:700;}
+.sec-hd p{font-size:13px;color:var(--text-muted);margin-top:2px;}
+
+/* ── REVIEW DETAIL ── */
+.detail-topbar{display:flex;align-items:center;gap:12px;margin-bottom:20px;flex-wrap:wrap;}
+.back-btn{display:flex;align-items:center;gap:6px;background:none;border:1px solid var(--border);padding:7px 13px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:500;color:var(--text-secondary);font-family:'DM Sans',sans-serif;transition:all .2s;}
+.back-btn:hover{border-color:var(--accent);color:var(--accent);}
+.breadcrumb{display:flex;align-items:center;gap:5px;font-size:12px;color:var(--text-muted);margin-bottom:3px;}
+.breadcrumb a{color:var(--accent);text-decoration:none;cursor:pointer;}
+.detail-title-big{font-size:18px;font-weight:700;}
+.detail-layout{display:grid;grid-template-columns:1fr 350px;gap:18px;align-items:start;}
+@media(max-width:1100px){.detail-layout{grid-template-columns:1fr;}}
+
+.d-card{background:#fff;border-radius:var(--radius);border:1px solid var(--border);margin-bottom:14px;overflow:hidden;}
+.d-card-hd{padding:13px 16px;border-bottom:1px solid var(--border-light);font-size:13px;font-weight:600;display:flex;align-items:center;gap:7px;}
+.d-card-body{padding:16px;}
+
+.meta-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.meta-item label{display:block;font-size:10.5px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:3px;}
+.meta-item span{font-size:13px;font-weight:500;}
+
+.clause-list{display:flex;flex-direction:column;gap:10px;}
+.clause-row{background:var(--light-bg);border-radius:8px;padding:12px 13px;border-left:3px solid var(--accent);}
+.clause-hd{display:flex;align-items:center;gap:8px;margin-bottom:5px;}
+.clause-ref{font-size:11.5px;font-family:'DM Mono',monospace;color:var(--accent);font-weight:500;}
+.clause-text{font-size:13px;line-height:1.5;}
+
+.evidence-list{display:flex;flex-direction:column;gap:7px;}
+.ev-item{display:flex;align-items:center;gap:10px;padding:9px 11px;background:var(--light-bg);border-radius:8px;cursor:pointer;transition:background .2s;}
+.ev-item:hover{background:#e2eaf5;}
+.ev-icon{width:30px;height:30px;min-width:30px;border-radius:6px;background:var(--accent-glow);display:flex;align-items:center;justify-content:center;font-size:13px;}
+.ev-name{font-size:13px;font-weight:500;flex:1;}
+.ev-meta{font-size:11px;color:var(--text-muted);}
+.ev-dl{font-size:11px;color:var(--accent);font-weight:600;}
+
+.circ-box{background:linear-gradient(135deg,#eff6ff,#e0f2fe);border:1px solid #bfdbfe;border-radius:8px;padding:13px;}
+.circ-ref-lbl{font-size:11px;font-weight:700;color:var(--accent-dark);margin-bottom:4px;text-transform:uppercase;letter-spacing:.05em;}
+.circ-ref-id{font-size:13px;font-family:'DM Mono',monospace;margin-bottom:5px;}
+.circ-ref-desc{font-size:12.5px;color:var(--text-secondary);line-height:1.5;}
+
+.checklist-items{display:flex;flex-direction:column;gap:8px;}
+.chk-row{display:flex;align-items:flex-start;gap:9px;padding:9px 11px;border-radius:7px;border:1px solid var(--border-light);transition:border-color .2s;}
+.chk-row:has(input:checked){border-color:var(--success);background:var(--success-bg);}
+.chk-row input{width:15px;height:15px;cursor:pointer;margin-top:2px;accent-color:var(--success);}
+.chk-row label{font-size:13px;cursor:pointer;line-height:1.4;}
+
+.feedback-form{display:flex;flex-direction:column;gap:11px;}
+.form-label{display:block;font-size:12px;font-weight:600;color:var(--text-secondary);margin-bottom:5px;}
+.form-input,.form-select,.form-textarea{width:100%;padding:8px 11px;border:1px solid var(--border);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:13px;outline:none;transition:border-color .2s;background:#fff;color:var(--text-primary);}
+.form-input:focus,.form-select:focus,.form-textarea:focus{border-color:var(--accent);}
+.form-textarea{resize:vertical;min-height:90px;line-height:1.5;}
+.decision-btns{display:flex;flex-direction:column;gap:8px;}
+.decision-btns .btn{justify-content:center;font-size:13.5px;padding:10px;}
+
+/* History expand */
+.h-detail{margin-top:5px;padding:11px 13px;background:var(--light-bg);border-radius:7px;font-size:13px;line-height:1.6;color:var(--text-secondary);display:none;}
+.h-detail.open{display:block;}
+.expand-btn{background:none;border:none;cursor:pointer;color:var(--accent);font-size:11px;font-weight:600;padding:0;font-family:'DM Sans',sans-serif;}
+
+/* My items sub-tabs */
+.sub-tabs{display:flex;gap:0;border-bottom:2px solid var(--border);margin-bottom:16px;}
+.sub-tab{padding:9px 18px;background:none;border:none;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;color:var(--text-secondary);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;transition:all .2s;}
+.sub-tab.active{color:var(--accent);border-bottom-color:var(--accent);}
+
+/* Metrics */
+.metrics-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px;margin-bottom:22px;}
+.metric-block{background:#fff;border:1px solid var(--border);border-radius:var(--radius);padding:16px;}
+.mb-lbl{font-size:11.5px;color:var(--text-secondary);margin-bottom:4px;}
+.mb-val{font-size:30px;font-weight:700;margin-bottom:2px;}
+.mb-trend{font-size:12px;font-weight:600;margin-top:6px;}
+.mb-trend.up{color:var(--success);}
+.mb-trend.down{color:var(--danger);}
+
+/* Toast */
+.toast-wrap{position:fixed;bottom:22px;right:22px;display:flex;flex-direction:column;gap:7px;z-index:9999;}
+.toast{padding:11px 16px;border-radius:10px;font-size:13px;font-weight:500;color:#fff;box-shadow:var(--shadow-lg);animation:slideUp .25s ease;display:flex;align-items:center;gap:8px;}
+.toast.success{background:var(--success);}
+.toast.error{background:var(--danger);}
+.toast.info{background:var(--accent);}
+.toast.warning{background:var(--warning);}
+@keyframes slideUp{from{transform:translateY(14px);opacity:0;}to{transform:translateY(0);opacity:1;}}
+
+::-webkit-scrollbar{width:4px;height:4px;}
+::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:99px;}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════ SIDEBAR ═══════════════ -->
+<aside id="sidebar">
+  <button class="sb-collapse-btn" id="sb-toggle">‹</button>
+
+  <div class="sb-logo">
+    <div class="sb-logo-icon">⬡</div>
+    <div class="sb-logo-text">
+      <span class="sb-logo-main">CMS</span>
+      <span class="sb-logo-sub">Compliance Suite</span>
+    </div>
+  </div>
+
+  <nav class="sb-nav">
+    <ul>
+
+      <li class="nav-item active" id="nav-dashboard">
+        <a href="#" onclick="navigate('dashboard');return false;">
+          <span class="nav-icon">▦</span>
+          <span class="nav-label">Dashboard</span>
+        </a>
+      </li>
+
+      <!-- Inbox with submenu -->
+      <li class="nav-item has-submenu open" id="nav-inbox">
+        <a href="#" class="nav-link" onclick="toggleSubmenu('nav-inbox');return false;">
+          <span class="nav-icon">◉</span>
+          <span class="nav-label">Inbox</span>
+          <span class="submenu-arrow">›</span>
+        </a>
+        <ul class="submenu">
+          
+          <li id="sub-myitems"><a href="#" onclick="navigate('myitems');return false;">My Items</a></li>
+          <li id="sub-queue"><a href="#" onclick="navigate('queue');return false;">Latest Reviews <span style="background:var(--danger);color:#fff;border-radius:99px;padding:1px 7px;font-size:10px;margin-left:4px;">5</span></a></li>
+          <li id="sub-history"><a href="#" onclick="navigate('history');return false;">Review History</a></li>
+          <!-- <li id="sub-metrics"><a href="#" onclick="navigate('metrics');return false;">Metrics</a></li> -->
+        </ul>
+      </li>
+ <!-- <li id="sub-metrics"><a href="#" onclick="navigate('metrics');return false;">Metrics</a></li> -->
+        <li class="nav-item" id="nav-settings">
+  <a href="#" onclick="navigate('metrics'); return false;">
+    <span class="nav-icon">Metrics</span>
+  </a>
+</li>
+      <div class="sb-section-label">Platform</div>
+
+      <!-- <li class="nav-item has-submenu" id="nav-ai">
+        <a href="#" class="nav-link" onclick="toggleSubmenu('nav-ai');return false;">
+          <span class="nav-icon">◈</span>
+          <span class="nav-label">AI Engine</span>
+          <span class="submenu-arrow">›</span>
+        </a>
+        <ul class="submenu">
+          <li><a href="#">Applicability Analysis</a></li>
+          <li><a href="#">Executive Summary</a></li>
+          <li><a href="#">Clause Generation</a></li>
+          <li><a href="#">Evaluate Evidence</a></li>
+        </ul>
+      </li>
+
+      <li class="nav-item has-submenu" id="nav-circular">
+        <a href="#" class="nav-link" onclick="toggleSubmenu('nav-circular');return false;">
+          <span class="nav-icon">◫</span>
+          <span class="nav-label">Circular Library</span>
+          <span class="submenu-arrow">›</span>
+        </a>
+        <ul class="submenu">
+          <li><a href="#">AI Suggestion</a></li>
+          <li><a href="#">Central Library</a></li>
+        </ul>
+      </li>
+
+      <li class="nav-item" id="nav-tasks">
+        <a href="#"><span class="nav-icon">◎</span><span class="nav-label">Task Management</span></a>
+      </li>
+
+      <li class="nav-item" id="nav-reports">
+        <a href="#"><span class="nav-icon">◧</span><span class="nav-label">Reports</span></a>
+      </li> -->
+
+      <li class="nav-item" id="nav-settings">
+        <a href="#"><span class="nav-icon">⚙</span><span class="nav-label">Settings</span></a>
+      </li>
+     
+
+    </ul>
+  </nav>
+
+  <div class="sb-footer">
+    <div class="user-mini">
+      <div class="user-av-sm">AK</div>
+      <div class="user-info-sm">
+        <span class="user-name-sm">Arjun Kumar</span>
+        <span class="user-role-sm">Compliance Head</span>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<!-- ═══════════════ MAIN ═══════════════ -->
+<div id="main-wrapper">
+
+  <header id="topbar">
+    <div class="topbar-left"><h1 id="page-title">Dashboard</h1></div>
+    <div class="topbar-right">
+      <button class="search-bar-btn">
+        <span style="font-size:16px;">⌕</span>
+        <span class="search-placeholder">Ask AI anything...</span>
+        <kbd>⌘K</kbd>
+      </button>
+      <button class="icon-btn">
+        🔔
+        <span class="notif-badge">3</span>
+      </button>
+      <div class="profile-wrap">
+        <button class="profile-btn" id="profile-btn">
+          <div class="user-av">AK</div>
+          <span class="profile-name">Arjun Kumar</span>
+          <span class="drop-arrow">▾</span>
+        </button>
+        <div class="profile-dd" id="profile-dd">
+          <div class="pd-head">
+            <div class="user-av lg">AK</div>
+            <div><div class="pd-name">Arjun Kumar</div><div class="pd-email">arjun@cms.co.in</div></div>
+          </div>
+          <hr/>
+          <a href="#" class="pd-item">My Profile</a>
+          <a href="#" class="pd-item">Account Settings</a>
+          <a href="#" class="pd-item">Audit Log</a>
+          <hr/>
+          <a href="#" class="pd-item danger">Sign Out</a>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div id="content-area">
+
+    <!-- ══════ DASHBOARD ══════ -->
+    <div class="page active" id="page-dashboard">
+      <div class="stats-grid">
+        <div class="stat-card sc-blue"><div class="sc-icon">📋</div><div class="sc-val">5</div><div class="sc-label">Pending Review</div><div class="sc-delta neutral">↑ 2 new today</div></div>
+        <div class="stat-card sc-orange"><div class="sc-icon">⚡</div><div class="sc-val">2</div><div class="sc-label">Overdue Items</div><div class="sc-delta down">Past due date</div></div>
+        <div class="stat-card sc-green"><div class="sc-icon">✅</div><div class="sc-val">18</div><div class="sc-label">Approved (Mar)</div><div class="sc-delta up">↑ 12% vs Feb</div></div>
+        <div class="stat-card sc-red"><div class="sc-icon">↺</div><div class="sc-val">3</div><div class="sc-label">Revisions Sent</div><div class="sc-delta neutral">This month</div></div>
+        <div class="stat-card sc-purple"><div class="sc-icon">⏱</div><div class="sc-val">50%</div><div class="sc-label">Work Efficiency </div><div class="sc-delta up">March</div></div>
+ 
+      </div>
+
+      <div class="dash-row">
+        <!-- Urgent actions -->
+        <div class="card">
+          <div class="card-hd">
+            <span class="card-title">⚡ Action Required — Urgent</span>
+            <a class="card-link" onclick="navigate('queue')">View All →</a>
+          </div>
+          <div class="card-body">
+            <div class="urgency-list">
+              <div class="urgency-item" onclick="openDetail('ACT-012')">
+                <div class="udot high"></div>
+                <div class="u-info"><div class="u-title">ACT-012 — AML Policy Framework Review</div><div class="u-meta">Meena Iyer · IT Compliance</div></div>
+                <div class="u-due overdue">2d overdue</div>
+              </div>
+              <div class="urgency-item" onclick="openDetail('ACT-005')">
+                <div class="udot high"></div>
+                <div class="u-info"><div class="u-title">ACT-005 — GDPR Data Processing Audit</div><div class="u-meta">Priya Sharma · Data Privacy</div></div>
+                <div class="u-due overdue">1d overdue</div>
+              </div>
+              <div class="urgency-item" onclick="openDetail('ACT-008')">
+                <div class="udot medium"></div>
+                <div class="u-info"><div class="u-title">ACT-008 — IT Security Assessment</div><div class="u-meta">Sarah Johnson · IT</div></div>
+                <div class="u-due soon">Due tomorrow</div>
+              </div>
+              <div class="urgency-item" onclick="openDetail('ACT-015')">
+                <div class="udot medium"></div>
+                <div class="u-info"><div class="u-title">ACT-015 — Capital Adequacy Ratio Report</div><div class="u-meta">Rajan Mehta · Finance</div></div>
+                <div class="u-due soon">Due in 2 days</div>
+              </div>
+              <div class="urgency-item" onclick="openDetail('ACT-018')">
+                <div class="udot low"></div>
+                <div class="u-info"><div class="u-title">ACT-018 — Employee Conduct Policy Update</div><div class="u-meta">Neha Rao · HR Compliance</div></div>
+                <div class="u-due" style="color:var(--text-muted);">Due in 5 days</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right col -->
+        <div>
+          <!-- SLA -->
+          <div class="card" style="margin-bottom:14px;">
+            <div class="card-hd"><span class="card-title">📈 SLA Adherence</span></div>
+            <div class="card-body" style="text-align:center;padding:18px 16px;">
+              <div class="sla-ring">
+                <svg width="86" height="86" viewBox="0 0 86 86">
+                  <circle cx="43" cy="43" r="35" fill="none" stroke="#e2e8f0" stroke-width="8"/>
+                  <circle cx="43" cy="43" r="35" fill="none" stroke="#10b981" stroke-width="8" stroke-dasharray="220" stroke-dashoffset="13" stroke-linecap="round"/>
+                </svg>
+                <div class="sla-ring-val">94%</div>
+              </div>
+              <div class="sla-lbl">Reviews within SLA</div>
+              <div style="margin-top:14px;">
+                <div class="prog-row"><span class="prog-label">Critical (24h)</span><div class="prog-wrap"><div class="prog-bar" style="width:88%;background:var(--danger);"></div></div><span class="prog-val" style="color:var(--danger);">88%</span></div>
+                <div class="prog-row"><span class="prog-label">High (48h)</span><div class="prog-wrap"><div class="prog-bar" style="width:95%;background:var(--warning);"></div></div><span class="prog-val" style="color:var(--warning);">95%</span></div>
+                <div class="prog-row"><span class="prog-label">Medium (5d)</span><div class="prog-wrap"><div class="prog-bar" style="width:100%;background:var(--success);"></div></div><span class="prog-val" style="color:var(--success);">100%</span></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Recent activity -->
+          <div class="card">
+            <div class="card-hd"><span class="card-title">🕐 Recent Activity</span></div>
+            <div class="card-body" style="padding:12px 16px;">
+              <div class="activity-feed">
+                <div class="act-item"><div class="act-dot approved">✓</div><div><div class="act-text">Approved <strong>ACT-007</strong> — SOX Documentation</div><div class="act-time">Today, 2:30 PM</div></div></div>
+                <div class="act-item"><div class="act-dot revision">↺</div><div><div class="act-text">Revision requested on <strong>ACT-003</strong></div><div class="act-time">Yesterday, 3:45 PM</div></div></div>
+                <div class="act-item"><div class="act-dot approved">✓</div><div><div class="act-text">Approved <strong>ACT-006</strong> — Anti-Corruption</div><div class="act-time">Mar 2, 10:15 AM</div></div></div>
+                <div class="act-item"><div class="act-dot assigned">↓</div><div><div class="act-text">New item assigned: <strong>ACT-012</strong></div><div class="act-time">Mar 1, 9:00 AM</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Outcome distribution -->
+      <div class="card">
+        <div class="card-hd"><span class="card-title">📊 Review Outcome Distribution — March 2025</span></div>
+        <div class="card-body">
+          <div class="outcome-grid">
+            <div class="outcome-col"><div class="oc-label">Approved</div><div class="oc-val" style="color:var(--success);">18</div><div class="meter-wrap"><div class="meter-bar" style="width:75%;background:var(--success);"></div></div><div class="oc-sub">75% of total</div></div>
+            <div class="outcome-col"><div class="oc-label">Revisions</div><div class="oc-val" style="color:var(--warning);">5</div><div class="meter-wrap"><div class="meter-bar" style="width:21%;background:var(--warning);"></div></div><div class="oc-sub">21% of total</div></div>
+            <div class="outcome-col"><div class="oc-label">Rejected</div><div class="oc-val" style="color:var(--danger);">1</div><div class="meter-wrap"><div class="meter-bar" style="width:4%;background:var(--danger);"></div></div><div class="oc-sub">4% of total</div></div>
+            <div class="outcome-col"><div class="oc-label">Pending</div><div class="oc-val" style="color:var(--info);">5</div><div class="meter-wrap"><div class="meter-bar" style="width:21%;background:var(--info);"></div></div><div class="oc-sub">In queue</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════ APPROVAL QUEUE ══════ -->
+    <div class="page" id="page-queue">
+      <div class="sec-hd">
+        <div><h2>Approval Queue</h2><p>Items pending your review — click Review to open the full detail screen</p></div>
+      </div>
+      <div class="card">
+        <div class="card-body" style="padding:16px;">
+          <div class="table-toolbar">
+            <input class="search-input" placeholder="🔍  Search by ID, title, assignee…">
+            <select class="filter-sel"><option value="">All Priorities</option><option>Critical</option><option>High</option><option>Medium</option><option>Low</option></select>
+            <select class="filter-sel"><option value="">All Departments</option><option>IT Compliance</option><option>Finance</option><option>Data Privacy</option><option>HR Compliance</option><option>Legal</option></select>
+            <select class="filter-sel"><option value="">All Statuses</option><option>Pending</option><option>In Review</option><option>Overdue</option></select>
+            <select class="filter-sel"><option value="">Circular Type</option><option>RBI</option><option>SEBI</option><option>IRDAI</option><option>Internal</option></select>
+            <button class="btn btn-ghost btn-sm">⬇ Export</button>
+          </div>
+          <div class="tbl-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Action ID</th><th>Title</th><th>Assignee</th><th>Department</th>
+                  <th>Circular Ref</th><th>Priority</th><th>Due Date</th><th>Status</th><th>Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr class="overdue-row">
+                  <td><span style="font-family:'DM Mono',monospace;font-size:12px;">ACT-012</span></td>
+                  <td><strong>AML Policy Framework Review</strong></td>
+                  <td>Meena Iyer</td><td><span class="tag">IT Compliance</span></td>
+                  <td><span style="font-family:'DM Mono',monospace;font-size:11.5px;color:var(--accent);">RBI/2024/AML/045</span></td>
+                  <td><span class="chip ch-critical"><span class="pdot critical"></span> Critical</span></td>
+                  <td style="color:var(--danger);font-weight:600;">Mar 1, 2025</td>
+                  <td><span class="chip ch-overdue">Overdue</span></td>
+                  <td><button class="tbl-btn" onclick="openDetail('ACT-012')">Review</button></td>
+                </tr>
+                <tr class="overdue-row">
+                  <td><span style="font-family:'DM Mono',monospace;font-size:12px;">ACT-005</span></td>
+                  <td><strong>GDPR Data Processing Audit</strong></td>
+                  <td>Priya Sharma</td><td><span class="tag">Data Privacy</span></td>
+                  <td><span style="font-family:'DM Mono',monospace;font-size:11.5px;color:var(--accent);">GDPR/Art35/2024</span></td>
+                  <td><span class="chip ch-high"><span class="pdot high"></span> High</span></td>
+                  <td style="color:var(--danger);font-weight:600;">Mar 2, 2025</td>
+                  <td><span class="chip ch-overdue">Overdue</span></td>
+                  <td><button class="tbl-btn" onclick="openDetail('ACT-005')">Review</button></td>
+                </tr>
+                <tr class="soon-row">
+                  <td><span style="font-family:'DM Mono',monospace;font-size:12px;">ACT-008</span></td>
+                  <td><strong>IT Security Assessment</strong></td>
+                  <td>Sarah Johnson</td><td><span class="tag">IT</span></td>
+                  <td><span style="font-family:'DM Mono',monospace;font-size:11.5px;color:var(--accent);">ISO27001/2024/Q1</span></td>
+                  <td><span class="chip ch-high"><span class="pdot high"></span> High</span></td>
+                  <td style="color:var(--warning);font-weight:600;">Mar 6, 2025</td>
+                  <td><span class="chip ch-inreview">In Review</span></td>
+                  <td><button class="tbl-btn" onclick="openDetail('ACT-008')">Review</button></td>
+                </tr>
+                <tr>
+                  <td><span style="font-family:'DM Mono',monospace;font-size:12px;">ACT-015</span></td>
+                  <td><strong>Capital Adequacy Ratio Report</strong></td>
+                  <td>Rajan Mehta</td><td><span class="tag">Finance</span></td>
+                  <td><span style="font-family:'DM Mono',monospace;font-size:11.5px;color:var(--accent);">RBI/CRAR/2025/01</span></td>
+                  <td><span class="chip ch-medium"><span class="pdot medium"></span> Medium</span></td>
+                  <td>Mar 7, 2025</td>
+                  <td><span class="chip ch-pending">Pending</span></td>
+                  <td><button class="tbl-btn" onclick="openDetail('ACT-015')">Review</button></td>
+                </tr>
+                <tr>
+                  <td><span style="font-family:'DM Mono',monospace;font-size:12px;">ACT-018</span></td>
+                  <td><strong>Employee Conduct Policy Update</strong></td>
+                  <td>Neha Rao</td><td><span class="tag">HR Compliance</span></td>
+                  <td><span style="font-family:'DM Mono',monospace;font-size:11.5px;color:var(--accent);">INT/HR/CONDUCT/24</span></td>
+                  <td><span class="chip ch-low"><span class="pdot low"></span> Low</span></td>
+                  <td>Mar 10, 2025</td>
+                  <td><span class="chip ch-pending">Pending</span></td>
+                  <td><button class="tbl-btn" onclick="openDetail('ACT-018')">Review</button></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="pagination">
+            <button class="pg-btn active">1</button><button class="pg-btn">2</button>
+            <span class="pg-info">Showing 5 of 5 items</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════ REVIEW DETAIL (in-page screen) ══════ -->
+    <div class="page" id="page-detail">
+      <div class="detail-topbar">
+        <button class="back-btn" id="detail-back-btn">← Back</button>
+        <div>
+          <div class="breadcrumb">
+            <a id="detail-breadcrumb-link">Approval Queue</a>
+            <span>›</span><span id="detail-bc-id">ACT-012</span>
+          </div>
+          <div class="detail-title-big" id="detail-main-title">AML Policy Framework Review</div>
+        </div>
+        <div style="margin-left:auto;display:flex;gap:8px;align-items:center;">
+          <span id="detail-status-chip" class="chip ch-overdue">Overdue</span>
+          <span id="detail-priority-chip" class="chip ch-critical">Critical</span>
+        </div>
+      </div>
+
+      <div class="detail-layout">
+        <!-- LEFT -->
+        <div>
+          <div class="d-card">
+            <div class="d-card-hd">ℹ Action Details</div>
+            <div class="d-card-body">
+              <div class="meta-grid">
+                <div class="meta-item"><label>Action ID</label><span id="d-id" style="font-family:'DM Mono',monospace;">ACT-012</span></div>
+                <div class="meta-item"><label>Assignee</label><span id="d-assignee">Meena Iyer</span></div>
+                <div class="meta-item"><label>Department</label><span id="d-dept">IT Compliance</span></div>
+                <div class="meta-item"><label>Due Date</label><span id="d-due" style="color:var(--danger);font-weight:600;">Mar 1, 2025</span></div>
+                <div class="meta-item"><label>Submitted On</label><span id="d-submitted">Feb 28, 2025</span></div>
+                <div class="meta-item"><label>Review Type</label><span id="d-type">Regulatory Compliance</span></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="d-card">
+            <div class="d-card-hd">📜 Circular Reference</div>
+            <div class="d-card-body">
+              <div class="circ-box">
+                <div class="circ-ref-lbl">Regulatory Circular</div>
+                <div class="circ-ref-id" id="d-circ-ref">RBI/2024/AML/045</div>
+                <div class="circ-ref-desc" id="d-circ-desc">Reserve Bank of India — Anti-Money Laundering (AML) Policy Framework Guidelines. Effective January 1, 2025. All regulated entities must review and update AML policies, controls, and training programs to align with revised PMLA 2002 amendments.</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="d-card">
+            <div class="d-card-hd">📄 Clauses to Review</div>
+            <div class="d-card-body">
+              <div class="clause-list" id="d-clauses">
+                <div class="clause-row">
+                  <div class="clause-hd"><span class="clause-ref">Clause 4.2.1</span><span class="chip ch-pending" style="margin-left:auto;">Pending</span></div>
+                  <div class="clause-text">Customer Due Diligence (CDD) procedures must be updated to include enhanced verification for PEPs with risk-based approach documentation.</div>
+                </div>
+                <div class="clause-row">
+                  <div class="clause-hd"><span class="clause-ref">Clause 4.3.5</span><span class="chip ch-pending" style="margin-left:auto;">Pending</span></div>
+                  <div class="clause-text">Transaction monitoring thresholds to be reviewed quarterly. Current ₹10 lakh threshold evaluated against new risk matrix parameters.</div>
+                </div>
+                <div class="clause-row">
+                  <div class="clause-hd"><span class="clause-ref">Clause 6.1</span><span class="chip ch-pending" style="margin-left:auto;">Pending</span></div>
+                  <div class="clause-text">Annual AML training mandatory for all front-line staff with certification. Evidence maintained for 5 years.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="d-card">
+            <div class="d-card-hd">📎 Attached Evidence</div>
+            <div class="d-card-body">
+              <div class="evidence-list" id="d-evidence">
+                <div class="ev-item"><div class="ev-icon">📄</div><div class="ev-name">AML_Policy_Draft_v3.pdf</div><span class="ev-meta">2.4 MB · PDF</span><span class="ev-dl">↓ View</span></div>
+                <div class="ev-item"><div class="ev-icon">📊</div><div class="ev-name">Transaction_Monitor_Matrix.xlsx</div><span class="ev-meta">890 KB</span><span class="ev-dl">↓ View</span></div>
+                <div class="ev-item"><div class="ev-icon">📋</div><div class="ev-name">Training_Completion_Feb25.xlsx</div><span class="ev-meta">1.1 MB</span><span class="ev-dl">↓ View</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- RIGHT -->
+        <div>
+          <div class="d-card">
+            <div class="d-card-hd">☑ Review Checklist</div>
+            <div class="d-card-body">
+              <div class="checklist-items">
+                <div class="chk-row"><input type="checkbox" id="c1"><label for="c1">All clauses read and reviewed</label></div>
+                <div class="chk-row"><input type="checkbox" id="c2"><label for="c2">Evidence documents verified and complete</label></div>
+                <div class="chk-row"><input type="checkbox" id="c3"><label for="c3">Circular reference requirements addressed</label></div>
+                <div class="chk-row"><input type="checkbox" id="c4"><label for="c4">Risk areas identified and documented</label></div>
+                <div class="chk-row"><input type="checkbox" id="c5"><label for="c5">Compliance timeline is achievable</label></div>
+                <div class="chk-row"><input type="checkbox" id="c6"><label for="c6">Cross-functional dependencies noted</label></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="d-card">
+            <div class="d-card-hd">💬 Review Feedback</div>
+            <div class="d-card-body">
+              <div class="feedback-form">
+                <div><label class="form-label">Review Outcome</label>
+                  <select class="form-select" id="review-outcome">
+                    <option value="">Select outcome…</option>
+                    <option>Approve</option><option>Request Revisions</option><option>Reject</option>
+                  </select>
+                </div>
+                <div><label class="form-label">Risk Rating</label>
+                  <select class="form-select">
+                    <option value="">Assign risk rating…</option>
+                    <option>Low Risk</option><option>Medium Risk</option><option>High Risk</option><option>Critical Risk</option>
+                  </select>
+                </div>
+                <div><label class="form-label">Comments & Findings</label>
+                  <textarea class="form-textarea" placeholder="Document your review findings, observations, and any areas of concern…"></textarea>
+                </div>
+                <div><label class="form-label">Revision Deadline (if applicable)</label>
+                  <input type="date" class="form-input">
+                </div>
+                <div><label class="form-label">Notify Assignee</label>
+                  <select class="form-select">
+                    <option>Yes — send email notification</option>
+                    <option>No — silent update</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="d-card">
+            <div class="d-card-hd">🚀 Submit Decision</div>
+            <div class="d-card-body">
+              <div class="decision-btns">
+                <button class="btn btn-success" onclick="submitDecision('approve')">✅ Approve</button>
+                <button class="btn btn-warning" onclick="submitDecision('revision')">↺ Request Revisions</button>
+                <button class="btn btn-danger" onclick="submitDecision('reject')">✕ Reject</button>
+                <button class="btn btn-ghost" style="justify-content:center;" onclick="submitDecision('save')">💾 Save Draft</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="d-card">
+            <div class="d-card-hd">🕐 Prior Review Cycles</div>
+            <div class="d-card-body" id="d-prior-cycles">
+              <div style="font-size:12px;color:var(--text-muted);text-align:center;padding:14px 0;">No prior review cycles for this item.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════ REVIEW HISTORY ══════ -->
+    <div class="page" id="page-history">
+      <div class="sec-hd">
+        <div><h2>Review History</h2><p>Complete audit trail of all reviewed items</p></div>
+      </div>
+      <div class="card">
+        <div class="card-body" style="padding:16px;">
+          <div class="table-toolbar">
+            <input class="search-input" placeholder="🔍  Search history…">
+            <select class="filter-sel"><option value="">All Outcomes</option><option>Approved</option><option>Revisions Requested</option><option>Rejected</option></select>
+            <select class="filter-sel"><option value="">All Departments</option><option>IT Compliance</option><option>Finance</option><option>Data Privacy</option><option>HR Compliance</option><option>Legal</option></select>
+            <select class="filter-sel"><option value="">All Time</option><option>This Week</option><option>This Month</option><option>Last 3 Months</option></select>
+            <select class="filter-sel"><option value="">Circular Type</option><option>RBI</option><option>SEBI</option><option>IRDAI</option><option>Internal</option></select>
+            <button class="btn btn-ghost btn-sm">⬇ Export</button>
+          </div>
+          <div class="tbl-wrap">
+            <table>
+              <thead>
+                <tr><th>Action ID</th><th>Title</th><th>Assignee</th><th>Circular Ref</th><th>Outcome</th><th>Risk</th><th>Reviewed On</th><th>Time Taken</th><th>Feedback</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><span style="font-family:'DM Mono',monospace;font-size:12px;">ACT-007</span></td>
+                  <td><strong>SOX Documentation Controller</strong></td>
+                  <td>Kavya Pillai</td>
+                  <td><span style="font-family:'DM Mono',monospace;font-size:11.5px;color:var(--accent);">SOX/DOC/2024/Q4</span></td>
+                  <td><span class="chip ch-approved">✓ Approved</span></td>
+                  <td><span class="chip ch-low">Low</span></td>
+                  <td>Mar 4 · 2:30 PM</td><td>1.8h</td>
+                  <td><button class="expand-btn" onclick="toggleH(this)">+ Show</button>
+                    <div class="h-detail">All SOX requirements properly addressed. Document ready for filing. Evidence complete.</div></td>
+                </tr>
+                <tr>
+                  <td><span style="font-family:'DM Mono',monospace;font-size:12px;">ACT-006</span></td>
+                  <td><strong>Anti-Corruption Training Program</strong></td>
+                  <td>Rohan Das</td>
+                  <td><span style="font-family:'DM Mono',monospace;font-size:11.5px;color:var(--accent);">INT/HR/ANTI-COR/24</span></td>
+                  <td><span class="chip ch-approved">✓ Approved</span></td>
+                  <td><span class="chip ch-low">Low</span></td>
+                  <td>Mar 2 · 10:15 AM</td><td>2.1h</td>
+                  <td><button class="expand-btn" onclick="toggleH(this)">+ Show</button>
+                    <div class="h-detail">Training materials comprehensive. All 248 employees completed. Approved for compliance documentation.</div></td>
+                </tr>
+                <tr>
+                  <td><span style="font-family:'DM Mono',monospace;font-size:12px;">ACT-003</span></td>
+                  <td><strong>Internal Audit Preparation (Rev 1)</strong></td>
+                  <td>Sanjay Patel</td>
+                  <td><span style="font-family:'DM Mono',monospace;font-size:11.5px;color:var(--accent);">INT/AUDIT/2024/Q1</span></td>
+                  <td><span class="chip ch-revision">↺ Revisions</span></td>
+                  <td><span class="chip ch-medium">Medium</span></td>
+                  <td>Feb 28 · 3:45 PM</td><td>3.5h</td>
+                  <td><button class="expand-btn" onclick="toggleH(this)">+ Show</button>
+                    <div class="h-detail">Missing critical audit plan for IT infrastructure. Resubmit deadline: March 5, 2025.</div></td>
+                </tr>
+                <tr>
+                  <td><span style="font-family:'DM Mono',monospace;font-size:12px;">ACT-002</span></td>
+                  <td><strong>Data Privacy Policy Update</strong></td>
+                  <td>Priya Sharma</td>
+                  <td><span style="font-family:'DM Mono',monospace;font-size:11.5px;color:var(--accent);">GDPR/Art35/2024</span></td>
+                  <td><span class="chip ch-approved">✓ Approved</span></td>
+                  <td><span class="chip ch-low">Low</span></td>
+                  <td>Feb 25 · 11:00 AM</td><td>2.0h</td>
+                  <td><button class="expand-btn" onclick="toggleH(this)">+ Show</button>
+                    <div class="h-detail">Properly addresses GDPR Article 35. Legal review completed. Ready for implementation.</div></td>
+                </tr>
+                <tr>
+                  <td><span style="font-family:'DM Mono',monospace;font-size:12px;">ACT-001</span></td>
+                  <td><strong>KYC Norms Revision — Branch Ops</strong></td>
+                  <td>Amit Nair</td>
+                  <td><span style="font-family:'DM Mono',monospace;font-size:11.5px;color:var(--accent);">RBI/KYC/2024/031</span></td>
+                  <td><span class="chip ch-rejected">✕ Rejected</span></td>
+                  <td><span class="chip ch-high">High</span></td>
+                  <td>Feb 20 · 4:00 PM</td><td>4.2h</td>
+                  <td><button class="expand-btn" onclick="toggleH(this)">+ Show</button>
+                    <div class="h-detail">Rejected — implementation plan doesn't meet RBI timeline. Critical gaps in digital KYC workflow. Requires complete rework.</div></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="pagination">
+            <button class="pg-btn active">1</button><button class="pg-btn">2</button><button class="pg-btn">3</button>
+            <span class="pg-info">Showing 5 of 24 · <a href="#" style="color:var(--accent);">Load more</a></span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════ MY ITEMS ══════ -->
+    <div class="page" id="page-myitems">
+      <div class="sec-hd">
+        <div><h2>My Items</h2><p>Track all actions assigned to you</p></div>
+      </div>
+      <div class="stats-grid" style="grid-template-columns:repeat(4,1fr);margin-bottom:18px;">
+        <div class="stat-card sc-blue"><div class="sc-icon">📋</div><div class="sc-val">5</div><div class="sc-label">Pending Review</div></div>
+        <div class="stat-card sc-orange"><div class="sc-icon">⚡</div><div class="sc-val">2</div><div class="sc-label">Overdue</div></div>
+        <div class="stat-card sc-green"><div class="sc-icon">✅</div><div class="sc-val">18</div><div class="sc-label">Completed</div></div>
+        <div class="stat-card sc-purple"><div class="sc-icon">↺</div><div class="sc-val">3</div><div class="sc-label">Revisions Sent</div></div>
+      </div>
+      <div class="sub-tabs">
+        <button class="sub-tab active" onclick="switchMyTab('pending',this)">Pending (5)</button>
+        <button class="sub-tab" onclick="switchMyTab('inprogress',this)">In Progress (1)</button>
+        <button class="sub-tab" onclick="switchMyTab('done',this)">Completed (18)</button>
+        <button class="sub-tab" onclick="switchMyTab('overdue',this)">Overdue (2)</button>
+      </div>
+      <div class="card">
+        <div class="card-body" style="padding:16px;">
+          <div class="table-toolbar">
+            <input class="search-input" placeholder="🔍  Search my items…">
+            <select class="filter-sel"><option value="">All Priorities</option><option>Critical</option><option>High</option><option>Medium</option><option>Low</option></select>
+            <select class="filter-sel"><option value="">All Types</option><option>Policy Review</option><option>Audit</option><option>Training</option><option>Assessment</option></select>
+          </div>
+          <div class="tbl-wrap"><table><thead><tr><th>Action ID</th><th>Title</th><th>Assignee</th><th>Type</th><th>Priority</th><th>Due Date</th><th>Status</th><th>Action</th></tr></thead>
+            <tbody id="my-items-tbody"></tbody>
+          </table></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════ METRICS ══════ -->
+    <div class="page" id="page-metrics">
+      <div class="sec-hd">
+        <div><h2>Performance Metrics</h2><p>Your review statistics and compliance KPIs</p></div>
+        <select class="filter-sel"><option>March 2025</option><option>February 2025</option><option>Q1 2025</option><option>FY 2024–25</option></select>
+      </div>
+      <div class="metrics-grid">
+        <div class="metric-block"><div class="mb-lbl">Total Reviews</div><div class="mb-val" style="color:var(--accent);">24</div><div class="mb-trend up">↑ 4 vs last month</div><div class="meter-wrap" style="margin-top:10px;"><div class="meter-bar" style="width:80%;background:var(--accent);"></div></div></div>
+        <div class="metric-block"><div class="mb-lbl">Approval Rate</div><div class="mb-val" style="color:var(--success);">75%</div><div class="mb-trend up">↑ 3% vs Feb</div><div class="meter-wrap" style="margin-top:10px;"><div class="meter-bar" style="width:75%;background:var(--success);"></div></div></div>
+        <div class="metric-block"><div class="mb-lbl">Avg Review Time</div><div class="mb-val" style="color:var(--info);">2.3h</div><div class="mb-trend up">↓ 0.4h faster</div><div class="meter-wrap" style="margin-top:10px;"><div class="meter-bar" style="width:55%;background:var(--info);"></div></div></div>
+        <!-- <div class="metric-block"><div class="mb-lbl">SLA Compliance</div><div class="mb-val" style="color:var(--success);">94%</div><div class="mb-trend up">↑ 3% this week</div><div class="meter-wrap" style="margin-top:10px;"><div class="meter-bar" style="width:94%;background:var(--success);"></div></div></div> -->
+        <div class="metric-block"><div class="mb-lbl">Revision Rate</div><div class="mb-val" style="color:var(--warning);">21%</div><div class="mb-trend down">↑ 5% vs Feb</div><div class="meter-wrap" style="margin-top:10px;"><div class="meter-bar" style="width:21%;background:var(--warning);"></div></div></div>
+        <div class="metric-block"><div class="mb-lbl">Rejection Rate</div><div class="mb-val" style="color:var(--danger);">4%</div><div class="mb-trend up">↓ 2% vs Feb</div><div class="meter-wrap" style="margin-top:10px;"><div class="meter-bar" style="width:4%;background:var(--danger);"></div></div></div>
+      </div>
+      <div class="card">
+        <div class="card-hd"><span class="card-title">📊 Detailed Metrics Breakdown</span></div>
+        <div class="tbl-wrap">
+          <table>
+            <thead><tr><th>Metric</th><th>This Month</th><th>Last Month</th><th>YTD</th><th>Target</th><th>Status</th></tr></thead>
+            <tbody>
+              <tr><td>Reviews Completed</td><td><strong>24</strong></td><td>20</td><td>68</td><td>25/mo</td><td><span class="chip ch-inreview">Near Target</span></td></tr>
+              <tr><td>Approved</td><td><strong style="color:var(--success);">18 (75%)</strong></td><td>16 (80%)</td><td>52</td><td>&gt;70%</td><td><span class="chip ch-approved">On Target</span></td></tr>
+              <tr><td>Revisions Requested</td><td><strong style="color:var(--warning);">5 (21%)</strong></td><td>3 (15%)</td><td>14</td><td>&lt;25%</td><td><span class="chip ch-approved">On Target</span></td></tr>
+              <tr><td>Rejected</td><td><strong style="color:var(--danger);">1 (4%)</strong></td><td>1 (5%)</td><td>2</td><td>&lt;5%</td><td><span class="chip ch-approved">On Target</span></td></tr>
+              <tr><td>Avg Review Time</td><td><strong>2.3h</strong></td><td>2.7h</td><td>2.5h</td><td>&lt;3h</td><td><span class="chip ch-approved">On Target</span></td></tr>
+              <tr><td>SLA Breaches</td><td><strong style="color:var(--danger);">2</strong></td><td>1</td><td>4</td><td>0</td><td><span class="chip ch-revision">Watch</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /content-area -->
+</div><!-- /main-wrapper -->
+
+<div class="toast-wrap" id="toast-wrap"></div>
+
+<script>
+// ── SIDEBAR COLLAPSE ──
+document.getElementById('sb-toggle').addEventListener('click',()=>{
+  document.getElementById('sidebar').classList.toggle('collapsed');
+});
+
+// ── SUBMENU TOGGLE ──
+function toggleSubmenu(id){
+  document.getElementById(id).classList.toggle('open');
+}
+
+// ── PROFILE DROPDOWN ──
+document.getElementById('profile-btn').addEventListener('click',()=>{
+  document.getElementById('profile-dd').classList.toggle('open');
+});
+document.addEventListener('click',e=>{
+  if(!e.target.closest('.profile-wrap')) document.getElementById('profile-dd').classList.remove('open');
+});
+
+// ── NAVIGATION STATE ──
+let prevPage = 'queue'; // page that opened detail
+
+function navigate(page){
+  // hide all pages
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-'+page).classList.add('active');
+
+  // update sidebar active states
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.querySelectorAll('.submenu li').forEach(n=>n.classList.remove('active'));
+
+  const titles = {
+    dashboard:'Dashboard',
+    queue:'Approval Queue',
+    history:'Review History',
+    myitems:'My Items',
+    metrics:'Metrics'
+  };
+  document.getElementById('page-title').textContent = titles[page] || page;
+
+  if(page === 'dashboard'){
+    document.getElementById('nav-dashboard').classList.add('active');
+  } else {
+    document.getElementById('nav-inbox').classList.add('open');
+    const subMap = {queue:'sub-queue', history:'sub-history', myitems:'sub-myitems', metrics:'sub-metrics'};
+    if(subMap[page]) document.getElementById(subMap[page]).classList.add('active');
+  }
+}
+
+// ── REVIEW DETAIL ──
+const reviewData = {
+  'ACT-012':{title:'AML Policy Framework Review',assignee:'Meena Iyer',dept:'IT Compliance',due:'Mar 1, 2025',dueColor:'var(--danger)',submitted:'Feb 28, 2025',type:'Regulatory Compliance',circRef:'RBI/2024/AML/045',circDesc:'Reserve Bank of India — Anti-Money Laundering (AML) Policy Framework Guidelines. Effective January 1, 2025. All regulated entities must update AML policies, controls, and training programs.',status:'Overdue',statusClass:'ch-overdue',priority:'Critical',priorityClass:'ch-critical'},
+  'ACT-005':{title:'GDPR Data Processing Audit',assignee:'Priya Sharma',dept:'Data Privacy',due:'Mar 2, 2025',dueColor:'var(--danger)',submitted:'Mar 1, 2025',type:'Regulatory Compliance',circRef:'GDPR/Art35/2024',circDesc:'GDPR Article 35 — Data Protection Impact Assessment requirements for high-risk processing activities. Organisations must document DPIAs for new technologies and large-scale profiling.',status:'Overdue',statusClass:'ch-overdue',priority:'High',priorityClass:'ch-high'},
+  'ACT-008':{title:'IT Security Assessment',assignee:'Sarah Johnson',dept:'IT',due:'Mar 6, 2025',dueColor:'var(--warning)',submitted:'Mar 3, 2025',type:'Security Audit',circRef:'ISO27001/2024/Q1',circDesc:'ISO/IEC 27001:2022 compliance audit for Q1 2025. Includes vulnerability assessment, penetration testing results, and remediation planning.',status:'In Review',statusClass:'ch-inreview',priority:'High',priorityClass:'ch-high'},
+  'ACT-015':{title:'Capital Adequacy Ratio Report',assignee:'Rajan Mehta',dept:'Finance',due:'Mar 7, 2025',dueColor:'var(--text-primary)',submitted:'Mar 4, 2025',type:'Financial Compliance',circRef:'RBI/CRAR/2025/01',circDesc:'RBI Circular on Capital Adequacy Ratio reporting for Q4 FY 2024–25. Banks must maintain minimum CRAR of 10.5% per Basel III norms.',status:'Pending',statusClass:'ch-pending',priority:'Medium',priorityClass:'ch-medium'},
+  'ACT-018':{title:'Employee Conduct Policy Update',assignee:'Neha Rao',dept:'HR Compliance',due:'Mar 10, 2025',dueColor:'var(--text-primary)',submitted:'Mar 5, 2025',type:'Policy Review',circRef:'INT/HR/CONDUCT/24',circDesc:'Internal circular updating Employee Code of Conduct policy effective April 1, 2025. Covers whistleblower protections, conflict of interest, and social media guidelines.',status:'Pending',statusClass:'ch-pending',priority:'Low',priorityClass:'ch-low'}
+};
+
+function openDetail(id, fromPage){
+  const d = reviewData[id];
+  if(!d) return;
+  prevPage = fromPage || 'queue';
+
+  document.getElementById('detail-bc-id').textContent = id;
+  document.getElementById('detail-breadcrumb-link').textContent = prevPage === 'myitems' ? 'My Items' : 'Approval Queue';
+  document.getElementById('detail-main-title').textContent = d.title;
+  document.getElementById('d-id').textContent = id;
+  document.getElementById('d-assignee').textContent = d.assignee;
+  document.getElementById('d-dept').textContent = d.dept;
+  document.getElementById('d-due').textContent = d.due;
+  document.getElementById('d-due').style.color = d.dueColor;
+  document.getElementById('d-submitted').textContent = d.submitted;
+  document.getElementById('d-type').textContent = d.type;
+  document.getElementById('d-circ-ref').textContent = d.circRef;
+  document.getElementById('d-circ-desc').textContent = d.circDesc;
+
+  const sc = document.getElementById('detail-status-chip');
+  sc.className = 'chip ' + d.statusClass;
+  sc.textContent = d.status;
+
+  const pc = document.getElementById('detail-priority-chip');
+  pc.className = 'chip ' + d.priorityClass;
+  pc.textContent = d.priority;
+
+  // reset form
+  document.querySelectorAll('#page-detail input[type=checkbox]').forEach(c=>c.checked=false);
+  document.getElementById('review-outcome').value = '';
+
+  // back button
+  document.getElementById('detail-back-btn').onclick = ()=>navigate(prevPage);
+  document.getElementById('detail-breadcrumb-link').onclick = (e)=>{e.preventDefault();navigate(prevPage);};
+
+  // show detail page
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-detail').classList.add('active');
+  document.getElementById('page-title').textContent = 'Review: ' + id;
+
+  // sidebar highlight inbox
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.querySelectorAll('.submenu li').forEach(n=>n.classList.remove('active'));
+  document.getElementById('nav-inbox').classList.add('open');
+}
+
+// ── SUBMIT DECISION ──
+function submitDecision(action){
+  const msgs = {
+    approve:{msg:'✅ Item approved! Assignee notified.',type:'success'},
+    revision:{msg:'↺ Revision request sent.',type:'info'},
+    reject:{msg:'✕ Item rejected. Feedback sent.',type:'error'},
+    save:{msg:'💾 Draft saved.',type:'info'}
+  };
+  toast(msgs[action].msg, msgs[action].type);
+  if(action !== 'save') setTimeout(()=>navigate(prevPage), 1600);
+}
+
+// ── HISTORY EXPAND ──
+function toggleH(btn){
+  const panel = btn.nextElementSibling;
+  panel.classList.toggle('open');
+  btn.textContent = panel.classList.contains('open') ? '− Hide' : '+ Show';
+}
+
+// ── MY ITEMS ──
+const myData = {
+  pending:[
+    {id:'ACT-012',title:'AML Policy Framework Review',assignee:'Meena Iyer',type:'Policy Review',priority:'Critical',pClass:'ch-critical',due:'Mar 1, 2025',overdue:true,status:'Overdue',sClass:'ch-overdue'},
+    {id:'ACT-005',title:'GDPR Data Processing Audit',assignee:'Priya Sharma',type:'Audit',priority:'High',pClass:'ch-high',due:'Mar 2, 2025',overdue:true,status:'Overdue',sClass:'ch-overdue'},
+    {id:'ACT-008',title:'IT Security Assessment',assignee:'Sarah Johnson',type:'Assessment',priority:'High',pClass:'ch-high',due:'Mar 6, 2025',overdue:false,status:'In Review',sClass:'ch-inreview'},
+    {id:'ACT-015',title:'Capital Adequacy Ratio Report',assignee:'Rajan Mehta',type:'Financial',priority:'Medium',pClass:'ch-medium',due:'Mar 7, 2025',overdue:false,status:'Pending',sClass:'ch-pending'},
+    {id:'ACT-018',title:'Employee Conduct Policy',assignee:'Neha Rao',type:'Policy Review',priority:'Low',pClass:'ch-low',due:'Mar 10, 2025',overdue:false,status:'Pending',sClass:'ch-pending'},
+  ],
+  inprogress:[
+    {id:'ACT-008',title:'IT Security Assessment',assignee:'Sarah Johnson',type:'Assessment',priority:'High',pClass:'ch-high',due:'Mar 6, 2025',overdue:false,status:'In Review',sClass:'ch-inreview'},
+  ],
+  done:[
+    {id:'ACT-007',title:'SOX Documentation Controller',assignee:'Kavya Pillai',type:'Documentation',priority:'High',pClass:'ch-high',due:'Mar 4, 2025',overdue:false,status:'Approved',sClass:'ch-approved'},
+    {id:'ACT-006',title:'Anti-Corruption Training',assignee:'Rohan Das',type:'Training',priority:'Medium',pClass:'ch-medium',due:'Mar 2, 2025',overdue:false,status:'Approved',sClass:'ch-approved'},
+    {id:'ACT-002',title:'Data Privacy Policy Update',assignee:'Priya Sharma',type:'Policy Review',priority:'High',pClass:'ch-high',due:'Feb 25, 2025',overdue:false,status:'Approved',sClass:'ch-approved'},
+  ],
+  overdue:[
+    {id:'ACT-012',title:'AML Policy Framework Review',assignee:'Meena Iyer',type:'Policy Review',priority:'Critical',pClass:'ch-critical',due:'Mar 1, 2025',overdue:true,status:'Overdue',sClass:'ch-overdue'},
+    {id:'ACT-005',title:'GDPR Data Processing Audit',assignee:'Priya Sharma',type:'Audit',priority:'High',pClass:'ch-high',due:'Mar 2, 2025',overdue:true,status:'Overdue',sClass:'ch-overdue'},
+  ]
+};
+
+function switchMyTab(key, btn){
+  document.querySelectorAll('.sub-tabs .sub-tab').forEach(t=>t.classList.remove('active'));
+  btn.classList.add('active');
+  renderMyItems(key);
+}
+
+function renderMyItems(key){
+  const rows = myData[key]||[];
+  const tbody = document.getElementById('my-items-tbody');
+  tbody.innerHTML = rows.length ? rows.map(r=>`
+    <tr ${r.overdue?'class="overdue-row"':''}>
+      <td><span style="font-family:'DM Mono',monospace;font-size:12px;">${r.id}</span></td>
+      <td><strong>${r.title}</strong></td>
+      <td>${r.assignee}</td>
+      <td><span class="tag">${r.type}</span></td>
+      <td><span class="chip ${r.pClass}">${r.priority}</span></td>
+      <td style="${r.overdue?'color:var(--danger);font-weight:600;':''}">${r.due}</td>
+      <td><span class="chip ${r.sClass}">${r.status}</span></td>
+      <td><button class="tbl-btn" onclick="openDetail('${r.id}','myitems')">Open</button></td>
+    </tr>`).join('')
+    : `<tr><td colspan="8" style="text-align:center;padding:32px;color:var(--text-muted);">No items in this category</td></tr>`;
+}
+
+// ── TOAST ──
+function toast(msg,type='success'){
+  const w = document.getElementById('toast-wrap');
+  const t = document.createElement('div');
+  t.className='toast '+type;
+  t.textContent=msg;
+  w.appendChild(t);
+  setTimeout(()=>{t.style.opacity='0';t.style.transition='opacity .3s';setTimeout(()=>t.remove(),300);},3200);
+}
+
+// ── INIT ──
+navigate('dashboard');
+renderMyItems('pending');
+</script>
+</body>
+</html>

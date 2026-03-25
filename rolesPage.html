@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>CMS — Circular Management System</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:       #0b1120;
+      --surface:  #111827;
+      --border:   rgba(255,255,255,0.07);
+      --text:     #f1f5f9;
+      --text2:    #94a3b8;
+      --text3:    #475569;
+      --accent:   #6366f1;
+      --accent-d: #4f46e5;
+      --glow:     rgba(99,102,241,0.25);
+
+      --co-color:    #6366f1; --co-bg:    rgba(99,102,241,0.1);
+      --rev-color:   #8b5cf6; --rev-bg:   rgba(139,92,246,0.1);
+      --asgn-color:  #06b6d4; --asgn-bg:  rgba(6,182,212,0.1);
+      --own-color:   #10b981; --own-bg:   rgba(16,185,129,0.1);
+      --fil-color:   #f59e0b; --fil-bg:   rgba(245,158,11,0.1);
+      --mgr-color:   #ef4444; --mgr-bg:   rgba(239,68,68,0.1);
+      --adm-color:   #e67e22; --adm-bg:   rgba(230,126,34,0.1);
+    }
+
+    html { font-size: 14px; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 24px;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    /* ── BACKGROUND ── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 80% 50% at 20% 10%, rgba(99,102,241,0.12) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 40% at 80% 80%, rgba(139,92,246,0.09) 0%, transparent 60%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* Grid lines */
+    body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
+      background-size: 48px 48px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .container {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      max-width: 900px;
+    }
+
+    /* ── HEADER ── */
+    .header {
+      text-align: center;
+      margin-bottom: 56px;
+      animation: fadeDown 0.6s ease both;
+    }
+
+    .logo-row {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 28px;
+      padding: 8px 20px 8px 12px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--border);
+      border-radius: 99px;
+    }
+
+    .logo-hex {
+      width: 36px;
+      height: 36px;
+      background: var(--accent);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      color: #fff;
+      box-shadow: 0 0 20px var(--glow);
+    }
+
+    .logo-text-group .logo-main {
+      display: block;
+      font-family: 'Syne', sans-serif;
+      font-size: 15px;
+      font-weight: 800;
+      color: #fff;
+      letter-spacing: 0.05em;
+    }
+
+    .logo-text-group .logo-sub {
+      display: block;
+      font-size: 10px;
+      color: var(--text3);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    .header h1 {
+      font-family: 'Syne', sans-serif;
+      font-size: clamp(28px, 5vw, 44px);
+      font-weight: 800;
+      color: #fff;
+      line-height: 1.15;
+      margin-bottom: 14px;
+      letter-spacing: -0.02em;
+    }
+
+    .header h1 span {
+      background: linear-gradient(135deg, #818cf8, #c084fc);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .header p {
+      font-size: 15px;
+      color: var(--text2);
+      max-width: 420px;
+      margin: 0 auto;
+      line-height: 1.7;
+    }
+
+    /* ── ROLES GRID ── */
+    .roles-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 16px;
+    }
+
+    /* Wide card for super admin */
+    .role-card.wide {
+      grid-column: 1 / -1;
+    }
+
+    /* ── ROLE CARD ── */
+    .role-card {
+      position: relative;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 24px 24px 20px;
+      cursor: pointer;
+      text-decoration: none;
+      color: inherit;
+      display: block;
+      transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+      overflow: hidden;
+      animation: fadeUp 0.5s ease both;
+      user-select: none;
+    }
+
+    .role-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 16px 48px rgba(0,0,0,0.4);
+    }
+
+    .role-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      opacity: 0;
+      transition: opacity 0.2s;
+      border-radius: 16px 16px 0 0;
+    }
+
+    .role-card:hover::before { opacity: 1; }
+
+    /* Glow blob */
+    .role-card .card-glow {
+      position: absolute;
+      top: -40px; right: -40px;
+      width: 160px; height: 160px;
+      border-radius: 50%;
+      opacity: 0.06;
+      transition: opacity 0.2s;
+      pointer-events: none;
+    }
+    .role-card:hover .card-glow { opacity: 0.12; }
+
+    /* Per-role accent colors */
+    .card-co    { --c: var(--co-color);   --cbg: var(--co-bg); }
+    .card-rev   { --c: var(--rev-color);  --cbg: var(--rev-bg); }
+    .card-asgn  { --c: var(--asgn-color); --cbg: var(--asgn-bg); }
+    .card-own   { --c: var(--own-color);  --cbg: var(--own-bg); }
+    .card-fil   { --c: var(--fil-color);  --cbg: var(--fil-bg); }
+    .card-mgr   { --c: var(--mgr-color);  --cbg: var(--mgr-bg); }
+    .card-adm   { --c: var(--adm-color);  --cbg: var(--adm-bg); }
+
+    .role-card:hover { border-color: var(--c); }
+    .role-card::before { background: var(--c); }
+    .role-card .card-glow { background: var(--c); }
+
+    /* Card content */
+    .card-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+
+    .card-icon {
+      width: 44px; height: 44px;
+      border-radius: 12px;
+      background: var(--cbg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      border: 1px solid rgba(255,255,255,0.05);
+      transition: transform 0.2s;
+    }
+    .role-card:hover .card-icon { transform: scale(1.1) rotate(-4deg); }
+
+    .card-arrow {
+      font-size: 18px;
+      color: var(--text3);
+      transition: transform 0.2s, color 0.2s;
+      line-height: 1;
+      margin-top: 4px;
+    }
+    .role-card:hover .card-arrow { transform: translate(3px,-3px); color: var(--c); }
+
+    .card-role-label {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--c);
+      margin-bottom: 5px;
+      font-family: 'DM Mono', monospace;
+    }
+
+    .card-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 18px;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 8px;
+      line-height: 1.2;
+    }
+
+    .card-desc {
+      font-size: 12.5px;
+      color: var(--text2);
+      line-height: 1.65;
+      margin-bottom: 18px;
+    }
+
+    /* Capability chips */
+    .card-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+    }
+
+    .chip {
+      font-size: 10.5px;
+      font-weight: 600;
+      padding: 3px 8px;
+      border-radius: 99px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.07);
+      color: var(--text2);
+      white-space: nowrap;
+    }
+
+    /* Wide card layout */
+    .role-card.wide .card-inner {
+      display: flex;
+      align-items: center;
+      gap: 24px;
+    }
+
+    .role-card.wide .card-body {
+      flex: 1;
+    }
+
+    .role-card.wide .card-desc { margin-bottom: 14px; }
+
+    .admin-badge {
+      flex-shrink: 0;
+      padding: 10px 20px;
+      border-radius: 10px;
+      background: var(--cbg);
+      border: 1px solid rgba(230,126,34,0.2);
+      text-align: center;
+    }
+
+    .admin-badge-label {
+      font-size: 10px;
+      color: var(--text3);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 4px;
+    }
+
+    .admin-badge-val {
+      font-family: 'Syne', sans-serif;
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--adm-color);
+    }
+
+    /* ── ANIMATION DELAYS ── */
+    .role-card:nth-child(1) { animation-delay: 0.05s; }
+    .role-card:nth-child(2) { animation-delay: 0.10s; }
+    .role-card:nth-child(3) { animation-delay: 0.15s; }
+    .role-card:nth-child(4) { animation-delay: 0.20s; }
+    .role-card:nth-child(5) { animation-delay: 0.25s; }
+    .role-card:nth-child(6) { animation-delay: 0.30s; }
+    .role-card:nth-child(7) { animation-delay: 0.35s; }
+
+    /* ── FOOTER ── */
+    .footer {
+      text-align: center;
+      margin-top: 40px;
+      color: var(--text3);
+      font-size: 12px;
+      animation: fadeUp 0.6s 0.4s ease both;
+    }
+
+    .footer code {
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      background: rgba(255,255,255,0.05);
+      padding: 2px 7px;
+      border-radius: 4px;
+      color: var(--text2);
+    }
+
+    /* ── ANIMATIONS ── */
+    @keyframes fadeDown {
+      from { opacity: 0; transform: translateY(-16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 600px) {
+      .roles-grid { grid-template-columns: 1fr; }
+      .role-card.wide .card-inner { flex-direction: column; gap: 14px; }
+      .admin-badge { width: 100%; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="logo-row">
+      <div class="logo-hex">⬡</div>
+      <div class="logo-text-group">
+        <span class="logo-main">CMS</span>
+        <span class="logo-sub">Compliance Suite</span>
+      </div>
+    </div>
+    <h1>Select Your <span>Role</span></h1>
+    <p>Choose your role to access your personalized workspace within the Circular Management System.</p>
+  </div>
+
+  <!-- ROLE CARDS -->
+  <div class="roles-grid">
+
+    <!-- Compliance Officer -->
+    <a onclick="go('co.html')" class="role-card card-co">
+      <div class="card-glow"></div>
+      <div class="card-top">
+        <div class="card-icon">🛡️</div>
+        <span class="card-arrow">↗</span>
+      </div>
+      <div class="card-role-label">Role · 01</div>
+      <div class="card-title">Compliance Officer</div>
+      <div class="card-desc">Oversee all circulars, manage AI-powered analysis, track department compliance, and generate reports.</div>
+      <div class="card-chips">
+        <span class="chip">Dashboard</span>
+        <span class="chip">AI Engine</span>
+        <span class="chip">Circular Library</span>
+        <span class="chip">Reports</span>
+      </div>
+    </a>
+
+    <!-- Reviewer -->
+    <a onclick="go('reviewer_panel.html')" class="role-card card-rev">
+      <div class="card-glow"></div>
+      <div class="card-top">
+        <div class="card-icon">🔍</div>
+        <span class="card-arrow">↗</span>
+      </div>
+      <div class="card-role-label">Role · 02</div>
+      <div class="card-title">Reviewer</div>
+      <div class="card-desc">Review submitted actions and evidence, provide feedback, and recommend approvals or revisions.</div>
+      <div class="card-chips">
+        <span class="chip">My Reviews</span>
+        <span class="chip">Evidence</span>
+        <span class="chip">Thread</span>
+        <span class="chip">Decisions</span>
+      </div>
+    </a>
+
+    <!-- Assignee -->
+    <a onclick="go('assignee_panel.html')" class="role-card card-asgn">
+      <div class="card-glow"></div>
+      <div class="card-top">
+        <div class="card-icon">✍️</div>
+        <span class="card-arrow">↗</span>
+      </div>
+      <div class="card-role-label">Role · 03</div>
+      <div class="card-title">Assignee</div>
+      <div class="card-desc">Execute assigned compliance actions, upload evidence, and submit work for review within deadlines.</div>
+      <div class="card-chips">
+        <span class="chip">My Tasks</span>
+        <span class="chip">Upload Evidence</span>
+        <span class="chip">Submit Actions</span>
+      </div>
+    </a>
+
+    <!-- Owner -->
+    <a onclick="go('owner_panel.html')" class="role-card card-own">
+      <div class="card-glow"></div>
+      <div class="card-top">
+        <div class="card-icon">✅</div>
+        <span class="card-arrow">↗</span>
+      </div>
+      <div class="card-role-label">Role · 04</div>
+      <div class="card-title">Owner</div>
+      <div class="card-desc">Provide final approval decisions on actions submitted through your department's approval workflow.</div>
+      <div class="card-chips">
+        <span class="chip">My Approvals</span>
+        <span class="chip">Approve / Reject</span>
+        <span class="chip">History</span>
+      </div>
+    </a>
+
+    <!-- Filer -->
+    <a onclick="go('filer_panel.html')" class="role-card card-fil">
+      <div class="card-glow"></div>
+      <div class="card-top">
+        <div class="card-icon">📁</div>
+        <span class="card-arrow">↗</span>
+      </div>
+      <div class="card-role-label">Role · 05</div>
+      <div class="card-title">Filer</div>
+      <div class="card-desc">File and organize circulars, maintain document records, and manage the circular library submissions.</div>
+      <div class="card-chips">
+        <span class="chip">Filing Queue</span>
+        <span class="chip">Circular Library</span>
+        <span class="chip">Documents</span>
+      </div>
+    </a>
+
+    <!-- Manager -->
+    <a onclick="go('dept_head.html')" class="role-card card-mgr">
+      <div class="card-glow"></div>
+      <div class="card-top">
+        <div class="card-icon">📊</div>
+        <span class="card-arrow">↗</span>
+      </div>
+      <div class="card-role-label">Role · 06</div>
+      <div class="card-title">Manager</div>
+      <div class="card-desc">Assign compliance actions to team members, monitor progress, and ensure department-level adherence.</div>
+      <div class="card-chips">
+        <span class="chip">Assign Actions</span>
+        <span class="chip">Team Overview</span>
+        <span class="chip">Approvals</span>
+        <span class="chip">Reports</span>
+      </div>
+    </a>
+
+    <!-- Super Admin — wide card -->
+    <a onclick="go('super_admin_panel.html')" class="role-card card-adm wide">
+      <div class="card-glow"></div>
+      <div class="card-inner">
+        <div class="card-body">
+          <div class="card-top">
+            <div class="card-icon">⚙️</div>
+            <span class="card-arrow">↗</span>
+          </div>
+          <div class="card-role-label">Role · 07 · Privileged</div>
+          <div class="card-title">Super Admin</div>
+          <div class="card-desc">Full system access — manage users, roles, circular configurations, audit logs, and platform-level settings across all departments.</div>
+          <div class="card-chips">
+            <span class="chip">User Management</span>
+            <span class="chip">Role Configuration</span>
+            <span class="chip">Audit Logs</span>
+            <span class="chip">System Settings</span>
+            <span class="chip">All Departments</span>
+            <span class="chip">Analytics</span>
+          </div>
+        </div>
+        <div class="admin-badge">
+          <div class="admin-badge-label">Access Level</div>
+          <div class="admin-badge-val">L7</div>
+        </div>
+      </div>
+    </a>
+
+  </div>
+
+  <!-- FOOTER -->
+  <div class="footer">
+    CMS Compliance Suite &nbsp;·&nbsp; <code>v2.0</code> &nbsp;·&nbsp; Select a role to continue
+  </div>
+
+</div>
+
+<script>
+  function go(file) {
+    window.location.href = file;
+  }
+</script>
+</body>
+</html>

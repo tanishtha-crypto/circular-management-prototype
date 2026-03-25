@@ -1,0 +1,3118 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Super Admin — CMS</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Inter:wght@400;500;600;700;800&family=DM+Mono:wght@500&display=swap"
+    rel="stylesheet" />
+  <style>
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0
+    }
+
+    :root {
+      --primary: #0f5a7d;
+      --primary-l: #1b7fa5;
+      --primary-xl: #e8f4f9;
+      --accent: #e67e22;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --text: #1a1a1a;
+      --text2: #475569;
+      --text3: #94a3b8;
+      --bg: #f8fafc;
+      --surface: #ffffff;
+      --border: #e2e8f0;
+      --sidebar-w: 240px;
+      --topbar-h: 56px;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      display: flex;
+      min-height: 100vh
+    }
+
+    /* ── SIDEBAR ── */
+    #sidebar {
+      width: 260px;
+      min-height: 100vh;
+      background: #1e3a5f;
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      z-index: 200;
+      border-right: 1px solid rgba(255, 255, 255, 0.08);
+      transition: width 0.25s cubic-bezier(.4, 0, .2, 1);
+      overflow: hidden;
+    }
+
+    #sidebar.collapsed {
+      width: 60px;
+    }
+
+    #sidebar.collapsed .logo-text,
+    #sidebar.collapsed .nav-label,
+    #sidebar.collapsed .submenu-arrow,
+    #sidebar.collapsed .user-info-sm,
+    #sidebar.collapsed .submenu,
+    #sidebar.collapsed .op-profile-mini {
+      display: none;
+    }
+
+    #sidebar.collapsed .sidebar-logo {
+      justify-content: center;
+      padding: 20px 0;
+    }
+
+    #sidebar.collapsed .nav-link {
+      justify-content: center;
+      padding: 12px 0;
+    }
+
+    #sidebar.collapsed .nav-icon {
+      width: auto;
+      font-size: 18px;
+    }
+
+    #sidebar.collapsed .sidebar-footer {
+      padding: 12px 0;
+    }
+
+    #sidebar.collapsed .user-mini {
+      justify-content: center;
+    }
+
+    #sidebar.collapsed+#main {
+      margin-left: 60px;
+    }
+
+    .sidebar-collapse-btn {
+      position: absolute;
+      top: 18px;
+      right: -12px;
+      width: 24px;
+      height: 24px;
+      background: #1e3a5f;
+      border: 2px solid rgba(255, 255, 255, 0.15);
+      border-radius: 50%;
+      color: #fff;
+      font-size: 11px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      z-index: 201;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+      transition: all 200ms cubic-bezier(.4, 0, .2, 1);
+    }
+
+    .sidebar-collapse-btn:hover {
+      background: #60a5fa;
+      border-color: #60a5fa;
+    }
+
+    .sidebar-logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 24px 20px 20px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      flex-shrink: 0;
+    }
+
+    .logo-icon {
+      width: 36px;
+      height: 36px;
+      background: #60a5fa;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      color: #fff;
+      flex-shrink: 0;
+    }
+
+    .logo-text {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .logo-main {
+      font-family: 'Syne', sans-serif;
+      font-size: 16px;
+      font-weight: 800;
+      color: #fff;
+      letter-spacing: 0.04em;
+    }
+
+    .logo-sub {
+      font-size: 10px;
+      color: #93b8d8;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    .sidebar-nav {
+      flex: 1;
+      overflow-y: hidden;
+      padding: 12px 0;
+    }
+
+    .nav-item {
+      position: relative;
+      list-style: none;
+    }
+
+    .nav-link {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 20px;
+      color: #93b8d8;
+      font-size: 13.5px;
+      font-weight: 500;
+      transition: all 200ms;
+      cursor: pointer;
+      text-decoration: none;
+    }
+
+    .nav-link:hover {
+      background: rgba(255, 255, 255, 0.07);
+      color: #fff;
+    }
+
+    .nav-icon {
+      font-size: 16px;
+      width: 20px;
+      text-align: center;
+      flex-shrink: 0;
+    }
+
+    .nav-label {
+      flex: 1;
+    }
+
+    .submenu-arrow {
+      font-size: 16px;
+      transition: transform 200ms;
+    }
+
+    .nav-item.active>.nav-link {
+      background: rgba(255, 255, 255, 0.12);
+      color: #fff;
+    }
+
+    .nav-item.active>.nav-link::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 3px;
+      background: #60a5fa;
+      border-radius: 0 2px 2px 0;
+    }
+
+    .submenu {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease;
+      background: rgba(0, 0, 0, 0.15);
+      list-style: none;
+    }
+
+    .submenu.open {
+      max-height: 600px;
+    }
+
+    .submenu li {
+      list-style: none;
+    }
+
+    .submenu li a {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 20px 8px 46px;
+      color: #93b8d8;
+      font-size: 12.5px;
+      text-decoration: none;
+      transition: color 200ms, background 200ms;
+    }
+
+    .submenu li a:hover {
+      color: #fff;
+      background: rgba(255, 255, 255, 0.04);
+    }
+
+    .nav-item.open>.nav-link .submenu-arrow {
+      transform: rotate(90deg);
+    }
+
+    /* Step dots */
+    .step-dot {
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 8px;
+      font-weight: 800;
+    }
+
+    .step-dot.done {
+      background: #10b981;
+      color: #fff;
+    }
+
+    .step-dot.todo {
+      background: rgba(255, 255, 255, 0.12);
+      color: #93b8d8;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+    }
+
+    /* Mini progress bar */
+    .op-profile-mini {
+      margin: 2px 12px 4px;
+      padding: 7px 10px;
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 8px;
+      font-size: 11px;
+      color: #93b8d8;
+    }
+
+    .op-profile-mini-bar {
+      height: 3px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 99px;
+      margin-top: 5px;
+      overflow: hidden;
+    }
+
+    .op-profile-mini-fill {
+      height: 100%;
+      background: #60a5fa;
+      border-radius: 99px;
+      transition: width .5s ease;
+    }
+
+    .sb-badge {
+      margin-left: auto;
+      font-size: 10px;
+      font-weight: 800;
+      background: var(--danger);
+      color: #fff;
+      padding: 1px 7px;
+      border-radius: 99px;
+    }
+
+    .sidebar-footer {
+      padding: 14px 16px;
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
+      flex-shrink: 0;
+    }
+
+    .user-mini {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .user-avatar-sm {
+      width: 30px;
+      height: 30px;
+      background: #60a5fa;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: 700;
+      color: #fff;
+      flex-shrink: 0;
+    }
+
+    .user-info-sm {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .user-name-sm {
+      color: #fff;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .user-role-sm {
+      color: #93b8d8;
+      font-size: 10.5px;
+    }
+
+    /* ── MAIN ── */
+    #main {
+      margin-left: 260px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      transition: margin-left 0.25s cubic-bezier(.4, 0, .2, 1);
+    }
+
+    #topbar {
+      height: 56px;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      padding: 0 24px;
+      gap: 12px;
+      position: sticky;
+      top: 0;
+      z-index: 50
+    }
+
+    /* ── PAGES ── */
+    .page {
+      display: none;
+      flex: 1;
+      flex-direction: column
+    }
+
+    .page.active {
+      display: flex
+    }
+
+    .page-body {
+      padding: 24px;
+      flex: 1
+    }
+
+    /* ── CARDS ── */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden
+    }
+
+    .card-hd {
+      padding: 14px 18px;
+      border-bottom: 1px solid var(--border);
+      background: #fafbff;
+      display: flex;
+      align-items: center;
+      justify-content: space-between
+    }
+
+    .card-title {
+      font-size: 14px;
+      font-weight: 800;
+      color: var(--text)
+    }
+
+    .card-sub {
+      font-size: 12px;
+      color: var(--text3);
+      margin-top: 1px
+    }
+
+    .card-body {
+      padding: 18px
+    }
+
+    /* ── STAT CARDS ── */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 14px;
+      margin-bottom: 24px
+    }
+
+    .stat-card {
+      border-radius: 12px;
+      padding: 16px 18px;
+      border: 1px solid transparent
+    }
+
+    .sc-icon {
+      font-size: 20px;
+      margin-bottom: 8px
+    }
+
+    .sc-val {
+      font-size: 26px;
+      font-weight: 800;
+      line-height: 1;
+      margin-bottom: 4px
+    }
+
+    .sc-label {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      margin-bottom: 6px
+    }
+
+    .sc-delta {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text3)
+    }
+
+    .sc-indigo {
+      background: #eef2ff;
+      border-color: #c7d2fe
+    }
+
+    .sc-indigo .sc-val {
+      color: #4338ca
+    }
+
+    .sc-indigo .sc-label {
+      color: #6366f1
+    }
+
+    .sc-green {
+      background: #f0fdf4;
+      border-color: #bbf7d0
+    }
+
+    .sc-green .sc-val {
+      color: #15803d
+    }
+
+    .sc-green .sc-label {
+      color: #22c55e
+    }
+
+    .sc-yellow {
+      background: #fffbeb;
+      border-color: #fde68a
+    }
+
+    .sc-yellow .sc-val {
+      color: #d97706
+    }
+
+    .sc-yellow .sc-label {
+      color: #f59e0b
+    }
+
+    .sc-blue {
+      background: #eff6ff;
+      border-color: #bfdbfe
+    }
+
+    .sc-blue .sc-val {
+      color: #1d4ed8
+    }
+
+    .sc-blue .sc-label {
+      color: #3b82f6
+    }
+
+    .sc-red {
+      background: #fff5f5;
+      border-color: #fecaca
+    }
+
+    .sc-red .sc-val {
+      color: #dc2626
+    }
+
+    .sc-red .sc-label {
+      color: #ef4444
+    }
+
+    /* ── TABLE ── */
+    .tbl-wrap {
+      overflow-x: auto
+    }
+
+    .tbl {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13.5px
+    }
+
+    .tbl thead tr {
+      background: #f8fafc
+    }
+
+    .tbl th {
+      padding: 10px 14px;
+      text-align: left;
+      font-size: 10.5px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      color: var(--text3);
+      border-bottom: 1px solid var(--border);
+      white-space: nowrap
+    }
+
+    .tbl td {
+      padding: 12px 14px;
+      border-bottom: 1px solid #f4f5f8;
+      vertical-align: middle
+    }
+
+    .tbl tbody tr:last-child td {
+      border-bottom: none
+    }
+
+    .tbl-row {
+      cursor: pointer;
+      transition: background .12s
+    }
+
+    .tbl-row:hover td {
+      background: #f5f8ff
+    }
+
+    /* ── CHIPS ── */
+    .chip {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 3px 9px;
+      border-radius: 99px;
+      white-space: nowrap
+    }
+
+    .ch-active {
+      background: #ecfdf5;
+      color: #065f46
+    }
+
+    .ch-inactive {
+      background: #f1f5f9;
+      color: #64748b
+    }
+
+    .ch-pending {
+      background: #fef9c3;
+      color: #854d0e
+    }
+
+    .ch-co {
+      background: #eef2ff;
+      color: #4338ca
+    }
+
+    .ch-manager {
+      background: #f0fdf4;
+      color: #166534
+    }
+
+    .ch-reviewer {
+      background: #fdf4ff;
+      color: #86198f
+    }
+
+    .ch-assignee {
+      background: #fff7ed;
+      color: #9a3412
+    }
+
+    .ch-owner {
+      background: #f0f9ff;
+      color: #075985
+    }
+
+    .ch-admin {
+      background: #fdf2f8;
+      color: #9d174d
+    }
+
+    .av {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      background: #eef2ff;
+      color: #4338ca;
+      font-size: 11px;
+      font-weight: 800;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border: 1.5px solid #c7d2fe;
+      flex-shrink: 0
+    }
+
+    .code-pill {
+      font-family: 'DM Mono', monospace;
+      font-size: 10px;
+      background: #eef2ff;
+      color: #4338ca;
+      border: 1px solid #c7d2fe;
+      padding: 2px 7px;
+      border-radius: 4px
+    }
+
+    /* ── BUTTONS ── */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 600;
+      padding: 8px 16px;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      transition: all .15s;
+      white-space: nowrap
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: #fff
+    }
+
+    .btn-primary:hover {
+      background: var(--primary-l)
+    }
+
+    .btn-ghost {
+      background: #fff;
+      color: var(--text2);
+      border: 1px solid var(--border)
+    }
+
+    .btn-ghost:hover {
+      background: var(--bg)
+    }
+
+    .btn-danger {
+      background: #fff;
+      color: var(--danger);
+      border: 1px solid #fecaca
+    }
+
+    .btn-danger:hover {
+      background: #fff5f5
+    }
+
+    .btn-sm {
+      padding: 5px 11px;
+      font-size: 12px;
+      border-radius: 6px
+    }
+
+    /* ── FORM ── */
+    .fg {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-bottom: 14px
+    }
+
+    .fg-lbl {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text);
+      text-transform: uppercase;
+      letter-spacing: .4px
+    }
+
+    .fg-input {
+      padding: 10px 12px;
+      border: 1.5px solid var(--border);
+      border-radius: 9px;
+      font-family: inherit;
+      font-size: 13.5px;
+      outline: none;
+      transition: border-color .15s;
+      background: #fff;
+      color: var(--text)
+    }
+
+    .fg-input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(15, 90, 125, .08)
+    }
+
+    .fg-input.error {
+      border-color: var(--danger)
+    }
+
+    .fg-err {
+      font-size: 11px;
+      color: var(--danger);
+      font-weight: 500;
+      display: none
+    }
+
+    .fg-err.show {
+      display: block
+    }
+
+    .fg-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px
+    }
+
+    /* ── MODULE TOGGLES ── */
+    .module-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 14px
+    }
+
+    .module-card {
+      border: 1.5px solid var(--border);
+      border-radius: 12px;
+      padding: 16px 18px;
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      background: #fff;
+      transition: all .2s
+    }
+
+    .module-card.enabled {
+      border-color: #86efac;
+      background: #f0fdf4
+    }
+
+    .mc-icon {
+      font-size: 24px;
+      flex-shrink: 0;
+      margin-top: 2px
+    }
+
+    .mc-body {
+      flex: 1
+    }
+
+    .mc-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 3px
+    }
+
+    .mc-desc {
+      font-size: 12px;
+      color: var(--text2);
+      line-height: 1.5
+    }
+
+    .mc-badge {
+      display: inline-block;
+      margin-top: 6px;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 99px;
+      background: #f1f5f9;
+      color: #64748b
+    }
+
+    .module-card.enabled .mc-badge {
+      background: #dcfce7;
+      color: #166534
+    }
+
+    .toggle-wrap {
+      display: flex;
+      align-items: center;
+      flex-shrink: 0
+    }
+
+    .toggle {
+      position: relative;
+      width: 40px;
+      height: 22px;
+      cursor: pointer
+    }
+
+    .toggle input {
+      opacity: 0;
+      width: 0;
+      height: 0
+    }
+
+    .toggle-slider {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: #cbd5e1;
+      border-radius: 99px;
+      transition: all .25s
+    }
+
+    .toggle-slider::before {
+      content: '';
+      position: absolute;
+      width: 16px;
+      height: 16px;
+      left: 3px;
+      top: 3px;
+      background: #fff;
+      border-radius: 50%;
+      transition: all .25s;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, .2)
+    }
+
+    .toggle input:checked+.toggle-slider {
+      background: var(--success)
+    }
+
+    .toggle input:checked+.toggle-slider::before {
+      transform: translateX(18px)
+    }
+
+    /* ── MODAL ── */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, .45);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center
+    }
+
+    .modal.show {
+      display: flex
+    }
+
+    .modal-box {
+      background: #fff;
+      border-radius: 16px;
+      padding: 28px 32px;
+      max-width: 520px;
+      width: 95%;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, .18);
+      position: relative;
+      animation: mSlide .2s ease;
+      max-height: 90vh;
+      overflow-y: auto
+    }
+
+    .modal-box::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, var(--primary), var(--accent));
+      border-radius: 16px 16px 0 0
+    }
+
+    .modal-close {
+      position: absolute;
+      top: 14px;
+      right: 16px;
+      width: 30px;
+      height: 30px;
+      background: none;
+      border: none;
+      font-size: 22px;
+      color: var(--text3);
+      cursor: pointer
+    }
+
+    .modal-close:hover {
+      color: var(--text)
+    }
+
+    .modal-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 4px
+    }
+
+    .modal-sub {
+      font-size: 13px;
+      color: var(--text2);
+      margin-bottom: 20px
+    }
+
+    .modal-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      margin-top: 20px;
+      padding-top: 16px;
+      border-top: 1px solid var(--border)
+    }
+
+    /* ── ROLE PICKER ── */
+    .role-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-bottom: 4px
+    }
+
+    .role-opt {
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 8px;
+      text-align: center;
+      cursor: pointer;
+      transition: all .15s;
+      background: #fff
+    }
+
+    .role-opt:hover {
+      border-color: var(--primary);
+      background: var(--primary-xl)
+    }
+
+    .role-opt.selected {
+      border-color: var(--primary);
+      background: var(--primary-xl)
+    }
+
+    .role-opt-ic {
+      font-size: 18px;
+      margin-bottom: 4px
+    }
+
+    .role-opt-lbl {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text)
+    }
+
+    /* ── ORG PROFILE SECTION ── */
+    .org-profile-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0
+    }
+
+    .op-item {
+      padding: 12px 0;
+      border-bottom: 1px solid #f1f5f9;
+      display: flex;
+      gap: 10px;
+      align-items: baseline
+    }
+
+    .op-item:nth-child(odd) {
+      padding-right: 24px;
+      border-right: 1px solid #f1f5f9
+    }
+
+    .op-item:nth-child(even) {
+      padding-left: 24px
+    }
+
+    .op-lbl {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text3);
+      min-width: 110px;
+      flex-shrink: 0
+    }
+
+    .op-val {
+      font-size: 13.5px;
+      color: var(--text);
+      font-weight: 500
+    }
+
+    /* ── WIZARD ── */
+    .wz-tab {
+      flex: 1;
+      padding: 8px 10px;
+      border-radius: 7px;
+      border: none;
+      background: transparent;
+      font-family: inherit;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text3);
+      cursor: pointer;
+      transition: all .2s;
+      text-align: center;
+      white-space: nowrap
+    }
+
+    .wz-tab.active {
+      background: #fff;
+      color: var(--primary);
+      box-shadow: 0 1px 4px rgba(0, 0, 0, .08)
+    }
+
+    .wz-tab.done {
+      color: var(--success)
+    }
+
+    .wz-card {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 22px 24px;
+      margin-bottom: 16px;
+      animation: fadeUp .2s ease
+    }
+
+    .wz-card-title {
+      font-size: 15px;
+      font-weight: 800;
+      color: var(--text);
+      margin-bottom: 4px
+    }
+
+    .wz-card-sub {
+      font-size: 12.5px;
+      color: var(--text3);
+      margin-bottom: 18px;
+      line-height: 1.5
+    }
+
+    .opt-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px
+    }
+
+    .opt-chip {
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      padding: 8px 14px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text2);
+      cursor: pointer;
+      transition: all .15s;
+      background: #fff;
+      display: flex;
+      align-items: center;
+      gap: 6px
+    }
+
+    .opt-chip:hover {
+      border-color: var(--primary);
+      color: var(--primary);
+      background: var(--primary-xl)
+    }
+
+    .opt-chip.sel {
+      border-color: var(--primary);
+      color: var(--primary);
+      background: var(--primary-xl)
+    }
+
+    .opt-chip.sel::before {
+      content: '✓ ';
+      font-weight: 800
+    }
+
+    .radio-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 10px
+    }
+
+    .radio-card {
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      padding: 14px;
+      cursor: pointer;
+      transition: all .15s;
+      background: #fff;
+      text-align: center
+    }
+
+    .radio-card:hover {
+      border-color: var(--primary);
+      background: var(--primary-xl)
+    }
+
+    .radio-card.sel {
+      border-color: var(--primary);
+      background: var(--primary-xl);
+      box-shadow: 0 0 0 3px rgba(15, 90, 125, .08)
+    }
+
+    .radio-card-ic {
+      font-size: 22px;
+      margin-bottom: 6px
+    }
+
+    .radio-card-lbl {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text)
+    }
+
+    .radio-card-sub {
+      font-size: 11px;
+      color: var(--text3);
+      margin-top: 3px;
+      line-height: 1.4
+    }
+
+    .yn-pair {
+      display: flex;
+      gap: 10px
+    }
+
+    .yn-btn {
+      flex: 1;
+      padding: 10px;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all .15s;
+      background: #fff;
+      color: var(--text2)
+    }
+
+    .yn-btn.sel-yes {
+      border-color: var(--success);
+      background: #f0fdf4;
+      color: #166534
+    }
+
+    .yn-btn.sel-no {
+      border-color: #fca5a5;
+      background: #fff5f5;
+      color: #991b1b
+    }
+
+    .op-sec-card {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px 18px
+    }
+
+    .op-sec-hd {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px
+    }
+
+    .op-sec-title {
+      font-size: 13px;
+      font-weight: 800;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 8px
+    }
+
+    .op-sec-edit {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--primary);
+      cursor: pointer;
+      border: none;
+      background: none;
+      padding: 0
+    }
+
+    .op-sec-edit:hover {
+      text-decoration: underline
+    }
+
+    .op-tag {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 3px 9px;
+      border-radius: 6px;
+      background: #f1f5f9;
+      color: #475569;
+      margin: 2px
+    }
+
+    .sb-divider {
+      height: 1px;
+      background: rgba(255, 255, 255, .06);
+      margin: 6px 10px
+    }
+
+    .sb-collapsed {
+      width: 56px !important
+    }
+
+    .sb-collapsed .sb-logo-main,
+    .sb-collapsed .sb-logo-sub,
+    .sb-collapsed .sb-uname,
+    .sb-collapsed .sb-urole {
+      display: none
+    }
+
+    .sb-collapsed .sb-item span:not(.sb-ic) {
+      display: none
+    }
+
+    .profile-incomplete-banner {
+  position: relative;
+}
+
+    .sb-collapsed .sb-badge {
+      display: none
+    }
+
+    .main-expanded {
+      margin-left: 56px !important
+    }
+
+    .tb-icon-btn {
+      width: 34px;
+      height: 34px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: #fff;
+      cursor: pointer;
+      font-size: 15px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all .15s
+    }
+
+    .tb-icon-btn:hover {
+      background: var(--bg)
+    }
+
+    .rn-input {
+      padding: 7px 10px;
+      border: 1.5px solid var(--border);
+      border-radius: 7px;
+      font-family: inherit;
+      font-size: 13px;
+      width: 100%;
+      outline: none;
+      transition: border-color .15s;
+      background: #fff
+    }
+
+    .rn-input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 2px rgba(15, 90, 125, .07)
+    }
+
+    .rn-select {
+      padding: 7px 24px 7px 9px;
+      border: 1.5px solid var(--border);
+      border-radius: 7px;
+      font-family: inherit;
+      font-size: 12px;
+      width: 100%;
+      outline: none;
+      cursor: pointer;
+      background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='4'%3E%3Cpath d='M0 0l4 4 4-4z' fill='%2394a3b8'/%3E%3C/svg%3E") no-repeat right 6px center;
+      -webkit-appearance: none
+    }
+
+    .rn-select:focus {
+      border-color: var(--primary)
+    }
+
+    .filter-bar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+      flex-wrap: wrap;
+      background: var(--bg)
+    }
+
+    .f-search {
+      position: relative;
+      flex: 1;
+      min-width: 160px;
+      max-width: 240px
+    }
+
+    .f-search input {
+      width: 100%;
+      padding: 7px 10px 7px 28px;
+      border: 1px solid var(--border);
+      border-radius: 7px;
+      font-family: inherit;
+      font-size: 13px;
+      outline: none;
+      background: #fff
+    }
+
+    .f-search input:focus {
+      border-color: var(--primary)
+    }
+
+    .f-si {
+      position: absolute;
+      left: 8px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text3);
+      font-size: 12px;
+      pointer-events: none
+    }
+
+    .f-sel {
+      padding: 7px 20px 7px 9px;
+      border: 1px solid var(--border);
+      border-radius: 7px;
+      font-family: inherit;
+      font-size: 12px;
+      color: var(--text);
+      cursor: pointer;
+      outline: none;
+      background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='4'%3E%3Cpath d='M0 0l4 4 4-4z' fill='%2394a3b8'/%3E%3C/svg%3E") no-repeat right 6px center;
+      -webkit-appearance: none
+    }
+
+    .toast-wrap {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      gap: 8px
+    }
+
+    .toast {
+      padding: 11px 18px;
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 600;
+      color: #fff;
+      box-shadow: 0 6px 24px rgba(0, 0, 0, .15);
+      animation: toastIn .2s ease;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: #1e293b
+    }
+
+    .wf-card {
+      border: 1.5px solid var(--border);
+      border-radius: 12px;
+      padding: 18px;
+      background: #fff;
+      cursor: pointer;
+      transition: all .2s
+    }
+
+    .wf-card:hover {
+      border-color: #c7d2fe;
+      background: #fafbff;
+      box-shadow: 0 2px 12px rgba(99, 102, 241, .08)
+    }
+
+    .wf-card.wf-selected {
+      border-color: var(--primary);
+      background: var(--primary-xl);
+      box-shadow: 0 4px 20px rgba(15, 90, 125, .12)
+    }
+
+    /* ── INCOMPLETE PROFILE BANNER ── */
+    .profile-incomplete-banner {
+      background: linear-gradient(135deg, #fff7ed, #fef3c7);
+      border: 1.5px solid #f59e0b;
+      border-radius: 14px;
+      padding: 20px 24px;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      animation: fadeUp .3s ease;
+    }
+
+    .pib-icon {
+      font-size: 32px;
+      flex-shrink: 0
+    }
+
+    .pib-body {
+      flex: 1
+    }
+
+    .pib-title {
+      font-size: 16px;
+      font-weight: 800;
+      color: #92400e;
+      margin-bottom: 4px
+    }
+
+    .pib-sub {
+      font-size: 13px;
+      color: #b45309;
+      line-height: 1.5
+    }
+
+    .pib-progress {
+      margin-top: 10px
+    }
+
+    .pib-bar {
+      height: 6px;
+      background: #fde68a;
+      border-radius: 99px;
+      overflow: hidden;
+      margin-top: 4px
+    }
+
+    .pib-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #f59e0b, #d97706);
+      border-radius: 99px;
+      transition: width .6s ease
+    }
+
+    .pib-steps {
+      display: flex;
+      gap: 6px;
+      margin-top: 8px;
+      flex-wrap: wrap
+    }
+
+    .pib-step {
+      font-size: 11px;
+      font-weight: 600;
+      padding: 3px 8px;
+      border-radius: 6px
+    }
+
+    .pib-step.done {
+      background: #dcfce7;
+      color: #166534
+    }
+
+    .pib-step.todo {
+      background: #fee2e2;
+      color: #991b1b
+    }
+
+    /* ── LOCATION CARDS ── */
+    .loc-card {
+      border: 1.5px solid var(--border);
+      border-radius: 12px;
+      padding: 16px 18px;
+      background: #fff;
+      margin-bottom: 12px;
+      position: relative;
+      transition: all .2s
+    }
+
+    .loc-card:hover {
+      border-color: #b3d9ec;
+      box-shadow: 0 2px 10px rgba(15, 90, 125, .06)
+    }
+
+    .loc-card-hd {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 14px
+    }
+
+    .loc-type-badge {
+      font-size: 10px;
+      font-weight: 800;
+      padding: 3px 10px;
+      border-radius: 99px;
+      text-transform: uppercase;
+      letter-spacing: .06em
+    }
+
+    .loc-hq {
+      background: #ede9fe;
+      color: #5b21b6
+    }
+
+    .loc-branch {
+      background: #dbeafe;
+      color: #1e40af
+    }
+
+    .loc-unit {
+      background: #f0fdf4;
+      color: #166534
+    }
+
+    .loc-remove {
+      position: absolute;
+      top: 12px;
+      right: 14px;
+      background: none;
+      border: none;
+      font-size: 16px;
+      color: var(--text3);
+      cursor: pointer;
+      width: 26px;
+      height: 26px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all .15s
+    }
+
+    .loc-remove:hover {
+      background: #fee2e2;
+      color: var(--danger)
+    }
+
+    /* ── LEGAL ENTITY CARDS ── */
+    .le-card {
+      border: 1.5px solid var(--border);
+      border-radius: 12px;
+      padding: 16px 18px;
+      background: #fff;
+      margin-bottom: 12px;
+      position: relative;
+      transition: all .2s
+    }
+
+    .le-card:hover {
+      border-color: #b3d9ec;
+      box-shadow: 0 2px 10px rgba(15, 90, 125, .06)
+    }
+
+    .le-type-badge {
+      font-size: 10px;
+      font-weight: 800;
+      padding: 3px 10px;
+      border-radius: 99px;
+      text-transform: uppercase;
+      letter-spacing: .06em
+    }
+
+    .le-subsidiary {
+      background: #fdf4ff;
+      color: #7e22ce
+    }
+
+    .le-jv {
+      background: #fff7ed;
+      color: #c2410c
+    }
+
+    .le-associate {
+      background: #ecfdf5;
+      color: #065f46
+    }
+
+    .le-division {
+      background: #eff6ff;
+      color: #1d4ed8
+    }
+
+    /* ── PROFILE EMPTY STATE ── */
+    .empty-profile {
+      text-align: center;
+      padding: 60px 24px
+    }
+
+    .empty-profile-icon {
+      font-size: 56px;
+      margin-bottom: 16px;
+      opacity: .6
+    }
+
+    .empty-profile-title {
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--text);
+      margin-bottom: 8px
+    }
+
+    .empty-profile-sub {
+      font-size: 14px;
+      color: var(--text2);
+      line-height: 1.6;
+      max-width: 420px;
+      margin: 0 auto 24px
+    }
+
+    @keyframes toastIn {
+      from {
+        opacity: 0;
+        transform: translateY(8px)
+      }
+
+      to {
+        opacity: 1;
+        transform: none
+      }
+    }
+
+    @keyframes mSlide {
+      from {
+        opacity: 0;
+        transform: scale(.96)
+      }
+
+      to {
+        opacity: 1;
+        transform: none
+      }
+    }
+
+    @keyframes fadeUp {
+      from {
+        opacity: 0;
+        transform: translateY(6px)
+      }
+
+      to {
+        opacity: 1;
+        transform: none
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- ══ SIDEBAR ══ -->
+  <!-- <aside id="sidebar">
+  <div style="display:flex;align-items:center;justify-content:flex-end;padding:10px 10px 0">
+    <button onclick="document.getElementById('sidebar').classList.toggle('sb-collapsed');document.getElementById('main').classList.toggle('main-expanded')" style="background:none;border:none;color:#475569;font-size:16px;cursor:pointer;width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center" title="Collapse">✕</button>
+  </div>
+  <nav class="sb-nav" style="padding-top:6px">
+    <a class="sb-item active" onclick="navigate('dashboard')"><span class="sb-ic">◧</span><span>Dashboard</span></a>
+    <a class="sb-item" onclick="navigate('org-profile')"><span class="sb-ic">🏦</span><span>Org Profile</span></a>
+    <div class="sb-divider"></div>
+    <a class="sb-item" onclick="navigate('users')"><span class="sb-ic">👥</span><span>Users</span> <span class="sb-badge" id="sb-pending-badge">0</span></a>
+    <a class="sb-item" onclick="navigate('roles')"><span class="sb-ic">🔑</span><span>Roles & Access</span></a>
+    <div class="sb-divider"></div>
+    <a class="sb-item" onclick="navigate('workflow')"><span class="sb-ic">⟳</span><span>Workflow</span></a>
+    <a class="sb-item" onclick="navigate('modules')"><span class="sb-ic">◫</span><span>Modules</span></a>
+    <a class="sb-item" onclick="navigate('settings')"><span class="sb-ic">◎</span><span>Settings</span></a>
+  </nav>
+  <div class="sb-footer">
+    <div class="sb-av">SA</div>
+    <div style="flex:1"><div class="sb-uname">Super Admin</div><div class="sb-urole">Administrator</div></div>
+    <button onclick="toast('Logged out')" style="background:none;border:none;color:#64748b;font-size:14px;cursor:pointer">⎋</button>
+  </div>
+</aside> -->
+
+
+  <aside id="sidebar">
+    <button class="sidebar-collapse-btn" id="sidebar-toggle" title="Collapse sidebar">‹</button>
+
+    <div class="sidebar-logo">
+      <div class="logo-icon">⬡</div>
+      <div class="logo-text">
+        <span class="logo-main">CMS</span>
+        <span class="logo-sub">Compliance Suite</span>
+      </div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <ul style="list-style:none;padding:0;margin:0">
+
+        <li class="nav-item active" id="sb-home">
+          <a class="nav-link" onclick="navigate('dashboard')" href="#">
+            <span class="nav-icon">▦</span>
+            <span class="nav-label">Home</span>
+          </a>
+        </li>
+
+        <!-- Org Profile with 9 stepper sub-items -->
+        <li class="nav-item has-submenu" id="sb-org-profile">
+          <a class="nav-link submenu-toggle" onclick="sbToggle('sb-org-profile');navigate('org-profile');" href="#">
+            <span class="nav-icon">◈</span>
+            <span class="nav-label">Org Profile</span>
+            <span class="submenu-arrow">›</span>
+          </a>
+          <div class="op-profile-mini" id="sb-op-mini" style="display:none">
+            <div style="display:flex;justify-content:space-between">
+              <span id="sb-op-mini-label">Profile incomplete</span>
+              <span style="font-weight:700;color:var(--sidebar-accent)" id="sb-op-mini-pct">0%</span>
+            </div>
+            <div class="op-profile-mini-bar">
+              <div class="op-profile-mini-fill" id="sb-op-mini-fill" style="width:0%"></div>
+            </div>
+          </div>
+          <ul class="submenu" id="submenu-sb-org-profile" style="list-style:none">
+            <li><a href="#" onclick="openProfileWizard(WZ_IDX.identity);return false;"><span class="step-dot todo"
+                  id="dot-identity">1</span>🏢 Basic Information</a></li>
+            <li><a href="#" onclick="openProfileWizard(WZ_IDX.entities);return false;"><span class="step-dot todo"
+                  id="dot-entities">3</span>📂 Legal Entities</a></li>
+             <li><a href="#" onclick="openProfileWizard(WZ_IDX.locations);return false;"><span class="step-dot todo"
+                  id="dot-locations">2</span>📍 Geographic Presence</a></li>
+            <li><a href="#" onclick="openProfileWizard(WZ_IDX.regulatory);return false;"><span class="step-dot todo"
+                  id="dot-regulatory">4</span>🗒️ Regulatory & Licensing</a></li>
+            <li><a href="#" onclick="openProfileWizard(WZ_IDX.activities);return false;"><span class="step-dot todo"
+                  id="dot-activities">5</span>📊 Business Activities</a></li>
+            <li><a href="#" onclick="openProfileWizard(WZ_IDX.products);return false;"><span class="step-dot todo"
+                  id="dot-products">6</span>🅿️ Products & Services 🅿</a></li>
+             <li><a href="#" onclick="openProfileWizard(WZ_IDX.deepdive);return false;"><span class="step-dot todo"
+                  id="dot-deepdive">7</span> 🖥️ Technology</a></li>
+            <!-- <li><a href="#" onclick="openProfileWizard(WZ_IDX.digital);return false;"><span class="step-dot todo"
+                  id="dot-digital">8</span>💻 Digital & Payment Systems </a></li>
+             -->
+             <!-- <li><a href="#" onclick="openProfileWizard(WZ_IDX.technology);return false;"><span class="step-dot todo"
+                  id="dot-technology">9</span> 🖥️ Technology & Infrastructure</a></li> -->
+
+            <li><a href="#" onclick="openProfileWizard(WZ_IDX.risk);return false;"><span class="step-dot todo"
+                  id="dot-risk">8</span>📈 Compliance & Risk</a></li>
+            <!-- <li><a href="#" onclick="openProfileWizard(WZ_IDX.governance);return false;"><span class="step-dot todo"
+                  id="dot-governance"></span>Governance and Contracts</a></li>
+            <li><a href="#" onclick="openProfileWizard(WZ_IDX.documents);return false;"><span class="step-dot todo"
+                  id="dot-documents"></span>Documents & Certifications</a></li> -->
+            <li><a href="#" onclick="openProfileWizard(WZ_IDX.context);return false;"><span class="step-dot todo"
+                  id="dot-context">9</span>ℹ️ Other Details</a></li>
+          </ul>
+        </li>
+
+        <li style="height:1px;background:rgba(255,255,255,0.06);margin:6px 16px;list-style:none"></li>
+
+        <li class="nav-item" id="sb-users">
+          <a class="nav-link" onclick="navigate('users')" href="#">
+            <span class="nav-icon">👥</span>
+            <span class="nav-label">Users</span>
+            <span class="sb-badge" id="sb-pending-badge">0</span>
+          </a>
+        </li>
+        <li class="nav-item" id="sb-roles">
+          <a class="nav-link" onclick="navigate('roles')" href="#">
+            <span class="nav-icon">🔑</span>
+            <span class="nav-label">Roles & Access</span>
+          </a>
+        </li>
+
+        <li style="height:1px;background:rgba(255,255,255,0.06);margin:6px 16px;list-style:none"></li>
+
+        <li class="nav-item" id="sb-workflow">
+          <a class="nav-link" onclick="navigate('workflow')" href="#">
+            <span class="nav-icon">⟳</span>
+            <span class="nav-label">Workflow</span>
+          </a>
+        </li>
+        <li class="nav-item" id="sb-modules">
+          <a class="nav-link" onclick="navigate('modules')" href="#">
+            <span class="nav-icon">◫</span>
+            <span class="nav-label">Modules</span>
+          </a>
+        </li>
+
+        <li style="height:1px;background:rgba(255,255,255,0.06);margin:6px 16px;list-style:none"></li>
+
+        <li class="nav-item" id="sb-settings">
+          <a class="nav-link" onclick="navigate('settings')" href="#">
+            <span class="nav-icon">◎</span>
+            <span class="nav-label">Settings</span>
+          </a>
+        </li>
+
+      </ul>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="user-mini">
+        <div class="user-avatar-sm">AK</div>
+        <div class="user-info-sm">
+          <span class="user-name-sm">Arjun Kumar</span>
+          <span class="user-role-sm">Compliance Head</span>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ══ MAIN ══ -->
+  <div id="main">
+    <header id="topbar">
+      <div style="display:flex;align-items:center;gap:10px;flex:1">
+        <div
+          style="width:32px;height:32px;background:var(--accent);border-radius:9px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:16px;font-weight:800;flex-shrink:0">
+          ◆</div>
+        <div>
+          <div style="font-size:15px;font-weight:800;color:var(--text);line-height:1.1">CMS <span
+              style="font-weight:400;color:var(--text3);font-size:12px">— Compliance Management System</span></div>
+          <div style="font-size:11px;color:var(--text3);margin-top:1px" id="topbar-org-sub">Complete your organization
+            profile to get started</div>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <div style="text-align:right;margin-right:4px">
+          <div style="font-size:13px;font-weight:700;color:var(--text)">Good morning, Rajesh 👋</div>
+          <div style="font-size:11px;color:var(--text3)">Super Administrator</div>
+        </div>
+        <button class="tb-icon-btn" title="Search">🔍</button>
+        <button class="tb-icon-btn" title="Notifications" style="position:relative">
+          🔔<span
+            style="position:absolute;top:5px;right:5px;width:6px;height:6px;background:var(--danger);border-radius:50%;border:1.5px solid #fff"></span>
+        </button>
+        <button class="tb-icon-btn" onclick="navigate('settings')" title="Settings">⚙</button>
+        <div style="width:1px;height:24px;background:var(--border);margin:0 2px"></div>
+        <div class="tb-av"
+          style="width:32px;height:32px;border-radius:50%;background:#e8f4f9;color:var(--primary);font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;cursor:pointer;border:1.5px solid #b3d9ec">
+          SA</div>
+      </div>
+    </header>
+
+    <!-- ══ DASHBOARD ══ -->
+    <div class="page active" id="page-dashboard">
+      <div class="page-body">
+        <div class="stats-grid">
+          <div class="stat-card sc-indigo">
+            <div class="sc-icon">👥</div>
+            <div class="sc-val" id="ds-users">0</div>
+            <div class="sc-label">Total Users</div>
+            <div class="sc-delta">Onboarded</div>
+          </div>
+          <div class="stat-card sc-green">
+            <div class="sc-icon">✓</div>
+            <div class="sc-val" id="ds-active">0</div>
+            <div class="sc-label">Active</div>
+            <div class="sc-delta">Currently active</div>
+          </div>
+          <div class="stat-card sc-yellow">
+            <div class="sc-icon">⏳</div>
+            <div class="sc-val" id="ds-pending">0</div>
+            <div class="sc-label">Pending</div>
+            <div class="sc-delta">Awaiting setup</div>
+          </div>
+          <div class="stat-card sc-blue">
+            <div class="sc-icon">◫</div>
+            <div class="sc-val" id="ds-modules">0</div>
+            <div class="sc-label">Modules On</div>
+            <div class="sc-delta">Enabled</div>
+          </div>
+          <div class="stat-card sc-red">
+            <div class="sc-icon">🔑</div>
+            <div class="sc-val">6</div>
+            <div class="sc-label">Roles</div>
+            <div class="sc-delta">Configured</div>
+          </div>
+        </div>
+        <!-- Profile completion nudge on dashboard -->
+        <div id="dash-profile-nudge"
+          style="display:none;background:linear-gradient(135deg,#fffbeb,#fef3c7);border:1.5px solid #fbbf24;border-radius:12px;padding:16px 20px;margin-bottom:20px;display:flex;align-items:center;gap:14px;cursor:pointer"
+          onclick="navigate('org-profile')">
+          <div style="font-size:24px">⚠️</div>
+          <div style="flex:1">
+            <div style="font-size:14px;font-weight:800;color:#92400e">Organization Profile Incomplete</div>
+            <div style="font-size:12.5px;color:#b45309;margin-top:2px">Complete your profile to enable AI-powered
+              circular applicability analysis</div>
+          </div>
+          <button class="btn btn-primary btn-sm">Complete Now →</button>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
+          <div class="card">
+            <div class="card-hd">
+              <div>
+                <div class="card-title">👥 Recent Users</div>
+                <div class="card-sub">Latest onboarded members</div>
+              </div>
+              <button class="btn btn-ghost btn-sm" onclick="navigate('users')">View All →</button>
+            </div>
+            <div class="tbl-wrap">
+              <table class="tbl">
+                <thead>
+                  <tr>
+                    <th>User</th>
+                    <th>Role</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody id="dash-users-tbody"></tbody>
+              </table>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-hd">
+              <div>
+                <div class="card-title">◫ Module Status</div>
+                <div class="card-sub">Active modules</div>
+              </div>
+              <button class="btn btn-ghost btn-sm" onclick="navigate('modules')">Manage →</button>
+            </div>
+            <div id="dash-modules-list" style="padding:0"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ ORG PROFILE ══ -->
+    <div class="page" id="page-org-profile">
+      <div class="page-body" id="op-page-body">
+
+        <!-- VIEW MODE -->
+        <div id="op-view-mode" style="display:none">
+
+         <div id="op-incomplete-banner" class="profile-incomplete-banner" style="display:none">
+  
+  <!-- Close Button -->
+  <button onclick="document.getElementById('op-incomplete-banner').style.display='none'"
+    style="position:absolute;top:10px;right:12px;background:transparent;border:none;cursor:pointer;font-size:18px;color:#92400e;line-height:1;opacity:0.6"
+    onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.6'">✕</button>
+
+  <div class="pib-icon">📋</div>
+  <div class="pib-body">
+    <div class="pib-title" id="pib-title">Set Up Your Organization Profile</div>
+    <div class="pib-sub" id="pib-sub">A complete profile powers the AI applicability engine — filtering
+      circulars by your locations, nature of business, departments, legal entities and risk profile. Takes
+      about 10–15 minutes.</div>
+    <div class="pib-progress">
+      <div style="display:flex;justify-content:space-between;font-size:11px;font-weight:700;color:#92400e">
+        <span>Completion</span><span id="pib-pct-label">0%</span>
+      </div>
+      <div class="pib-bar">
+        <div class="pib-bar-fill" id="pib-bar-fill" style="width:0%"></div>
+      </div>
+    </div>
+    <div class="pib-steps" id="pib-steps"></div>
+  </div>
+  <button class="btn btn-primary" id="pib-cta" onclick="openProfileWizard(0)"
+    style="flex-shrink:0;white-space:nowrap">
+    🚀 Start Setup
+  </button>
+</div>
+          <!-- Profile view — always visible once started, shows dashes until data is filled -->
+          <div id="op-full-view">
+            <div style="display:flex;justify-content:flex-end;margin-bottom:16px;gap:8px;align-items:center">
+              <div id="op-completion-badge"
+                style="display:flex;align-items:center;gap:6px;background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:6px 12px;font-size:12px;font-weight:700;color:#854d0e;cursor:pointer"
+                onclick="openProfileWizard(0)">
+                ⚠ Profile <span id="op-pct">0%</span> complete
+              </div>
+              <button class="btn btn-primary btn-sm" onclick="openProfileWizard()">✎ Update Profile</button>
+            </div>
+            <div class="card" style="margin-bottom:20px">
+              <div class="card-hd">
+                <div style="display:flex;align-items:center;gap:14px">
+                  <div
+                    style="width:52px;height:52px;background:linear-gradient(135deg,var(--primary),var(--primary-l));border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:26px;color:#fff">
+                    🏦</div>
+                  <div>
+                    <div style="font-size:20px;font-weight:800" id="op-name">—</div>
+                    <div style="font-size:12px;color:var(--text3);margin-top:2px" id="op-industry">Complete your profile
+                      to populate this section</div>
+                    <div style="display:flex;gap:6px;margin-top:6px" id="op-tags"></div>
+                  </div>
+                </div>
+                <div style="text-align:right">
+                  <span class="chip ch-pending" id="op-status-chip">Incomplete</span>
+                  <div style="font-size:11px;color:var(--text3);margin-top:6px" id="op-updated-label">Not yet set up
+                  </div>
+                </div>
+              </div>
+              <div class="card-body">
+                <div class="org-profile-grid" id="org-profile-grid"></div>
+              </div>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px" id="op-section-cards"></div>
+          </div>
+        </div>
+
+        <!-- WIZARD MODE -->
+        <div id="op-wizard-mode" style="display:none">
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px">
+            <button class="btn btn-ghost btn-sm" onclick="closeProfileWizard()">← Back to Profile</button>
+            <div style="flex:1">
+              <div style="font-size:18px;font-weight:800" id="wz-title">Organization Profile Setup</div>
+              <div style="font-size:12px;color:var(--text3)" id="wz-sub">Complete your profile to enable precise
+                circular matching</div>
+            </div>
+            <div style="font-size:13px;font-weight:700;color:var(--primary)" id="wz-step-lbl">Step 1 of 9</div>
+          </div>
+          <div style="height:4px;background:#e2e8f0;border-radius:99px;margin-bottom:24px;overflow:hidden">
+            <div id="wz-progress-bar"
+              style="height:100%;background:linear-gradient(90deg,var(--primary),var(--primary-l));border-radius:99px;transition:width .4s ease;width:11%">
+            </div>
+          </div>
+          <div style="overflow-x:auto;margin-bottom:24px">
+            <div style="display:flex;gap:0;background:#f1f5f9;border-radius:10px;padding:4px;min-width:max-content"
+              id="wz-tabs"></div>
+          </div>
+          <div id="wz-content"></div>
+          <div
+            style="display:flex;justify-content:space-between;align-items:center;margin-top:24px;padding-top:16px;border-top:1px solid var(--border)">
+            <button class="btn btn-ghost" id="wz-back-btn" onclick="wzPrev()" style="visibility:hidden">←
+              Previous</button>
+            <div style="font-size:12px;color:var(--text3)">Progress is auto-saved</div>
+            <button class="btn btn-primary" id="wz-next-btn" onclick="wzNext()">Next Step →</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ══ USERS ══ -->
+    <div class="page" id="page-users">
+      <div class="page-body">
+        <div style="display:flex;justify-content:flex-end;gap:8px;margin-bottom:16px">
+          <button class="btn btn-ghost btn-sm" onclick="openBulkUploadModal()">⬆ Bulk Upload</button>
+          <button class="btn btn-primary btn-sm" onclick="openAddUserModal()">+ Add User</button>
+        </div>
+        <div class="card">
+          <div class="filter-bar">
+            <div class="f-search"><span class="f-si">⌕</span><input id="user-search" placeholder="Search users…"
+                oninput="renderUsersTable()" /></div>
+            <select class="f-sel" id="user-role-filter" onchange="renderUsersTable()">
+              <option value="">All Roles</option>
+              <option>Compliance Officer</option>
+              <option>Department Manager</option>
+              <option>Reviewer</option>
+              <option>Assignee</option>
+              <option>Owner</option>
+            </select>
+            <select class="f-sel" id="user-status-filter" onchange="renderUsersTable()">
+              <option value="">All Status</option>
+              <option>Active</option>
+              <option>Inactive</option>
+              <option>Pending</option>
+            </select>
+          </div>
+          <div class="tbl-wrap">
+            <table class="tbl">
+              <thead>
+                <tr>
+                  <th>User</th>
+                  <th>Email</th>
+                  <th>Role</th>
+                  <th>Department</th>
+                  <th>Status</th>
+                  <th>Added</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody id="users-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ ROLES ══ -->
+    <div class="page" id="page-roles">
+      <div class="page-body">
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px" id="roles-grid">
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ WORKFLOW ══ -->
+    <div class="page" id="page-workflow">
+      <div class="page-body">
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px;margin-bottom:28px"
+          id="wf-cards"></div>
+        <div class="card" id="wf-summary-card">
+          <div class="card-hd">
+            <div>
+              <div class="card-title">⟳ Active Workflow</div>
+              <div class="card-sub" id="wf-summary-sub">Select a workflow above to preview</div>
+            </div>
+          </div>
+          <div class="card-body" id="wf-summary-body">
+            <div style="text-align:center;padding:24px;color:var(--text3);font-size:13px">No workflow selected yet</div>
+          </div>
+        </div>
+        <div style="margin-top:24px">
+          <div style="font-size:16px;font-weight:800;margin-bottom:4px">Department Overrides</div>
+          <div style="font-size:13px;color:var(--text3);margin-bottom:16px">Override the default workflow for specific
+            departments.</div>
+          <div class="card">
+            <div class="card-hd">
+              <div class="card-title">Per-Department Workflow</div>
+              <button class="btn btn-ghost btn-sm" onclick="openDeptOverrideModal()">+ Add Override</button>
+            </div>
+            <div class="tbl-wrap">
+              <table class="tbl">
+                <thead>
+                  <tr>
+                    <th>Department</th>
+                    <th>Workflow</th>
+                    <th>Set By</th>
+                    <th>Date</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody id="dept-override-tbody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+        <div style="margin-top:24px">
+          <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:4px">
+            <div>
+              <div style="font-size:16px;font-weight:800">Role Names & Flow Mapping</div>
+              <div style="font-size:13px;color:var(--text3);margin-top:2px">Customize role display names and escalation
+                paths.</div>
+            </div>
+            <button class="btn btn-primary btn-sm" onclick="saveRoleNames()">Save Names</button>
+          </div>
+          <div class="card" style="margin-top:16px">
+            <div class="card-hd">
+              <div class="card-title">⚙ Role Configuration</div>
+              <div class="card-sub">Custom names appear across all panels, emails and reports</div>
+            </div>
+            <div class="card-body" style="padding:0">
+              <table class="tbl">
+                <thead>
+                  <tr>
+                    <th style="width:40px">#</th>
+                    <th>System Role</th>
+                    <th>Custom Display Name</th>
+                    <th>Escalates To</th>
+                    <th>Abbreviation</th>
+                  </tr>
+                </thead>
+                <tbody id="role-names-tbody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ MODULES ══ -->
+    <div class="page" id="page-modules">
+      <div class="page-body">
+        <div class="module-grid" id="modules-grid"></div>
+      </div>
+    </div>
+
+    <!-- ══ SETTINGS ══ -->
+    <div class="page" id="page-settings">
+      <div class="page-body">
+        <div class="card">
+          <div class="card-hd">
+            <div class="card-title">🔐 Security Settings</div>
+          </div>
+          <div class="card-body" id="settings-body"></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ══ ADD USER MODAL ══ -->
+  <div class="modal" id="addUserModal">
+    <div class="modal-box">
+      <button class="modal-close" onclick="closeModal('addUserModal')">×</button>
+      <div class="modal-title">Add New User</div>
+      <div class="modal-sub">Onboard a team member and assign their role</div>
+      <div class="fg-row">
+        <div class="fg"><label class="fg-lbl">First Name</label><input id="au-fname" class="fg-input"
+            placeholder="First name">
+          <div class="fg-err" id="au-fnameErr"></div>
+        </div>
+        <div class="fg"><label class="fg-lbl">Last Name</label><input id="au-lname" class="fg-input"
+            placeholder="Last name">
+          <div class="fg-err" id="au-lnameErr"></div>
+        </div>
+      </div>
+      <div class="fg"><label class="fg-lbl">Work Email</label><input id="au-email" type="email" class="fg-input"
+          placeholder="user@org.com">
+        <div class="fg-err" id="au-emailErr"></div>
+      </div>
+      <div class="fg"><label class="fg-lbl">Department</label>
+        <select id="au-dept" class="fg-input">
+          <option value="">Select department</option>
+          <option>IT Compliance</option>
+          <option>Legal</option>
+          <option>Risk</option>
+          <option>Finance</option>
+          <option>Operations</option>
+          <option>HR</option>
+          <option>Audit</option>
+        </select>
+        <div class="fg-err" id="au-deptErr"></div>
+      </div>
+      <div class="fg">
+        <label class="fg-lbl">Assign Role</label>
+        <div class="role-grid" id="role-picker">
+          <div class="role-opt" onclick="selectRole(this,'Compliance Officer')" data-role="Compliance Officer">
+            <div class="role-opt-ic">📋</div>
+            <div class="role-opt-lbl">Compliance Officer</div>
+          </div>
+          <div class="role-opt" onclick="selectRole(this,'Department Manager')" data-role="Department Manager">
+            <div class="role-opt-ic">🏢</div>
+            <div class="role-opt-lbl">Department Manager</div>
+          </div>
+          <div class="role-opt" onclick="selectRole(this,'Reviewer')" data-role="Reviewer">
+            <div class="role-opt-ic">🔍</div>
+            <div class="role-opt-lbl">Reviewer</div>
+          </div>
+          <div class="role-opt" onclick="selectRole(this,'Assignee')" data-role="Assignee">
+            <div class="role-opt-ic">✍</div>
+            <div class="role-opt-lbl">Assignee</div>
+          </div>
+          <div class="role-opt" onclick="selectRole(this,'Owner')" data-role="Owner">
+            <div class="role-opt-ic">👤</div>
+            <div class="role-opt-lbl">Owner</div>
+          </div>
+          <div class="role-opt" onclick="selectRole(this,'Filer')" data-role="Filer">
+            <div class="role-opt-ic">📁</div>
+            <div class="role-opt-lbl">Filer</div>
+          </div>
+        </div>
+        <div class="fg-err" id="au-roleErr"></div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" onclick="closeModal('addUserModal')">Cancel</button>
+        <button class="btn btn-primary" onclick="saveNewUser()">Add User</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ BULK UPLOAD MODAL ══ -->
+  <div class="modal" id="bulkUploadModal">
+    <div class="modal-box" style="max-width:440px">
+      <button class="modal-close" onclick="closeModal('bulkUploadModal')">×</button>
+      <div class="modal-title">Bulk Upload Users</div>
+      <div class="modal-sub">Upload a CSV file with employee details</div>
+      <div
+        style="border:2px dashed var(--border);border-radius:10px;padding:32px;text-align:center;cursor:pointer;background:#f8fafc;margin-bottom:16px"
+        onclick="toast('File browser coming soon','info')">
+        <div style="font-size:36px;margin-bottom:10px">📂</div>
+        <div style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:4px">Click to upload CSV</div>
+        <div style="font-size:12px;color:var(--text3)">or drag and drop here</div>
+      </div>
+      <div
+        style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:12px 14px;font-size:12px;color:#166534">
+        <strong>CSV format:</strong> First Name, Last Name, Email, Department, Role
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" onclick="closeModal('bulkUploadModal')">Cancel</button>
+        <button class="btn btn-primary"
+          onclick="toast('Upload processing…');closeModal('bulkUploadModal')">Upload</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ DEPT OVERRIDE MODAL ══ -->
+  <div class="modal" id="deptOverrideModal">
+    <div class="modal-box" style="max-width:440px">
+      <button class="modal-close" onclick="closeModal('deptOverrideModal')">×</button>
+      <div class="modal-title">Add Department Override</div>
+      <div class="modal-sub">Set a specific workflow for one department</div>
+      <div class="fg">
+        <label class="fg-lbl">Department</label>
+        <select id="do-dept" class="fg-input">
+          <option value="">Select department</option>
+          <option>IT Compliance</option>
+          <option>Legal</option>
+          <option>Risk</option>
+          <option>Finance</option>
+          <option>Operations</option>
+          <option>HR</option>
+          <option>Audit</option>
+        </select>
+        <div class="fg-err" id="do-deptErr"></div>
+      </div>
+      <div class="fg">
+        <label class="fg-lbl">Workflow Level</label>
+        <select id="do-wf" class="fg-input">
+          <option value="">Select workflow</option>
+          <option value="1">Level 1 — Direct</option>
+          <option value="2">Level 2 — With Review</option>
+          <option value="3">Level 3 — Full Lifecycle</option>
+          <option value="4">Level 4 — CO Supervised</option>
+        </select>
+        <div class="fg-err" id="do-wfErr"></div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" onclick="closeModal('deptOverrideModal')">Cancel</button>
+        <button class="btn btn-primary" onclick="saveDeptOverride()">Save Override</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ LOCATION ADD MODAL ══ -->
+  <div class="modal" id="addLocationModal">
+    <div class="modal-box" style="max-width:580px">
+      <button class="modal-close" onclick="closeModal('addLocationModal')">×</button>
+      <div class="modal-title">Add Location / Unit</div>
+      <div class="modal-sub">Add a physical location — HQ, branch, regional office or business unit</div>
+      <div class="fg-row">
+        <div class="fg">
+          <label class="fg-lbl">Location Name</label>
+          <input id="loc-name" class="fg-input" placeholder="e.g. Mumbai HQ, Pune Branch">
+        </div>
+        <div class="fg">
+          <label class="fg-lbl">Location Type</label>
+          <select id="loc-type" class="fg-input">
+            <option value="">Select type</option>
+            <option>HQ (Head Office)</option>
+            <option>Regional Office</option>
+            <option>Branch Office</option>
+            <option>Business Unit</option>
+            <option>Manufacturing Plant</option>
+            <option>Data Center</option>
+            <option>Registered Office</option>
+            <option>Other</option>
+          </select>
+        </div>
+      </div>
+      <div class="fg">
+        <label class="fg-lbl">Full Address</label>
+        <input id="loc-addr" class="fg-input" placeholder="Street address, building name">
+      </div>
+      <div class="fg-row">
+        <div class="fg">
+          <label class="fg-lbl">City</label>
+          <input id="loc-city" class="fg-input" placeholder="e.g. Mumbai">
+        </div>
+        <div class="fg">
+          <label class="fg-lbl">State</label>
+          <select id="loc-state" class="fg-input">
+            <option value="">Select state</option>
+            <option>Andhra Pradesh</option>
+            <option>Assam</option>
+            <option>Bihar</option>
+            <option>Chhattisgarh</option>
+            <option>Delhi</option>
+            <option>Goa</option>
+            <option>Gujarat</option>
+            <option>Haryana</option>
+            <option>Himachal Pradesh</option>
+            <option>Jharkhand</option>
+            <option>Karnataka</option>
+            <option>Kerala</option>
+            <option>Madhya Pradesh</option>
+            <option>Maharashtra</option>
+            <option>Manipur</option>
+            <option>Meghalaya</option>
+            <option>Mizoram</option>
+            <option>Nagaland</option>
+            <option>Odisha</option>
+            <option>Punjab</option>
+            <option>Rajasthan</option>
+            <option>Sikkim</option>
+            <option>Tamil Nadu</option>
+            <option>Telangana</option>
+            <option>Tripura</option>
+            <option>Uttar Pradesh</option>
+            <option>Uttarakhand</option>
+            <option>West Bengal</option>
+          </select>
+        </div>
+      </div>
+      <div class="fg-row">
+        <div class="fg">
+          <label class="fg-lbl">PIN Code</label>
+          <input id="loc-pin" class="fg-input" placeholder="e.g. 400001" maxlength="6">
+        </div>
+        <div class="fg">
+          <label class="fg-lbl">Employee Count at this Location</label>
+          <select id="loc-headcount" class="fg-input">
+            <option value="">Select range</option>
+            <option>1–10</option>
+            <option>11–50</option>
+            <option>51–200</option>
+            <option>201–500</option>
+            <option>501–1000</option>
+            <option>1000+</option>
+          </select>
+        </div>
+      </div>
+      <div class="fg">
+        <label class="fg-lbl">Departments Present at this Location</label>
+        <div class="opt-grid" id="loc-depts-grid" style="margin-top:4px">
+          <div class="opt-chip" onclick="this.classList.toggle('sel')">IT Compliance</div>
+          <div class="opt-chip" onclick="this.classList.toggle('sel')">Legal</div>
+          <div class="opt-chip" onclick="this.classList.toggle('sel')">Risk</div>
+          <div class="opt-chip" onclick="this.classList.toggle('sel')">Finance</div>
+          <div class="opt-chip" onclick="this.classList.toggle('sel')">Operations</div>
+          <div class="opt-chip" onclick="this.classList.toggle('sel')">HR</div>
+          <div class="opt-chip" onclick="this.classList.toggle('sel')">Audit</div>
+          <div class="opt-chip" onclick="this.classList.toggle('sel')">Technology</div>
+          <div class="opt-chip" onclick="this.classList.toggle('sel')">Treasury</div>
+          <div class="opt-chip" onclick="this.classList.toggle('sel')">Customer Service</div>
+        </div>
+      </div>
+      <div class="fg">
+        <label class="fg-lbl">Legal Entity (if applicable)</label>
+        <select id="loc-entity" class="fg-input">
+          <option value="">— Parent Organization —</option>
+        </select>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" onclick="closeModal('addLocationModal')">Cancel</button>
+        <button class="btn btn-primary" onclick="saveLocation()">Add Location</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ LEGAL ENTITY ADD MODAL ══ -->
+  <div class="modal" id="addEntityModal">
+    <div class="modal-box" style="max-width:580px">
+      <button class="modal-close" onclick="closeModal('addEntityModal')">×</button>
+      <div class="modal-title">Add Legal Entity</div>
+      <div class="modal-sub">Add a subsidiary, JV, associate or division under your organization</div>
+      <div class="fg-row">
+        <div class="fg">
+          <label class="fg-lbl">Entity Name</label>
+          <input id="le-name" class="fg-input" placeholder="e.g. Wipro IT Services Ltd.">
+        </div>
+        <div class="fg">
+          <label class="fg-lbl">Entity Type</label>
+          <select id="le-type" class="fg-input">
+            <option value="">Select type</option>
+            <option>Wholly Owned Subsidiary</option>
+            <option>Joint Venture (JV)</option>
+            <option>Associate Company</option>
+            <option>Step-down Subsidiary</option>
+            <option>Division</option>
+            <option>Special Purpose Vehicle (SPV)</option>
+            <option>Branch of Foreign Company</option>
+            <option>Limited Liability Partnership (LLP)</option>
+            <option>Trust / Foundation</option>
+            <option>Other</option>
+          </select>
+        </div>
+      </div>
+      <div class="fg-row">
+        <div class="fg">
+          <label class="fg-lbl">CIN / Registration ID</label>
+          <input id="le-cin" class="fg-input" placeholder="e.g. U72200MH2010PLC205025">
+        </div>
+        <div class="fg">
+          <label class="fg-lbl">PAN Number</label>
+          <input id="le-pan" class="fg-input" placeholder="e.g. AABCW1234D">
+        </div>
+      </div>
+      <div class="fg-row">
+        <div class="fg">
+          <label class="fg-lbl">Primary Regulator</label>
+          <select id="le-reg" class="fg-input">
+            <option value="">Select regulator</option>
+            <option>RBI</option>
+            <option>SEBI</option>
+            <option>IRDAI</option>
+            <option>MCA</option>
+            <option>PFRDA</option>
+            <option>NHB</option>
+            <option>IFSCA</option>
+            <option>Multiple</option>
+            <option>None</option>
+          </select>
+        </div>
+        <div class="fg">
+          <label class="fg-lbl">Ownership Stake (%)</label>
+          <input id="le-stake" class="fg-input" type="number" min="1" max="100" placeholder="e.g. 100">
+        </div>
+      </div>
+      <div class="fg">
+        <label class="fg-lbl">Business Lines / Activities</label>
+        <div class="opt-grid" id="le-biz-grid" style="margin-top:4px">
+          <div class="opt-chip" onclick="this.classList.toggle('sel')">Retail Banking</div>
+          <div class="opt-chip" onclick="this.classList.toggle('sel')">Corporate Banking</div>
+          <div class="opt-chip" onclick="this.classList.toggle('sel')">Insurance</div>
+          <div class="opt-chip" onclick="this.classList.toggle('sel')">Asset Management</div>
+          <div class="opt-chip" onclick="this.classList.toggle('sel')">Technology Services</div>
+          <div class="opt-chip" onclick="this.classList.toggle('sel')">Payment Services</div>
+          <div class="opt-chip" onclick="this.classList.toggle('sel')">Wealth Management</div>
+          <div class="opt-chip" onclick="this.classList.toggle('sel')">Real Estate</div>
+          <div class="opt-chip" onclick="this.classList.toggle('sel')">Other</div>
+        </div>
+      </div>
+      <div class="fg">
+        <label class="fg-lbl">Registered State / Jurisdiction</label>
+        <select id="le-state" class="fg-input">
+          <option value="">Select state</option>
+          <option>Maharashtra</option>
+          <option>Delhi</option>
+          <option>Karnataka</option>
+          <option>Tamil Nadu</option>
+          <option>Gujarat</option>
+          <option>Telangana</option>
+          <option>West Bengal</option>
+          <option>Uttar Pradesh</option>
+          <option>Rajasthan</option>
+          <option>Other Indian State</option>
+          <option>Foreign Jurisdiction</option>
+        </select>
+      </div>
+      <div class="fg">
+        <label class="fg-lbl">Regulatory License Number (if applicable)</label>
+        <input id="le-license" class="fg-input" placeholder="e.g. RBI license, SEBI registration no.">
+      </div>
+      <div class="fg" id="le-locations-fg">
+        <label class="fg-lbl">Locations Belonging to this Entity</label>
+        <div id="le-locations-grid" class="opt-grid" style="margin-top:4px">
+          <div style="font-size:12px;color:var(--text3);font-style:italic">Add locations in Step 2 first — they'll
+            appear here for assignment.</div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" onclick="closeModal('addEntityModal')">Cancel</button>
+        <button class="btn btn-primary" onclick="saveLegalEntity()">Add Entity</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast-wrap" id="toast-wrap"></div>
+
+  <!-- ══════════════════════════════════════════
+     MODULE: DATA STORE
+══════════════════════════════════════════ -->
+  <script id="mod-data">
+    // ── PROFILE STATE — starts empty ──
+    const OP = {
+      // Step 1: Identity — empty on first load
+      legalName: '', regName: '', orgType: '', industry: '', subSector: '',
+      cin: '', incorporated: '', panNo: '', listed: '', exchanges: '', hasParent: '', parentName: '',
+      // Step 2: Regulatory
+      regulators: [], regulator: '', entityClass: '', secondaryRegs: [], sros: [],
+      rbilicense: '', sebilicense: '', irdalicense: '', otherlicense: '',
+      // Step 3: Activities
+      coreActivities: [], businessLines: [],
+      financialServices: '', lendingServices: '', investmentAdvisory: '', paymentServices: '',
+      insuranceServices: '', fintechServices: '', marketplaceOps: '', custodialServices: '',
+      fxServices: '', tradeFinanceServices: '',
+      // Step 4: Products
+      products: [],
+      hasRegulatedProducts: '', hasDigitalProducts: '', hasCrossBorder: '', hasInstitutional: '',
+      hasRetail: '', hasCoBranded: '', hasBNPL: '', hasThirdPartyDist: '',
+      // Step 5: Deep Dive
+      deepDive: {
+        cbs: '', cloudUsage: '', internetBanking: '', mobileBanking: '', apiBanking: '',
+        outsourcing: '', dataCenter: '',
+        loanTypes: [], coLending: '', prioritySector: '', nbfcPartner: '', securitisation: '',
+        cardTypes: [], paymentSystems: [],
+        nriDeposits: '', forex: '', correspondent: '', tradefinance: '',
+      },
+      // Step 6: Locations & Structure — NEW
+      locations: [],        // [{name, type, address, city, state, pin, headcount, departments:[], entityId}]
+      departments: [],      // [{name, head, functions:[]}]
+      divisions: [],        // [{name, description, locations:[]}]
+      // Step 7: Legal Entities — NEW
+      legalEntities: [],    // [{name, type, cin, pan, regulator, stake, bizLines:[], state}]
+      // Step 8: Risk
+      riskAppetite: '', lastAudit: '', penalties: '', kycLevel: '', cyberFramework: [],
+      complianceTeamSize: '', boardCommittee: '', reportingFreq: '',
+      highRiskGeo: '', pepCustomers: '', remittances: '', sanctions: '',
+      // Step 9: Context
+      bizModelDesc: '', regObligDesc: '', productsDesc: '', complianceRisks: '',
+      // Meta
+      _profileStarted: false,
+      _profileSaved: false,
+      brandName: "",
+      officialEmail: "",
+      officialPhone: "",
+      website: "",
+      registeredAddress: "",
+      corporateAddress: "",
+      legalEntityType: "",
+      incorporationDate: "",
+      operationalSince: "",
+      lei: "",
+      gst: "",
+      tan: "",
+      stockExchange: "",
+      isin: "",
+      ticker: "",
+      licenseIssueDate: "",
+      licenseExpiryDate: "",
+      licenseStatus: "",
+      regulatoryCategory: "",
+      firstRegulationDate: "",
+      regulatoryZone: "",
+      baselCategory: "",
+      crar: "",
+      isSI: "",
+      isDSIB: "",
+      underPCA: "",
+      multiRegulator: "",
+
+uploadedFile: "",
+bizModelDesc: "",
+regObligDesc: "",
+productsDesc: "",
+complianceRisks: "",
+
+      // Digital & Payments
+      paymentSystems: [], digitalServices: [], isPA: "", isPG: "",
+      isPPI: "", ppiType: "", crossBorder: "",
+
+      // Technology
+      cbs: "", cbsVendor: "", cbsVersion: "", cloudAdopted: "",
+      cloudProviders: [], dataLocalization: "", cyberFrameworks: [],
+      vapt: "", vaptDate: "", soc: "", itOutsourcing: "", itVendor: "",
+
+      // Governance
+      boardSize: "", independentDirectors: "", womenDirectors: "",
+      executiveDirectors: "", auditCommittee: "", riskCommittee: "",
+      whistleblower: "",
+      ceoName: "", ceoEmail: "", ceoPhone: "",
+      ccoName: "", ccoEmail: "", ccoPhone: "",
+      croName: "", croEmail: "", croPhone: "",
+      csName: "", csEmail: "", csPhone: "",
+      nodalName: "", nodalEmail: "", nodalPhone: "",
+      groName: "", groEmail: "", groPhone: "",
+      cisoName: "", cisoEmail: "", cisoPhone: "",
+      cfoName: "", cfoEmail: "", cfoPhone: "",
+
+      // Documents
+      docCOI: "", docLicense: "", docBalanceSheet: "",
+      docBoardRes: "", docMoaAoa: "", docPAN: "",
+      docGST: "", docISO: "",
+    };
+
+    const ORG_BASIC = {
+      name: '', industry: '', size: '', pan: '', regulator: '', address: '', city: '', state: ''
+    };
+
+    const USERS = [
+      { id: 'U001', fname: 'Ananya', lname: 'Sharma', email: 'ananya.s@hdfcbank.com', role: 'Compliance Officer', dept: 'IT Compliance', status: 'Active', added: '01 Mar 2025' },
+      { id: 'U002', fname: 'Raj', lname: 'Iyer', email: 'raj.iyer@hdfcbank.com', role: 'Assignee', dept: 'IT', status: 'Active', added: '01 Mar 2025' },
+      { id: 'U003', fname: 'Priya', lname: 'Nair', email: 'priya.n@hdfcbank.com', role: 'Reviewer', dept: 'Compliance', status: 'Active', added: '02 Mar 2025' },
+      { id: 'U004', fname: 'Karan', lname: 'Shah', email: 'karan.s@hdfcbank.com', role: 'Department Manager', dept: 'Legal', status: 'Active', added: '02 Mar 2025' },
+      { id: 'U005', fname: 'Sneha', lname: 'Das', email: 'sneha.d@hdfcbank.com', role: 'Assignee', dept: 'Compliance', status: 'Active', added: '03 Mar 2025' },
+      { id: 'U006', fname: 'Ravi', lname: 'Verma', email: 'ravi.v@hdfcbank.com', role: 'Owner', dept: 'Risk', status: 'Active', added: '03 Mar 2025' },
+      { id: 'U007', fname: 'Meera', lname: 'Pillai', email: 'meera.p@hdfcbank.com', role: 'Filer', dept: 'Operations', status: 'Pending', added: '05 Mar 2025' },
+      { id: 'U008', fname: 'Arjun', lname: 'Kumar', email: 'arjun.k@hdfcbank.com', role: 'Department Manager', dept: 'IT Compliance', status: 'Active', added: '05 Mar 2025' },
+    ];
+
+    const MODULES = [
+      { id: 'ai-engine', title: 'AI Engine', icon: '🤖', desc: 'Applicability analysis, summaries, clause generation.', enabled: true, tag: 'Core AI' },
+      { id: 'circ-lib', title: 'Circular Library', icon: '📚', desc: 'Central repository for regulatory circulars.', enabled: true, tag: 'Core' },
+      { id: 'task-mgmt', title: 'Task Management', icon: '✅', desc: 'Assign, track and manage compliance actions.', enabled: true, tag: 'Core' },
+      { id: 'dashboard', title: 'Dashboard & Reports', icon: '📊', desc: 'Real-time dashboards and exportable reports.', enabled: true, tag: 'Core' },
+      { id: 'ai-suggest', title: 'AI Suggestions', icon: '💡', desc: 'AI-powered action suggestions based on circulars.', enabled: true, tag: 'AI Add-on' },
+      { id: 'bulk-upload', title: 'Bulk Upload', icon: '⬆', desc: 'Upload employees, circulars and actions in bulk.', enabled: true, tag: 'Utility' },
+      { id: 'audit-trail', title: 'Audit Trail', icon: '🔍', desc: 'Immutable log of all actions and approvals.', enabled: true, tag: 'Compliance' },
+      { id: 'escalation', title: 'Escalations', icon: '⚠', desc: 'Automated escalation workflows for overdue actions.', enabled: false, tag: 'Add-on' },
+      { id: 'notifications', title: 'Notifications', icon: '🔔', desc: 'Email and in-app alerts for assignments and deadlines.', enabled: true, tag: 'Utility' },
+    ];
+
+    const ROLES_DEF = [
+      { role: 'Compliance Officer', ic: '📋', cls: 'ch-co', desc: 'Manages circulars, extracts obligations, assigns to departments.', access: ['Circular Library', 'AI Engine', 'Task Management', 'Reports', 'Dashboard'] },
+      { role: 'Department Manager', ic: '🏢', cls: 'ch-manager', desc: 'Receives from CO, assigns to team, monitors actions.', access: ['My Items', 'Team Actions', 'Approvals', 'Dashboard'] },
+      { role: 'Reviewer', ic: '🔍', cls: 'ch-reviewer', desc: 'Reviews completed actions before owner sign-off.', access: ['Review Queue', 'Evidence View', 'Comments'] },
+      { role: 'Assignee', ic: '✍', cls: 'ch-assignee', desc: 'Executes actions, uploads evidence, updates status.', access: ['My Tasks', 'Evidence Upload', 'Status Update'] },
+      { role: 'Owner', ic: '👤', cls: 'ch-owner', desc: 'Final approver — approves, rejects or sends back actions.', access: ['Approvals', 'Decision Panel', 'History'] },
+      { role: 'Filer', ic: '📁', cls: 'ch-admin', desc: 'Handles filing, archiving and document management.', access: ['Document Library', 'Filing Queue'] },
+    ];
+
+    const WORKFLOWS = [
+      { id: 1, level: 'Level 1', name: 'Direct', desc: 'Simplest flow. Manager assigns directly to Assignee.', steps: [{ role: 'Manager', ic: '🏢', note: 'Assigns action' }, { role: 'Assignee', ic: '✍', note: 'Executes & submits' }, { role: 'Manager', ic: '🏢', note: 'Reviews & closes' }], tag: 'Low Risk', tagColor: '#166534', tagBg: '#dcfce7', recommended: false },
+      { id: 2, level: 'Level 2', name: 'With Review', desc: 'Adds a Reviewer for medium-risk actions.', steps: [{ role: 'Manager', ic: '🏢', note: 'Assigns action' }, { role: 'Assignee', ic: '✍', note: 'Executes & submits' }, { role: 'Reviewer', ic: '🔍', note: 'Reviews quality' }, { role: 'Manager', ic: '🏢', note: 'Final closure' }], tag: 'Medium Risk', tagColor: '#854d0e', tagBg: '#fef9c3', recommended: true },
+      { id: 3, level: 'Level 3', name: 'Full Lifecycle', desc: 'Full approval chain for high-risk actions.', steps: [{ role: 'Manager', ic: '🏢', note: 'Assigns action' }, { role: 'Assignee', ic: '✍', note: 'Executes & submits' }, { role: 'Reviewer', ic: '🔍', note: 'Reviews quality' }, { role: 'Owner', ic: '👤', note: 'Final approval' }, { role: 'Manager', ic: '🏢', note: 'Closes action' }], tag: 'High Risk', tagColor: '#991b1b', tagBg: '#fee2e2', recommended: false },
+      { id: 4, level: 'Level 4', name: 'CO Supervised', desc: 'Full lifecycle with CO oversight at both ends.', steps: [{ role: 'CO', ic: '📋', note: 'Assigns to dept' }, { role: 'Manager', ic: '🏢', note: 'Assigns to team' }, { role: 'Assignee', ic: '✍', note: 'Executes & submits' }, { role: 'Reviewer', ic: '🔍', note: 'Reviews quality' }, { role: 'Owner', ic: '👤', note: 'Approves' }, { role: 'CO', ic: '📋', note: 'Final sign-off' }], tag: 'Critical', tagColor: '#9d174d', tagBg: '#fdf2f8', recommended: false },
+    ];
+
+    const ROLE_NAMES = [
+      { system: 'Compliance Officer', custom: 'Compliance Officer', abbr: 'CO', escalatesTo: 'Department Manager', ic: '📋' },
+      { system: 'Department Manager', custom: 'Department Manager', abbr: 'DM', escalatesTo: 'Assignee', ic: '🏢' },
+      { system: 'Assignee', custom: 'Assignee', abbr: 'ASN', escalatesTo: 'Reviewer', ic: '✍' },
+      { system: 'Reviewer', custom: 'Reviewer', abbr: 'REV', escalatesTo: 'Owner', ic: '🔍' },
+      { system: 'Owner', custom: 'Owner', abbr: 'OWN', escalatesTo: 'Compliance Officer', ic: '👤' },
+      { system: 'Filer', custom: 'Filer', abbr: 'FLR', escalatesTo: 'Compliance Officer', ic: '📁' },
+    ];
+
+    const DEPT_OVERRIDES = [
+      { dept: 'Legal', wfId: 3, setBy: 'Super Admin', date: '01 Mar 2025' },
+    ];
+
+    let _selectedRole = null;
+    let _selectedWorkflow = 2;
+  </script>
+
+  <!-- ══════════════════════════════════════════
+     MODULE: NAVIGATION
+══════════════════════════════════════════ -->
+  <script id="mod-nav">
+    function navigate(page) {
+      document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+      document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+      const pageMap = { dashboard: 'page-dashboard', 'org-profile': 'page-org-profile', users: 'page-users', roles: 'page-roles', workflow: 'page-workflow', modules: 'page-modules', settings: 'page-settings' };
+      const sbMap = { dashboard: 'sb-home', 'org-profile': 'sb-org-profile', users: 'sb-users', roles: 'sb-roles', workflow: 'sb-workflow', modules: 'sb-modules', settings: 'sb-settings' };
+      document.getElementById(pageMap[page])?.classList.add('active');
+      const sbItem = document.getElementById(sbMap[page]);
+      if (sbItem) sbItem.classList.add('active');
+      // auto-open org-profile submenu when navigating there
+      // toggle org-profile submenu — open when on that page, close when leaving
+      document.querySelectorAll('.submenu.open').forEach(s => {
+        const parentId = s.id.replace('submenu-', '');
+        if (parentId !== sbMap[page]) {
+          s.classList.remove('open');
+          document.getElementById(parentId)?.classList.remove('open');
+        }
+      });
+      if (page === 'org-profile') {
+        const sm = document.getElementById('submenu-sb-org-profile');
+        const li = document.getElementById('sb-org-profile');
+        if (sm && !sm.classList.contains('open')) {
+          sm.classList.add('open');
+          li?.classList.add('open');
+        }
+      }
+      if (page === 'dashboard') renderDashboard();
+      if (page === 'org-profile') renderOrgProfile();
+      if (page === 'users') renderUsersTable();
+      if (page === 'roles') renderRoles();
+      if (page === 'workflow') renderWorkflow();
+      if (page === 'modules') renderModules();
+      if (page === 'settings') renderSettings();
+    }
+  </script>
+
+
+  <script id="mod-sidebar">
+    function sbToggle(id) {
+      const li = document.getElementById(id);
+      const sm = document.getElementById('submenu-' + id);
+      if (!li || !sm) return;
+      const isOpen = sm.classList.contains('open');
+      document.querySelectorAll('.submenu.open').forEach(s => {
+        if (s.id !== 'submenu-' + id) { s.classList.remove('open'); s.closest('.nav-item')?.classList.remove('open'); }
+      });
+      sm.classList.toggle('open', !isOpen);
+      li.classList.toggle('open', !isOpen);
+    }
+
+    document.getElementById('sidebar-toggle').addEventListener('click', () => {
+      const sb = document.getElementById('sidebar');
+      const main = document.getElementById('main');          // ADD THIS
+      sb.classList.toggle('collapsed');
+      main.classList.toggle('sidebar-collapsed');            // ADD THIS
+      document.getElementById('sidebar-toggle').textContent = sb.classList.contains('collapsed') ? '›' : '‹';
+    });
+
+    function refreshSidebarSteps() {
+      const checks = {
+        identity: () => !!(OP.legalName || OP.regName),
+        locations: () => OP.locations?.length > 0,
+        entities: () => OP.legalEntities?.length > 0,
+        regulatory: () => !!OP.regulator,
+        activities: () => OP.businessLines?.length > 0,
+        products: () => OP.products?.length > 0,
+        deepdive: () => Object.values(OP.deepDive).some(v => v && (Array.isArray(v) ? v.length > 0 : v !== '')),
+        risk: () => !!OP.riskAppetite,
+        context: () => !!OP.bizModelDesc,
+      };
+      Object.entries(checks).forEach(([step, check], i) => {
+        const dot = document.getElementById('dot-' + step);
+        if (!dot) return;
+        const done = OP._profileStarted && check();
+        dot.className = 'step-dot ' + (done ? 'done' : 'todo');
+        dot.textContent = done ? '✓' : (i + 1);
+      });
+      const pct = calcCompletion();
+      const mini = document.getElementById('sb-op-mini');
+      if (mini) {
+        mini.style.display = OP._profileStarted ? 'block' : 'none';
+        document.getElementById('sb-op-mini-pct').textContent = pct + '%';
+        document.getElementById('sb-op-mini-fill').style.width = pct + '%';
+        document.getElementById('sb-op-mini-label').textContent = pct >= 80 ? 'Profile complete ✓' : 'Profile incomplete';
+      }
+    }
+  </script>
+  <!-- ══════════════════════════════════════════
+     MODULE: USERS
+══════════════════════════════════════════ -->
+  <script id="mod-users">
+    function renderUsersTable() {
+      const q = (document.getElementById('user-search')?.value || '').toLowerCase();
+      const fRole = document.getElementById('user-role-filter')?.value || '';
+      const fSt = document.getElementById('user-status-filter')?.value || '';
+      const list = USERS.filter(u => {
+        if (fRole && u.role !== fRole) return false;
+        if (fSt && u.status !== fSt) return false;
+        if (q && !`${u.fname} ${u.lname} ${u.email} ${u.dept}`.toLowerCase().includes(q)) return false;
+        return true;
+      });
+      const tb = document.getElementById('users-tbody');
+      if (!list.length) { tb.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:40px;color:var(--text3)">No users found</td></tr>`; return; }
+      tb.innerHTML = list.map(u => {
+        const rc = roleClass(u.role);
+        return `<tr class="tbl-row">
+      <td><div style="display:flex;align-items:center;gap:9px">
+        <span class="av">${u.fname[0]}${u.lname[0]}</span>
+        <div><div style="font-size:13.5px;font-weight:600">${u.fname} ${u.lname}</div>
+          <div style="font-size:11px;color:var(--text3)">${u.id}</div></div>
+      </div></td>
+      <td style="font-size:12.5px">${u.email}</td>
+      <td><span class="chip ${rc}">${u.role}</span></td>
+      <td style="font-size:12.5px">${u.dept}</td>
+      <td><span class="chip ${u.status === 'Active' ? 'ch-active' : u.status === 'Pending' ? 'ch-pending' : 'ch-inactive'}">${u.status}</span></td>
+      <td style="font-size:12px;color:var(--text3)">${u.added}</td>
+      <td><div style="display:flex;gap:6px">
+        <button class="btn btn-ghost btn-sm" onclick="toast('Edit coming soon')">✎</button>
+        <button class="btn btn-danger btn-sm" onclick="removeUser('${u.id}')">✕</button>
+      </div></td>
+    </tr>`;
+      }).join('');
+    }
+    function removeUser(id) {
+      const i = USERS.findIndex(u => u.id === id);
+      if (i > -1) { USERS.splice(i, 1); renderUsersTable(); toast('User removed'); renderDashboard(); }
+    }
+    function openAddUserModal() {
+      _selectedRole = null;
+      ['au-fname', 'au-lname', 'au-email', 'au-dept'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+      document.querySelectorAll('.role-opt').forEach(o => o.classList.remove('selected'));
+      ['au-fnameErr', 'au-lnameErr', 'au-emailErr', 'au-deptErr', 'au-roleErr'].forEach(id => { const el = document.getElementById(id); if (el) el.classList.remove('show'); });
+      document.getElementById('addUserModal').classList.add('show');
+    }
+    function selectRole(el, role) {
+      _selectedRole = role;
+      document.querySelectorAll('.role-opt').forEach(o => o.classList.remove('selected'));
+      el.classList.add('selected');
+    }
+    function saveNewUser() {
+      const fname = document.getElementById('au-fname').value.trim();
+      const lname = document.getElementById('au-lname').value.trim();
+      const email = document.getElementById('au-email').value.trim();
+      const dept = document.getElementById('au-dept').value;
+      const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      let ok = true;
+      if (!fname) { showFgErr('au-fnameErr', 'Required'); ok = false; }
+      if (!lname) { showFgErr('au-lnameErr', 'Required'); ok = false; }
+      if (!email || !emailRe.test(email)) { showFgErr('au-emailErr', 'Valid email required'); ok = false; }
+      if (!dept) { showFgErr('au-deptErr', 'Select department'); ok = false; }
+      if (!_selectedRole) { showFgErr('au-roleErr', 'Select a role'); ok = false; }
+      if (!ok) return;
+      USERS.push({ id: `U${String(USERS.length + 1).padStart(3, '0')}`, fname, lname, email, role: _selectedRole, dept, status: 'Pending', added: new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) });
+      closeModal('addUserModal'); renderUsersTable(); renderDashboard();
+      toast(`${fname} ${lname} added as ${_selectedRole} ✓`);
+    }
+  </script>
+
+  <!-- ══════════════════════════════════════════
+     MODULE: DASHBOARD
+══════════════════════════════════════════ -->
+  <script id="mod-dashboard">
+    function renderDashboard() {
+      document.getElementById('ds-users').textContent = USERS.length;
+      document.getElementById('ds-active').textContent = USERS.filter(u => u.status === 'Active').length;
+      document.getElementById('ds-pending').textContent = USERS.filter(u => u.status === 'Pending').length;
+      document.getElementById('ds-modules').textContent = MODULES.filter(m => m.enabled).length;
+      document.getElementById('sb-pending-badge').textContent = USERS.filter(u => u.status === 'Pending').length;
+
+      const tb = document.getElementById('dash-users-tbody');
+      tb.innerHTML = USERS.slice(0, 5).map(u => `
+    <tr><td><div style="display:flex;align-items:center;gap:8px">
+      <span class="av">${u.fname[0]}${u.lname[0]}</span>
+      <span style="font-size:13px;font-weight:600">${u.fname} ${u.lname}</span>
+    </div></td>
+    <td><span class="chip ${roleClass(u.role)}">${u.role}</span></td>
+    <td><span class="chip ${u.status === 'Active' ? 'ch-active' : 'ch-pending'}">${u.status}</span></td></tr>`).join('');
+
+      document.getElementById('dash-modules-list').innerHTML = MODULES.slice(0, 6).map(m => `
+    <div style="display:flex;align-items:center;gap:10px;padding:10px 16px;border-bottom:1px solid #f4f5f8">
+      <span style="font-size:16px">${m.icon}</span>
+      <span style="font-size:13px;font-weight:600;flex:1">${m.title}</span>
+      <span class="chip ${m.enabled ? 'ch-active' : 'ch-inactive'}">${m.enabled ? 'On' : 'Off'}</span>
+    </div>`).join('');
+
+      // Profile nudge visibility
+      if (!OP._profileStarted || calcCompletion() < 80) {
+        document.getElementById('dash-profile-nudge').style.display = 'flex';
+      } else {
+        document.getElementById('dash-profile-nudge').style.display = 'none';
+      }
+    }
+  </script>
+
+  <!-- ══════════════════════════════════════════
+     MODULE: OTHER PAGES
+══════════════════════════════════════════ -->
+  <script id="mod-other-pages">
+    function renderRoles() {
+      document.getElementById('roles-grid').innerHTML = ROLES_DEF.map(r => `
+    <div class="card">
+      <div class="card-hd">
+        <div style="display:flex;align-items:center;gap:10px">
+          <span style="font-size:22px">${r.ic}</span>
+          <div><div class="card-title">${r.role}</div><span class="chip ${r.cls}" style="font-size:10px">${r.role}</span></div>
+        </div>
+        <span style="font-size:12px;font-weight:600;color:var(--text3)">${USERS.filter(u => u.role === r.role).length} users</span>
+      </div>
+      <div class="card-body">
+        <div style="font-size:13px;color:var(--text2);line-height:1.6;margin-bottom:12px">${r.desc}</div>
+        <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text3);margin-bottom:8px">Module Access</div>
+        <div style="display:flex;flex-wrap:wrap;gap:6px">${r.access.map(a => `<span style="font-size:11px;font-weight:600;background:#f1f5f9;color:#475569;padding:3px 8px;border-radius:6px">${a}</span>`).join('')}</div>
+      </div>
+    </div>`).join('');
+    }
+
+    function renderModules() {
+      document.getElementById('modules-grid').innerHTML = MODULES.map((m, i) => `
+    <div class="module-card ${m.enabled ? 'enabled' : ''}" id="mc-${m.id}">
+      <span class="mc-icon">${m.icon}</span>
+      <div class="mc-body">
+        <div class="mc-title">${m.title}</div>
+        <div class="mc-desc">${m.desc}</div>
+        <span class="mc-badge">${m.tag}</span>
+      </div>
+      <div class="toggle-wrap">
+        <label class="toggle"><input type="checkbox" ${m.enabled ? 'checked' : ''} onchange="toggleModule('${m.id}',this.checked)">
+        <span class="toggle-slider"></span></label>
+      </div>
+    </div>`).join('');
+    }
+    function toggleModule(id, enabled) {
+      const m = MODULES.find(x => x.id === id);
+      if (m) { m.enabled = enabled; document.getElementById(`mc-${id}`)?.classList.toggle('enabled', enabled); document.getElementById('ds-modules').textContent = MODULES.filter(x => x.enabled).length; toast(`${m.title} ${enabled ? 'enabled ✓' : 'disabled'}`); }
+    }
+
+    function renderWorkflow() {
+      document.getElementById('wf-cards').innerHTML = WORKFLOWS.map(w => `
+    <div class="wf-card ${_selectedWorkflow === w.id ? 'wf-selected' : ''}" onclick="selectWorkflow(${w.id})">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:10px">
+        <div><div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text3);margin-bottom:3px">${w.level}</div>
+          <div style="font-size:16px;font-weight:800">${w.name}</div></div>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:5px">
+          <span style="font-size:10px;font-weight:700;padding:2px 8px;border-radius:99px;background:${w.tagBg};color:${w.tagColor}">${w.tag}</span>
+          ${w.recommended ? `<span style="font-size:10px;font-weight:700;padding:2px 8px;border-radius:99px;background:#eef2ff;color:#4338ca">Recommended</span>` : ''}
+        </div>
+      </div>
+      <div style="font-size:12px;color:var(--text2);line-height:1.55;margin-bottom:14px">${w.desc}</div>
+      <div style="display:flex;align-items:center;gap:4px;flex-wrap:wrap">
+        ${w.steps.map((s, i) => `<div style="display:flex;align-items:center;gap:4px">
+          <div style="display:flex;flex-direction:column;align-items:center;gap:3px">
+            <div style="width:28px;height:28px;border-radius:50%;background:${_selectedWorkflow === w.id ? 'var(--primary)' : '#f1f5f9'};color:${_selectedWorkflow === w.id ? '#fff' : '#64748b'};display:flex;align-items:center;justify-content:center;font-size:13px">${s.ic}</div>
+            <div style="font-size:9px;font-weight:700;color:var(--text3);white-space:nowrap">${s.role}</div>
+          </div>
+          ${i < w.steps.length - 1 ? `<div style="width:16px;height:1.5px;background:${_selectedWorkflow === w.id ? 'var(--primary)' : '#e2e8f0'};margin-bottom:14px"></div>` : ''}</div>`).join('')}
+      </div>
+      <div style="margin-top:14px;padding-top:12px;border-top:1px solid ${_selectedWorkflow === w.id ? '#c7d2fe' : '#f1f5f9'};display:flex;justify-content:space-between">
+        <span style="font-size:12px;font-weight:600;color:${_selectedWorkflow === w.id ? 'var(--primary)' : 'var(--text3)'}">${w.steps.length} steps</span>
+        <span style="font-size:12px;font-weight:700;color:${_selectedWorkflow === w.id ? 'var(--primary)' : 'var(--text3)'}">${_selectedWorkflow === w.id ? '✓ Selected' : 'Select →'}</span>
+      </div>
+    </div>`).join('');
+      renderWorkflowSummary();
+      renderDeptOverrides();
+      renderRoleNamesTable();
+    }
+    function selectWorkflow(id) { _selectedWorkflow = id; renderWorkflow(); }
+    function renderWorkflowSummary() {
+      const w = WORKFLOWS.find(x => x.id === _selectedWorkflow);
+      if (!w) return;
+      document.getElementById('wf-summary-sub').textContent = `${w.level} — ${w.name} · ${w.steps.length} steps · ${w.tag}`;
+      document.getElementById('wf-summary-body').innerHTML = `
+    <div style="display:flex;align-items:flex-start;gap:0;overflow-x:auto;padding-bottom:8px">
+      ${w.steps.map((s, i) => `<div style="display:flex;align-items:center;gap:0;flex-shrink:0">
+        <div style="display:flex;flex-direction:column;align-items:center;gap:8px;min-width:110px;padding:0 8px">
+          <div style="width:44px;height:44px;border-radius:50%;background:var(--primary-xl);border:2px solid var(--primary);display:flex;align-items:center;justify-content:center;font-size:20px">${s.ic}</div>
+          <div style="text-align:center"><div style="font-size:13px;font-weight:700">${s.role}</div><div style="font-size:11px;color:var(--text3)">${s.note}</div></div>
+          <div style="font-size:10px;font-weight:800;background:#eef2ff;color:#4338ca;padding:2px 8px;border-radius:99px">Step ${i + 1}</div>
+        </div>
+        ${i < w.steps.length - 1 ? `<div style="flex-shrink:0;padding-bottom:36px"><div style="font-size:18px;color:#c7d2fe">→</div></div>` : ''}</div>`).join('')}
+    </div>`;
+    }
+    function renderRoleNamesTable() {
+      const allRoles = ROLE_NAMES.map(r => r.system);
+      document.getElementById('role-names-tbody').innerHTML = ROLE_NAMES.map((r, i) => `
+    <tr>
+      <td style="text-align:center"><span style="width:26px;height:26px;background:#f1f5f9;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:14px">${r.ic}</span></td>
+      <td><div style="font-size:13px;font-weight:700">${r.system}</div><div style="font-size:11px;color:var(--text3)">System role</div></td>
+      <td><input class="rn-input" id="rn-custom-${i}" value="${r.custom}" placeholder="Display name…"></td>
+      <td><select class="rn-select" id="rn-esc-${i}">
+        ${['— None —', ...allRoles.filter(x => x !== r.system)].map(opt => `<option value="${opt}" ${r.escalatesTo === opt ? 'selected' : ''}>${opt}</option>`).join('')}
+      </select></td>
+      <td><input class="rn-input" id="rn-abbr-${i}" value="${r.abbr}" maxlength="5" placeholder="e.g. CO" style="text-transform:uppercase"></td>
+    </tr>`).join('');
+    }
+    function saveRoleNames() {
+      ROLE_NAMES.forEach((r, i) => {
+        const c = document.getElementById(`rn-custom-${i}`)?.value.trim();
+        const e = document.getElementById(`rn-esc-${i}`)?.value;
+        const a = document.getElementById(`rn-abbr-${i}`)?.value.trim().toUpperCase();
+        if (c) r.custom = c; if (e) r.escalatesTo = e; if (a) r.abbr = a;
+      });
+      toast('Role names & mappings saved ✓');
+      renderRoleNamesTable();
+    }
+    function renderDeptOverrides() {
+      const tb = document.getElementById('dept-override-tbody');
+      if (!DEPT_OVERRIDES.length) { tb.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:28px;color:var(--text3)">No overrides set</td></tr>`; return; }
+      tb.innerHTML = DEPT_OVERRIDES.map((o, i) => {
+        const w = WORKFLOWS.find(x => x.id === o.wfId); return `<tr>
+    <td style="font-size:13.5px;font-weight:600">${o.dept}</td>
+    <td><span style="font-size:12px;font-weight:700;background:#eef2ff;color:#4338ca;padding:3px 9px;border-radius:99px">${w?.level} — ${w?.name}</span></td>
+    <td style="font-size:12.5px">${o.setBy}</td>
+    <td style="font-size:12px;color:var(--text3)">${o.date}</td>
+    <td><button class="btn btn-danger btn-sm" onclick="removeDeptOverride(${i})">✕ Remove</button></td>
+  </tr>`}).join('');
+    }
+    function openDeptOverrideModal() { document.getElementById('do-dept').value = ''; document.getElementById('do-wf').value = ''; document.getElementById('deptOverrideModal').classList.add('show'); }
+    function saveDeptOverride() {
+      const dept = document.getElementById('do-dept').value;
+      const wfId = parseInt(document.getElementById('do-wf').value);
+      let ok = true;
+      if (!dept) { showFgErr('do-deptErr', 'Select department'); ok = false; }
+      if (!wfId) { showFgErr('do-wfErr', 'Select workflow'); ok = false; }
+      if (!ok) return;
+      const i = DEPT_OVERRIDES.findIndex(o => o.dept === dept);
+      const entry = { dept, wfId, setBy: 'Super Admin', date: new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) };
+      if (i > -1) DEPT_OVERRIDES[i] = entry; else DEPT_OVERRIDES.push(entry);
+      closeModal('deptOverrideModal'); renderDeptOverrides(); toast(`Override saved for ${dept} ✓`);
+    }
+    function removeDeptOverride(i) { DEPT_OVERRIDES.splice(i, 1); renderDeptOverrides(); toast('Override removed'); }
+
+    function renderSettings() {
+      document.getElementById('settings-body').innerHTML = ['Two-Factor Authentication', 'Single Sign-On (SSO)', 'Session Timeout (30 min)', 'Audit Logging', 'IP Whitelisting'].map(s => `
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid #f1f5f9">
+      <div style="font-size:13.5px;font-weight:600">${s}</div>
+      <label class="toggle"><input type="checkbox" ${s.includes('Audit') || s.includes('Session') ? 'checked' : ''}><span class="toggle-slider"></span></label>
+    </div>`).join('');
+    }
+  </script>
+
+  <!-- ══════════════════════════════════════════
+     MODULE: UTILITIES
+══════════════════════════════════════════ -->
+  <script id="mod-utils">
+    function roleClass(role) { return ({ 'Compliance Officer': 'ch-co', 'Department Manager': 'ch-manager', 'Reviewer': 'ch-reviewer', 'Assignee': 'ch-assignee', 'Owner': 'ch-owner', 'Filer': 'ch-admin' })[role] || 'ch-inactive'; }
+    function openBulkUploadModal() { document.getElementById('bulkUploadModal').classList.add('show'); }
+    function closeModal(id) { document.getElementById(id).classList.remove('show'); }
+    function showFgErr(id, msg) { const el = document.getElementById(id); if (el) { el.textContent = msg; el.classList.add('show'); } }
+    function toast(msg, type = 'ok') {
+      const wrap = document.getElementById('toast-wrap');
+      const t = document.createElement('div'); t.className = 'toast';
+      t.style.background = type === 'ok' ? '#1e293b' : type === 'warn' ? '#f59e0b' : '#ef4444';
+      t.textContent = msg; wrap.appendChild(t);
+      setTimeout(() => { t.style.opacity = '0'; t.style.transition = 'opacity .3s'; setTimeout(() => t.remove(), 300); }, 2400);
+    }
+    document.querySelectorAll('.modal').forEach(m => { m.addEventListener('click', e => { if (e.target === m) m.classList.remove('show'); }); });
+
+    // ── INIT ──
+    document.addEventListener('DOMContentLoaded', () => {
+      navigate('dashboard');
+      // Show profile nudge on dashboard since profile is empty
+      document.getElementById('dash-profile-nudge').style.display = 'flex';
+    });
+  </script>
+
+
+  <script src="./superAdmin/orgProfile.js"></script>
+</body>
+
+</html>
