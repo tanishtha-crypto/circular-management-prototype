@@ -10,98 +10,161 @@
 const CMS_DATA = {
 
   circulars: [
+   {
+  "id": "RBI-HF-2024-001",
+  "title": "Master Circular on Housing Finance",
+  "regulator": "RBI",
+  "issuedDate": "2024-04-02",
+  "effectiveDate": "2024-04-02",
+  "dueDate": "2024-12-31",
+  "type": "Master",
+  "status": "Active",
+  "departments": ["Credit", "Risk", "Operations"],
+  "risk": "High",
+  "complianceScore": 70,
+  "summary": "The Master Circular on Housing Finance consolidates RBI guidelines for banks on housing loans, including eligible purposes such as purchase, construction, repairs, lending restrictions, exposure norms, loan-to-value ratios, risk weights, fair lending practices, and regulatory compliance requirements.",
+  "chapters": [
+   
     {
-      id: 'CIRC-2024-001',
-      title: 'Cybersecurity Risk Management Framework',
-      regulator: 'RBI',
-      issuedDate: '2024-01-15',
-      effectiveDate: '2024-03-01',
-      dueDate: '2024-06-30',
-      type: 'Master',
-      status: 'Active',
-      departments: ['IT', 'Risk', 'Operations'],
-      risk: 'High',
-      complianceScore: 72,
-      summary: 'The Master Circular on Housing Finance by the Reserve Bank of India consolidates regulatory guidelines governing housing loans provided by banks, covering aspects such as eligible purposes (purchase, construction, repair), prudential limits like loan-to-value ratios, risk weights for capital adequacy, and classification under priority sector lending.',
-      chapters: [
+      "num": 2,
+      "title": "Housing Loan Regulations",
+      "clauses": [
         {
-          num: 1, title: 'Governance and Accountability',
-          clauses: [
-            {
-              id: 'C1.1', text: 'The Board of Directors shall establish a dedicated Cybersecurity Committee.',
-              obligation: 'Establish a Board-level Cybersecurity Committee with defined mandate and meeting cadence.',
-              actionables: 'Draft and circulate Board resolution to form Cybersecurity Committee; appoint CISO.',
-              department: 'IT', risk: 'High', status: 'In Progress'
-            },
-            {
-              id: 'C1.2', text: 'A Chief Information Security Officer (CISO) shall be appointed at Senior Management level.',
-              obligation: 'Appoint a qualified CISO with minimum 8 years experience in information security.',
-              actionables: 'Initiate CISO recruitment / designation process within 30 days.',
-              department: 'HR', risk: 'High', status: 'Complete'
-            }
-          ],
-          sections: [
-            {
-              id: 'Section 1',
-              text: 'Board-Level Cybersecurity Governance',
-              clauses: ['C1.1', 'C1.2']   // clause ids that belong here
-            },
-            {
-              id: 'Section 2',
-              text: 'Incident Response & Reporting',
-              clauses: ['C2.1', 'C2.2']
-            }
-          ],
-        
+          "id": "C2.1",
+          "text": "Banks may grant loans for purchase, construction, repair, and improvement of housing units.",
+          "obligations": "Ensure loans are sanctioned only for permitted housing purposes.",
+          "actionables": "Define eligible housing loan categories in policy.",
+          "department": "Credit",
+          "risk": "High",
+          "status": "Open"
         },
         {
-          num: 2, title: 'Risk Assessment and Management',
-          clauses: [
-          {
-            id: 'C2.1', text: 'Annual cybersecurity risk assessment shall be conducted by an independent party.',
-            obligations: 'Conduct risk assessment covering all IT assets, vendor systems, and data flows.',
-            actionables: 'Engage certified third-party auditor; scope assessment; schedule assessment Q1 each year.',
-            department: 'Risk', risk: 'High', status: 'Open'
-          },
-          {
-            id: 'C2.2', text: 'Risk register shall be maintained and reviewed quarterly.',
-            obligations: 'Maintain a live risk register updated at minimum quarterly.',
-            actionables: 'Create risk register template; assign risk owners; schedule quarterly reviews.',
-            department: 'Risk', risk: 'Medium', status: 'In Progress'
-          }
-          ],
-             sections: [
-            {
-              id: 'Section 1',
-              text: 'Board-Level Cybersecurity Governance',
-              clauses: ['Section 1', 'C1.2']   // clause ids that belong here
-            },
-            {
-              id: 'Section 2',
-              text: 'Incident Response & Reporting',
-              clauses: ['C2.1', 'C2.2']
-            }
-          ]
-          ,
-
+          "id": "C2.2",
+          "text": "Loans shall not be granted for speculative real estate activities or unauthorized constructions.",
+          "obligations": "Restrict financing to compliant and authorized properties.",
+          "actionables": "Implement due diligence checks including approvals and sanctioned plans.",
+          "department": "Risk",
+          "risk": "High",
+          "status": "In Progress"
         },
         {
-          num: 3, title: 'Incident Response',
-          clauses: [
-            {
-              id: 'C3.1', text: 'All cyber incidents must be reported to RBI within 6 hours of detection.',
-              obligations: 'Establish incident detection and reporting mechanism with 6-hour SLA.',
-              actionables: 'Implement SIEM; define escalation matrix; train SOC team on reporting procedure.',
-              department: 'IT', risk: 'High', status: 'Open'
-            }
-          ]
+          "id": "C2.3",
+          "text": "Banks must ensure borrower compliance with sanctioned plans and obtain necessary certificates.",
+          "obligations": "Ensure documentation such as sanctioned plan and completion certificate.",
+          "actionables": "Update loan documentation checklist.",
+          "department": "Operations",
+          "risk": "Medium",
+          "status": "Open"
         }
       ],
-      amendments: [
-        { date: '2024-02-10', version: '1.1', description: 'Clarification on CISO qualification criteria.' },
-        { date: '2024-04-05', version: '1.2', description: 'Extended deadline for risk assessment to Q2.' }
+      "sections": [
+        {
+          "id": "Section 1",
+          "text": "Eligible Housing Finance Activities",
+          "clauses": ["C2.1"]
+        },
+        {
+          "id": "Section 2",
+          "text": "Restrictions and Compliance",
+          "clauses": ["C2.2", "C2.3"]
+        }
       ]
     },
+    {
+      "num": 3,
+      "title": "Loan Exposure and Risk Management",
+      "clauses": [
+        {
+          "id": "C3.1",
+          "text": "Banks must adhere to prescribed Loan-to-Value (LTV) ratios and risk weights.",
+          "obligations": "Ensure housing loans comply with RBI LTV and capital adequacy norms.",
+          "actionables": "Configure systems to enforce LTV thresholds.",
+          "department": "Risk",
+          "risk": "High",
+          "status": "Open"
+        },
+        {
+          "id": "C3.2",
+          "text": "Banks must frame board-approved policies on real estate exposure limits.",
+          "obligations": "Establish prudential norms for exposure to housing sector.",
+          "actionables": "Draft and approve exposure policy at Board level.",
+          "department": "Risk",
+          "risk": "High",
+          "status": "In Progress"
+        }
+      ]
+    },
+    {
+      "num": 4,
+      "title": "Disbursement and Product Guidelines",
+      "clauses": [
+        {
+          "id": "C4.1",
+          "text": "Loan disbursement must be linked to stages of construction.",
+          "obligations": "Avoid upfront disbursement in under-construction projects.",
+          "actionables": "Implement stage-wise disbursement controls.",
+          "department": "Operations",
+          "risk": "High",
+          "status": "Open"
+        },
+        {
+          "id": "C4.2",
+          "text": "Banks must ensure customers are informed of risks in innovative loan products.",
+          "obligations": "Ensure transparency and suitability of loan products.",
+          "actionables": "Update product disclosures and customer communication.",
+          "department": "Compliance",
+          "risk": "Medium",
+          "status": "In Progress"
+        }
+      ]
+    },
+    {
+      "num": 5,
+      "title": "Regulatory Compliance and Fair Practices",
+      "clauses": [
+        {
+          "id": "C5.1",
+          "text": "Banks must comply with RBI directions on interest rates and EMI reset.",
+          "obligations": "Ensure adherence to RBI interest rate guidelines.",
+          "actionables": "Align loan systems with RBI directions.",
+          "department": "Finance",
+          "risk": "Medium",
+          "status": "Open"
+        },
+        {
+          "id": "C5.2",
+          "text": "Disclosure of mortgage details by builders must be ensured.",
+          "obligations": "Ensure transparency in housing projects financed.",
+          "actionables": "Include disclosure clauses in loan agreements.",
+          "department": "Legal",
+          "risk": "Medium",
+          "status": "Open"
+        },
+        {
+          "id": "C5.3",
+          "text": "Banks must follow fair lending practices including penal charges and document release.",
+          "obligations": "Ensure customer protection and transparency.",
+          "actionables": "Update fair lending policy as per RBI circulars.",
+          "department": "Compliance",
+          "risk": "High",
+          "status": "In Progress"
+        }
+      ]
+    }
+  ],
+  "amendments": [
+    {
+      "date": "2023-08-18",
+      "version": "1.1",
+      "description": "Guidelines on penal charges and EMI reset incorporated."
+    },
+    {
+      "date": "2023-09-13",
+      "version": "1.2",
+      "description": "Responsible lending conduct guidelines added."
+    }
+  ]
+},
     {
       id: 'CIRC-2024-002',
       title: 'KYC / AML Compliance Amendments 2024',

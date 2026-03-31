@@ -82,13 +82,6 @@
         }
         .input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(15,90,125,0.1); }
         .input::placeholder { color: var(--text-light); }
-        .input.error { border-color: var(--error); background: rgba(220,38,38,0.03); }
-        .error-msg { display: none; font-size: 11px; color: var(--error); font-weight: 500; margin-top: 2px; }
-        .error-msg.show { display: block; }
-        .checkbox-group { display: flex; align-items: flex-start; gap: 10px; grid-column: 1 / -1; margin-bottom: 4px; }
-        .checkbox { width: 18px; height: 18px; margin-top: 3px; cursor: pointer; accent-color: var(--primary); flex-shrink: 0; }
-        .checkbox-label { font-size: 12px; color: var(--text-dark); cursor: pointer; line-height: 1.5; }
-        .checkbox-label a { color: var(--primary); text-decoration: none; font-weight: 500; }
         .btn-submit {
             width: 100%; padding: 13px 24px;
             background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
@@ -97,51 +90,9 @@
             box-shadow: 0 4px 12px rgba(15,90,125,0.2); grid-column: 1 / -1;
         }
         .btn-submit:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(15,90,125,0.3); }
-        .btn-submit:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
-        .btn-submit.loading { color: transparent; }
-        .btn-submit.loading::after {
-            content: ''; position: absolute; width: 16px; height: 16px;
-            top: 50%; left: 50%; margin-left: -8px; margin-top: -8px;
-            border: 2px solid rgba(255,255,255,0.3); border-radius: 50%;
-            border-top-color: #fff; animation: spin 0.8s linear infinite;
-        }
         .form-footer { text-align: center; margin-top: 18px; font-size: 12px; color: var(--text-light); }
         .form-footer a { color: var(--primary); text-decoration: none; font-weight: 600; cursor: pointer; }
-        .form-footer a:hover { color: var(--primary-light); }
         .hidden { display: none !important; }
-
-        /* ── ACCOUNT TYPE SELECTOR ── */
-        .account-type-wrap { grid-column: 1 / -1; margin-bottom: 4px; }
-        .account-type-label { font-size: 12px; font-weight: 600; color: var(--text-dark); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px; }
-        .account-type-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        .account-type-card {
-            border: 1.5px solid var(--border); border-radius: 10px; padding: 14px 12px;
-            cursor: pointer; transition: all 0.2s ease; background: #fff; text-align: left;
-            display: flex; flex-direction: column; gap: 4px;
-        }
-        .account-type-card:hover { border-color: var(--primary); background: rgba(15,90,125,0.03); }
-        .account-type-card.selected { border-color: var(--primary); background: rgba(15,90,125,0.06); box-shadow: 0 0 0 3px rgba(15,90,125,0.1); }
-        .at-icon { font-size: 22px; margin-bottom: 4px; }
-        .at-title { font-size: 13px; font-weight: 700; color: var(--text-dark); }
-        .at-desc  { font-size: 11px; color: var(--text-light); line-height: 1.4; }
-        .at-badge { display: inline-block; margin-top: 4px; font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 99px; background: rgba(15,90,125,0.1); color: var(--primary); }
-
-        /* ── STEP INDICATOR ── */
-        .step-bar { display: flex; align-items: center; gap: 0; margin-bottom: 24px; }
-        .step-item { display: flex; align-items: center; gap: 6px; flex: 1; }
-        .step-item:last-child { flex: 0; }
-        .step-dot {
-            width: 26px; height: 26px; border-radius: 50%; border: 2px solid var(--border);
-            display: flex; align-items: center; justify-content: center;
-            font-size: 11px; font-weight: 700; color: var(--text-light); flex-shrink: 0;
-            transition: all 0.3s ease;
-        }
-        .step-dot.active { border-color: var(--primary); background: var(--primary); color: #fff; }
-        .step-dot.done   { border-color: var(--success); background: var(--success); color: #fff; }
-        .step-line { flex: 1; height: 2px; background: var(--border); transition: background 0.3s; }
-        .step-line.done { background: var(--success); }
-        .step-lbl { font-size: 10px; font-weight: 600; color: var(--text-light); white-space: nowrap; }
-        .step-lbl.active { color: var(--primary); }
 
         /* FOOTER */
         .footer {
@@ -173,26 +124,349 @@
         .modal-title { font-family: 'Playfair Display', serif; font-size: 24px; font-weight: 700; margin-bottom: 6px; color: var(--text-dark); }
         .modal-subtitle { font-size: 13px; color: var(--text-light); }
         .modal-form { display: flex; flex-direction: column; gap: 16px; }
-        .modal-success { display: none; background: rgba(16,185,129,0.1); border: 1px solid var(--success); color: var(--success); padding: 12px 14px; border-radius: 8px; font-size: 12px; font-weight: 500; text-align: center; margin-bottom: 16px; }
-        .modal-success.show { display: block; }
 
         @keyframes spin { to { transform: rotate(360deg); } }
         @keyframes modalSlide { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
         .fade-in { animation: fadeIn 0.25s ease; }
 
+        /* ═══════════════════════════════════════════
+           ORG PROFILE QUESTIONNAIRE OVERLAY
+        ═══════════════════════════════════════════ */
+        .profile-overlay {
+            display: none;
+            position: fixed; inset: 0;
+            background: #f8f9fa;
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Inter', sans-serif;
+        }
+        .profile-overlay.show { display: flex; }
+
+        .profile-card {
+            background: #fff;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.12), 0 4px 16px rgba(0,0,0,0.06);
+            width: 100%;
+            max-width: 580px;
+            max-height: 90vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            animation: profileSlide 0.4s cubic-bezier(0.16,1,0.3,1);
+        }
+
+        @keyframes profileSlide {
+            from { opacity: 0; transform: translateY(20px) scale(0.98); }
+            to   { opacity: 1; transform: none; }
+        }
+
+        .profile-top-bar {
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary) 0%, var(--accent) 100%);
+            border-radius: 20px 20px 0 0;
+            flex-shrink: 0;
+        }
+
+        .profile-progress-track {
+            height: 3px;
+            background: #f0f0f0;
+            flex-shrink: 0;
+        }
+        .profile-progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--accent));
+            transition: width 0.4s ease;
+        }
+
+        .profile-header {
+            padding: 28px 36px 0;
+            flex-shrink: 0;
+        }
+
+        .profile-step-label {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--primary);
+            margin-bottom: 6px;
+        }
+
+        .profile-q-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin-bottom: 4px;
+            line-height: 1.3;
+        }
+
+        .profile-q-sub {
+            font-size: 13px;
+            color: var(--text-light);
+            margin-bottom: 0;
+        }
+
+        .profile-body {
+            padding: 20px 36px 0;
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .profile-footer {
+            padding: 20px 36px 28px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-top: 1px solid #f0f0f0;
+            flex-shrink: 0;
+            gap: 12px;
+        }
+
+        .profile-footer-left {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .profile-step-count {
+            font-size: 12px;
+            color: var(--text-light);
+            font-weight: 500;
+        }
+
+        .btn-back {
+            background: none;
+            border: 1.5px solid var(--border);
+            border-radius: 8px;
+            padding: 9px 18px;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-light);
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: 'Inter', sans-serif;
+        }
+        .btn-back:hover { border-color: var(--primary); color: var(--primary); }
+
+        .btn-skip {
+            background: none;
+            border: none;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-light);
+            cursor: pointer;
+            padding: 9px 4px;
+            text-decoration: underline;
+            font-family: 'Inter', sans-serif;
+        }
+        .btn-skip:hover { color: var(--text-dark); }
+
+        .btn-next {
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            padding: 10px 28px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: 'Inter', sans-serif;
+            box-shadow: 0 4px 12px rgba(15,90,125,0.2);
+            margin-left: auto;
+        }
+        .btn-next:hover { transform: translateY(-1px); box-shadow: 0 6px 18px rgba(15,90,125,0.3); }
+
+        /* INPUT STYLES inside questionnaire */
+        .q-input {
+            width: 100%;
+            padding: 11px 14px;
+            border: 1.5px solid var(--border);
+            border-radius: 10px;
+            font-size: 14px;
+            font-family: 'Inter', sans-serif;
+            transition: all 0.2s;
+            background: #fff;
+            color: var(--text-dark);
+        }
+        .q-input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(15,90,125,0.08); }
+        .q-input::placeholder { color: #bbb; }
+
+        .q-label {
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-dark);
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .q-field { margin-bottom: 16px; }
+
+        .q-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+
+        /* CHIP SELECTOR */
+        .chip-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 4px;
+        }
+        .chip {
+            padding: 8px 16px;
+            border: 1.5px solid var(--border);
+            border-radius: 30px;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-dark);
+            cursor: pointer;
+            transition: all 0.18s ease;
+            background: #fff;
+            user-select: none;
+        }
+        .chip:hover { border-color: var(--primary); color: var(--primary); background: rgba(15,90,125,0.04); }
+        .chip.selected {
+            border-color: var(--primary);
+            background: var(--primary);
+            color: #fff;
+            box-shadow: 0 2px 8px rgba(15,90,125,0.25);
+        }
+
+        /* CARD SELECTOR (big tiles) */
+        .card-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 4px;
+        }
+        .sel-card {
+            border: 1.5px solid var(--border);
+            border-radius: 12px;
+            padding: 14px 16px;
+            cursor: pointer;
+            transition: all 0.18s ease;
+            background: #fff;
+            user-select: none;
+        }
+        .sel-card:hover { border-color: var(--primary); background: rgba(15,90,125,0.03); }
+        .sel-card.selected {
+            border-color: var(--primary);
+            background: rgba(15,90,125,0.06);
+            box-shadow: 0 0 0 3px rgba(15,90,125,0.1);
+        }
+        .sel-card-icon { font-size: 22px; margin-bottom: 6px; }
+        .sel-card-title { font-size: 13px; font-weight: 700; color: var(--text-dark); }
+        .sel-card-desc  { font-size: 11px; color: var(--text-light); margin-top: 2px; line-height: 1.4; }
+
+        /* TOGGLE SWITCH */
+        .toggle-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 16px;
+            border: 1.5px solid var(--border);
+            border-radius: 10px;
+            background: #fff;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: border-color 0.2s;
+        }
+        .toggle-row:hover { border-color: var(--primary); }
+        .toggle-row-info { }
+        .toggle-row-title { font-size: 14px; font-weight: 600; color: var(--text-dark); }
+        .toggle-row-sub   { font-size: 12px; color: var(--text-light); margin-top: 2px; }
+        .toggle-switch {
+            width: 42px; height: 24px;
+            background: #ddd;
+            border-radius: 99px;
+            position: relative;
+            transition: background 0.25s;
+            flex-shrink: 0;
+        }
+        .toggle-switch::after {
+            content: '';
+            position: absolute;
+            width: 18px; height: 18px;
+            background: #fff;
+            border-radius: 50%;
+            top: 3px; left: 3px;
+            transition: transform 0.25s;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+        }
+        .toggle-switch.on { background: var(--primary); }
+        .toggle-switch.on::after { transform: translateX(18px); }
+
+        /* RANGE SLIDER */
+        .range-wrap { padding: 4px 0 8px; }
+        .range-labels { display: flex; justify-content: space-between; font-size: 11px; color: var(--text-light); margin-top: 6px; }
+        input[type=range] {
+            -webkit-appearance: none;
+            width: 100%; height: 4px;
+            background: linear-gradient(90deg, var(--primary) 0%, var(--border) 0%);
+            border-radius: 4px;
+            outline: none;
+            transition: background 0.2s;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px; height: 20px;
+            border-radius: 50%;
+            background: var(--primary);
+            cursor: pointer;
+            box-shadow: 0 2px 6px rgba(15,90,125,0.3);
+            border: 3px solid #fff;
+        }
+        .range-value {
+            display: inline-block;
+            margin-top: 10px;
+            background: var(--primary);
+            color: #fff;
+            font-size: 13px;
+            font-weight: 700;
+            padding: 4px 14px;
+            border-radius: 20px;
+        }
+
+        /* SUCCESS STEP */
+        .success-screen {
+            text-align: center;
+            padding: 16px 0 8px;
+        }
+        .success-emoji { font-size: 52px; margin-bottom: 16px; display: block; }
+        .success-title { font-family: 'Playfair Display', serif; font-size: 26px; font-weight: 700; color: var(--text-dark); margin-bottom: 8px; }
+        .success-sub { font-size: 14px; color: var(--text-light); margin-bottom: 24px; line-height: 1.6; }
+        .success-checklist {
+            background: #f0fdf4;
+            border: 1px solid #bbf7d0;
+            border-radius: 10px;
+            padding: 16px;
+            text-align: left;
+            margin-bottom: 24px;
+        }
+        .success-checklist-title { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .5px; color: #166534; margin-bottom: 10px; }
+        .success-check-item { font-size: 13px; color: #166534; padding: 3px 0; }
+
         @media (max-width: 768px) {
             .main-wrapper { flex-direction: column; }
             .left-section { flex: 0 0 auto; max-height: 40vh; padding: 30px 24px; justify-content: center; }
             .right-section { flex: 1; padding: 25px 20px; }
             .form-card { padding: 28px; }
-            .account-type-grid { grid-template-columns: 1fr 1fr; }
             .footer { padding: 12px 20px; grid-template-columns: 1fr; gap: 8px; }
+            .profile-card { max-width: 98vw; margin: 0 10px; }
+            .profile-header { padding: 20px 20px 0; }
+            .profile-body { padding: 16px 20px 0; }
+            .profile-footer { padding: 16px 20px 20px; }
+            .card-group { grid-template-columns: 1fr; }
+            .q-grid-2 { grid-template-columns: 1fr; }
         }
         @media (max-width: 480px) {
             .form-grid { grid-template-columns: 1fr; }
             .form-group.half { grid-column: 1 / -1; }
-            .account-type-grid { grid-template-columns: 1fr; }
         }
     </style>
 </head>
@@ -207,34 +481,34 @@
             <p class="app-desc" id="leftDescription">Streamline your compliance workflows with intelligent automation and real-time tracking across your entire organization.</p>
         </div>
         <div class="features-container">
-            <h3 class="features-heading" id="leftHeading">Key Benefits</h3>
+            <h3 class="features-heading">Key Benefits</h3>
             <div class="feature-grid">
                 <div class="feature-item">
                     <div class="feature-icon">📋</div>
                     <div>
-                        <div class="feature-title" id="feature1Title">Circular Tracking</div>
-                        <div class="feature-desc"  id="feature1Desc">Manage RBI & regulatory circulars end to end</div>
+                        <div class="feature-title">Circular Tracking</div>
+                        <div class="feature-desc">Manage RBI & regulatory circulars end to end</div>
                     </div>
                 </div>
                 <div class="feature-item">
                     <div class="feature-icon">🤖</div>
                     <div>
-                        <div class="feature-title" id="feature2Title">AI Engine</div>
-                        <div class="feature-desc"  id="feature2Desc">Auto-extract obligations & suggest actions</div>
+                        <div class="feature-title">AI Engine</div>
+                        <div class="feature-desc">Auto-extract obligations & suggest actions</div>
                     </div>
                 </div>
                 <div class="feature-item">
                     <div class="feature-icon">📊</div>
                     <div>
-                        <div class="feature-title" id="feature3Title">Real-Time Reports</div>
-                        <div class="feature-desc"  id="feature3Desc">Track compliance posture across departments</div>
+                        <div class="feature-title">Real-Time Reports</div>
+                        <div class="feature-desc">Track compliance posture across departments</div>
                     </div>
                 </div>
                 <div class="feature-item">
                     <div class="feature-icon">🔒</div>
                     <div>
-                        <div class="feature-title" id="feature4Title">Role-Based Access</div>
-                        <div class="feature-desc"  id="feature4Desc">CO, Manager, Reviewer, Assignee, Owner</div>
+                        <div class="feature-title">Role-Based Access</div>
+                        <div class="feature-desc">CO, Manager, Reviewer, Assignee, Owner</div>
                     </div>
                 </div>
             </div>
@@ -245,7 +519,7 @@
     <div class="right-section">
         <div class="form-wrapper">
 
-            <!-- ══ LOGIN FORM ══ -->
+            <!-- LOGIN FORM -->
             <div class="form-card" id="loginForm">
                 <div class="form-header">
                     <h2 class="form-title">Welcome Back</h2>
@@ -255,261 +529,53 @@
                     <div class="form-group">
                         <label class="label">Username or Email</label>
                         <input type="text" id="loginUsername" class="input" placeholder="Enter your username or email" autocomplete="username">
-                        <div class="error-msg" id="loginUsernameError"></div>
                     </div>
                     <div class="form-group">
                         <label class="label">Password</label>
                         <input type="password" id="loginPassword" class="input" placeholder="Enter your password" autocomplete="current-password">
-                        <div class="error-msg" id="loginPasswordError"></div>
                     </div>
-                    <button type="submit" class="btn-submit" id="signinBtn">Sign In</button>
+                    <button type="submit" class="btn-submit">Sign In</button>
                 </form>
                 <div class="form-footer">
                     <a onclick="openResetModal()">Forgot password?</a>
-                    <span id="signupSpan"> • <a onclick="showAccountTypePicker()">Create account</a></span>
+                    &nbsp;•&nbsp;<a onclick="showSignup()">Create account</a>
                 </div>
             </div>
 
-            <!-- ══ STEP 0: ACCOUNT TYPE PICKER ══ -->
-            <div class="form-card hidden fade-in" id="accountTypeForm">
+            <!-- SIGN UP FORM (simplified) -->
+            <div class="form-card hidden fade-in" id="signupForm">
                 <div class="form-header">
-                    <h2 class="form-title">Get Started</h2>
-                    <p class="form-subtitle">Choose how you want to use the platform</p>
+                    <h2 class="form-title">Create Account</h2>
+                    <p class="form-subtitle">Set up your organization in minutes</p>
                 </div>
-                <div class="account-type-wrap">
-                    <div class="account-type-grid">
-                        <div class="account-type-card" id="at-org" onclick="selectAccountType('org')">
-                            <div class="at-icon">🏦</div>
-                            <div class="at-title">Organization</div>
-                            <div class="at-desc">Banks, NBFCs, MoE departments, financial institutions</div>
-                            <span class="at-badge">Super Admin</span>
-                        </div>
-                        <div class="account-type-card" id="at-individual" onclick="selectAccountType('individual')">
-                            <div class="at-icon">👤</div>
-                            <div class="at-title">Individual</div>
-                            <div class="at-desc">Consultants, advisors providing compliance services</div>
-                            <span class="at-badge">Personal</span>
-                        </div>
-                    </div>
-                </div>
-                <div style="margin-top:24px">
-                    <button class="btn-submit" onclick="proceedFromTypePicker()" id="typePickerBtn" disabled>Continue →</button>
-                </div>
-                <div class="form-footer">
-                    <a onclick="showLogin()">← Back to login</a>
-                </div>
-            </div>
-
-            <!-- ══ ORG REGISTRATION: STEP 1 — Admin Details ══ -->
-            <div class="form-card hidden fade-in" id="orgStep1Form">
-                <div class="step-bar" id="orgStepBar1">
-                    <div class="step-item"><div class="step-dot active" id="sd1">1</div><div class="step-line" id="sl1"></div></div>
-                    <div class="step-item"><div class="step-dot" id="sd2">2</div><div class="step-line" id="sl2"></div></div>
-                    <div class="step-item"><div class="step-dot" id="sd3">3</div></div>
-                </div>
-                <div class="form-header">
-                    <h2 class="form-title">Admin Account</h2>
-                    <p class="form-subtitle">Your Super Admin credentials</p>
-                </div>
-                <form onsubmit="orgStep1Next(event)" class="form-grid">
+                <form onsubmit="handleSignup(event)" class="form-grid">
                     <div class="form-group half">
                         <label class="label">First Name</label>
-                        <input type="text" id="o1-fname" class="input" placeholder="First name">
-                        <div class="error-msg" id="o1-fnameError"></div>
+                        <input type="text" id="s-fname" class="input" placeholder="First name">
                     </div>
                     <div class="form-group half">
                         <label class="label">Last Name</label>
-                        <input type="text" id="o1-lname" class="input" placeholder="Last name">
-                        <div class="error-msg" id="o1-lnameError"></div>
+                        <input type="text" id="s-lname" class="input" placeholder="Last name">
                     </div>
                     <div class="form-group">
                         <label class="label">Work Email</label>
-                        <input type="email" id="o1-email" class="input" placeholder="admin@yourorg.com">
-                        <div class="error-msg" id="o1-emailError"></div>
+                        <input type="email" id="s-email" class="input" placeholder="admin@yourcompany.com">
+                    </div>
+                    <div class="form-group">
+                        <label class="label">Company Name</label>
+                        <input type="text" id="s-company" class="input" placeholder="e.g. HDFC Bank Ltd.">
                     </div>
                     <div class="form-group half">
                         <label class="label">Password</label>
-                        <input type="password" id="o1-pass" class="input" placeholder="Min 8 characters">
-                        <div class="error-msg" id="o1-passError"></div>
+                        <input type="password" id="s-pass" class="input" placeholder="Min 8 characters">
                     </div>
                     <div class="form-group half">
                         <label class="label">Confirm Password</label>
-                        <input type="password" id="o1-confirm" class="input" placeholder="Re-enter password">
-                        <div class="error-msg" id="o1-confirmError"></div>
+                        <input type="password" id="s-confirm" class="input" placeholder="Re-enter password">
                     </div>
-                    <button type="submit" class="btn-submit">Next: Organization Details →</button>
+                    <button type="submit" class="btn-submit" id="signupBtn">Create Account →</button>
                 </form>
-                <div class="form-footer"><a onclick="showAccountTypePicker()">← Back</a></div>
-            </div>
-
-            <!-- ══ ORG REGISTRATION: STEP 2 — Org Profile ══ -->
-            <div class="form-card hidden fade-in" id="orgStep2Form">
-                <div class="step-bar">
-                    <div class="step-item"><div class="step-dot done">✓</div><div class="step-line done"></div></div>
-                    <div class="step-item"><div class="step-dot active">2</div><div class="step-line" id="sl2b"></div></div>
-                    <div class="step-item"><div class="step-dot">3</div></div>
-                </div>
-                <div class="form-header">
-                    <h2 class="form-title">Organization Profile</h2>
-                    <p class="form-subtitle">Tell us about your organization</p>
-                </div>
-                <form onsubmit="orgStep2Next(event)" class="form-grid">
-                    <div class="form-group">
-                        <label class="label">Organization Name</label>
-                        <input type="text" id="o2-orgname" class="input" placeholder="e.g. HDFC Bank Ltd.">
-                        <div class="error-msg" id="o2-orgnameError"></div>
-                    </div>
-                    <div class="form-group half">
-                        <label class="label">Industry / Nature of Business</label>
-                        <select id="o2-industry" class="input">
-                            <option value="">Select industry</option>
-                            <option>Commercial Bank</option>
-                            <option>NBFC</option>
-                            <option>Insurance</option>
-                            <option>Asset Management</option>
-                            <option>Payment Institution</option>
-                            <option>Government / Ministry</option>
-                            <option>Other Financial Institution</option>
-                        </select>
-                        <div class="error-msg" id="o2-industryError"></div>
-                    </div>
-                    <div class="form-group half">
-                        <label class="label">Business Size</label>
-                        <select id="o2-size" class="input">
-                            <option value="">Select size</option>
-                            <option>Small (1–50 employees)</option>
-                            <option>Medium (51–500)</option>
-                            <option>Large (501–5000)</option>
-                            <option>Enterprise (5000+)</option>
-                        </select>
-                        <div class="error-msg" id="o2-sizeError"></div>
-                    </div>
-                    <div class="form-group half">
-                        <label class="label">PAN / CIN Number</label>
-                        <input type="text" id="o2-pan" class="input" placeholder="e.g. AAAAA1234A">
-                        <div class="error-msg" id="o2-panError"></div>
-                    </div>
-                    <div class="form-group half">
-                        <label class="label">Regulator</label>
-                        <select id="o2-regulator" class="input">
-                            <option value="">Select regulator</option>
-                            <option>RBI</option>
-                            <option>SEBI</option>
-                            <option>IRDAI</option>
-                            <option>PFRDA</option>
-                            <option>MoF</option>
-                            <option>MoE</option>
-                            <option>Multiple</option>
-                        </select>
-                        <div class="error-msg" id="o2-regulatorError"></div>
-                    </div>
-                    <div class="form-group">
-                        <label class="label">Registered Address</label>
-                        <input type="text" id="o2-address" class="input" placeholder="Street, City, State, PIN">
-                        <div class="error-msg" id="o2-addressError"></div>
-                    </div>
-                    <div class="form-group half">
-                        <label class="label">City</label>
-                        <input type="text" id="o2-city" class="input" placeholder="e.g. Mumbai">
-                        <div class="error-msg" id="o2-cityError"></div>
-                    </div>
-                    <div class="form-group half">
-                        <label class="label">State</label>
-                        <input type="text" id="o2-state" class="input" placeholder="e.g. Maharashtra">
-                        <div class="error-msg" id="o2-stateError"></div>
-                    </div>
-                    <div class="checkbox-group">
-                        <input type="checkbox" id="o2-terms" class="checkbox">
-                        <label for="o2-terms" class="checkbox-label">
-                            I agree to the <a href="#" onclick="event.preventDefault()">Terms of Service</a> and <a href="#" onclick="event.preventDefault()">Privacy Policy</a>
-                        </label>
-                    </div>
-                    <div class="error-msg" id="o2-termsError"></div>
-                    <button type="submit" class="btn-submit">Complete Registration →</button>
-                </form>
-                <div class="form-footer"><a onclick="showOrgStep1()">← Back</a></div>
-            </div>
-
-            <!-- ══ ORG REGISTRATION: STEP 3 — Success ══ -->
-            <div class="form-card hidden fade-in" id="orgStep3Form">
-                <div class="step-bar">
-                    <div class="step-item"><div class="step-dot done">✓</div><div class="step-line done"></div></div>
-                    <div class="step-item"><div class="step-dot done">✓</div><div class="step-line done"></div></div>
-                    <div class="step-item"><div class="step-dot done">✓</div></div>
-                </div>
-                <div style="text-align:center;padding:20px 0 10px">
-                    <div style="font-size:52px;margin-bottom:16px">🎉</div>
-                    <h2 class="form-title" style="margin-bottom:8px">Organization Registered!</h2>
-                    <p class="form-subtitle" style="margin-bottom:24px">Your organization has been set up. Now let's onboard your team and configure modules.</p>
-                    <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:14px;margin-bottom:24px;text-align:left">
-                        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:#166534;margin-bottom:8px">What's next</div>
-                        <div style="font-size:13px;color:#166534;display:flex;flex-direction:column;gap:6px">
-                            <div>✓ Add team members &amp; assign roles</div>
-                            <div>✓ Enable or disable modules</div>
-                            <div>✓ Start managing compliance circulars</div>
-                        </div>
-                    </div>
-                    <button class="btn-submit" style="grid-column:unset;width:100%" onclick="window.location.href='super_admin_panel.html'">
-                        Go to Admin Panel →
-                    </button>
-                </div>
-            </div>
-
-            <!-- ══ INDIVIDUAL REGISTRATION ══ -->
-            <div class="form-card hidden fade-in" id="individualForm">
-                <div class="form-header">
-                    <h2 class="form-title">Individual Account</h2>
-                    <p class="form-subtitle">Create your personal consultant workspace</p>
-                </div>
-                <form onsubmit="handleIndividualSignup(event)" class="form-grid">
-                    <div class="form-group half">
-                        <label class="label">First Name</label>
-                        <input type="text" id="i-fname" class="input" placeholder="First name">
-                        <div class="error-msg" id="i-fnameError"></div>
-                    </div>
-                    <div class="form-group half">
-                        <label class="label">Last Name</label>
-                        <input type="text" id="i-lname" class="input" placeholder="Last name">
-                        <div class="error-msg" id="i-lnameError"></div>
-                    </div>
-                    <div class="form-group">
-                        <label class="label">Email Address</label>
-                        <input type="email" id="i-email" class="input" placeholder="your@email.com">
-                        <div class="error-msg" id="i-emailError"></div>
-                    </div>
-                    <div class="form-group">
-                        <label class="label">Area of Expertise</label>
-                        <select id="i-expertise" class="input">
-                            <option value="">Select expertise</option>
-                            <option>Regulatory Compliance</option>
-                            <option>Risk Management</option>
-                            <option>Legal &amp; Advisory</option>
-                            <option>IT Compliance</option>
-                            <option>Audit &amp; Assurance</option>
-                            <option>Other</option>
-                        </select>
-                        <div class="error-msg" id="i-expertiseError"></div>
-                    </div>
-                    <div class="form-group half">
-                        <label class="label">Password</label>
-                        <input type="password" id="i-pass" class="input" placeholder="Min 8 characters">
-                        <div class="error-msg" id="i-passError"></div>
-                    </div>
-                    <div class="form-group half">
-                        <label class="label">Confirm Password</label>
-                        <input type="password" id="i-confirm" class="input" placeholder="Re-enter">
-                        <div class="error-msg" id="i-confirmError"></div>
-                    </div>
-                    <div class="checkbox-group">
-                        <input type="checkbox" id="i-terms" class="checkbox">
-                        <label for="i-terms" class="checkbox-label">
-                            I agree to the <a href="#" onclick="event.preventDefault()">Terms</a> and <a href="#" onclick="event.preventDefault()">Privacy Policy</a>
-                        </label>
-                    </div>
-                    <div class="error-msg" id="i-termsError"></div>
-                    <button type="submit" class="btn-submit" id="indvBtn">Create Account</button>
-                </form>
-                <div class="form-footer"><a onclick="showAccountTypePicker()">← Back</a></div>
+                <div class="form-footer"><a onclick="showLogin()">← Back to login</a></div>
             </div>
 
         </div>
@@ -517,7 +583,7 @@
 </div>
 
 <!-- FOOTER -->
-<footer class="footer" id="footer">
+<footer class="footer">
     <div class="footer-col">
         <div class="footer-heading">Product</div>
         <div class="footer-links">
@@ -544,7 +610,7 @@
     </div>
 </footer>
 
-<!-- RESET MODAL -->
+<!-- RESET PASSWORD MODAL -->
 <div class="modal" id="resetModal">
     <div class="modal-box">
         <button class="modal-close" onclick="closeResetModal()">×</button>
@@ -552,220 +618,429 @@
             <h3 class="modal-title">Reset Password</h3>
             <p class="modal-subtitle">Enter your email to receive a reset link</p>
         </div>
-        <div class="modal-success" id="resetSuccess">✓ Reset link sent! Check your email.</div>
         <form onsubmit="handleReset(event)" class="modal-form">
-            <div class="form-group">
+            <div style="display:flex;flex-direction:column;gap:8px">
                 <label class="label">Email Address</label>
-                <input type="email" id="resetEmail" class="input" placeholder="your@email.com" autocomplete="email">
-                <div class="error-msg" id="resetEmailError"></div>
+                <input type="email" id="resetEmail" class="input" placeholder="your@email.com">
             </div>
             <button type="submit" class="btn-submit" id="resetBtn">Send Reset Link</button>
         </form>
     </div>
 </div>
 
-<script>
-const CONFIG = { enableSignUp: true, enableFooter: true };
-let _selectedAccountType = null;
+<!-- ═══════════════════════════════════════════════════
+     ORG PROFILE QUESTIONNAIRE OVERLAY
+═══════════════════════════════════════════════════ -->
+<div class="profile-overlay" id="profileOverlay">
+    <div class="profile-card" id="profileCard">
+        <div class="profile-top-bar"></div>
+        <div class="profile-progress-track">
+            <div class="profile-progress-fill" id="progressFill" style="width:0%"></div>
+        </div>
 
-/* ── SHOW / HIDE HELPERS ── */
-const FORMS = ['loginForm','accountTypeForm','orgStep1Form','orgStep2Form','orgStep3Form','individualForm'];
+        <div class="profile-header">
+            <div class="profile-step-label" id="stepLabel">Step 1 of 7</div>
+            <div class="profile-q-title" id="stepTitle">What's your organization's legal name?</div>
+            <div class="profile-q-sub"  id="stepSub">This will appear on all official documents and reports.</div>
+        </div>
+
+        <div class="profile-body" id="profileBody">
+            <!-- Rendered by JS -->
+        </div>
+
+        <div class="profile-footer">
+            <div class="profile-footer-left">
+                <button class="btn-back" id="btnBack" onclick="profilePrev()" style="display:none">← Back</button>
+                <span class="profile-step-count" id="stepCount"></span>
+            </div>
+            <button class="btn-skip" onclick="profileSkip()">Skip</button>
+            <button class="btn-next" id="btnNext" onclick="profileNext()">Continue →</button>
+        </div>
+    </div>
+</div>
+
+<script>
+/* ─────────────────────────────────────────────
+   LOGIN / SIGNUP ROUTING
+───────────────────────────────────────────── */
+const FORMS = ['loginForm','signupForm'];
 function showOnly(id) {
-    FORMS.forEach(f => {
-        const el = document.getElementById(f);
-        if (el) el.classList.toggle('hidden', f !== id);
-    });
+    FORMS.forEach(f => document.getElementById(f).classList.toggle('hidden', f !== id));
     document.querySelector('.right-section').scrollTop = 0;
 }
-function showLogin()           { showOnly('loginForm'); updateLeftContent('login'); }
-function showAccountTypePicker(){ showOnly('accountTypeForm'); updateLeftContent('signup'); }
-function showOrgStep1()        { showOnly('orgStep1Form'); }
-function showOrgStep2()        { showOnly('orgStep2Form'); }
-function showOrgStep3()        { showOnly('orgStep3Form'); }
-function showIndividual()      { showOnly('individualForm'); }
+function showLogin()  { showOnly('loginForm'); }
+function showSignup() { showOnly('signupForm'); }
 
-/* ── ACCOUNT TYPE PICKER ── */
-function selectAccountType(type) {
-    _selectedAccountType = type;
-    document.getElementById('at-org').classList.toggle('selected', type === 'org');
-    document.getElementById('at-individual').classList.toggle('selected', type === 'individual');
-    document.getElementById('typePickerBtn').disabled = false;
-}
-function proceedFromTypePicker() {
-    if (!_selectedAccountType) return;
-    if (_selectedAccountType === 'org') showOrgStep1();
-    else showIndividual();
-}
+let postQuestionnaireRedirect = 'super_admin_panel.html';
 
-/* ── LEFT CONTENT ── */
-function updateLeftContent(mode) {
-    if (mode === 'signup') {
-        document.getElementById('leftHeading').textContent = 'Start Your Journey';
-        document.getElementById('leftDescription').textContent = 'Join CMS to manage regulatory circulars, automate compliance workflows and empower every role in your organization.';
-        document.getElementById('feature1Title').textContent = 'Organization Setup';
-        document.getElementById('feature1Desc').textContent = 'Configure your org, users and roles in minutes';
-        document.getElementById('feature2Title').textContent = 'Module Control';
-        document.getElementById('feature2Desc').textContent = 'Enable only the modules your team needs';
-        document.getElementById('feature3Title').textContent = 'Role-Based Panels';
-        document.getElementById('feature3Desc').textContent = 'Each role gets their own dedicated workspace';
-        document.getElementById('feature4Title').textContent = 'Consultant Access';
-        document.getElementById('feature4Desc').textContent = 'Individuals can serve multiple client orgs';
-    } else {
-        document.getElementById('leftHeading').textContent = 'Key Benefits';
-        document.getElementById('leftDescription').textContent = 'Streamline your compliance workflows with intelligent automation and real-time tracking across your entire organization.';
-        document.getElementById('feature1Title').textContent = 'Circular Tracking';
-        document.getElementById('feature1Desc').textContent = 'Manage RBI & regulatory circulars end to end';
-        document.getElementById('feature2Title').textContent = 'AI Engine';
-        document.getElementById('feature2Desc').textContent = 'Auto-extract obligations & suggest actions';
-        document.getElementById('feature3Title').textContent = 'Real-Time Reports';
-        document.getElementById('feature3Desc').textContent = 'Track compliance posture across departments';
-        document.getElementById('feature4Title').textContent = 'Role-Based Access';
-        document.getElementById('feature4Desc').textContent = 'CO, Manager, Reviewer, Assignee, Owner';
-    }
-}
-
-/* ── LOGIN ── */
-function handleLogin(event) {
-    event.preventDefault();
-    const username = document.getElementById('loginUsername').value.trim();
-    const password = document.getElementById('loginPassword').value.trim();
-    clearErrors(['loginUsernameError','loginPasswordError']);
-    if (!username) { showError('loginUsernameError','Username required'); return; }
-    if (!password) { showError('loginPasswordError','Password required'); return; }
-
+function handleLogin(e) {
+    e.preventDefault();
+    const u = document.getElementById('loginUsername').value.trim();
+    const p = document.getElementById('loginPassword').value.trim();
     const routes = {
-        co:         './co.html',
-        dept_head:  'dept_head.html',
-        reviewer:   'reviewer_panel.html',
-        filer:      'filer_panel.html',
-        owner:      'owner_panel.html',
-        assignee:   'assignee_panel.html',
-        superadmin: 'super_admin_panel.html',
+        co:'./co.html', dept_head:'dept_head.html', reviewer:'reviewer_panel.html',
+        filer:'filer_panel.html', owner:'owner_panel.html', assignee:'assignee_panel.html',
+        superadmin:'super_admin_panel.html', spoc:'spoc_panel.html'
     };
-    if (routes[username] && password === '1234') {
-        window.location.href = routes[username];
+
+    if (u === 'admin' && p === 'admin') {
+        const isFirstLogin = !localStorage.getItem('cms_org_profile_done');
+        postQuestionnaireRedirect = 'super_admin_panel.html';
+        if (isFirstLogin) {
+            openProfileQuestionnaire();
+        } else {
+            window.location.href = postQuestionnaireRedirect;
+        }
+        return;
+    }
+    if (routes[u] && p === '1234') {
+        window.location.href = routes[u];
     } else {
-        showError('loginPasswordError','Invalid username or password');
+        // Demo: any other login → open questionnaire first, then go to super admin
+        postQuestionnaireRedirect = 'super_admin_panel.html';
+        openProfileQuestionnaire();
     }
 }
 
-/* ── ORG STEP 1 ── */
-function orgStep1Next(event) {
-    event.preventDefault();
-    const fname   = document.getElementById('o1-fname').value.trim();
-    const lname   = document.getElementById('o1-lname').value.trim();
-    const email   = document.getElementById('o1-email').value.trim();
-    const pass    = document.getElementById('o1-pass').value;
-    const confirm = document.getElementById('o1-confirm').value;
-    const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    clearErrors(['o1-fnameError','o1-lnameError','o1-emailError','o1-passError','o1-confirmError']);
-    if (!fname) { showError('o1-fnameError','Required'); return; }
-    if (!lname) { showError('o1-lnameError','Required'); return; }
-    if (!email || !emailRe.test(email)) { showError('o1-emailError','Valid email required'); return; }
-    if (!pass || pass.length < 8) { showError('o1-passError','Min 8 characters'); return; }
-    if (pass !== confirm) { showError('o1-confirmError','Passwords do not match'); return; }
-    showOrgStep2();
+function handleSignup(e) {
+    e.preventDefault();
+    showLogin();
 }
 
-/* ── ORG STEP 2 ── */
-function orgStep2Next(event) {
-    event.preventDefault();
-    const orgname   = document.getElementById('o2-orgname').value.trim();
-    const industry  = document.getElementById('o2-industry').value;
-    const size      = document.getElementById('o2-size').value;
-    const pan       = document.getElementById('o2-pan').value.trim();
-    const regulator = document.getElementById('o2-regulator').value;
-    const address   = document.getElementById('o2-address').value.trim();
-    const city      = document.getElementById('o2-city').value.trim();
-    const state     = document.getElementById('o2-state').value.trim();
-    const terms     = document.getElementById('o2-terms').checked;
-    clearErrors(['o2-orgnameError','o2-industryError','o2-sizeError','o2-panError','o2-regulatorError','o2-addressError','o2-cityError','o2-stateError','o2-termsError']);
-    if (!orgname)   { showError('o2-orgnameError','Required'); return; }
-    if (!industry)  { showError('o2-industryError','Required'); return; }
-    if (!size)      { showError('o2-sizeError','Required'); return; }
-    if (!pan)       { showError('o2-panError','Required'); return; }
-    if (!regulator) { showError('o2-regulatorError','Required'); return; }
-    if (!address)   { showError('o2-addressError','Required'); return; }
-    if (!city)      { showError('o2-cityError','Required'); return; }
-    if (!state)     { showError('o2-stateError','Required'); return; }
-    if (!terms)     { showError('o2-termsError','You must accept the terms'); return; }
-
-    const btn = event.submitter;
-    btn.classList.add('loading'); btn.disabled = true;
-    setTimeout(() => { btn.classList.remove('loading'); btn.disabled = false; showOrgStep3(); }, 1200);
-}
-
-/* ── INDIVIDUAL ── */
-function handleIndividualSignup(event) {
-    event.preventDefault();
-    const fname  = document.getElementById('i-fname').value.trim();
-    const lname  = document.getElementById('i-lname').value.trim();
-    const email  = document.getElementById('i-email').value.trim();
-    const exp    = document.getElementById('i-expertise').value;
-    const pass   = document.getElementById('i-pass').value;
-    const conf   = document.getElementById('i-confirm').value;
-    const terms  = document.getElementById('i-terms').checked;
-    const emailRe= /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    clearErrors(['i-fnameError','i-lnameError','i-emailError','i-expertiseError','i-passError','i-confirmError','i-termsError']);
-    if (!fname)  { showError('i-fnameError','Required'); return; }
-    if (!lname)  { showError('i-lnameError','Required'); return; }
-    if (!email || !emailRe.test(email)) { showError('i-emailError','Valid email required'); return; }
-    if (!exp)    { showError('i-expertiseError','Required'); return; }
-    if (!pass || pass.length < 8) { showError('i-passError','Min 8 characters'); return; }
-    if (pass !== conf) { showError('i-confirmError','Passwords do not match'); return; }
-    if (!terms)  { showError('i-termsError','You must accept the terms'); return; }
-
-    const btn = document.getElementById('indvBtn');
-    btn.classList.add('loading'); btn.disabled = true;
-    setTimeout(() => { btn.classList.remove('loading'); btn.disabled = false; window.location.href='assignee_panel.html'; }, 1200);
-}
-
-/* ── RESET ── */
-function handleReset(event) {
-    event.preventDefault();
-    const email = document.getElementById('resetEmail').value.trim();
-    const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    const errEl = document.getElementById('resetEmailError');
-    errEl.classList.remove('show');
-    if (!email || !emailRe.test(email)) { errEl.textContent='Valid email required'; errEl.classList.add('show'); return; }
-    const btn = document.getElementById('resetBtn');
-    btn.disabled = true; btn.textContent = 'Sending...';
-    setTimeout(() => {
-        document.getElementById('resetSuccess').classList.add('show');
-        document.querySelector('#resetModal .modal-form').style.display = 'none';
-        setTimeout(closeResetModal, 2000);
-    }, 800);
-}
-function openResetModal() {
-    document.getElementById('resetEmail').value = '';
-    document.getElementById('resetEmailError').classList.remove('show');
-    document.getElementById('resetSuccess').classList.remove('show');
-    document.querySelector('#resetModal .modal-form').style.display = 'block';
-    document.getElementById('resetBtn').textContent = 'Send Reset Link';
-    document.getElementById('resetBtn').disabled = false;
-    document.getElementById('resetModal').classList.add('show');
-}
+/* RESET MODAL */
+function openResetModal() { document.getElementById('resetModal').classList.add('show'); }
 function closeResetModal() { document.getElementById('resetModal').classList.remove('show'); }
-
-/* ── UTILITIES ── */
-function showError(id, msg) {
-    const err = document.getElementById(id);
-    const inputId = id.replace('Error','');
-    const input = document.getElementById(inputId);
-    if (err) { err.textContent = msg; err.classList.add('show'); }
-    if (input) input.classList.add('error');
+function handleReset(e) {
+    e.preventDefault();
+    alert('Reset link sent! Check your email.');
+    closeResetModal();
 }
-function clearErrors(ids) {
-    ids.forEach(id => {
-        const err = document.getElementById(id);
-        const input = document.getElementById(id.replace('Error',''));
-        if (err) err.classList.remove('show');
-        if (input) input.classList.remove('error');
-    });
+document.getElementById('resetModal').addEventListener('click', function(e){ if(e.target===this) closeResetModal(); });
+document.addEventListener('keydown', e => { if(e.key==='Escape') closeResetModal(); });
+
+/* ─────────────────────────────────────────────
+   ORG PROFILE QUESTIONNAIRE
+   7 steps + 1 success screen
+───────────────────────────────────────────── */
+const STEPS = [
+    // 0 — Legal Name
+    {
+        label: 'Step 1 of 7',
+        title: "What's your organization's legal name?",
+        sub:   'This will appear on all official documents and reports.',
+        render() {
+            return `
+            <div class="q-field">
+                <label class="q-label">Legal / Registered Name</label>
+                <input id="q-legalname" class="q-input" placeholder="e.g. HDFC Bank Limited" type="text">
+            </div>`;
+        }
+    },
+    // 1 — Org Type
+    {
+        label: 'Step 2 of 7',
+        title: 'What type of organization are you?',
+        sub:   'Select the option that best describes your entity.',
+        render() {
+            const types = [
+                { icon:'🏦', title:'Commercial Bank',      desc:'Public, private or foreign bank' },
+                { icon:'🏢', title:'NBFC',                 desc:'Non-banking financial company' },
+                { icon:'🛡️', title:'Insurance Company',    desc:'Life, general or health insurer' },
+                { icon:'📈', title:'Asset Management',     desc:'Mutual fund, PMS, AIF' },
+                { icon:'💳', title:'Payment Institution',  desc:'PPI, payment aggregator/gateway' },
+                { icon:'🏛️', title:'Government / Ministry',desc:'Central or state government body' },
+            ];
+            return `<div class="card-group">${types.map((t,i)=>`
+                <div class="sel-card" id="ot-${i}" onclick="selectCard('ot',${i},${types.length})">
+                    <div class="sel-card-icon">${t.icon}</div>
+                    <div class="sel-card-title">${t.title}</div>
+                    <div class="sel-card-desc">${t.desc}</div>
+                </div>`).join('')}</div>`;
+        }
+    },
+    // 2 — Industry & Business Activities
+    {
+        label: 'Step 3 of 7',
+        title: 'Industry & Business Activities',
+        sub:   'Select all that apply to your organization.',
+        render() {
+            const chips = ['Retail Banking','Corporate Banking','Treasury','Lending & Credit','Insurance','Wealth Management','Capital Markets','Payments & Remittances','Foreign Exchange','IT / Tech Services','Audit & Assurance','Compliance Advisory'];
+            return `
+            <div class="q-field">
+                <label class="q-label">Primary Industry</label>
+                <select id="q-industry" class="q-input">
+                    <option value="">Select industry</option>
+                    <option>Banking & Finance</option>
+                    <option>Insurance</option>
+                    <option>Capital Markets</option>
+                    <option>Payment & Fintech</option>
+                    <option>Government / Regulatory</option>
+                    <option>Other Financial Services</option>
+                </select>
+            </div>
+            <div class="q-field">
+                <label class="q-label">Business Activities <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--text-light)">(pick all that apply)</span></label>
+                <div class="chip-group" id="biz-chips">
+                    ${chips.map((c,i)=>`<div class="chip" id="bc-${i}" onclick="toggleChip('bc-${i}')">${c}</div>`).join('')}
+                </div>
+            </div>`;
+        }
+    },
+    // 3 — Turnover & Employee Size
+    {
+        label: 'Step 4 of 7',
+        title: 'Business Scale',
+        sub:   'Help us tailor the platform to your organization size.',
+        render() {
+            return `
+            <div class="q-field">
+                <label class="q-label">Annual Turnover / Revenue</label>
+                <div class="chip-group" id="turnover-chips">
+                    ${['< ₹10 Cr','₹10–100 Cr','₹100–500 Cr','₹500 Cr–5,000 Cr','> ₹5,000 Cr'].map((c,i)=>`<div class="chip" id="tc-${i}" onclick="selectChipGroup('tc',${i},5)">${c}</div>`).join('')}
+                </div>
+            </div>
+            <div class="q-field" style="margin-top:8px">
+                <label class="q-label">Number of Employees</label>
+                <div class="range-wrap">
+                    <input type="range" id="emp-range" min="0" max="4" value="1" step="1" oninput="updateEmpRange(this.value)">
+                    <div class="range-labels">
+                        <span>1–50</span><span>51–200</span><span>201–1000</span><span>1001–5000</span><span>5000+</span>
+                    </div>
+                    <span class="range-value" id="emp-val">51–200 employees</span>
+                </div>
+            </div>`;
+        }
+    },
+    // 4 — Multi-Location
+    {
+        label: 'Step 5 of 7',
+        title: 'Operating Locations',
+        sub:   'Does your organization operate across multiple locations?',
+        render() {
+            return `
+            <div class="toggle-row" onclick="toggleSwitch('sw-multiloc')" id="tr-multiloc">
+                <div class="toggle-row-info">
+                    <div class="toggle-row-title">Multiple Locations / Branches</div>
+                    <div class="toggle-row-sub">Offices, branches, or operating sites in more than one city</div>
+                </div>
+                <div class="toggle-switch" id="sw-multiloc"></div>
+            </div>
+            <div class="toggle-row" onclick="toggleSwitch('sw-interstate')" id="tr-interstate">
+                <div class="toggle-row-info">
+                    <div class="toggle-row-title">Inter-state Operations</div>
+                    <div class="toggle-row-sub">Operates in more than one Indian state or UT</div>
+                </div>
+                <div class="toggle-switch" id="sw-interstate"></div>
+            </div>
+            <div class="toggle-row" onclick="toggleSwitch('sw-international')" id="tr-international">
+                <div class="toggle-row-info">
+                    <div class="toggle-row-title">International Presence</div>
+                    <div class="toggle-row-sub">Has offices, subsidiaries, or operations outside India</div>
+                </div>
+                <div class="toggle-switch" id="sw-international"></div>
+            </div>
+            <div class="q-field" style="margin-top:4px">
+                <label class="q-label">Applicable Regulator(s)</label>
+                <div class="chip-group">
+                    ${['RBI','SEBI','IRDAI','PFRDA','MoF','MoE','Multiple'].map((c,i)=>`<div class="chip" id="reg-${i}" onclick="toggleChip('reg-${i}')">${c}</div>`).join('')}
+                </div>
+            </div>`;
+        }
+    },
+    // 5 — Additional Details (GSTIN, CIN, PAN, DOI)
+    {
+        label: 'Step 6 of 7',
+        title: 'Registration & Tax Details',
+        sub:   'Official identifiers for your organization. You can update these later.',
+        render() {
+            return `
+            <div class="q-grid-2">
+                <div class="q-field">
+                    <label class="q-label">PAN</label>
+                    <input id="q-pan" class="q-input" placeholder="AAAAA1234A" type="text" style="text-transform:uppercase">
+                </div>
+                <div class="q-field">
+                    <label class="q-label">CIN</label>
+                    <input id="q-cin" class="q-input" placeholder="L12345MH2000PLC123456" type="text">
+                </div>
+                <div class="q-field">
+                    <label class="q-label">GSTIN</label>
+                    <input id="q-gstin" class="q-input" placeholder="22AAAAA0000A1Z5" type="text" style="text-transform:uppercase">
+                </div>
+                <div class="q-field">
+                    <label class="q-label">Date of Incorporation</label>
+                    <input id="q-doi" class="q-input" type="date">
+                </div>
+            </div>`;
+        }
+    },
+    // 6 — Registered Address
+    {
+        label: 'Step 7 of 7',
+        title: 'Registered Address',
+        sub:   "Your organization's official registered address.",
+        render() {
+            return `
+            <div class="q-field">
+                <label class="q-label">Street Address</label>
+                <input id="q-street" class="q-input" placeholder="Building, Street, Area" type="text">
+            </div>
+            <div class="q-grid-2">
+                <div class="q-field">
+                    <label class="q-label">City</label>
+                    <input id="q-city" class="q-input" placeholder="Mumbai" type="text">
+                </div>
+                <div class="q-field">
+                    <label class="q-label">State</label>
+                    <select id="q-state" class="q-input">
+                        <option value="">Select state</option>
+                        <option>Andhra Pradesh</option><option>Assam</option><option>Bihar</option>
+                        <option>Delhi</option><option>Goa</option><option>Gujarat</option>
+                        <option>Haryana</option><option>Himachal Pradesh</option><option>Jharkhand</option>
+                        <option>Karnataka</option><option>Kerala</option><option>Madhya Pradesh</option>
+                        <option>Maharashtra</option><option>Odisha</option><option>Punjab</option>
+                        <option>Rajasthan</option><option>Tamil Nadu</option><option>Telangana</option>
+                        <option>Uttar Pradesh</option><option>Uttarakhand</option><option>West Bengal</option>
+                    </select>
+                </div>
+                <div class="q-field">
+                    <label class="q-label">PIN Code</label>
+                    <input id="q-pin" class="q-input" placeholder="400001" type="text" maxlength="6">
+                </div>
+                <div class="q-field">
+                    <label class="q-label">Country</label>
+                    <input id="q-country" class="q-input" value="India" type="text">
+                </div>
+            </div>`;
+        }
+    },
+];
+
+let currentStep = 0;
+const TOTAL = STEPS.length;
+
+function openProfileQuestionnaire() {
+    currentStep = 0;
+    document.getElementById('profileOverlay').classList.add('show');
+    renderStep();
 }
 
-document.getElementById('resetModal').addEventListener('click', function(e) { if (e.target===this) closeResetModal(); });
-document.addEventListener('keydown', e => { if (e.key==='Escape') closeResetModal(); });
+function renderStep() {
+    if (currentStep >= TOTAL) { renderSuccess(); return; }
+    const step = STEPS[currentStep];
+    document.getElementById('stepLabel').textContent = step.label;
+    document.getElementById('stepTitle').textContent = step.title;
+    document.getElementById('stepSub').textContent   = step.sub;
+    document.getElementById('profileBody').innerHTML  = step.render();
+    document.getElementById('progressFill').style.width = (((currentStep + 1) / TOTAL) * 100) + '%';
+    document.getElementById('stepCount').textContent = `${currentStep + 1} of ${TOTAL}`;
+
+    const back = document.getElementById('btnBack');
+    back.style.display = currentStep > 0 ? 'block' : 'none';
+
+    const next = document.getElementById('btnNext');
+    next.textContent = currentStep === TOTAL - 1 ? 'Submit →' : 'Continue →';
+
+    // Animate body
+    const body = document.getElementById('profileBody');
+    body.style.opacity = 0;
+    body.style.transform = 'translateY(10px)';
+    setTimeout(() => {
+        body.style.transition = 'all 0.28s ease';
+        body.style.opacity = 1;
+        body.style.transform = 'none';
+    }, 20);
+
+    // Post-render hooks
+    if (currentStep === 3) setTimeout(() => updateEmpRange(1), 30);
+}
+
+function renderSuccess() {
+    document.getElementById('stepLabel').textContent = 'Setup Complete';
+    document.getElementById('stepTitle').textContent = '';
+    document.getElementById('stepSub').textContent   = '';
+    document.getElementById('progressFill').style.width = '100%';
+    document.getElementById('btnBack').style.display = 'none';
+    document.getElementById('btnNext').style.display = 'none';
+    document.querySelector('.btn-skip').style.display = 'none';
+    document.getElementById('stepCount').textContent = '';
+
+    document.getElementById('profileBody').innerHTML = `
+    <div class="success-screen">
+        <span class="success-emoji">🎉</span>
+        <div class="success-title">Organization Profile Complete!</div>
+        <p class="success-sub">Your workspace is ready. Let's head to the admin panel to set up your team and start managing compliance circulars.</p>
+        <div class="success-checklist">
+            <div class="success-checklist-title">What's waiting for you</div>
+            <div class="success-check-item">✓ Add team members & assign roles</div>
+            <div class="success-check-item">✓ Enable or disable modules</div>
+            <div class="success-check-item">✓ Import & track regulatory circulars</div>
+            <div class="success-check-item">✓ Configure compliance workflows</div>
+        </div>
+        <button class="btn-next" style="width:100%;padding:13px;font-size:15px" onclick="goToAdmin()">Go to Admin Panel →</button>
+    </div>`;
+}
+
+function profileNext() {
+    if (currentStep >= TOTAL) { goToAdmin(); return; }
+    currentStep++;
+    renderStep();
+}
+function profilePrev() {
+    if (currentStep <= 0) return;
+    currentStep--;
+    renderStep();
+}
+function profileSkip() {
+    if (currentStep >= TOTAL - 1) { currentStep = TOTAL; renderSuccess(); return; }
+    currentStep++;
+    renderStep();
+}
+function goToAdmin() {
+    localStorage.setItem('cms_org_profile_done', '1');
+    window.location.href = postQuestionnaireRedirect || 'super_admin_panel.html';
+}
+
+/* ── INTERACTIVE HELPERS ── */
+function selectCard(prefix, idx, total) {
+    for (let i = 0; i < total; i++) {
+        const el = document.getElementById(`${prefix}-${i}`);
+        if (el) el.classList.toggle('selected', i === idx);
+    }
+}
+function toggleChip(id) {
+    const el = document.getElementById(id);
+    if (el) el.classList.toggle('selected');
+}
+function selectChipGroup(prefix, idx, total) {
+    for (let i = 0; i < total; i++) {
+        const el = document.getElementById(`${prefix}-${i}`);
+        if (el) el.classList.toggle('selected', i === idx);
+    }
+}
+function toggleSwitch(id) {
+    const el = document.getElementById(id);
+    if (el) el.classList.toggle('on');
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('firstLogin') && !localStorage.getItem('cms_org_profile_done')) {
+        openProfileQuestionnaire();
+    }
+});
+
+const EMP_LABELS = ['1–50 employees','51–200 employees','201–1,000 employees','1,001–5,000 employees','5,000+ employees'];
+function updateEmpRange(val) {
+    const v = parseInt(val);
+    const el = document.getElementById('emp-val');
+    if (el) el.textContent = EMP_LABELS[v] || '';
+    const range = document.getElementById('emp-range');
+    if (range) {
+        const pct = (v / 4) * 100;
+        range.style.background = `linear-gradient(90deg, var(--primary) ${pct}%, var(--border) ${pct}%)`;
+    }
+}
 </script>
 </body>
 </html>

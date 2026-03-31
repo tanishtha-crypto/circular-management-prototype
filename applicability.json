@@ -1,0 +1,119 @@
+{
+  "as_is_applicable_entities": [
+    "Scheduled Commercial Banks (excluding Regional Rural Banks)",
+    "Housing Finance Companies (in aligned contexts where applicable via NHB/RBI guidance)",
+    "Banks engaged in housing finance lending activities"
+  ],
+
+  "chapter_or_section_wise_applicability": [
+    {
+      "chapter_or_section_title": "Overall Circular Applicability",
+      "applicable": "Not Applicable",
+      "reason": "The circular is explicitly issued for Scheduled Commercial Banks engaged in housing finance lending. HDFC AMC is an Asset Management Company and does not undertake lending activities."
+    },
+    {
+      "chapter_or_section_title": "Acquisition of Land (Loan for Plot Purchase)",
+      "applicable": "Not Applicable",
+      "reason": "This section governs lending conditions for banks financing land purchase. HDFC AMC does not originate loans or finance property acquisition."
+    },
+    {
+      "chapter_or_section_title": "Construction of Building / Ready-built House",
+      "applicable": "Not Applicable",
+      "reason": "Applies to banks providing housing loans and managing disbursement, certification, and borrower compliance. AMC has no such credit exposure role."
+    },
+    {
+      "chapter_or_section_title": "Prohibition on Financing Unauthorized Properties",
+      "applicable": "Not Applicable",
+      "reason": "Restriction applies to lenders. AMC may invest in securities linked to real estate but does not directly finance properties."
+    },
+    {
+      "chapter_or_section_title": "Quantum of Loan – LTV Ratios and Risk Weights",
+      "applicable": "Not Applicable",
+      "reason": "LTV and risk weight norms are prudential lending requirements applicable to banks’ balance sheet exposures, not to pooled investment vehicles."
+    },
+    {
+      "chapter_or_section_title": "Commercial Real Estate (CRE) Exposure Norms",
+      "applicable": "Partially Applicable",
+      "reason": "While direct lending norms do not apply, AMC funds investing in real estate-linked instruments (e.g., REITs, debt securities of real estate companies) may be indirectly impacted through market risk and SEBI-imposed exposure limits."
+    },
+    {
+      "chapter_or_section_title": "Priority Sector Lending (PSL)",
+      "applicable": "Not Applicable",
+      "reason": "PSL targets are applicable only to banks. AMC has no statutory lending targets."
+    },
+    {
+      "chapter_or_section_title": "Disbursement and Monitoring Requirements",
+      "applicable": "Not Applicable",
+      "reason": "Applies to loan lifecycle management in banks. AMC does not disburse or monitor loans."
+    },
+    {
+      "chapter_or_section_title": "Risk Management and Prudential Norms",
+      "applicable": "Partially Applicable",
+      "reason": "Although RBI norms do not directly apply, similar risk principles (concentration, exposure limits, asset quality) are enforced on AMC via SEBI Mutual Fund Regulations."
+    }
+  ],
+
+  "applicable_parameters": [
+    {
+      "type": "Entity Type",
+      "parameter": "Scheduled Commercial Bank vs AMC",
+      "condition_or_rule": "Circular applies only to banks engaged in housing finance lending",
+      "applicable": "No",
+      "reason": "HDFC AMC is a capital markets intermediary and not a lending institution"
+    },
+    {
+      "type": "Business Activity",
+      "parameter": "Housing Loan Origination",
+      "condition_or_rule": "Entity must originate or service housing loans",
+      "applicable": "No",
+      "reason": "AMC manages pooled investments and does not originate loans"
+    },
+    {
+      "type": "Balance Sheet Exposure",
+      "parameter": "On-book credit exposure to real estate",
+      "condition_or_rule": "LTV and risk weights apply to lender balance sheet",
+      "applicable": "No",
+      "reason": "AMC does not carry loans on balance sheet"
+    },
+    {
+      "type": "Indirect Market Exposure",
+      "parameter": "Investment in real estate-linked securities",
+      "condition_or_rule": "Exposure through debt/equity instruments of real estate sector",
+      "applicable": "Yes (Indirect)",
+      "reason": "AMC funds may invest in real estate companies or REITs, creating indirect exposure"
+    },
+    {
+      "type": "Regulatory Framework",
+      "parameter": "RBI vs SEBI jurisdiction",
+      "condition_or_rule": "RBI regulates banks/NBFCs; SEBI regulates AMCs",
+      "applicable": "No (Direct), Yes (Indirect)",
+      "reason": "AMC governed by SEBI, but macro-prudential signals from RBI influence market and risk environment"
+    },
+    {
+      "type": "Risk Management Principles",
+      "parameter": "Concentration and exposure norms",
+      "condition_or_rule": "Similar prudential principles applied via SEBI MF regulations",
+      "applicable": "Yes (Equivalent)",
+      "reason": "Though not RBI-driven, equivalent controls exist under SEBI"
+    }
+  ],
+
+  "assumptions": [
+    {
+      "scope": "Circular interpretation",
+      "detail": "Assumed RBI Master Circular on Housing Finance applicable to Scheduled Commercial Banks only"
+    },
+    {
+      "organization_activity": "HDFC AMC",
+      "detail": "Does not undertake lending, only manages mutual fund investments"
+    },
+    {
+      "indirect_exposure": "Real estate investments",
+      "detail": "AMC may have indirect exposure via securities but not direct lending exposure"
+    },
+    {
+      "regulatory_overlap": "RBI vs SEBI",
+      "detail": "RBI circulars may influence market conditions but are not directly binding on AMC"
+    }
+  ]
+}

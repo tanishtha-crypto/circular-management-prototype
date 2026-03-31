@@ -149,7 +149,7 @@ function _sumBuildDoc(circ, data, org, aud, dep, date) {
         </div>
         <div class="sum-dh-actions">
           <button class="sum-dh-btn" id="sum-expand-all">⊞ Expand All</button>
-          <button class="sum-dh-btn" onclick="window.print()">🖨 Print</button>
+          <button class="sum-dh-btn" onclick="_sumOpenDoc()">🖨 Print</button>
           <button class="sum-dh-btn" id="sum-regen-btn">↺ Regenerate</button>
            <button class="sum-strip-change" onclick="document.querySelector('[data-tab=\\'overview\\']')?.click()">← Change Circular</button>
         </div>
@@ -231,6 +231,17 @@ function _sumRenderAccordion(sec, open) {
     </div>
   </div>`;
 }
+
+
+function _sumOpenDoc() {
+  const url = './Executive Summary RBI MC.pdf';
+  const win = window.open(encodeURI(url), '_blank');
+
+  if (win) {
+    win.onload = () => win.print();
+  }
+}
+
 
 /* ================================================================ BIND EVENTS */
 function _sumBindDocEvents(circ) {

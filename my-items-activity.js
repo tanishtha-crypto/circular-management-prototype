@@ -222,7 +222,11 @@ function actBuildHTML() {
   return `
   <div class="fade-in">
  
+<<<<<<< Updated upstream
     <div class="aa-page-head" style="margin-bottom:16px;">
+=======
+    <div class="aa-page-head1" style="margin-bottom:16px;">
+>>>>>>> Stashed changes
       <div class="aa-head-left">
 
 
@@ -297,6 +301,8 @@ function actBuildHTML() {
       .tb-arrow{font-size:13px;color:#cbd5e1;font-weight:700;}
       .tb-date-hint{display:none;font-size:11px;font-weight:600;color:#6366f1;background:#eef2ff;border:1px solid #c7d2fe;padding:3px 10px;border-radius:20px;white-space:nowrap;}
       .tb-date-hint.visible{display:inline;}
+      .aa-page-head1{display:flex;flex-direction: row-reverse;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:20px;flex-wrap:wrap;}
+
     </style>
   </div>`;
 }

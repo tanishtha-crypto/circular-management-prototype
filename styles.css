@@ -2480,6 +2480,178 @@ textarea.form-control {
   transition: width 0.4s ease;
 }
 
+
+/* ============================================================
+   SPOC DASHBOARD
+   ============================================================ */
+.spoc-pipeline-wrap { padding: 16px 20px; }
+
+.spoc-pipeline {
+  display: flex;
+  align-items: flex-start;
+  gap: 0;
+}
+.spoc-pipeline-stage {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: opacity var(--transition);
+  padding: 0 2px;
+  min-width: 0;
+}
+.spoc-pipeline-stage:hover { opacity: 0.72; }
+.spoc-pipeline-bar {
+  height: 10px;
+  width: 100%;
+  border-radius: 99px;
+}
+.spoc-pipeline-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+.spoc-pipeline-count {
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 800;
+  line-height: 1;
+}
+.spoc-pipeline-name {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  text-align: center;
+  white-space: nowrap;
+}
+.spoc-pipeline-sep {
+  flex-shrink: 0;
+  font-size: 18px;
+  color: var(--border);
+  font-weight: 700;
+  padding: 0 4px;
+  line-height: 10px;
+  align-self: flex-start;
+}
+
+.spoc-quick-actions { display: flex; flex-direction: column; padding: 4px 20px; }
+.spoc-qa-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--border-light);
+}
+.spoc-qa-item:last-child { border-bottom: none; }
+.spoc-qa-icon {
+  width: 38px; height: 38px;
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px;
+  flex-shrink: 0;
+}
+.spoc-qa-body { flex: 1; min-width: 0; }
+.spoc-qa-title { font-size: 13px; font-weight: 600; color: var(--text-primary); }
+.spoc-qa-desc  { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+
+@media (max-width: 768px) {
+  .spoc-pipeline { flex-wrap: wrap; gap: 10px; }
+  .spoc-pipeline-sep { display: none; }
+}
+
+/* Action buttons in recent circulars table */
+.spoc-action-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 4px 11px;
+  border-radius: 6px;
+  white-space: nowrap;
+  cursor: pointer;
+  line-height: 1.4;
+  letter-spacing: 0.01em;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08), 0 0 0 1px rgba(0,0,0,0.06);
+  transition: transform 80ms ease, box-shadow 80ms ease, opacity 80ms ease;
+  text-decoration: none;
+}
+.spoc-action-pill:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 3px 8px rgba(0,0,0,0.13), 0 0 0 1px rgba(0,0,0,0.08);
+}
+.spoc-action-pill:active { transform: translateY(0); box-shadow: none; }
+.spoc-pill-warning {
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  color: #78350f;
+  border: 1px solid #f59e0b !important;
+}
+.spoc-pill-info {
+  background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%);
+  color: #0c4a6e;
+  border: 1px solid #38bdf8 !important;
+}
+.spoc-pill-danger {
+  background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+  color: #7f1d1d;
+  border: 1px solid #ef4444 !important;
+}
+.spoc-pill-none {
+  background: var(--surface-alt, #f3f4f6);
+  color: var(--text-muted);
+  border: 1px solid var(--border) !important;
+  cursor: default;
+  box-shadow: none;
+  font-weight: 500;
+}
+.spoc-pill-none:hover { transform: none; box-shadow: none; }
+
+/* Badge legend below recent circulars table */
+.spoc-badge-legend {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  padding: 10px 16px;
+  border-top: 1px solid var(--border-light);
+  background: var(--surface-alt, #f9fafb);
+}
+.spoc-legend-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted);
+  margin-right: 4px;
+}
+
+/* Withdrawn circular badge */
+.circ-withdrawn-badge {
+  display: inline-block;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  padding: 2px 7px;
+  border-radius: 4px;
+  background: #fef3f2;
+  color: #b91c1c;
+  border: 1px solid #fecaca;
+  margin-left: 6px;
+  vertical-align: middle;
+  flex-shrink: 0;
+}
+
+/* Withdrawn row tint in tables */
+tr.circ-row-withdrawn {
+  background: #fff7f7 !important;
+}
+tr.circ-row-withdrawn:hover {
+  background: #fef2f2 !important;
+}
+
 /* ============================================================
    SPOC DASHBOARD
    ============================================================ */

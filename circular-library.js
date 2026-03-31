@@ -320,32 +320,13 @@ function dueDateBadge(dateStr) {
    PDF VIEWER
    ================================================================ */
 function openPDFViewer(pdfFile, circularId, circularTitle) {
-  const existing = document.getElementById('pdf-viewer-overlay');
-  if (existing) existing.remove();
+  const url = './RBI Master Circular.pdf';
+  const win = window.open(encodeURI(url), '_blank');
 
-  const overlay = document.createElement('div');
-  overlay.id = 'pdf-viewer-overlay';
-  overlay.innerHTML = `
-    <div id="pdf-viewer-box">
-      <div id="pdf-viewer-header">
-        <div class="pdf-viewer-title">
-          <div class="pdf-icon-badge">PDF</div>
-          <div class="pdf-title-text">
-            <div class="pdf-doc-name">${circularTitle}</div>
-            <div class="pdf-doc-meta">${circularId} &nbsp;·&nbsp; ${pdfFile}</div>
-          </div>
-        </div>
-        <div class="pdf-viewer-actions">
-          <button class="pdf-action-btn" onclick="dummyDownload('${circularId}')">⬇ &nbsp;Download</button>
-          <button class="pdf-close-btn" title="Close" onclick="closePDFViewer()">✕</button>
-        </div>
-      </div>
-      <iframe id="pdf-viewer-frame"
-        src="${pdfFile}#toolbar=1&navpanes=0&view=FitH"
-        title="Circular Document Viewer">
-      </iframe>
-    </div>
-  `;
+  if (win) {
+    win.onload = () => win.print();
+  }
+
 
   overlay.addEventListener('click', e => { if (e.target === overlay) closePDFViewer(); });
   document._pdfEscListener = e => { if (e.key === 'Escape') closePDFViewer(); };
@@ -355,17 +336,9 @@ function openPDFViewer(pdfFile, circularId, circularTitle) {
 
 function closePDFViewer() {
   const overlay = document.getElementById('pdf-viewer-overlay');
-  if (overlay) {
-    overlay.style.opacity = '0';
-    overlay.style.transition = 'opacity 0.2s';
-    setTimeout(() => overlay.remove(), 200);
-  }
-  if (document._pdfEscListener) {
-    document.removeEventListener('keydown', document._pdfEscListener);
-    delete document._pdfEscListener;
-  }
+  if (overlay) overlay.remove();
+  document.removeEventListener('keydown', document._pdfEscListener);
 }
-
 function dummyDownload(circularId) {
   const toast = document.createElement('div');
   toast.className = 'cms-toast';
@@ -410,7 +383,7 @@ function openCircularScreen(circularId) {
       </div>
       <div style="display:flex;gap:8px;flex-shrink:0">
         <button class="btn btn-ghost btn-sm"
-          onclick="openPDFViewer('RBI_Master_Circular.pdf','${circular.id}','${safeTitleAttr}')">
+          onclick="openPDFViewer('RBI Master Circular.pdf','${circular.id}','${safeTitleAttr}')">
           👁 &nbsp;View PDF
         </button>
         <button class="btn btn-ghost btn-sm" onclick="dummyDownload('${circular.id}')">

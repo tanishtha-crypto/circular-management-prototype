@@ -1,113 +1,69 @@
 /**
- * orgProfile.js
- * Self-contained Org Profile module for CMS.
+ * orgProfile.js  (v3 — enhanced UI)
  *
  * DEPENDENCIES (must exist on window before this script runs):
- *   - OP               : org profile state object          (from mod-data)
- *   - ORG_BASIC        : simple org summary object         (from mod-data)
- *   - WZ_STEPS         : wizard step definitions array     (defined below, exported)
- *   - toast(msg, type) : toast utility                     (from mod-utils)
- *   - closeModal(id)   : modal close utility               (from mod-utils)
- *
- * EXPOSES on window:
- *   WZ_IDX, WZ_STEPS
- *   openProfileWizard(startStep), closeProfileWizard()
- *   wzNext(), wzPrev(), wzGoto(i)
- *   calcCompletion(), COMPLETION_STEPS
- *   renderOrgProfile()
- *   refreshSidebarSteps()
- *   openAddLocationModal(), saveLocation(), removeLocation(i)
- *   openAddEntityModal(),   saveLegalEntity(), removeLegalEntity(i)
- *   addDepartment(), quickAddDept(el, name), removeDept(i)
- *   addDivision(), removeDivision(i)
- *   opSel, opSelChipSingle, opSelChipDeep
- *   opToggleArr, opToggleDeepArr
- *   opYN, opYNDeep
+ *   - OP               : org profile state object
+ *   - ORG_BASIC        : simple org summary object
+ *   - toast(msg, type) : toast utility
+ *   - closeModal(id)   : modal close utility
  */
 
 (function (global) {
   "use strict";
 
   // ─────────────────────────────────────────────
-  // STEP DEFINITIONS
-  // ─────────────────────────────────────────────
-
-  const WZ_STEPS = [
-    { id: "identity",   label: "Basic Information",   icon: "🏦" },
-    { id: "entities",   label: "Entities",   icon: "🏢" },
-    { id: "locations",  label: "Locations",  icon: "📍" },
-    { id: "regulatory", label: "Regulatory", icon: "🏛" },
-    { id: "activities", label: "Activities", icon: "⚡" },
-    { id: "products",   label: "Products",   icon: "📦" },
-    { id: "deepdive",   label: "Deep Dive",  icon: "🔍" },
-    { id: "risk",       label: "Risk",       icon: "⚠" },
-    { id: "context",    label: "Context",    icon: "📝" },
-  ];
-
-  const WZ_IDX = {
-    identity: 0, entities: 1, locations: 2 , regulatory: 3,
-    activities: 4, products: 5, deepdive: 6, risk: 7, context: 8,
-  };
-
-  // ─────────────────────────────────────────────
   // COMPLETION
   // ─────────────────────────────────────────────
-
-  const COMPLETION_STEPS = [
-    { label: "Identity",   check: () => !!(OP.legalName || OP.regName) },
-    { label: "Regulatory", check: () => !!OP.regulator },
-    { label: "Activities", check: () => OP.businessLines && OP.businessLines.length > 0 },
-    { label: "Products",   check: () => OP.products && OP.products.length > 0 },
-    { label: "Deep Dive",  check: () => Object.values(OP.deepDive).some(v => v && (Array.isArray(v) ? v.length > 0 : v !== "")) },
-    { label: "Locations",  check: () => OP.locations && OP.locations.length > 0 },
-    { label: "Entities",   check: () => true }, // optional
-    { label: "Risk",       check: () => !!OP.riskAppetite },
-    { label: "Context",    check: () => !!OP.bizModelDesc },
-  ];
 
   function calcCompletion() {
     const checks = [
       OP.legalName || OP.regName,
+      OP.orgType,
+      OP.industry,
       OP.regulator,
-      OP.businessLines && OP.businessLines.length > 0,
-      OP.products && OP.products.length > 0,
-      Object.values(OP.deepDive).some(v => v && v.length > 0),
+      OP.businessScale,
       OP.locations && OP.locations.length > 0,
-      OP.riskAppetite,
-      OP.bizModelDesc,
+      OP.panNo || OP.cin,
+      OP.registeredAddress,
     ];
     return Math.round((checks.filter(Boolean).length / checks.length) * 100);
   }
 
   // ─────────────────────────────────────────────
-  // SIDEBAR STEP DOTS
+  // ENTITY DETAIL COMPLETION
+  // ─────────────────────────────────────────────
+
+  const ENTITY_DETAIL_FIELDS = [
+    { key: "cin",          label: "CIN" },
+    { key: "pan",          label: "PAN" },
+    { key: "gstin",        label: "GSTIN" },
+    { key: "address",      label: "Address" },
+    { key: "employeeSize", label: "Employee Size" },
+    { key: "licenseNo",    label: "License No." },
+  ];
+
+  function entityCompletion(e) {
+    const filled = ENTITY_DETAIL_FIELDS.filter(f => e[f.key] && String(e[f.key]).trim()).length;
+    return { filled, total: ENTITY_DETAIL_FIELDS.length };
+  }
+
+  function entityStatusBadge(e) {
+    const { filled, total } = entityCompletion(e);
+    const pct = filled / total;
+    if (pct >= 0.8) return { dot: "✓", label: "Complete",    cls: "ent-badge-green", color: "#16a34a" };
+    if (pct >= 0.4) return { dot: "◐", label: "In Progress", cls: "ent-badge-amber", color: "#d97706" };
+    return              { dot: "○", label: "Incomplete",   cls: "ent-badge-red",   color: "#dc2626" };
+  }
+
+  // ─────────────────────────────────────────────
+  // SIDEBAR
   // ─────────────────────────────────────────────
 
   function refreshSidebarSteps() {
-    const checks = {
-      identity:   () => !!(OP.legalName || OP.regName),
-      locations:  () => OP.locations?.length > 0,
-      entities:   () => OP.legalEntities?.length > 0,
-      regulatory: () => !!OP.regulator,
-      activities: () => OP.businessLines?.length > 0,
-      products:   () => OP.products?.length > 0,
-      deepdive:   () => Object.values(OP.deepDive).some(v => v && (Array.isArray(v) ? v.length > 0 : v !== "")),
-      risk:       () => !!OP.riskAppetite,
-      context:    () => !!OP.bizModelDesc,
-    };
-
-    Object.entries(checks).forEach(([step, check], i) => {
-      const dot = document.getElementById("dot-" + step);
-      if (!dot) return;
-      const done = OP._profileStarted && check();
-      dot.className = "step-dot " + (done ? "done" : "todo");
-      dot.textContent = done ? "✓" : (i + 1);
-    });
-
     const pct  = calcCompletion();
     const mini = document.getElementById("sb-op-mini");
     if (mini) {
-      mini.style.display = OP._profileStarted ? "block" : "none";
+      mini.style.display = "block";
       document.getElementById("sb-op-mini-pct").textContent  = pct + "%";
       document.getElementById("sb-op-mini-fill").style.width = pct + "%";
       document.getElementById("sb-op-mini-label").textContent =
@@ -116,1314 +72,652 @@
   }
 
   // ─────────────────────────────────────────────
-  // ORG PROFILE VIEW RENDER
+  // MAIN RENDER
   // ─────────────────────────────────────────────
-
-  function opRow(l, v) {
-    return `<div style="display:flex;justify-content:space-between;font-size:12.5px;padding:3px 0;border-bottom:1px solid #f8fafc">
-      <span style="color:var(--text3);font-weight:600">${l}</span>
-      <span style="font-weight:600">${v}</span>
-    </div>`;
-  }
 
   function renderOrgProfile() {
-    const pct   = calcCompletion();
-    const banner = document.getElementById("op-incomplete-banner");
-    const nudge  = document.getElementById("dash-profile-nudge");
+    const root = document.getElementById("op-view-mode");
+    if (!root) return;
+    root.style.display = "block";
 
-    document.getElementById("op-view-mode").style.display = "block";
+    const pct = calcCompletion();
 
-    // Banner
-    if (pct < 80) {
-      banner.style.display = "flex";
-      if (nudge) nudge.style.display = "flex";
+    root.innerHTML = `
+      <div class="op3-wrap">
 
-      if (!OP._profileStarted) {
-        document.getElementById("pib-title").textContent = "Set Up Your Organization Profile";
-        document.getElementById("pib-sub").textContent   =
-          "A complete profile powers the AI applicability engine — filtering circulars by your locations, business lines, legal entities and risk profile. Takes about 10–15 minutes.";
-        document.getElementById("pib-cta").textContent   = "🚀 Start Setup";
-      } else {
-        document.getElementById("pib-title").textContent = "Complete Your Organization Profile";
-        document.getElementById("pib-sub").textContent   =
-          "Your profile is partially complete. Finish the remaining sections to enable precise AI-powered applicability analysis.";
-        document.getElementById("pib-cta").textContent   = "Continue Setup →";
-      }
-
-      document.getElementById("pib-pct-label").textContent = pct + "%";
-      document.getElementById("pib-bar-fill").style.width   = pct + "%";
-      document.getElementById("pib-steps").innerHTML = COMPLETION_STEPS.map(s =>
-        `<span class="pib-step ${s.check() ? "done" : "todo"}">${s.check() ? "✓" : "✗"} ${s.label}</span>`
-      ).join("");
-    } else {
-      banner.style.display = "none";
-      if (nudge) nudge.style.display = "none";
-    }
-
-    // Completion badge
-    document.getElementById("op-pct").textContent = pct + "%";
-    const badge = document.getElementById("op-completion-badge");
-    if (pct >= 80) {
-      badge.style.cssText = "display:flex;align-items:center;gap:6px;background:#f0fdf4;border:1px solid #86efac;border-radius:8px;padding:6px 12px;font-size:12px;font-weight:700;color:#166534";
-      badge.innerHTML = "✓ Profile " + pct + "% complete";
-    } else {
-      badge.style.cssText = "display:flex;align-items:center;gap:6px;background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:6px 12px;font-size:12px;font-weight:700;color:#854d0e;cursor:pointer";
-      badge.innerHTML = "⚠ Profile " + pct + "% — Update now";
-    }
-
-    // Status chip
-    const statusChip = document.getElementById("op-status-chip");
-    const updLabel   = document.getElementById("op-updated-label");
-    if (pct >= 80) {
-      statusChip.className = "chip ch-active"; statusChip.textContent = "Active";
-      updLabel.textContent = "Profile updated today";
-    } else if (OP._profileStarted) {
-      statusChip.className = "chip ch-pending"; statusChip.textContent = "In Progress";
-      updLabel.textContent = "Setup in progress";
-    } else {
-      statusChip.className = "chip ch-inactive"; statusChip.textContent = "Not Set Up";
-      updLabel.textContent = "Not yet configured";
-    }
-
-    // Header
-    const name = OP.legalName || OP.regName || "—";
-    const hq   = (OP.locations || []).find(l => l.type && l.type.includes("HQ")) || OP.locations[0] || null;
-
-    document.getElementById("op-name").textContent = name;
-    document.getElementById("op-industry").textContent = OP._profileStarted
-      ? [OP.industry, OP.regulator ? OP.regulator + " Regulated" : "", hq?.city].filter(Boolean).join(" · ") || "—"
-      : "Complete your profile to populate this section";
-    document.getElementById("op-tags").innerHTML = OP._profileStarted
-      ? [OP.orgType, OP.regulator, OP.listed === "Yes" ? "Listed" : OP.listed === "No" ? "Unlisted" : ""]
-          .filter(Boolean).map(t => `<span class="chip ch-co" style="font-size:10px">${t}</span>`).join("")
-      : "";
-
-    // Basic grid
-    const fields = [
-      ["Industry",       OP.industry || "Banking"],
-      ["Org Type",       OP.orgType  || "HDFC"],
-      ["PAN / CIN",      OP.panNo || OP.cin || "GFG78643NN"],
-      ["Regulator",      OP.regulator || "RBI"],
-      ["HQ Address",     hq ? `${hq.address || ""} ${hq.city || ""}`.trim() || "Mumbai" : "—"],
-      ["State",          hq?.state || "—"],
-      ["Locations",      OP.locations.length ? OP.locations.length + " location(s)" : "Mumbai"],
-      ["Legal Entities", OP.legalEntities.length ? OP.legalEntities.length + " entit" + (OP.legalEntities.length === 1 ? "y" : "ies") : "3"],
-    ];
-    document.getElementById("org-profile-grid").innerHTML = fields.map(([l, v]) =>
-      `<div class="op-item"><span class="op-lbl">${l}</span><span class="op-val">${v}</span></div>`
-    ).join("");
-
-    // Section cards
-    document.getElementById("op-section-cards").innerHTML = `
-      <div class="op-sec-card">
-        <div class="op-sec-hd">
-          <div class="op-sec-title">📊 Business Lines</div>
-          <button class="op-sec-edit" onclick="openProfileWizard(WZ_IDX.activities)">Edit →</button>
-        </div>
-        <div>${(OP.businessLines || []).map(b => `<span class="op-tag">${b}</span>`).join("")
-          || '<span style="color:var(--text3);font-size:12px">Not set — click Edit to add</span>'}</div>
-      </div>
-
-      <div class="op-sec-card">
-        <div class="op-sec-hd">
-          <div class="op-sec-title">📍 Locations (${OP.locations.length})</div>
-          <button class="op-sec-edit" onclick="openProfileWizard(WZ_IDX.locations)">Edit →</button>
-        </div>
-        ${OP.locations.length
-          ? OP.locations.slice(0, 3).map(l => `
-            <div style="display:flex;justify-content:space-between;align-items:center;font-size:12.5px;padding:5px 0;border-bottom:1px solid #f8fafc">
-              <div>
-                <span style="font-weight:700">${l.name}</span>
-                <span style="font-size:10px;font-weight:700;padding:1px 7px;border-radius:99px;background:#f1f5f9;color:#64748b;margin-left:5px">${l.type}</span>
-              </div>
-              <span style="color:var(--text3);font-size:11px">${l.city || ""}${l.state ? ", " + l.state : ""}</span>
-            </div>`).join("") +
-            (OP.locations.length > 3 ? `<div style="font-size:11px;color:var(--text3);margin-top:6px">+${OP.locations.length - 3} more</div>` : "")
-          : '<span style="color:var(--text3);font-size:12px">No locations added — click Edit to add</span>'}
-      </div>
-
-      <div class="op-sec-card">
-        <div class="op-sec-hd">
-          <div class="op-sec-title">🏢 Legal Entities (${OP.legalEntities.length})</div>
-          <button class="op-sec-edit" onclick="openProfileWizard(WZ_IDX.entities)">Edit →</button>
-        </div>
-        ${OP.legalEntities.length
-          ? OP.legalEntities.slice(0, 3).map(e => `
-            <div style="display:flex;justify-content:space-between;align-items:center;font-size:12.5px;padding:5px 0;border-bottom:1px solid #f8fafc">
-              <span style="font-weight:700">${e.name}</span>
-              <span style="color:var(--text3);font-size:11px">${e.type}${e.stake ? " · " + e.stake + "%" : ""}</span>
-            </div>`).join("") +
-            (OP.legalEntities.length > 3 ? `<div style="font-size:11px;color:var(--text3);margin-top:6px">+${OP.legalEntities.length - 3} more</div>` : "")
-          : '<span style="color:var(--text3);font-size:12px">No entities added — click Edit to add</span>'}
-      </div>
-
-      <div class="op-sec-card">
-        <div class="op-sec-hd">
-          <div class="op-sec-title">⚠ Risk Profile</div>
-          <button class="op-sec-edit" onclick="openProfileWizard(WZ_IDX.risk)">Edit →</button>
-        </div>
-        <div style="display:flex;flex-direction:column;gap:5px">
-          ${opRow("Risk Appetite",   OP.riskAppetite  || "—")}
-          ${opRow("Last Audit",      OP.lastAudit     || "—")}
-          ${opRow("KYC Level",       OP.kycLevel      || "—")}
-          ${opRow("Board Committee", OP.boardCommittee || "—")}
-        </div>
-      </div>`;
-
-    // Topbar subtitle
-    if (name !== "—") {
-      const sub = document.getElementById("topbar-org-sub");
-      if (sub) sub.textContent = `${name} · ${OP.regulator || "—"} Regulated · ${hq?.city || "India"}`;
-    }
-  }
-
-  // ─────────────────────────────────────────────
-  // WIZARD STEP RENDERERS
-  // ─────────────────────────────────────────────
-
-  function wzStepIdentity() {
-    return `
-    <div class="wz-card">
-      <div class="wz-card-title">🏦 Legal & Registered Name</div>
-      <div class="wz-card-sub">Exact names as per regulatory filings and MCA records.</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
-        <div class="fg" style="margin:0"><label class="fg-lbl">Legal Name of Organization</label>
-          <input class="fg-input" id="op-legal-name" value="${OP.legalName}" placeholder="As per regulator records"></div>
-        <div class="fg" style="margin:0"><label class="fg-lbl">Registered Company Name (MCA)</label>
-          <input class="fg-input" id="op-reg-name" value="${OP.regName}" placeholder="As per incorporation"></div>
-      </div>
-    </div>
-
-    <div class="wz-card">
-      <div class="wz-card-title">🏷 Organization Type & Industry</div>
-      <div class="wz-card-sub">Determines the base set of applicable regulatory circulars.</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px">
-        <div class="fg" style="margin:0"><label class="fg-lbl">Organization Type</label>
-          <select class="fg-input" onchange="OP.orgType=this.value">
-            ${["","Bank","NBFC","FinTech","Insurance Company","Mutual Fund / AMC","Stock Broker","Depository Participant","Payment Aggregator","Corporate","Government / PSU","Other"]
-              .map(t => `<option value="${t}" ${OP.orgType === t ? "selected" : ""}>${t || "Select type"}</option>`).join("")}
-          </select></div>
-        <div class="fg" style="margin:0"><label class="fg-lbl">Industry</label>
-          <select class="fg-input" onchange="OP.industry=this.value">
-            ${["","Banking & Financial Services","Insurance","Capital Markets","Payments & Fintech","Asset Management","Microfinance","Housing Finance","Other"]
-              .map(t => `<option value="${t}" ${OP.industry === t ? "selected" : ""}>${t || "Select industry"}</option>`).join("")}
-          </select></div>
-        <div class="fg" style="margin:0"><label class="fg-lbl">Sub-sector</label>
-          <select class="fg-input" onchange="OP.subSector=this.value">
-            ${["","Scheduled Commercial Bank","Non-Scheduled Bank","Private Sector Bank","Public Sector Bank","Small Finance Bank","Payment Bank","NBFC-MFI","NBFC-ICC","NBFC-HFC","Life Insurer","General Insurer","Other"]
-              .map(t => `<option value="${t}" ${OP.subSector === t ? "selected" : ""}>${t || "Select sub-sector"}</option>`).join("")}
-          </select></div>
-      </div>
-    </div>
-
-    <div class="wz-card">
-  <div class="wz-card-title">📞 Contact & Address</div>
-  <div class="wz-card-sub">Primary contact details and registered addresses of the organization.</div>
-  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px">
-    <div class="fg" style="margin:0"><label class="fg-lbl">Brand / Trade Name</label>
-      <input class="fg-input" value="${OP.brandName}" onchange="OP.brandName=this.value" placeholder="e.g. HDFC Bank"></div>
-    <div class="fg" style="margin:0"><label class="fg-lbl">Official Email</label>
-      <input class="fg-input" type="email" value="${OP.officialEmail}" onchange="OP.officialEmail=this.value" placeholder="e.g. contact@hdfc.com"></div>
-    <div class="fg" style="margin:0"><label class="fg-lbl">Official Phone</label>
-      <input class="fg-input" type="tel" value="${OP.officialPhone}" onchange="OP.officialPhone=this.value" placeholder="e.g. +91 9999999999"></div>
-  </div>
-  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-top:14px">
-    <div class="fg" style="margin:0"><label class="fg-lbl">Organization Website</label>
-      <input class="fg-input" type="url" value="${OP.website}" onchange="OP.website=this.value" placeholder="e.g. https://www.hdfc.com"></div>
-    <div class="fg" style="margin:0"><label class="fg-lbl">Registered Address</label>
-      <textarea class="fg-input" rows="2" onchange="OP.registeredAddress=this.value" placeholder="As per MCA / regulator records">${OP.registeredAddress}</textarea></div>
-    <div class="fg" style="margin:0"><label class="fg-lbl">Corporate / Operational Address</label>
-      <textarea class="fg-input" rows="2" onchange="OP.corporateAddress=this.value" placeholder="If different from registered">${OP.corporateAddress}</textarea></div>
-  </div>
-</div>
-
-
-<div class="wz-card">
-  <div class="wz-card-title">🪪 Additional Identity & Compliance Numbers</div>
-  <div class="wz-card-sub">Required for regulatory verification and circular applicability matching.</div>
-  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px">
-    <div class="fg" style="margin:0"><label class="fg-lbl">Legal Entity Type</label>
-      <select class="fg-input" onchange="OP.legalEntityType=this.value">
-        ${["","Public Limited","Private Limited","LLP","Co-operative Society","Trust","Partnership","Sole Proprietorship","Other"]
-          .map(t => `<option value="${t}" ${OP.legalEntityType === t ? "selected" : ""}>${t || "Select type"}</option>`).join("")}
-      </select></div>
-    <div class="fg" style="margin:0"><label class="fg-lbl">Date of Incorporation</label>
-      <input class="fg-input" type="date" value="${OP.incorporationDate}" onchange="OP.incorporationDate=this.value"></div>
-    <div class="fg" style="margin:0"><label class="fg-lbl">Operational Since</label>
-      <input class="fg-input" type="date" value="${OP.operationalSince}" onchange="OP.operationalSince=this.value" placeholder="When operations actually started"></div>
-  </div>
-  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-top:14px">
-    <div class="fg" style="margin:0"><label class="fg-lbl">LEI Number</label>
-      <input class="fg-input" value="${OP.lei}" onchange="OP.lei=this.value" placeholder="20-character LEI code"></div>
-    <div class="fg" style="margin:0"><label class="fg-lbl">GST Number</label>
-      <input class="fg-input" value="${OP.gst}" onchange="OP.gst=this.value" placeholder="e.g. 27AAACH2702H1Z5"></div>
-    <div class="fg" style="margin:0"><label class="fg-lbl">TAN Number</label>
-      <input class="fg-input" value="${OP.tan}" onchange="OP.tan=this.value" placeholder="e.g. MUMH12345A"></div>
-  </div>
-</div>
-
-
-    <div class="wz-card">
-      <div class="wz-card-title">📋 Incorporation & Identity Numbers</div>
-      <div class="wz-card-sub">Used for license validation and regulatory circular lookup.</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px">
-        <div class="fg" style="margin:0"><label class="fg-lbl">CIN / Registration ID</label>
-          <input class="fg-input" id="op-cin" value="${OP.cin}" placeholder="e.g. L65920MH1994PLC080618"></div>
-        <div class="fg" style="margin:0"><label class="fg-lbl">Year of Incorporation</label>
-          <input class="fg-input" type="number" min="1800" max="2025" value="${OP.incorporated}" onchange="OP.incorporated=this.value" placeholder="e.g. 1994"></div>
-        <div class="fg" style="margin:0"><label class="fg-lbl">PAN Number</label>
-          <input class="fg-input" id="op-pan-wz" value="${OP.panNo}" placeholder="e.g. AAACH2702H"></div>
-      </div>
-    </div>
-
-${OP.listed === "Yes" ? `
-<div class="wz-card">
-  <div class="wz-card-title">📈 Listed Company Details</div>
-  <div class="wz-card-sub">Stock exchange details for listed organizations.</div>
-  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px">
-    <div class="fg" style="margin:0"><label class="fg-lbl">Stock Exchange</label>
-      <select class="fg-input" onchange="OP.stockExchange=this.value">
-        ${["","NSE","BSE","NSE & BSE","Other"]
-          .map(t => `<option value="${t}" ${OP.stockExchange === t ? "selected" : ""}>${t || "Select exchange"}</option>`).join("")}
-      </select></div>
-    <div class="fg" style="margin:0"><label class="fg-lbl">ISIN</label>
-      <input class="fg-input" value="${OP.isin}" onchange="OP.isin=this.value" placeholder="e.g. INE040A01034"></div>
-    <div class="fg" style="margin:0"><label class="fg-lbl">Ticker / Scrip Code</label>
-      <input class="fg-input" value="${OP.ticker}" onchange="OP.ticker=this.value" placeholder="e.g. HDFCBANK"></div>
-  </div>
-</div>` : ""}
-
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
-      <div class="wz-card" style="margin:0">
-        <div class="wz-card-title">📊 Is the company publicly listed?</div>
-        <div class="yn-pair" style="margin-top:10px">
-          <button class="yn-btn ${OP.listed === "Yes" ? "sel-yes" : ""}" onclick="opYN(this,'listed','Yes')">✓ Yes — Listed</button>
-          <button class="yn-btn ${OP.listed === "No" ? "sel-no" : ""}" onclick="opYN(this,'listed','No')">✗ No — Unlisted</button>
-        </div>
-      </div>
-      <div class="wz-card" style="margin:0">
-        <div class="wz-card-title">🏢 Part of a Parent Group?</div>
-        <div class="yn-pair" style="margin-top:10px">
-          <button class="yn-btn ${OP.hasParent === "Yes" ? "sel-yes" : ""}" onclick="opYN(this,'hasParent','Yes')">✓ Yes</button>
-          <button class="yn-btn ${OP.hasParent === "No" ? "sel-no" : ""}" onclick="opYN(this,'hasParent','No')">✗ No — Standalone</button>
-        </div>
-        ${OP.hasParent === "Yes"
-          ? `<input class="fg-input" style="margin-top:10px" placeholder="Parent organization name" value="${OP.parentName}" onchange="OP.parentName=this.value">`
-          : ""}
-      </div>
-    </div>`;
-  }
-
-  function wzStepRegulatory() {
-    const regulators = ["RBI","SEBI","IRDAI","MCA","PFRDA","GST Council","TRAI","IFSCA","NHB","NABARD","FIU-IND","CCI","NCLT","ED / FEMA"];
-    const sros       = ["BSE","NSE","AMFI","IAMAI","NASSCOM","IBA","FIDC","MFIN","Sa-Dhan"];
-    const entityClasses = ["Scheduled Commercial Bank","Non-Scheduled Bank","NBFC – Deposit Taking","NBFC – Non-Deposit Taking","Systemically Important NBFC","Payment System Operator","Insurance Company (Life)","Insurance Company (Non-Life)","Registered Investment Adviser","Stock Broker","Depository Participant","Other"];
-    return `
-    <div class="wz-card">
-      <div class="wz-card-title">🏛 Regulatory Authorities</div>
-      <div class="wz-card-sub">Select all regulators that govern your organization.</div>
-      <div class="opt-grid">${regulators.map(r =>
-        `<div class="opt-chip ${(OP.regulators || []).includes(r) ? "sel" : ""}" onclick="opToggleArr(this,'regulators','${r}')">${r}</div>`
-      ).join("")}</div>
-    </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
-      <div class="wz-card" style="margin:0">
-        <div class="wz-card-title">⭐ Primary Regulator</div>
-        <select class="fg-input" style="margin-top:8px" onchange="OP.regulator=this.value">
-          ${["", ...regulators].map(r => `<option ${OP.regulator === r ? "selected" : ""}>${r || "Select primary regulator"}</option>`).join("")}
-        </select>
-      </div>
-      <div class="wz-card" style="margin:0">
-        <div class="wz-card-title">📋 Regulated Entity Classification</div>
-        <select class="fg-input" style="margin-top:8px" onchange="OP.entityClass=this.value">
-          ${["", ...entityClasses].map(c => `<option ${OP.entityClass === c ? "selected" : ""}>${c || "Select classification"}</option>`).join("")}
-        </select>
-      </div>
-    </div>
-    <div class="wz-card">
-      <div class="wz-card-title">🤝 Self-Regulatory Organizations (SROs)</div>
-      <div class="opt-grid">${sros.map(s =>
-        `<div class="opt-chip ${(OP.sros || []).includes(s) ? "sel" : ""}" onclick="opToggleArr(this,'sros','${s}')">${s}</div>`
-      ).join("")}</div>
-    </div>
-    <div class="wz-card">
-      <div class="wz-card-title">🔑 Regulatory License Numbers</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
-        ${[["RBI License / Registration No.","rbilicense"],["SEBI Registration No.","sebilicense"],["IRDAI License No.","irdalicense"],["Other License","otherlicense"]]
-          .map(([l, k]) => `
-          <div class="fg" style="margin:0"><label class="fg-lbl">${l}</label>
-            <input class="fg-input" value="${OP[k] || ""}" onchange="OP['${k}']=this.value" placeholder="License number"></div>`
-          ).join("")}
-      </div>
-    </div>
-    
-    <div class="wz-card">
-  <div class="wz-card-title">📅 License Details</div>
-  <div class="wz-card-sub">License validity and regulatory category for accurate circular matching.</div>
-  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px">
-    <div class="fg" style="margin:0"><label class="fg-lbl">License Issue Date</label>
-      <input class="fg-input" type="date" value="${OP.licenseIssueDate || ''}" onchange="OP.licenseIssueDate=this.value"></div>
-    <div class="fg" style="margin:0"><label class="fg-lbl">License Expiry Date</label>
-      <input class="fg-input" type="date" value="${OP.licenseExpiryDate || ''}" onchange="OP.licenseExpiryDate=this.value"></div>
-    <div class="fg" style="margin:0"><label class="fg-lbl">License Status</label>
-      <select class="fg-input" onchange="OP.licenseStatus=this.value">
-        ${["","Active","Suspended","Under Renewal","Expired","Cancelled"]
-          .map(s => `<option value="${s}" ${OP.licenseStatus === s ? "selected" : ""}>${s || "Select status"}</option>`).join("")}
-      </select></div>
-  </div>
-  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-top:14px">
-    <div class="fg" style="margin:0"><label class="fg-lbl">Regulatory Category</label>
-      <select class="fg-input" onchange="OP.regulatoryCategory=this.value">
-        ${["","NBFC-MFI","NBFC-HFC","NBFC-ICC","NBFC-P2P","NBFC-AA","NBFC-Factor","Core Investment Company","Infrastructure Finance Company","Micro Finance Institution","Small Finance Bank","Payment Bank","Prepaid Payment Instrument","Other"]
-          .map(c => `<option value="${c}" ${OP.regulatoryCategory === c ? "selected" : ""}>${c || "Select category"}</option>`).join("")}
-      </select></div>
-    <div class="fg" style="margin:0"><label class="fg-lbl">Date of First Regulation</label>
-      <input class="fg-input" type="date" value="${OP.firstRegulationDate || ''}" onchange="OP.firstRegulationDate=this.value"></div>
-    <div class="fg" style="margin:0"><label class="fg-lbl">Regulatory Zone / Region</label>
-      <select class="fg-input" onchange="OP.regulatoryZone=this.value">
-        ${["","North","South","East","West","Central","North-East","Pan India"]
-          .map(z => `<option value="${z}" ${OP.regulatoryZone === z ? "selected" : ""}>${z || "Select zone"}</option>`).join("")}
-      </select></div>
-  </div>
-</div>
-
-<div class="wz-card">
-  <div class="wz-card-title">🚦 Regulatory Status Flags</div>
-  <div class="wz-card-sub">Special regulatory designations that determine applicability of specific circulars.</div>
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
-    <div class="fg" style="margin:0"><label class="fg-lbl">Basel Category</label>
-      <select class="fg-input" onchange="OP.baselCategory=this.value">
-        ${["","Basel II","Basel III","Not Applicable"]
-          .map(b => `<option value="${b}" ${OP.baselCategory === b ? "selected" : ""}>${b || "Select category"}</option>`).join("")}
-      </select></div>
-    <div class="fg" style="margin:0"><label class="fg-lbl">CRAR / Capital Adequacy Ratio (%)</label>
-      <input class="fg-input" type="number" min="0" max="100" step="0.01" value="${OP.crar || ''}" onchange="OP.crar=this.value" placeholder="e.g. 15.5"></div>
-  </div>
-  <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:14px;margin-top:14px">
-    <div>
-      <div class="fg-lbl" style="margin-bottom:6px">Systemically Important (SI)</div>
-      <div class="yn-pair">
-        <button class="yn-btn ${OP.isSI === 'Yes' ? 'sel-yes' : ''}" onclick="opYN(this,'isSI','Yes')">✓ Yes</button>
-        <button class="yn-btn ${OP.isSI === 'No' ? 'sel-no' : ''}" onclick="opYN(this,'isSI','No')">✗ No</button>
-      </div>
-    </div>
-    <div>
-      <div class="fg-lbl" style="margin-bottom:6px">D-SIB Status</div>
-      <div class="yn-pair">
-        <button class="yn-btn ${OP.isDSIB === 'Yes' ? 'sel-yes' : ''}" onclick="opYN(this,'isDSIB','Yes')">✓ Yes</button>
-        <button class="yn-btn ${OP.isDSIB === 'No' ? 'sel-no' : ''}" onclick="opYN(this,'isDSIB','No')">✗ No</button>
-      </div>
-    </div>
-    <div>
-      <div class="fg-lbl" style="margin-bottom:6px">Under PCA</div>
-      <div class="yn-pair">
-        <button class="yn-btn ${OP.underPCA === 'Yes' ? 'sel-yes' : ''}" onclick="opYN(this,'underPCA','Yes')">✓ Yes</button>
-        <button class="yn-btn ${OP.underPCA === 'No' ? 'sel-no' : ''}" onclick="opYN(this,'underPCA','No')">✗ No</button>
-      </div>
-    </div>
-    <div>
-      <div class="fg-lbl" style="margin-bottom:6px">Multi-Regulator</div>
-      <div class="yn-pair">
-        <button class="yn-btn ${(OP.regulators||[]).length > 1 ? 'sel-yes' : ''}" onclick="opYN(this,'multiRegulator','Yes')">✓ Yes</button>
-        <button class="yn-btn ${OP.multiRegulator === 'No' ? 'sel-no' : ''}" onclick="opYN(this,'multiRegulator','No')">✗ No</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-
-    `;
-  }
-
-  function wzStepActivities() {
-    const coreActivities = ["Deposit Taking","Lending / Credit","Investment Advisory","Portfolio Management","Payment Processing","Insurance Underwriting","Mutual Fund Distribution","Forex / Cross-border","Trade Finance","Wealth Management","Asset Reconstruction","Factoring / Invoice Discounting","Micro-lending / Microfinance","Other"];
-    const serviceChecks  = [
-      ["Provide financial services overall?","financialServices"],
-      ["Provide lending / credit services?","lendingServices"],
-      ["Provide investment advisory services?","investmentAdvisory"],
-      ["Provide payment services?","paymentServices"],
-      ["Provide insurance services?","insuranceServices"],
-      ["Provide fintech / digital platform services?","fintechServices"],
-      ["Operate marketplace / intermediary platforms?","marketplaceOps"],
-      ["Provide custodial or trust services?","custodialServices"],
-      ["Provide foreign exchange services?","fxServices"],
-      ["Provide trade finance services?","tradeFinanceServices"],
-    ];
-    const bizLines = ["Retail Banking","Corporate Banking","Treasury","Digital Banking","Lending","Cards","Wealth Management","Insurance Distribution","Mutual Fund Dist.","Payment Services","Forex Services","NRI Services","Priority Sector","Correspondent Banking"];
-    return `
-    <div class="wz-card">
-      <div class="wz-card-title">⚡ Core Business Activities</div>
-      <div class="wz-card-sub">Select all primary activities — most critical input for circular matching.</div>
-      <div class="opt-grid">${coreActivities.map(a =>
-        `<div class="opt-chip ${(OP.coreActivities || []).includes(a) ? "sel" : ""}" onclick="opToggleArr(this,'coreActivities','${a}')">${a}</div>`
-      ).join("")}</div>
-    </div>
-    <div class="wz-card">
-      <div class="wz-card-title">💰 Financial Services Checklist</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-        ${serviceChecks.map(([l, k]) => `
-          <div style="background:#f8fafc;border-radius:8px;padding:10px 12px">
-            <div style="font-size:12.5px;font-weight:600;margin-bottom:7px">${l}</div>
-            <div class="yn-pair">
-              <button class="yn-btn ${OP[k] === "Yes" ? "sel-yes" : ""}" onclick="opYN(this,'${k}','Yes')">Yes</button>
-              <button class="yn-btn ${OP[k] === "No" ? "sel-no" : ""}" onclick="opYN(this,'${k}','No')">No</button>
-            </div>
-          </div>`).join("")}
-      </div>
-    </div>
-    <div class="wz-card">
-      <div class="wz-card-title">📊 Business Lines</div>
-      <div class="opt-grid">${bizLines.map(b =>
-        `<div class="opt-chip ${(OP.businessLines || []).includes(b) ? "sel" : ""}" onclick="opToggleArr(this,'businessLines','${b}')">${b}</div>`
-      ).join("")}</div>
-    </div>`;
-  }
-
-  function wzStepProducts() {
-    const products = ["Savings Account","Current Account","Fixed Deposit","Recurring Deposit","Home Loan","Auto Loan","Personal Loan","Business Loan","Credit Card","Debit Card","Prepaid Card","Forex Card","MSME Loan","Gold Loan","Education Loan","NRI Account (NRE/NRO/FCNR)","Mutual Fund","Insurance Policy","Demat Account","Portfolio Management (PMS)","UPI / Mobile Payment","Internet Banking","Mobile Banking App","API Banking","Trade Finance (LC/BG)","Custodial Services","Escrow Services"];
-    const charChecks = [
-      ["Regulated financial products?","hasRegulatedProducts"],
-      ["Digital products / mobile apps?","hasDigitalProducts"],
-      ["Cross-border / international services?","hasCrossBorder"],
-      ["Institutional / corporate clients?","hasInstitutional"],
-      ["Retail / individual customers?","hasRetail"],
-      ["White-label or co-branded products?","hasCoBranded"],
-      ["Embedded finance / BNPL products?","hasBNPL"],
-      ["Third-party distribution channels?","hasThirdPartyDist"],
-    ];
-    return `
-    <div class="wz-card">
-      <div class="wz-card-title">📦 Products & Services Offered</div>
-      <div class="opt-grid">${products.map(p =>
-        `<div class="opt-chip ${(OP.products || []).includes(p) ? "sel" : ""}" onclick="opToggleArr(this,'products','${p}')">${p}</div>`
-      ).join("")}
-      </div>
-      <div style="margin-top:10px;font-size:12px;color:var(--text3)"><strong id="prod-count">${(OP.products || []).length}</strong> products selected</div>
-    </div>
-    <div class="wz-card">
-      <div class="wz-card-title">🌐 Service Characteristics</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-        ${charChecks.map(([l, k]) => `
-          <div style="background:#f8fafc;border-radius:8px;padding:10px 12px">
-            <div style="font-size:12.5px;font-weight:600;margin-bottom:7px">${l}</div>
-            <div class="yn-pair">
-              <button class="yn-btn ${OP[k] === "Yes" ? "sel-yes" : ""}" onclick="opYN(this,'${k}','Yes')">Yes</button>
-              <button class="yn-btn ${OP[k] === "No" ? "sel-no" : ""}" onclick="opYN(this,'${k}','No')">No</button>
-            </div>
-          </div>`).join("")}
-      </div>
-    </div>`;
-  }
-
-  function wzStepDeepDive() {
-   const hasDigi  = true;
-const hasLend  = true;
-const hasCards = true;
-const hasForex = true;
-const hasPay   = true;
-    if (!hasDigi && !hasLend && !hasCards && !hasForex && !hasPay) return `
-      <div class="wz-card"><div style="text-align:center;padding:32px;color:var(--text3)">
-        <div style="font-size:32px;margin-bottom:12px">📊</div>
-        <div style="font-size:14px;font-weight:700;margin-bottom:6px">No deep dive required for your business lines</div>
-        <div style="font-size:13px">Proceed to the next step.</div>
-        <button class="btn btn-ghost btn-sm" style="margin-top:14px" onclick="wzGoto(WZ_IDX.activities)">← Review Business Lines</button>
-      </div></div>`;
-
-    return `
-    ${hasDigi ? `<div class="wz-card">
-      <div class="wz-card-title">💻 Digital Banking — Technology Setup</div>
-      <div class="wz-card-sub">Matches IT governance, cybersecurity and DPDP circulars.</div>
-      <div style="display:flex;flex-direction:column;gap:14px">
-        <div class="fg" style="margin:0"><label class="fg-lbl">Core Banking System (CBS)</label>
-          <select class="fg-input" onchange="OP.deepDive.cbs=this.value">
-            ${["","Finacle","Temenos T24","TCS BaNCS","Oracle FLEXCUBE","Finastra","FIS Profile","In-house","Other"]
-              .map(c => `<option ${OP.deepDive.cbs === c ? "selected" : ""}>${c || "Select CBS"}</option>`).join("")}
-          </select></div>
-        <div><label class="fg-lbl">Cloud Infrastructure</label>
-          <div class="opt-grid" style="margin-top:6px">${["No Cloud","Public Cloud","Private Cloud","Hybrid Cloud","Multi-Cloud"]
-            .map(c => `<div class="opt-chip ${OP.deepDive.cloudUsage === c ? "sel" : ""}" onclick="opSelChipDeep(this,'cloudUsage','${c}')">${c}</div>`).join("")}</div></div>
-        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">
-          ${[["Internet Banking","internetBanking"],["Mobile Banking","mobileBanking"],["API Banking","apiBanking"],["Third-party Outsourcing","outsourcing"],["Overseas Data Center","dataCenter"]]
-            .map(([l, k]) => `
-            <div><div style="font-size:12px;font-weight:700;margin-bottom:6px">${l}</div>
-            <div class="yn-pair">
-              <button class="yn-btn ${OP.deepDive[k] === "Yes" ? "sel-yes" : ""}" onclick="opYNDeep(this,'${k}','Yes')">Yes</button>
-              <button class="yn-btn ${OP.deepDive[k] === "No" ? "sel-no" : ""}" onclick="opYNDeep(this,'${k}','No')">No</button>
-            </div></div>`).join("")}
-        </div>
-      </div>
-    </div>` : ""}
-    ${hasLend ? `<div class="wz-card">
-      <div class="wz-card-title">🏠 Lending — Loan Portfolio</div>
-      <div class="opt-grid" style="margin-bottom:14px">${["Home Loan","Auto Loan","Personal Loan","MSME Loan","Agricultural Loan","Education Loan","Gold Loan","Microfinance","Loan Against Property"]
-        .map(l => `<div class="opt-chip ${(OP.deepDive.loanTypes || []).includes(l) ? "sel" : ""}" onclick="opToggleDeepArr(this,'loanTypes','${l}')">${l}</div>`).join("")}</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-        ${[["Co-lending Arrangements","coLending"],["Priority Sector Lending","prioritySector"],["NBFC Partnership","nbfcPartner"],["Securitisation / ABS","securitisation"]]
-          .map(([l, k]) => `
-          <div><div style="font-size:12px;font-weight:700;margin-bottom:6px">${l}</div>
-          <div class="yn-pair">
-            <button class="yn-btn ${OP.deepDive[k] === "Yes" ? "sel-yes" : ""}" onclick="opYNDeep(this,'${k}','Yes')">Yes</button>
-            <button class="yn-btn ${OP.deepDive[k] === "No" ? "sel-no" : ""}" onclick="opYNDeep(this,'${k}','No')">No</button>
-          </div></div>`).join("")}
-      </div>
-    </div>` : ""}
-    ${hasCards ? `<div class="wz-card">
-      <div class="wz-card-title">💳 Cards — Product Details</div>
-      <div class="opt-grid">${["Credit Card","Debit Card","Prepaid Card","Co-branded Card","Corporate Card","Forex Card"]
-        .map(c => `<div class="opt-chip ${(OP.deepDive.cardTypes || []).includes(c) ? "sel" : ""}" onclick="opToggleDeepArr(this,'cardTypes','${c}')">${c}</div>`).join("")}</div>
-    </div>` : ""}
-    ${hasPay ? `<div class="wz-card">
-      <div class="wz-card-title">⚡ Payment Services — Infrastructure</div>
-      <div class="opt-grid">${["UPI","NACH","BBPS","IMPS","RTGS","NEFT","SWIFT","FASTag","Aadhaar Pay","Payment Gateway"]
-        .map(p => `<div class="opt-chip ${(OP.deepDive.paymentSystems || []).includes(p) ? "sel" : ""}" onclick="opToggleDeepArr(this,'paymentSystems','${p}')">${p}</div>`).join("")}</div>
-    </div>` : ""}
-    ${hasForex ? `<div class="wz-card">
-      <div class="wz-card-title">🌐 Forex & NRI Services</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-        ${[["NRI / FCNR Deposits","nriDeposits"],["Outward Remittances","forex"],["Correspondent Banking","correspondent"],["Trade Finance (LC/BG)","tradefinance"]]
-          .map(([l, k]) => `
-          <div><div style="font-size:12px;font-weight:700;margin-bottom:6px">${l}</div>
-          <div class="yn-pair">
-            <button class="yn-btn ${OP.deepDive[k] === "Yes" ? "sel-yes" : ""}" onclick="opYNDeep(this,'${k}','Yes')">Yes</button>
-            <button class="yn-btn ${OP.deepDive[k] === "No" ? "sel-no" : ""}" onclick="opYNDeep(this,'${k}','No')">No</button>
-          </div></div>`).join("")}
-      </div>
-    </div>` : ""}`;
-  }
-
-  function wzStepLocations() {
-    const locList = OP.locations.length
-      ? OP.locations.map((loc, i) => {
-          const typeBadge = loc.type.includes("HQ") ? "loc-hq" : loc.type.includes("Branch") ? "loc-branch" : "loc-unit";
-          return `<div class="loc-card">
-            <button class="loc-remove" onclick="removeLocation(${i})">✕</button>
-            <div class="loc-card-hd">
-              <span style="font-size:18px">📍</span>
-              <span style="font-size:15px;font-weight:800;color:var(--text)">${loc.name}</span>
-              <span class="loc-type-badge ${typeBadge}">${loc.type}</span>
-            </div>
-            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;font-size:12.5px">
-              <div><div style="color:var(--text3);font-weight:600;font-size:11px;margin-bottom:2px">ADDRESS</div>${loc.address || "—"}</div>
-              <div><div style="color:var(--text3);font-weight:600;font-size:11px;margin-bottom:2px">CITY / STATE</div>${loc.city}, ${loc.state} ${loc.pin ? "— " + loc.pin : ""}</div>
-              <div><div style="color:var(--text3);font-weight:600;font-size:11px;margin-bottom:2px">HEADCOUNT</div>${loc.headcount || "—"}</div>
-            </div>
-            ${loc.departments && loc.departments.length ? `<div style="margin-top:10px"><div style="font-size:11px;font-weight:700;color:var(--text3);margin-bottom:5px">DEPARTMENTS</div><div>${loc.departments.map(d => `<span class="op-tag">${d}</span>`).join("")}</div></div>` : ""}
-            ${loc.entityId ? `<div style="margin-top:8px;font-size:11px;color:var(--text3)">🏢 Entity: <strong>${loc.entityId}</strong></div>` : ""}
-          </div>`;
-        }).join("")
-      : `<div style="border:2px dashed var(--border);border-radius:12px;padding:28px;text-align:center;color:var(--text3);margin-bottom:14px">
-          <div style="font-size:28px;margin-bottom:8px">📍</div>
-          <div style="font-size:13px;font-weight:600;margin-bottom:4px">No locations added yet</div>
-          <div style="font-size:12px">Add your HQ, branches and business units below</div>
-        </div>`;
-
-    const deptList = OP.departments.length
-      ? OP.departments.map((d, i) => `
-        <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:#f8fafc;border-radius:8px;margin-bottom:6px">
-          <div>
-            <div style="font-size:13px;font-weight:700">${d.name}</div>
-            ${d.head ? `<div style="font-size:11px;color:var(--text3)">Head: ${d.head}</div>` : ""}
-            ${d.functions && d.functions.length ? `<div style="margin-top:4px">${d.functions.map(f => `<span class="op-tag">${f}</span>`).join("")}</div>` : ""}
+        <!-- ── IDENTITY SECTION ── -->
+        <div class="op3-section-row">
+          <div class="op3-section-label">
+            <span class="op3-sec-dot"></span>
+            Organization Identity
           </div>
-          <button class="btn btn-danger btn-sm" onclick="removeDept(${i})">✕</button>
-        </div>`).join("")
-      : "";
-
-    return `
-    <div class="wz-card">
-      <div class="wz-card-title">📍 Physical Locations</div>
-      <div class="wz-card-sub">Add all physical locations — HQ, branches, regional offices, and business units.</div>
-      ${locList}
-      <button class="btn btn-ghost" onclick="openAddLocationModal()" style="width:100%;justify-content:center;border-style:dashed">
-        + Add Location / Branch / Unit
-      </button>
-    </div>
-    <div class="wz-card">
-      <div class="wz-card-title">🏗 Departments</div>
-      <div class="wz-card-sub">Define the departments in your organization.</div>
-      ${deptList || `<div style="font-size:13px;color:var(--text3);margin-bottom:10px">No departments added yet</div>`}
-      <div style="display:grid;grid-template-columns:1fr 1fr auto;gap:10px;align-items:end;margin-top:8px">
-        <div class="fg" style="margin:0"><label class="fg-lbl">Department Name</label>
-          <input id="new-dept-name" class="fg-input" placeholder="e.g. IT Compliance, Legal, Risk"></div>
-        <div class="fg" style="margin:0"><label class="fg-lbl">Department Head (optional)</label>
-          <input id="new-dept-head" class="fg-input" placeholder="Name of head"></div>
-        <button class="btn btn-primary" onclick="addDepartment()">+ Add</button>
-      </div>
-      <div style="margin-top:8px">
-        <label class="fg-lbl" style="display:block;margin-bottom:6px">Quick Add Common Departments</label>
-        <div class="opt-grid">
-          ${["IT Compliance","Legal","Risk","Finance","Operations","HR","Audit","Treasury","Technology","Customer Service","Marketing"].map(d =>
-            `<div class="opt-chip ${(OP.departments || []).find(x => x.name === d) ? "sel" : ""}" onclick="quickAddDept(this,'${d}')">${d}</div>`
-          ).join("")}
+          <button class="op3-edit-btn" onclick="openIdentityEdit()">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            Edit Details
+          </button>
         </div>
-      </div>
-    </div>
-    <div class="wz-card">
-      <div class="wz-card-title">🗂 Divisions</div>
-      <div class="wz-card-sub">If your organization has distinct business divisions, add them here.</div>
-      ${OP.divisions.length
-        ? OP.divisions.map((d, i) => `
-          <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:#f8fafc;border-radius:8px;margin-bottom:6px">
-            <div><div style="font-size:13px;font-weight:700">${d.name}</div>
-              ${d.description ? `<div style="font-size:12px;color:var(--text3)">${d.description}</div>` : ""}</div>
-            <button class="btn btn-danger btn-sm" onclick="removeDivision(${i})">✕</button>
-          </div>`).join("")
-        : `<div style="font-size:13px;color:var(--text3);margin-bottom:10px">No divisions added yet</div>`}
-      <div style="display:grid;grid-template-columns:1fr 1fr auto;gap:10px;align-items:end;margin-top:8px">
-        <div class="fg" style="margin:0"><label class="fg-lbl">Division Name</label>
-          <input id="new-div-name" class="fg-input" placeholder="e.g. Retail Division"></div>
-        <div class="fg" style="margin:0"><label class="fg-lbl">Description (optional)</label>
-          <input id="new-div-desc" class="fg-input" placeholder="Brief description"></div>
-        <button class="btn btn-primary" onclick="addDivision()">+ Add</button>
-      </div>
-    </div>`;
-  }
 
-  function wzStepEntities() {
-    const typeMap = {
-      "Wholly Owned Subsidiary": "le-subsidiary",
-      "Joint Venture (JV)": "le-jv",
-      "Associate Company": "le-associate",
-      "Division": "le-division",
-    };
-    const entityList = OP.legalEntities.length
-      ? OP.legalEntities.map((e, i) => {
-          const badgeCls = typeMap[e.type] || "le-subsidiary";
-          return `<div class="le-card">
-            <button class="loc-remove" onclick="removeLegalEntity(${i})">✕</button>
-            <div class="loc-card-hd" style="margin-bottom:12px">
-              <span style="font-size:18px">🏢</span>
-              <span style="font-size:15px;font-weight:800;color:var(--text)">${e.name}</span>
-              <span class="le-type-badge ${badgeCls}">${e.type}</span>
-              ${e.stake ? `<span style="font-size:11px;font-weight:700;color:var(--text3);margin-left:4px">${e.stake}% stake</span>` : ""}
-            </div>
-            <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:10px;font-size:12.5px;margin-bottom:10px">
-              <div><div style="color:var(--text3);font-weight:600;font-size:10px;margin-bottom:2px;text-transform:uppercase">CIN</div>${e.cin || "—"}</div>
-              <div><div style="color:var(--text3);font-weight:600;font-size:10px;margin-bottom:2px;text-transform:uppercase">PAN</div>${e.pan || "—"}</div>
-              <div><div style="color:var(--text3);font-weight:600;font-size:10px;margin-bottom:2px;text-transform:uppercase">Regulator</div>${e.regulator || "—"}</div>
-              <div><div style="color:var(--text3);font-weight:600;font-size:10px;margin-bottom:2px;text-transform:uppercase">License No.</div>${e.license || "—"}</div>
-            </div>
-            ${e.bizLines && e.bizLines.length ? `<div style="margin-bottom:8px"><div style="font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;margin-bottom:5px">Business Lines</div><div>${e.bizLines.map(b => `<span class="op-tag">${b}</span>`).join("")}</div></div>` : ""}
-            ${e.locations && e.locations.length ? `<div style="margin-bottom:6px"><div style="font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;margin-bottom:5px">Locations (${e.locations.length})</div><div>${e.locations.map(l => `<span class="op-tag">📍 ${l}</span>`).join("")}</div></div>` : ""}
-            ${e.state ? `<div style="font-size:11px;color:var(--text3);margin-top:4px">📌 Registered in ${e.state}</div>` : ""}
-          </div>`;
-        }).join("")
-      : `<div style="border:2px dashed var(--border);border-radius:12px;padding:28px;text-align:center;color:var(--text3);margin-bottom:14px">
-          <div style="font-size:28px;margin-bottom:8px">🏢</div>
-          <div style="font-size:13px;font-weight:600;margin-bottom:4px">No legal entities added yet</div>
-          <div style="font-size:12px;line-height:1.6">Add subsidiaries, JVs, associates or divisions under your parent organization.</div>
-        </div>`;
-
-    return `
-    <div style="background:#eef2ff;border:1px solid #c7d2fe;border-radius:10px;padding:14px 18px;margin-bottom:16px;font-size:13px;color:#3730a3;line-height:1.6">
-      💡 <strong>Why capture legal entities?</strong> Different entities may be regulated differently, operate in different states, and have different regulatory obligations.
-    </div>
-    <div class="wz-card">
-      <div class="wz-card-title">🏢 Legal Entities / Group Structure</div>
-      <div class="wz-card-sub">Add all subsidiaries, JVs, associates, divisions and SPVs.</div>
-      ${entityList}
-      <button class="btn btn-ghost" onclick="openAddEntityModal()" style="width:100%;justify-content:center;border-style:dashed">
-        + Add Legal Entity / Subsidiary / Division
-      </button>
-    </div>
-    <div class="wz-card">
-      <div class="wz-card-title">📊 Group Structure Summary</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;text-align:center;margin-top:4px">
-        <div style="background:#f8fafc;border-radius:10px;padding:16px">
-          <div style="font-size:28px;font-weight:800;color:var(--primary)">${OP.legalEntities.filter(e => e.type === "Wholly Owned Subsidiary").length}</div>
-          <div style="font-size:11px;font-weight:700;color:var(--text3);margin-top:4px">SUBSIDIARIES</div>
+        <div class="op3-identity-card" id="op2-identity-card">
+          ${renderIdentityCard(pct)}
         </div>
-        <div style="background:#f8fafc;border-radius:10px;padding:16px">
-          <div style="font-size:28px;font-weight:800;color:var(--primary)">${OP.legalEntities.filter(e => e.type === "Joint Venture (JV)").length}</div>
-          <div style="font-size:11px;font-weight:700;color:var(--text3);margin-top:4px">JOINT VENTURES</div>
+
+        <!-- ── ENTITIES SECTION ── -->
+        <div class="op3-section-row" style="margin-top:36px">
+          <div class="op3-section-label">
+            <span class="op3-sec-dot"></span>
+            Legal Entities
+            ${OP.legalEntities.length > 0 ? `<span class="op3-count-pill">${OP.legalEntities.length}</span>` : ""}
+          </div>
+          <button class="op3-add-btn" onclick="openAddEntityModal()">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Add Entity
+          </button>
         </div>
-        <div style="background:#f8fafc;border-radius:10px;padding:16px">
-          <div style="font-size:28px;font-weight:800;color:var(--primary)">${OP.legalEntities.filter(e => !["Wholly Owned Subsidiary","Joint Venture (JV)"].includes(e.type)).length}</div>
-          <div style="font-size:11px;font-weight:700;color:var(--text3);margin-top:4px">OTHER ENTITIES</div>
-        </div>
-      </div>
-    </div>`;
-  }
 
-  function wzStepRisk() {
-    return `
-    <div class="wz-card">
-      <div class="wz-card-title">⚠ Risk Appetite</div>
-      <div class="radio-grid" style="grid-template-columns:repeat(3,1fr)">
-        ${[{v:"Low",ic:"🟢",d:"Conservative"},{v:"Medium",ic:"🟡",d:"Balanced"},{v:"High",ic:"🔴",d:"Aggressive"}].map(r =>
-          `<div class="radio-card ${OP.riskAppetite === r.v ? "sel" : ""}" onclick="opSel(this,'riskAppetite','${r.v}')">
-            <div class="radio-card-ic">${r.ic}</div>
-            <div class="radio-card-lbl">${r.v}</div>
-            <div class="radio-card-sub">${r.d}</div>
-          </div>`).join("")}
-      </div>
-    </div>
-    <div class="wz-card">
-      <div class="wz-card-title">📋 Last Regulatory Audit Outcome</div>
-      <div class="opt-grid">${["Clean","Minor Observations","Major Findings","Penalty Imposed","Under Review"].map(a =>
-        `<div class="opt-chip ${OP.lastAudit === a ? "sel" : ""}" onclick="opSelChipSingle(this,'lastAudit','${a}')">${a}</div>`
-      ).join("")}</div>
-    </div>
-    <div class="wz-card">
-      <div class="wz-card-title">🔒 KYC / AML Compliance Level</div>
-      <div class="opt-grid">${["Basic KYC","Standard KYC","Enhanced Due Diligence","Risk-Based KYC","Full AML Programme"].map(k =>
-        `<div class="opt-chip ${OP.kycLevel === k ? "sel" : ""}" onclick="opSelChipSingle(this,'kycLevel','${k}')">${k}</div>`
-      ).join("")}</div>
-    </div>
-    <div class="wz-card">
-      <div class="wz-card-title">🛡 Cybersecurity Frameworks</div>
-      <div class="opt-grid">${["ISO 27001","RBI Cyber Security Framework","NIST","PCI-DSS","SOC 2","DPDP Act Compliance","None"].map(f =>
-        `<div class="opt-chip ${(OP.cyberFramework || []).includes(f) ? "sel" : ""}" onclick="opToggleArr(this,'cyberFramework','${f}')">${f}</div>`
-      ).join("")}</div>
-    </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
-      <div class="wz-card" style="margin:0">
-        <div class="wz-card-title">👥 Compliance Team Size</div>
-        <div class="opt-grid" style="margin-top:8px">${["1-5","6-10","11-25","26-50","50+"].map(s =>
-          `<div class="opt-chip ${OP.complianceTeamSize === s ? "sel" : ""}" onclick="opSelChipSingle(this,'complianceTeamSize','${s}')">${s}</div>`
-        ).join("")}</div>
-      </div>
-      <div class="wz-card" style="margin:0">
-        <div class="wz-card-title">📅 Reporting Frequency</div>
-        <div class="opt-grid" style="margin-top:8px">${["Monthly","Quarterly","Half-yearly","Annual","Ad-hoc"].map(f =>
-          `<div class="opt-chip ${OP.reportingFreq === f ? "sel" : ""}" onclick="opSelChipSingle(this,'reportingFreq','${f}')">${f}</div>`
-        ).join("")}</div>
-      </div>
-    </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
-      <div class="wz-card" style="margin:0">
-        <div class="wz-card-title">🏛 Board-Level Compliance Committee?</div>
-        <div class="yn-pair" style="margin-top:10px">
-          <button class="yn-btn ${OP.boardCommittee === "Yes" ? "sel-yes" : ""}" onclick="opYN(this,'boardCommittee','Yes')">✓ Yes</button>
-          <button class="yn-btn ${OP.boardCommittee === "No" ? "sel-no" : ""}" onclick="opYN(this,'boardCommittee','No')">✗ Not yet</button>
-        </div>
-      </div>
-      <div class="wz-card" style="margin:0">
-        <div class="wz-card-title">⚖ Regulatory Penalties (last 3 yrs)?</div>
-        <div class="yn-pair" style="margin-top:10px">
-          <button class="yn-btn ${OP.penalties === "Yes" ? "sel-yes" : ""}" onclick="opYN(this,'penalties','Yes')">✓ Yes</button>
-          <button class="yn-btn ${OP.penalties === "No" ? "sel-no" : ""}" onclick="opYN(this,'penalties','No')">✗ No</button>
-        </div>
-      </div>
-    </div>
-    <div class="wz-card">
-      <div class="wz-card-title">🌍 Customer Risk Profile</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-        ${[["High-Risk Geography Customers","highRiskGeo"],["PEP (Politically Exposed Persons)","pepCustomers"],["Cross-border Remittances","remittances"],["Sanctions Screening Active","sanctions"]]
-          .map(([l, k]) => `
-          <div style="background:#f8fafc;border-radius:8px;padding:10px 12px">
-            <div style="font-size:12.5px;font-weight:600;margin-bottom:7px">${l}</div>
-            <div class="yn-pair">
-              <button class="yn-btn ${OP[k] === "Yes" ? "sel-yes" : ""}" onclick="opYN(this,'${k}','Yes')">Yes</button>
-              <button class="yn-btn ${OP[k] === "No" ? "sel-no" : ""}" onclick="opYN(this,'${k}','No')">No</button>
-            </div>
-          </div>`).join("")}
-      </div>
-    </div>`;
-  }
+        ${renderEntityList()}
 
-  function wzStepContext() {
-    const fields = [
-      { key: "bizModelDesc",    title: "Business Model Description",    hint: "How you operate, revenue streams, customer segments, distribution channels.",                   placeholder: "e.g. Universal bank providing retail, corporate and digital banking…" },
-      { key: "regObligDesc",    title: "Regulatory Obligations Overview", hint: "Primary regulatory obligations, reporting requirements and key mandates.",                    placeholder: "e.g. Monthly RBI XBRL returns, quarterly Basel III disclosures…" },
-      { key: "productsDesc",    title: "Products & Services Detail",    hint: "Unique or niche offerings not covered in structured questions.",                                placeholder: "e.g. Co-branded credit card with IndiGo, specialized NRI investment product…" },
-      { key: "complianceRisks", title: "Major Compliance Risks",        hint: "Top compliance risks — helps AI prioritize critical circulars.",                               placeholder: "e.g. Cyber fraud in digital channels, FEMA violations in forex…" },
-    ];
-    return `
-    <div style="background:#eef2ff;border:1px solid #c7d2fe;border-radius:10px;padding:14px 18px;margin-bottom:16px;font-size:13px;color:#3730a3;line-height:1.6">
-      🤖 <strong>AI Context Layer</strong> — These descriptions are fed into the AI engine to handle edge cases not captured by structured questions.
-    </div>
-    ${fields.map(f => `
-      <div class="wz-card">
-        <div class="wz-card-title">📝 ${f.title}</div>
-        <div class="wz-card-sub">${f.hint}</div>
-        <textarea class="fg-input" rows="4" style="resize:vertical;font-size:13px;line-height:1.6" placeholder="${f.placeholder}" onchange="OP['${f.key}']=this.value">${OP[f.key] || ""}</textarea>
-      </div>`).join("")}
-    <div class="wz-card" style="background:linear-gradient(135deg,#f0fdf4,#ecfdf5);border-color:#86efac">
-      <div style="display:flex;align-items:center;gap:14px">
-        <div style="font-size:36px">🤖</div>
-        <div>
-          <div style="font-size:15px;font-weight:800;color:#166634;margin-bottom:4px">Ready to generate AI applicability profile</div>
-          <div style="font-size:12.5px;color:#166534;line-height:1.6">Once saved, the AI engine will map every applicable circular, obligation and action to your specific profile.</div>
-        </div>
       </div>
-    </div>`;
-  }
 
-
-  function wzStepDigitalPayments() {
-  const paymentSystems = ["UPI","RTGS","NEFT","IMPS","NACH","BBPS","SWIFT","Fastag","NETC"];
-  const digitalServices = ["Internet Banking","Mobile Banking","Digital Lending","Video KYC","Account Aggregator (AA)","ONDC Participant","DigiLocker Integration"];
-  const ppiTypes = ["Closed PPI","Semi-Closed PPI","Open PPI"];
-  return `
-  <div class="wz-card">
-    <div class="wz-card-title">💳 Payment System Participation</div>
-    <div class="wz-card-sub">Select all payment systems your organization participates in.</div>
-    <div class="opt-grid">${paymentSystems.map(p =>
-      `<div class="opt-chip ${(OP.paymentSystems||[]).includes(p) ? "sel" : ""}" onclick="opToggleArr(this,'paymentSystems','${p}')">${p}</div>`
-    ).join("")}</div>
-  </div>
-  <div class="wz-card">
-    <div class="wz-card-title">📱 Digital Services Offered</div>
-    <div class="wz-card-sub">Select all digital services your organization offers.</div>
-    <div class="opt-grid">${digitalServices.map(d =>
-      `<div class="opt-chip ${(OP.digitalServices||[]).includes(d) ? "sel" : ""}" onclick="opToggleArr(this,'digitalServices','${d}')">${d}</div>`
-    ).join("")}</div>
-  </div>
-  <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:14px">
-    <div>
-      <div class="fg-lbl" style="margin-bottom:6px">Payment Aggregator</div>
-      <div class="yn-pair">
-        <button class="yn-btn ${OP.isPA === 'Yes' ? 'sel-yes' : ''}" onclick="opYN(this,'isPA','Yes')">✓ Yes</button>
-        <button class="yn-btn ${OP.isPA === 'No' ? 'sel-no' : ''}" onclick="opYN(this,'isPA','No')">✗ No</button>
+      <!-- ── IDENTITY EDIT PANEL (hidden) ── -->
+      <div id="op2-identity-edit" class="op3-edit-panel" style="display:none">
+        ${renderIdentityEditForm()}
       </div>
-    </div>
-    <div>
-      <div class="fg-lbl" style="margin-bottom:6px">Payment Gateway</div>
-      <div class="yn-pair">
-        <button class="yn-btn ${OP.isPG === 'Yes' ? 'sel-yes' : ''}" onclick="opYN(this,'isPG','Yes')">✓ Yes</button>
-        <button class="yn-btn ${OP.isPG === 'No' ? 'sel-no' : ''}" onclick="opYN(this,'isPG','No')">✗ No</button>
-      </div>
-    </div>
-    <div>
-      <div class="fg-lbl" style="margin-bottom:6px">PPI Issuer</div>
-      <div class="yn-pair">
-        <button class="yn-btn ${OP.isPPI === 'Yes' ? 'sel-yes' : ''}" onclick="opYN(this,'isPPI','Yes')">✓ Yes</button>
-        <button class="yn-btn ${OP.isPPI === 'No' ? 'sel-no' : ''}" onclick="opYN(this,'isPPI','No')">✗ No</button>
-      </div>
-      ${OP.isPPI === 'Yes' ? `
-      <select class="fg-input" style="margin-top:10px" onchange="OP.ppiType=this.value">
-        ${["", ...ppiTypes].map(p => `<option value="${p}" ${OP.ppiType === p ? "selected" : ""}>${p || "Select PPI type"}</option>`).join("")}
-      </select>` : ""}
-    </div>
-    <div>
-      <div class="fg-lbl" style="margin-bottom:6px">Cross Border Payments</div>
-      <div class="yn-pair">
-        <button class="yn-btn ${OP.crossBorder === 'Yes' ? 'sel-yes' : ''}" onclick="opYN(this,'crossBorder','Yes')">✓ Yes</button>
-        <button class="yn-btn ${OP.crossBorder === 'No' ? 'sel-no' : ''}" onclick="opYN(this,'crossBorder','No')">✗ No</button>
-      </div>
-    </div>
-  </div>`;
-}
+    `;
 
-
-function wzStepTechnology() {
-  const cbsList = ["Finacle","Flexcube","BaNCS","FinnOne","Temenos T24","Intellect","Mifos","Custom Built","Other"];
-  const cloudProviders = ["AWS","Azure","GCP","Private Cloud","Hybrid Cloud"];
-  const cyberFrameworks = ["ISO 27001","NIST","RBI Cybersecurity Framework","SEBI Cybersecurity Framework","PCI-DSS","SOC 2"];
-  return `
-  <div class="wz-card">
-    <div class="wz-card-title">🏗 Core Banking & Systems</div>
-    <div class="wz-card-sub">Primary technology systems powering your operations.</div>
-    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px">
-      <div class="fg" style="margin:0"><label class="fg-lbl">Core Banking System (CBS)</label>
-        <select class="fg-input" onchange="OP.cbs=this.value">
-          ${["", ...cbsList].map(c => `<option value="${c}" ${OP.cbs === c ? "selected" : ""}>${c || "Select CBS"}</option>`).join("")}
-        </select></div>
-      <div class="fg" style="margin:0"><label class="fg-lbl">CBS Vendor Name</label>
-        <input class="fg-input" value="${OP.cbsVendor || ''}" onchange="OP.cbsVendor=this.value" placeholder="e.g. Infosys Finacle"></div>
-      <div class="fg" style="margin:0"><label class="fg-lbl">CBS Version</label>
-        <input class="fg-input" value="${OP.cbsVersion || ''}" onchange="OP.cbsVersion=this.value" placeholder="e.g. v11.0"></div>
-    </div>
-  </div>
-  <div class="wz-card">
-    <div class="wz-card-title">☁️ Cloud & Infrastructure</div>
-    <div class="wz-card-sub">Cloud adoption and data hosting details.</div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
-      <div>
-        <div class="fg-lbl" style="margin-bottom:6px">Cloud Adopted</div>
-        <div class="yn-pair">
-          <button class="yn-btn ${OP.cloudAdopted === 'Yes' ? 'sel-yes' : ''}" onclick="opYN(this,'cloudAdopted','Yes')">✓ Yes</button>
-          <button class="yn-btn ${OP.cloudAdopted === 'No' ? 'sel-no' : ''}" onclick="opYN(this,'cloudAdopted','No')">✗ No</button>
-        </div>
-        ${OP.cloudAdopted === 'Yes' ? `
-        <div class="opt-grid" style="margin-top:10px">${cloudProviders.map(c =>
-          `<div class="opt-chip ${(OP.cloudProviders||[]).includes(c) ? "sel" : ""}" onclick="opToggleArr(this,'cloudProviders','${c}')">${c}</div>`
-        ).join("")}</div>` : ""}
-      </div>
-      <div>
-        <div class="fg-lbl" style="margin-bottom:6px">Data Localization Compliant</div>
-        <div class="yn-pair">
-          <button class="yn-btn ${OP.dataLocalization === 'Yes' ? 'sel-yes' : ''}" onclick="opYN(this,'dataLocalization','Yes')">✓ Yes</button>
-          <button class="yn-btn ${OP.dataLocalization === 'No' ? 'sel-no' : ''}" onclick="opYN(this,'dataLocalization','No')">✗ No</button>
-        </div>
-      </div>
-    </div>
-  </div>
-  <div class="wz-card">
-    <div class="wz-card-title">🔒 Cybersecurity & Compliance</div>
-    <div class="wz-card-sub">Security frameworks and audit status.</div>
-    <div class="opt-grid">${cyberFrameworks.map(f =>
-      `<div class="opt-chip ${(OP.cyberFrameworks||[]).includes(f) ? "sel" : ""}" onclick="opToggleArr(this,'cyberFrameworks','${f}')">${f}</div>`
-    ).join("")}</div>
-    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-top:14px">
-      <div>
-        <div class="fg-lbl" style="margin-bottom:6px">VAPT Conducted</div>
-        <div class="yn-pair">
-          <button class="yn-btn ${OP.vapt === 'Yes' ? 'sel-yes' : ''}" onclick="opYN(this,'vapt','Yes')">✓ Yes</button>
-          <button class="yn-btn ${OP.vapt === 'No' ? 'sel-no' : ''}" onclick="opYN(this,'vapt','No')">✗ No</button>
-        </div>
-        ${OP.vapt === 'Yes' ? `<input class="fg-input" type="date" style="margin-top:10px" value="${OP.vaptDate || ''}" onchange="OP.vaptDate=this.value">` : ""}
-      </div>
-      <div>
-        <div class="fg-lbl" style="margin-bottom:6px">SOC Operations</div>
-        <div class="yn-pair">
-          <button class="yn-btn ${OP.soc === 'Yes' ? 'sel-yes' : ''}" onclick="opYN(this,'soc','Yes')">✓ Yes</button>
-          <button class="yn-btn ${OP.soc === 'No' ? 'sel-no' : ''}" onclick="opYN(this,'soc','No')">✗ No</button>
-        </div>
-      </div>
-      <div>
-        <div class="fg-lbl" style="margin-bottom:6px">IT Outsourcing</div>
-        <div class="yn-pair">
-          <button class="yn-btn ${OP.itOutsourcing === 'Yes' ? 'sel-yes' : ''}" onclick="opYN(this,'itOutsourcing','Yes')">✓ Yes</button>
-          <button class="yn-btn ${OP.itOutsourcing === 'No' ? 'sel-no' : ''}" onclick="opYN(this,'itOutsourcing','No')">✗ No</button>
-        </div>
-        ${OP.itOutsourcing === 'Yes' ? `<input class="fg-input" style="margin-top:10px" value="${OP.itVendor || ''}" onchange="OP.itVendor=this.value" placeholder="Vendor name">` : ""}
-      </div>
-    </div>
-  </div>`;
-}
-
-
-function wzStepGovernance() {
-  const roles = [
-    ["MD / CEO", "ceo"],
-    ["Chief Compliance Officer", "cco"],
-    ["Chief Risk Officer", "cro"],
-    ["Company Secretary", "cs"],
-    ["Nodal Officer", "nodal"],
-    ["Grievance Redressal Officer", "gro"],
-    ["Chief Information Security Officer", "ciso"],
-    ["Chief Financial Officer", "cfo"]
-  ];
-  return `
-  <div class="wz-card">
-    <div class="wz-card-title">🏛 Board Composition</div>
-    <div class="wz-card-sub">Board structure as per regulatory requirements.</div>
-    <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:14px">
-      <div class="fg" style="margin:0"><label class="fg-lbl">Total Board Size</label>
-        <input class="fg-input" type="number" min="1" value="${OP.boardSize || ''}" onchange="OP.boardSize=this.value" placeholder="e.g. 12"></div>
-      <div class="fg" style="margin:0"><label class="fg-lbl">Independent Directors</label>
-        <input class="fg-input" type="number" min="0" value="${OP.independentDirectors || ''}" onchange="OP.independentDirectors=this.value" placeholder="e.g. 5"></div>
-      <div class="fg" style="margin:0"><label class="fg-lbl">Women Directors</label>
-        <input class="fg-input" type="number" min="0" value="${OP.womenDirectors || ''}" onchange="OP.womenDirectors=this.value" placeholder="e.g. 2"></div>
-      <div class="fg" style="margin:0"><label class="fg-lbl">Executive Directors</label>
-        <input class="fg-input" type="number" min="0" value="${OP.executiveDirectors || ''}" onchange="OP.executiveDirectors=this.value" placeholder="e.g. 3"></div>
-    </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-top:14px">
-      <div>
-        <div class="fg-lbl" style="margin-bottom:6px">Audit Committee</div>
-        <div class="yn-pair">
-          <button class="yn-btn ${OP.auditCommittee === 'Yes' ? 'sel-yes' : ''}" onclick="opYN(this,'auditCommittee','Yes')">✓ Yes</button>
-          <button class="yn-btn ${OP.auditCommittee === 'No' ? 'sel-no' : ''}" onclick="opYN(this,'auditCommittee','No')">✗ No</button>
-        </div>
-      </div>
-      <div>
-        <div class="fg-lbl" style="margin-bottom:6px">Risk Management Committee</div>
-        <div class="yn-pair">
-          <button class="yn-btn ${OP.riskCommittee === 'Yes' ? 'sel-yes' : ''}" onclick="opYN(this,'riskCommittee','Yes')">✓ Yes</button>
-          <button class="yn-btn ${OP.riskCommittee === 'No' ? 'sel-no' : ''}" onclick="opYN(this,'riskCommittee','No')">✗ No</button>
-        </div>
-      </div>
-      <div>
-        <div class="fg-lbl" style="margin-bottom:6px">Whistleblower Policy</div>
-        <div class="yn-pair">
-          <button class="yn-btn ${OP.whistleblower === 'Yes' ? 'sel-yes' : ''}" onclick="opYN(this,'whistleblower','Yes')">✓ Yes</button>
-          <button class="yn-btn ${OP.whistleblower === 'No' ? 'sel-no' : ''}" onclick="opYN(this,'whistleblower','No')">✗ No</button>
-        </div>
-      </div>
-    </div>
-  </div>
-  <div class="wz-card">
-    <div class="wz-card-title">👤 Key Contacts</div>
-    <div class="wz-card-sub">Primary point of contacts for regulatory and compliance matters.</div>
-    ${roles.map(([label, key]) => `
-    <div style="display:grid;grid-template-columns:180px 1fr 1fr 1fr;gap:14px;margin-bottom:10px;align-items:center">
-      <div class="fg-lbl" style="margin:0">${label}</div>
-      <div class="fg" style="margin:0">
-        <input class="fg-input" value="${OP[key+'Name'] || ''}" onchange="OP['${key}Name']=this.value" placeholder="Full name"></div>
-      <div class="fg" style="margin:0">
-        <input class="fg-input" type="email" value="${OP[key+'Email'] || ''}" onchange="OP['${key}Email']=this.value" placeholder="Email"></div>
-      <div class="fg" style="margin:0">
-        <input class="fg-input" type="tel" value="${OP[key+'Phone'] || ''}" onchange="OP['${key}Phone']=this.value" placeholder="Phone"></div>
-    </div>`).join("")}
-  </div>`;
-}
-
-
-function wzStepDocuments() {
-  const docs = [
-    ["Certificate of Incorporation", "docCOI", "Issued by MCA / ROC"],
-    ["Regulatory License Copy", "docLicense", "RBI / SEBI / IRDAI license"],
-    ["Latest Audited Balance Sheet", "docBalanceSheet", "Last financial year"],
-    ["Board Resolution", "docBoardRes", "For authorized signatories"],
-    ["MoA / AoA", "docMoaAoa", "Memorandum & Articles of Association"],
-    ["PAN Card Copy", "docPAN", "Organization PAN"],
-    ["GST Certificate", "docGST", "GST registration certificate"],
-    ["ISO / Other Certifications", "docISO", "Any compliance certifications"],
-  ];
-  return `
-  <div class="wz-card">
-    <div class="wz-card-title">📂 Document Uploads</div>
-    <div class="wz-card-sub">Upload all regulatory and compliance documents. Accepted formats: PDF, JPG, PNG. Max 10MB per file.</div>
-    ${docs.map(([label, key, hint]) => `
-    <div style="display:grid;grid-template-columns:1fr 2fr 160px;gap:14px;align-items:center;padding:10px 0;border-bottom:0.5px solid var(--color-border-tertiary)">
-      <div>
-        <div style="font-size:13px;font-weight:500;color:var(--color-text-primary)">${label}</div>
-        <div style="font-size:11px;color:var(--color-text-secondary);margin-top:2px">${hint}</div>
-      </div>
-      <div style="font-size:12px;color:var(--color-text-secondary)">
-        ${OP[key] ? `<span style="color:var(--color-text-success)">✓ ${OP[key]}</span>` : `<span>No file uploaded</span>`}
-      </div>
-      <label style="cursor:pointer">
-        <input type="file" accept=".pdf,.jpg,.jpeg,.png" style="display:none" onchange="OP['${key}']=this.files[0]?.name; this.closest('.wz-card').querySelector('[data-key=${key}]').textContent='✓ '+this.files[0]?.name">
-        <div class="yn-btn" style="text-align:center;padding:6px 12px;font-size:12px">
-          ${OP[key] ? '↺ Replace' : '↑ Upload'}
-        </div>
-      </label>
-    </div>`).join("")}
-  </div>
-  <div class="wz-card">
-    <div class="wz-card-title">✅ Profile Completion</div>
-    <div class="wz-card-sub">Summary of mandatory documents status.</div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:8px">
-      ${docs.map(([label, key]) => `
-      <div style="display:flex;align-items:center;gap:8px;font-size:13px">
-        <span style="color:${OP[key] ? 'var(--color-text-success)' : 'var(--color-text-danger)'}">
-          ${OP[key] ? '✓' : '○'}
-        </span>
-        <span style="color:var(--color-text-${OP[key] ? 'primary' : 'secondary'})">${label}</span>
-      </div>`).join("")}
-    </div>
-  </div>`;
-}
-  // ─────────────────────────────────────────────
-  // WIZARD CONTROLLER
-  // ─────────────────────────────────────────────
-
-  let _wzStep = 0;
-
-  const _stepRenderers = [
-    wzStepIdentity, wzStepLocations, wzStepEntities,
-    wzStepRegulatory, wzStepActivities, wzStepProducts,
-    wzStepDeepDive, wzStepRisk, wzStepContext,
-  ];
-
-  function wzSaveCurrentInputs() {
-    const legalName = document.getElementById("op-legal-name"); if (legalName) OP.legalName = legalName.value;
-    const regName   = document.getElementById("op-reg-name");   if (regName)   OP.regName   = regName.value;
-    const cin       = document.getElementById("op-cin");         if (cin)       OP.cin        = cin.value;
-    const pan       = document.getElementById("op-pan-wz");      if (pan)       OP.panNo      = pan.value;
-  }
-
-  function wzRender() {
-    const total = WZ_STEPS.length;
-    document.getElementById("wz-step-lbl").textContent     = `Step ${_wzStep + 1} of ${total}`;
-    document.getElementById("wz-progress-bar").style.width = ((_wzStep + 1) / total * 100) + "%";
-    document.getElementById("wz-title").textContent        = `Step ${_wzStep + 1}: ${WZ_STEPS[_wzStep].label}`;
-    document.getElementById("wz-back-btn").style.visibility = _wzStep === 0 ? "hidden" : "visible";
-    document.getElementById("wz-next-btn").textContent      = _wzStep === total - 1 ? "Save Profile ✓" : "Next Step →";
-
-    document.getElementById("wz-tabs").innerHTML = WZ_STEPS.map((s, i) =>
-      `<button class="wz-tab ${i === _wzStep ? "active" : i < _wzStep ? "done" : ""}" onclick="wzGoto(${i})">
-        ${i < _wzStep ? "✓ " : ""}${s.icon} ${s.label}
-      </button>`
-    ).join("");
-
-    document.getElementById("wz-content").innerHTML = _stepRenderers[_wzStep]();
-    wzSaveCurrentInputs();
-  }
-
-  function wzNext() {
-    wzSaveCurrentInputs();
-    OP._profileStarted = true;
-    if (_wzStep < WZ_STEPS.length - 1) {
-      _wzStep++;
-      wzRender();
-    } else {
-      OP._profileSaved = true;
-      // Sync ORG_BASIC
-      ORG_BASIC.name      = OP.legalName || OP.regName || "Organization";
-      ORG_BASIC.industry  = OP.industry  || OP.subSector || "—";
-      ORG_BASIC.pan       = OP.panNo     || OP.cin      || "—";
-      ORG_BASIC.regulator = OP.regulator || "—";
-      if (OP.locations.length) {
-        const hq = OP.locations.find(l => l.type && l.type.includes("HQ")) || OP.locations[0];
-        ORG_BASIC.address = hq.address || "—";
-        ORG_BASIC.city    = hq.city    || "—";
-        ORG_BASIC.state   = hq.state   || "—";
-      }
-      closeProfileWizard();
-      toast("Organization profile saved ✓");
-      refreshSidebarSteps();
-      const sub = document.getElementById("topbar-org-sub");
-      if (sub) sub.textContent = `${ORG_BASIC.name} · ${ORG_BASIC.regulator} Regulated · ${ORG_BASIC.city || "India"}`;
-    }
-    document.querySelector("#op-page-body").scrollTop = 0;
-  }
-
-  function wzPrev()   { wzSaveCurrentInputs(); if (_wzStep > 0) { _wzStep--; wzRender(); } }
-  function wzGoto(i)  { wzSaveCurrentInputs(); if (i <= _wzStep) { _wzStep = i; wzRender(); } }
-
-  function openProfileWizard(startStep) {
-    _wzStep = (startStep !== undefined) ? startStep : 0;
-    document.getElementById("op-view-mode").style.display   = "none";
-    document.getElementById("op-wizard-mode").style.display = "block";
-    wzRender();
-  }
-
-  function closeProfileWizard() {
-    document.getElementById("op-wizard-mode").style.display = "none";
-    document.getElementById("op-view-mode").style.display   = "block";
-    renderOrgProfile();
     refreshSidebarSteps();
   }
 
   // ─────────────────────────────────────────────
-  // LOCATION & ENTITY HELPERS
+  // IDENTITY CARD — New Design
   // ─────────────────────────────────────────────
 
-  function openAddLocationModal() {
-    ["loc-name","loc-addr","loc-city","loc-pin"].forEach(id => { const el = document.getElementById(id); if (el) el.value = ""; });
-    document.getElementById("loc-type").value      = "";
-    document.getElementById("loc-state").value     = "";
-    document.getElementById("loc-headcount").value = "";
-    document.querySelectorAll("#loc-depts-grid .opt-chip").forEach(c => c.classList.remove("sel"));
-    const sel = document.getElementById("loc-entity");
-    sel.innerHTML = '<option value="">— Parent Organization —</option>' +
-      OP.legalEntities.map(e => `<option value="${e.name}">${e.name}</option>`).join("");
-    document.getElementById("addLocationModal").classList.add("show");
+  function renderIdentityCard(pct) {
+    const name    = OP.legalName || OP.regName || "—";
+    const initial = (name !== "—" ? name[0] : "O").toUpperCase();
+    const hq      = (OP.locations || []).find(l => l.type && l.type.includes("HQ")) || OP.locations?.[0] || null;
+    const isNew   = !OP.legalName && !OP.regName;
+
+    const leftFields = [
+      { icon: `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>`,  label: "Legal Name",       value: OP.legalName || null },
+      { icon: `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>`, label: "Industry",         value: OP.industry || null },
+      { icon: `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>`,                                                             label: "Business Scale",   value: OP.businessScale || null },
+      { icon: `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>`,           label: "Registered Address", value: OP.registeredAddress || (hq ? [hq.address, hq.city, hq.state].filter(Boolean).join(", ") : null) },
+    ];
+
+    const rightFields = [
+      { icon: `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>`, label: "Org Type",         value: OP.orgType || null },
+      { icon: `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>`,                                                                        label: "Primary Regulator", value: OP.regulator || null },
+      { icon: `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>`, label: "PAN / CIN",         value: [OP.panNo, OP.cin].filter(Boolean).join(" · ") || null },
+      { icon: `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>`,                                     label: "State / Location",  value: hq?.state || (OP.locations?.length ? OP.locations.map(l=>l.state||l.city).filter(Boolean).slice(0,2).join(", ") : null) },
+    ];
+
+    const bizLines = (OP.businessLines || []).slice(0, 8);
+
+    if (isNew) {
+      return `
+        <div class="icard3-empty">
+          <div class="icard3-empty-icon">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+          </div>
+          <div class="icard3-empty-title">No identity details yet</div>
+          <div class="icard3-empty-sub">Click <strong>Edit Details</strong> to fill in your organization's basic information.</div>
+        </div>
+      `;
+    }
+
+    return `
+      <div class="icard3">
+        <!-- Hero row -->
+        <div class="icard3-hero">
+          <div class="icard3-avatar-wrap">
+            <div class="icard3-avatar">${initial}</div>
+            <div class="icard3-avatar-ring"></div>
+          </div>
+          <div class="icard3-hero-info">
+            <div class="icard3-name">${name}</div>
+            <div class="icard3-subtitle">
+              ${[OP.orgType, OP.industry].filter(Boolean).map(t => `<span class="icard3-sub-chip">${t}</span>`).join("")}
+              ${OP.regulator ? `<span class="icard3-reg-chip">⚖ ${OP.regulator}</span>` : ""}
+            </div>
+          </div>
+          <div class="icard3-completion-wrap">
+            <svg class="icard3-ring-svg" viewBox="0 0 36 36">
+              <circle cx="18" cy="18" r="15.9" fill="none" stroke="#e2e8f0" stroke-width="2.5"/>
+              <circle cx="18" cy="18" r="15.9" fill="none"
+                stroke="${pct >= 80 ? "#16a34a" : pct >= 40 ? "#d97706" : "#dc2626"}"
+                stroke-width="2.5"
+                stroke-dasharray="${pct}, 100"
+                stroke-dashoffset="25"
+                stroke-linecap="round"/>
+            </svg>
+            <div class="icard3-ring-label">
+              <span class="icard3-ring-pct" style="color:${pct >= 80 ? "#16a34a" : pct >= 40 ? "#d97706" : "#dc2626"}">${pct}%</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Divider -->
+        <div class="icard3-divider"></div>
+
+        <!-- Fields grid -->
+        <div class="icard3-fields">
+          <div class="icard3-col">
+            ${leftFields.map(f => renderField3(f)).join("")}
+          </div>
+          <div class="icard3-col-sep"></div>
+          <div class="icard3-col">
+            ${rightFields.map(f => renderField3(f)).join("")}
+          </div>
+        </div>
+
+        ${bizLines.length ? `
+        <!-- Business lines -->
+        <div class="icard3-divider"></div>
+        <div class="icard3-biz-row">
+          <span class="icard3-biz-label">Business Lines</span>
+          <div class="icard3-biz-tags">
+            ${bizLines.map(b => `<span class="icard3-biz-tag">${b}</span>`).join("")}
+            ${(OP.businessLines||[]).length > 8 ? `<span class="icard3-biz-tag icard3-biz-more">+${OP.businessLines.length - 8}</span>` : ""}
+          </div>
+        </div>
+        ` : ""}
+      </div>
+    `;
   }
 
-  function saveLocation() {
-    const name = document.getElementById("loc-name").value.trim();
-    const type = document.getElementById("loc-type").value;
-    if (!name || !type) { toast("Please enter location name and type", "warn"); return; }
-    const depts = [...document.querySelectorAll("#loc-depts-grid .opt-chip.sel")]
-      .map(c => c.textContent.replace(/^✓ /, ""));
-    OP.locations.push({
-      name, type,
-      address:    document.getElementById("loc-addr").value.trim(),
-      city:       document.getElementById("loc-city").value.trim(),
-      state:      document.getElementById("loc-state").value,
-      pin:        document.getElementById("loc-pin").value.trim(),
-      headcount:  document.getElementById("loc-headcount").value,
-      departments: depts,
-      entityId:   document.getElementById("loc-entity").value || null,
-    });
-    closeModal("addLocationModal");
-    toast(`${name} added ✓`);
-    document.getElementById("wz-content").innerHTML = wzStepLocations();
+  function renderField3(f) {
+    const hasVal = f.value && String(f.value).trim() && f.value !== "—";
+    return `
+      <div class="icard3-field">
+        <div class="icard3-field-lbl">
+          ${f.icon}
+          <span>${f.label}</span>
+        </div>
+        <div class="icard3-field-val ${hasVal ? "" : "icard3-empty"}">${hasVal ? f.value : "Not set"}</div>
+      </div>
+    `;
   }
 
-  function removeLocation(i) {
-    OP.locations.splice(i, 1);
-    document.getElementById("wz-content").innerHTML = wzStepLocations();
-    toast("Location removed");
+  // ─────────────────────────────────────────────
+  // IDENTITY EDIT FORM
+  // ─────────────────────────────────────────────
+
+  const BIZ_LINES = ["Retail Banking","Corporate Banking","Treasury","Digital Banking","Lending","Cards","Wealth Management","Insurance Distribution","Mutual Fund Dist.","Payment Services","Forex Services","NRI Services","Priority Sector","Correspondent Banking","MSME Banking"];
+
+  function renderIdentityEditForm() {
+    return `
+      <div class="op3-section-row">
+        <div class="op3-section-label">
+          <span class="op3-sec-dot"></span>
+          Edit Organization Identity
+        </div>
+        <div style="display:flex;gap:10px">
+          <button class="op3-cancel-btn" onclick="cancelIdentityEdit()">Cancel</button>
+          <button class="op3-save-btn" onclick="saveIdentityEdit()">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+            Save Changes
+          </button>
+        </div>
+      </div>
+
+      <div class="op3-form-card">
+        <div class="op3-form-section-title">Basic Information</div>
+        <div class="ief-grid-3">
+          <div class="ief-fg"><label class="ief-lbl">Legal Name <span class="req">*</span></label>
+            <input class="ief-input" id="ief-legal-name" value="${OP.legalName || ""}" placeholder="As per regulatory records"></div>
+          <div class="ief-fg"><label class="ief-lbl">Registered Name (MCA)</label>
+            <input class="ief-input" id="ief-reg-name" value="${OP.regName || ""}" placeholder="As per incorporation"></div>
+          <div class="ief-fg"><label class="ief-lbl">Brand / Trade Name</label>
+            <input class="ief-input" id="ief-brand" value="${OP.brandName || ""}" placeholder="e.g. HDFC Bank"></div>
+        </div>
+
+        <div class="op3-form-section-title" style="margin-top:18px">Classification</div>
+        <div class="ief-grid-3">
+          <div class="ief-fg"><label class="ief-lbl">Organization Type <span class="req">*</span></label>
+            <select class="ief-input" id="ief-org-type">
+              ${["","Bank","NBFC","FinTech","Insurance Company","Mutual Fund / AMC","Stock Broker","Depository Participant","Payment Aggregator","Corporate","Government / PSU","Other"]
+                .map(t => `<option value="${t}" ${OP.orgType===t?"selected":""}>${t||"Select type"}</option>`).join("")}
+            </select></div>
+          <div class="ief-fg"><label class="ief-lbl">Industry <span class="req">*</span></label>
+            <select class="ief-input" id="ief-industry">
+              ${["","Banking & Financial Services","Insurance","Capital Markets","Payments & Fintech","Asset Management","Microfinance","Housing Finance","Other"]
+                .map(t => `<option value="${t}" ${OP.industry===t?"selected":""}>${t||"Select industry"}</option>`).join("")}
+            </select></div>
+          <div class="ief-fg"><label class="ief-lbl">Business Scale</label>
+            <select class="ief-input" id="ief-biz-scale">
+              ${["","Micro (< 10 Cr AUM)","Small (10–100 Cr)","Mid (100 Cr – 1,000 Cr)","Large (1,000–10,000 Cr)","Enterprise (> 10,000 Cr)"]
+                .map(t => `<option value="${t}" ${OP.businessScale===t?"selected":""}>${t||"Select scale"}</option>`).join("")}
+            </select></div>
+        </div>
+
+        <div class="op3-form-section-title" style="margin-top:18px">Regulatory & Tax IDs</div>
+        <div class="ief-grid-3">
+          <div class="ief-fg"><label class="ief-lbl">Primary Regulator</label>
+            <select class="ief-input" id="ief-regulator">
+              ${["","RBI","SEBI","IRDAI","MCA","PFRDA","IFSCA","NHB","NABARD","Other"]
+                .map(t => `<option value="${t}" ${OP.regulator===t?"selected":""}>${t||"Select regulator"}</option>`).join("")}
+            </select></div>
+          <div class="ief-fg"><label class="ief-lbl">PAN Number</label>
+            <input class="ief-input" id="ief-pan" value="${OP.panNo || ""}" placeholder="e.g. AAACH2702H"></div>
+          <div class="ief-fg"><label class="ief-lbl">CIN / Registration ID</label>
+            <input class="ief-input" id="ief-cin" value="${OP.cin || ""}" placeholder="e.g. L65920MH1994PLC080618"></div>
+        </div>
+        <div class="ief-grid-3">
+          <div class="ief-fg"><label class="ief-lbl">GST Number</label>
+            <input class="ief-input" id="ief-gst" value="${OP.gst || ""}" placeholder="e.g. 27AAACH2702H1Z5"></div>
+          <div class="ief-fg"><label class="ief-lbl">LEI Number</label>
+            <input class="ief-input" id="ief-lei" value="${OP.lei || ""}" placeholder="20-character LEI code"></div>
+          <div class="ief-fg"><label class="ief-lbl">Operational Since</label>
+            <input class="ief-input" type="date" id="ief-op-since" value="${OP.operationalSince || ""}"></div>
+        </div>
+
+        <div class="op3-form-section-title" style="margin-top:18px">Address</div>
+        <div class="ief-fg"><label class="ief-lbl">Registered Address</label>
+          <textarea class="ief-input" id="ief-reg-addr" rows="2" placeholder="As per MCA / regulator records">${OP.registeredAddress || ""}</textarea></div>
+
+        <div class="op3-form-section-title" style="margin-top:18px">Business Lines</div>
+        <div class="ief-chips" id="ief-biz-lines">
+          ${BIZ_LINES.map(b => `<div class="ief-chip ${(OP.businessLines||[]).includes(b)?"sel":""}" onclick="this.classList.toggle('sel')">${b}</div>`).join("")}
+        </div>
+      </div>
+    `;
   }
+
+  function openIdentityEdit() {
+    document.getElementById("op2-identity-card").style.display    = "none";
+    document.querySelector(".op3-section-row").style.display      = "none";
+    const panel = document.getElementById("op2-identity-edit");
+    panel.innerHTML = renderIdentityEditForm();
+    panel.style.display = "block";
+  }
+  global.openIdentityEdit = openIdentityEdit;
+
+  function cancelIdentityEdit() {
+    document.getElementById("op2-identity-edit").style.display   = "none";
+    document.getElementById("op2-identity-card").style.display   = "block";
+    document.querySelector(".op3-section-row").style.display      = "flex";
+  }
+  global.cancelIdentityEdit = cancelIdentityEdit;
+
+  function saveIdentityEdit() {
+    OP.legalName         = document.getElementById("ief-legal-name").value.trim();
+    OP.regName           = document.getElementById("ief-reg-name").value.trim();
+    OP.brandName         = document.getElementById("ief-brand").value.trim();
+    OP.orgType           = document.getElementById("ief-org-type").value;
+    OP.industry          = document.getElementById("ief-industry").value;
+    OP.businessScale     = document.getElementById("ief-biz-scale").value;
+    OP.regulator         = document.getElementById("ief-regulator").value;
+    OP.panNo             = document.getElementById("ief-pan").value.trim();
+    OP.cin               = document.getElementById("ief-cin").value.trim();
+    OP.gst               = document.getElementById("ief-gst").value.trim();
+    OP.lei               = document.getElementById("ief-lei").value.trim();
+    OP.operationalSince  = document.getElementById("ief-op-since").value;
+    OP.registeredAddress = document.getElementById("ief-reg-addr").value.trim();
+    OP.businessLines     = [...document.querySelectorAll("#ief-biz-lines .ief-chip.sel")].map(c => c.textContent);
+
+    OP._profileStarted = true;
+    if (typeof toast === "function") toast("Identity details saved ✓");
+    renderOrgProfile();
+    refreshSidebarSteps();
+  }
+  global.saveIdentityEdit = saveIdentityEdit;
+
+  // ─────────────────────────────────────────────
+  // ENTITY LIST — New Design
+  // ─────────────────────────────────────────────
+
+  function renderEntityList() {
+    if (!OP.legalEntities || OP.legalEntities.length === 0) {
+      return `
+        <div class="ent3-empty">
+          <div class="ent3-empty-icon">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+          </div>
+          <div class="ent3-empty-title">No legal entities added yet</div>
+          <div class="ent3-empty-sub">Add subsidiaries, JVs, associates or divisions to map your group structure.</div>
+          <button class="op3-add-btn" onclick="openAddEntityModal()">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Add First Entity
+          </button>
+        </div>
+      `;
+    }
+
+    return `
+      <div class="ent3-grid">
+        ${OP.legalEntities.map((e, i) => renderEntityCard(e, i)).join("")}
+      </div>
+    `;
+  }
+
+  function renderEntityCard(e, i) {
+    const { filled, total } = entityCompletion(e);
+    const pct   = Math.round(filled / total * 100);
+    const badge = entityStatusBadge(e);
+    const typeColors = {
+      "Wholly Owned Subsidiary": { bg: "#f0f9ff", border: "#bae6fd", text: "#0369a1", dot: "#38bdf8" },
+      "Joint Venture (JV)":      { bg: "#fff7ed", border: "#fed7aa", text: "#c2410c", dot: "#fb923c" },
+      "Associate Company":       { bg: "#f0fdf4", border: "#bbf7d0", text: "#15803d", dot: "#4ade80" },
+      "Division":                { bg: "#faf5ff", border: "#e9d5ff", text: "#7e22ce", dot: "#c084fc" },
+      "Branch":                  { bg: "#eff6ff", border: "#bfdbfe", text: "#1d4ed8", dot: "#60a5fa" },
+      "SPV":                     { bg: "#fdf4ff", border: "#f5d0fe", text: "#86198f", dot: "#e879f9" },
+    };
+    const tc = typeColors[e.type] || { bg: "#f8fafc", border: "#e2e8f0", text: "#475569", dot: "#94a3b8" };
+
+    const segColors = [
+      "#3b82f6","#8b5cf6","#ec4899","#f59e0b","#10b981","#ef4444","#6366f1","#14b8a6"
+    ];
+    const segColor = segColors[i % segColors.length];
+
+    return `
+      <div class="ent3-card" id="ent-card-${i}" style="--ent-accent:${segColor}">
+        <div class="ent3-card-accent-bar"></div>
+
+        <div class="ent3-card-head">
+          <div class="ent3-avatar" style="background:${segColor}15;color:${segColor}">
+            ${(e.name?.[0] || "E").toUpperCase()}
+          </div>
+          <div class="ent3-head-info">
+            <div class="ent3-name">${e.name}</div>
+            <div class="ent3-chips">
+              ${e.type ? `<span class="ent3-type-chip" style="background:${tc.bg};border-color:${tc.border};color:${tc.text}">
+                <span style="width:5px;height:5px;border-radius:50%;background:${tc.dot};display:inline-block;margin-right:4px"></span>
+                ${e.type}
+              </span>` : ""}
+              ${e.regulator ? `<span class="ent3-reg-chip">${e.regulator}</span>` : ""}
+            </div>
+          </div>
+          <button class="ent3-remove" onclick="removeEntity(${i})" title="Remove entity">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+
+        <div class="ent3-card-body">
+          ${e.state || e.city ? `
+          <div class="ent3-info-row">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            <span>${[e.state, e.city].filter(Boolean).join(", ")}</span>
+          </div>` : ""}
+          ${e.businessActivities && e.businessActivities.length ? `
+          <div class="ent3-activities">
+            ${e.businessActivities.slice(0,3).map(a=>`<span class="ent3-act-tag">${a}</span>`).join("")}
+            ${e.businessActivities.length>3?`<span class="ent3-act-tag ent3-act-more">+${e.businessActivities.length-3}</span>`:""}
+          </div>` : ""}
+        </div>
+
+        <div class="ent3-card-foot">
+          <div class="ent3-progress">
+            <div class="ent3-progress-track">
+              <div class="ent3-progress-fill" style="width:${pct}%;background:${segColor}"></div>
+            </div>
+            <span class="ent3-progress-txt" style="color:${badge.color}">${badge.dot} ${filled}/${total} fields</span>
+          </div>
+          <button class="ent3-cta" onclick="openEntityDetail(${i})" style="--cta-color:${segColor}">
+            Fill Details
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+          </button>
+        </div>
+      </div>
+    `;
+  }
+
+  // ─────────────────────────────────────────────
+  // ADD ENTITY MODAL
+  // ─────────────────────────────────────────────
+
+  const ENTITY_ACTIVITIES = ["Retail Banking","Corporate Banking","Lending","Insurance","Investment Advisory","Payment Services","Forex / FX","Trade Finance","Wealth Management","Asset Management","Microfinance","Fintech / Digital","Custodial Services","Other"];
 
   function openAddEntityModal() {
-    ["le-name","le-cin","le-pan","le-stake","le-license"].forEach(id => { const el = document.getElementById(id); if (el) el.value = ""; });
-    document.getElementById("le-type").value  = "";
-    document.getElementById("le-reg").value   = "";
-    document.getElementById("le-state").value = "";
-    document.querySelectorAll("#le-biz-grid .opt-chip").forEach(c => c.classList.remove("sel"));
-    const locGrid = document.getElementById("le-locations-grid");
-    locGrid.innerHTML = OP.locations.length
-      ? OP.locations.map(l =>
-          `<div class="opt-chip" onclick="this.classList.toggle('sel')" data-loc="${l.name}">
-            📍 ${l.name} <span style="font-size:10px;opacity:.7">${l.city}</span>
-          </div>`).join("")
-      : '<div style="font-size:12px;color:var(--text3);font-style:italic">Add locations in Step 2 first — they\'ll appear here for assignment.</div>';
-    document.getElementById("addEntityModal").classList.add("show");
-  }
+    let modal = document.getElementById("op2-add-entity-modal");
+    if (!modal) {
+      modal = document.createElement("div");
+      modal.id = "op2-add-entity-modal";
+      modal.className = "op3-modal-overlay";
+      document.body.appendChild(modal);
+    }
 
-  function saveLegalEntity() {
-    const name = document.getElementById("le-name").value.trim();
-    const type = document.getElementById("le-type").value;
-    if (!name || !type) { toast("Please enter entity name and type", "warn"); return; }
-    const bizLines    = [...document.querySelectorAll("#le-biz-grid .opt-chip.sel")].map(c => c.textContent.replace(/^✓ /, "").trim());
-    const assignedLocs = [...document.querySelectorAll("#le-locations-grid .opt-chip.sel")].map(c => c.getAttribute("data-loc"));
+    modal.innerHTML = `
+      <div class="op3-modal">
+        <div class="op3-modal-head">
+          <div>
+            <div class="op3-modal-title">Add Legal Entity</div>
+            <div class="op3-modal-sub">Register a subsidiary, JV, associate or division</div>
+          </div>
+          <button class="op3-modal-close" onclick="document.getElementById('op2-add-entity-modal').style.display='none'">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+        <div class="op3-modal-body">
+          <div class="ief-grid-2">
+            <div class="ief-fg"><label class="ief-lbl">Entity Name <span class="req">*</span></label>
+              <input class="ief-input" id="aem-name" placeholder="e.g. HDFC Securities Ltd"></div>
+            <div class="ief-fg"><label class="ief-lbl">Entity Type <span class="req">*</span></label>
+              <select class="ief-input" id="aem-type">
+                <option value="">Select type</option>
+                ${["Wholly Owned Subsidiary","Joint Venture (JV)","Associate Company","Division","Branch","SPV","Partnership Firm","Trust","Other"]
+                  .map(t => `<option value="${t}">${t}</option>`).join("")}
+              </select></div>
+          </div>
+          <div class="ief-grid-3">
+            <div class="ief-fg"><label class="ief-lbl">State</label>
+              <select class="ief-input" id="aem-state">
+                <option value="">Select state</option>
+                ${["Andhra Pradesh","Arunachal Pradesh","Assam","Bihar","Chhattisgarh","Goa","Gujarat","Haryana","Himachal Pradesh","Jharkhand","Karnataka","Kerala","Madhya Pradesh","Maharashtra","Manipur","Meghalaya","Mizoram","Nagaland","Odisha","Punjab","Rajasthan","Sikkim","Tamil Nadu","Telangana","Tripura","Uttar Pradesh","Uttarakhand","West Bengal","Delhi","Chandigarh","Puducherry","Other"]
+                  .map(s => `<option value="${s}">${s}</option>`).join("")}
+              </select></div>
+            <div class="ief-fg"><label class="ief-lbl">City</label>
+              <input class="ief-input" id="aem-city" placeholder="e.g. Mumbai"></div>
+            <div class="ief-fg"><label class="ief-lbl">Regulator</label>
+              <select class="ief-input" id="aem-regulator">
+                <option value="">Select regulator</option>
+                ${["RBI","SEBI","IRDAI","MCA","PFRDA","IFSCA","NHB","NABARD","FIU-IND","None / Not Applicable"]
+                  .map(r => `<option value="${r}">${r}</option>`).join("")}
+              </select></div>
+          </div>
+          <div class="ief-fg"><label class="ief-lbl">Business Activities</label>
+            <div class="ief-chips" id="aem-activities">
+              ${ENTITY_ACTIVITIES.map(a => `<div class="ief-chip" onclick="this.classList.toggle('sel')">${a}</div>`).join("")}
+            </div>
+          </div>
+        </div>
+        <div class="op3-modal-foot">
+          <button class="op3-cancel-btn" onclick="document.getElementById('op2-add-entity-modal').style.display='none'">Cancel</button>
+          <button class="op3-save-btn" onclick="saveEntity()">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Add Entity
+          </button>
+        </div>
+      </div>
+    `;
+
+    modal.style.display = "flex";
+  }
+  global.openAddEntityModal = openAddEntityModal;
+
+  function saveEntity() {
+    const name = document.getElementById("aem-name").value.trim();
+    const type = document.getElementById("aem-type").value;
+    if (!name || !type) { if (typeof toast==="function") toast("Please enter entity name and type", "warn"); return; }
+
+    const activities = [...document.querySelectorAll("#aem-activities .ief-chip.sel")].map(c => c.textContent);
+
     OP.legalEntities.push({
       name, type,
-      cin:      document.getElementById("le-cin").value.trim(),
-      pan:      document.getElementById("le-pan").value.trim(),
-      regulator: document.getElementById("le-reg").value,
-      license:  document.getElementById("le-license").value.trim(),
-      stake:    document.getElementById("le-stake").value,
-      bizLines,
-      locations: assignedLocs,
-      state:    document.getElementById("le-state").value,
+      state:              document.getElementById("aem-state").value,
+      city:               document.getElementById("aem-city").value.trim(),
+      regulator:          document.getElementById("aem-regulator").value,
+      businessActivities: activities,
+      cin: "", pan: "", gstin: "", address: "", pin: "",
+      employeeSize: "", licenseNo: "", departments: [], customerTypes: [], products: [],
     });
-    assignedLocs.forEach(locName => {
-      const loc = OP.locations.find(l => l.name === locName);
-      if (loc) loc.entityId = name;
-    });
-    closeModal("addEntityModal");
-    toast(`${name} added ✓`);
-    document.getElementById("wz-content").innerHTML = wzStepEntities();
-  }
 
-  function removeLegalEntity(i) {
+    document.getElementById("op2-add-entity-modal").style.display = "none";
+    if (typeof toast==="function") toast(`${name} added ✓`);
+    renderOrgProfile();
+  }
+  global.saveEntity = saveEntity;
+
+  function removeEntity(i) {
+    const name = OP.legalEntities[i]?.name || "Entity";
     OP.legalEntities.splice(i, 1);
-    document.getElementById("wz-content").innerHTML = wzStepEntities();
-    toast("Entity removed");
+    if (typeof toast==="function") toast(`${name} removed`);
+    renderOrgProfile();
   }
-
-  function addDepartment() {
-    const name = document.getElementById("new-dept-name").value.trim();
-    if (!name) return;
-    if (!OP.departments.find(d => d.name === name)) {
-      OP.departments.push({ name, head: document.getElementById("new-dept-head").value.trim(), functions: [] });
-    }
-    document.getElementById("new-dept-name").value = "";
-    document.getElementById("new-dept-head").value = "";
-    document.getElementById("wz-content").innerHTML = wzStepLocations();
-    toast(`Department "${name}" added ✓`);
-  }
-
-  function quickAddDept(el, name) {
-    const idx = OP.departments.findIndex(d => d.name === name);
-    if (idx === -1) {
-      OP.departments.push({ name, head: "", functions: [] });
-      el.classList.add("sel");
-      toast(`${name} added ✓`);
-    } else {
-      OP.departments.splice(idx, 1);
-      el.classList.remove("sel");
-      toast(`${name} removed`);
-    }
-    document.getElementById("wz-content").innerHTML = wzStepLocations();
-  }
-
-  function removeDept(i) {
-    OP.departments.splice(i, 1);
-    document.getElementById("wz-content").innerHTML = wzStepLocations();
-  }
-
-  function addDivision() {
-    const name = document.getElementById("new-div-name").value.trim();
-    if (!name) return;
-    OP.divisions.push({ name, description: document.getElementById("new-div-desc").value.trim() });
-    document.getElementById("new-div-name").value = "";
-    document.getElementById("new-div-desc").value = "";
-    document.getElementById("wz-content").innerHTML = wzStepLocations();
-    toast(`Division "${name}" added ✓`);
-  }
-
-  function removeDivision(i) {
-    OP.divisions.splice(i, 1);
-    document.getElementById("wz-content").innerHTML = wzStepLocations();
-  }
+  global.removeEntity = removeEntity;
 
   // ─────────────────────────────────────────────
-  // INPUT HELPERS
+  // ENTITY DETAIL MODAL
   // ─────────────────────────────────────────────
 
-  function opSel(el, key, val) {
+  const DEPT_OPTIONS    = ["Compliance","Legal","Risk","Finance","Operations","HR","Audit","Treasury","Technology","Customer Service","IT","Marketing"];
+  const CUSTOMER_TYPES  = ["Retail Individuals","HNI / Ultra HNI","MSME","Corporates","Government","NRI / Foreign","Institutional","Other"];
+  const PRODUCT_OPTIONS = ["Savings Account","Current Account","Fixed Deposit","Home Loan","Auto Loan","Personal Loan","Business Loan","Credit Card","Debit Card","UPI / Mobile Pay","Insurance Policy","Mutual Fund","Demat Account","Trade Finance (LC/BG)","PMS","Other"];
+
+  function openEntityDetail(i) {
+    const e = OP.legalEntities[i];
+    if (!e) return;
+
+    let modal = document.getElementById("op2-detail-modal");
+    if (!modal) {
+      modal = document.createElement("div");
+      modal.id = "op2-detail-modal";
+      modal.className = "op3-modal-overlay";
+      document.body.appendChild(modal);
+    }
+
+    modal.innerHTML = `
+      <div class="op3-modal op3-modal-wide">
+        <div class="op3-modal-head">
+          <div>
+            <div class="op3-modal-title">${e.name}</div>
+            <div class="op3-modal-sub">${e.type || ""}${e.regulator ? " · " + e.regulator : ""}</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px">
+            <div id="edm-comp-pill" class="edm3-comp-pill">${renderDetailCompletionPill(e)}</div>
+            <button class="op3-modal-close" onclick="document.getElementById('op2-detail-modal').style.display='none'">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+          </div>
+        </div>
+        <div class="op3-modal-body">
+
+          <div class="edm3-section">Registration & Identification</div>
+          <div class="ief-grid-3">
+            <div class="ief-fg"><label class="ief-lbl">CIN</label>
+              <input class="ief-input" data-field="cin" data-idx="${i}" value="${e.cin||""}" placeholder="e.g. U65910MH2000PLC125580" oninput="liveUpdateEntity(this,${i})"></div>
+            <div class="ief-fg"><label class="ief-lbl">PAN</label>
+              <input class="ief-input" data-field="pan" data-idx="${i}" value="${e.pan||""}" placeholder="e.g. AAACH2702H" oninput="liveUpdateEntity(this,${i})"></div>
+            <div class="ief-fg"><label class="ief-lbl">GSTIN</label>
+              <input class="ief-input" data-field="gstin" data-idx="${i}" value="${e.gstin||""}" placeholder="e.g. 27AAACH2702H1Z5" oninput="liveUpdateEntity(this,${i})"></div>
+          </div>
+
+          <div class="edm3-section">Address Details</div>
+          <div class="ief-grid-2">
+            <div class="ief-fg"><label class="ief-lbl">Full Address</label>
+              <textarea class="ief-input" data-field="address" data-idx="${i}" rows="2" placeholder="Street, area, landmark" oninput="liveUpdateEntity(this,${i})">${e.address||""}</textarea></div>
+            <div class="ief-fg"><label class="ief-lbl">PIN Code</label>
+              <input class="ief-input" data-field="pin" data-idx="${i}" value="${e.pin||""}" placeholder="6-digit PIN" oninput="liveUpdateEntity(this,${i})"></div>
+          </div>
+
+          <div class="edm3-section">Size & Licensing</div>
+          <div class="ief-grid-2">
+            <div class="ief-fg"><label class="ief-lbl">Employee Size</label>
+              <select class="ief-input" data-field="employeeSize" data-idx="${i}" onchange="liveUpdateEntity(this,${i})">
+                ${["","< 50","50–200","200–500","500–1000","1000–5000","5000+"]
+                  .map(s => `<option value="${s}" ${e.employeeSize===s?"selected":""}>${s||"Select size"}</option>`).join("")}
+              </select></div>
+            <div class="ief-fg"><label class="ief-lbl">License Number</label>
+              <input class="ief-input" data-field="licenseNo" data-idx="${i}" value="${e.licenseNo||""}" placeholder="Regulatory license no." oninput="liveUpdateEntity(this,${i})"></div>
+          </div>
+
+          <div class="edm3-section">Departments</div>
+          <div class="ief-chips">
+            ${DEPT_OPTIONS.map(d => `<div class="ief-chip ${(e.departments||[]).includes(d)?"sel":""}" onclick="toggleEntityArr(this,${i},'departments','${d}')">${d}</div>`).join("")}
+          </div>
+
+          <div class="edm3-section">Customer Types</div>
+          <div class="ief-chips">
+            ${CUSTOMER_TYPES.map(ct => `<div class="ief-chip ${(e.customerTypes||[]).includes(ct)?"sel":""}" onclick="toggleEntityArr(this,${i},'customerTypes','${ct}')">${ct}</div>`).join("")}
+          </div>
+
+          <div class="edm3-section">Products & Services</div>
+          <div class="ief-chips">
+            ${PRODUCT_OPTIONS.map(p => `<div class="ief-chip ${(e.products||[]).includes(p)?"sel":""}" onclick="toggleEntityArr(this,${i},'products','${p}')">${p}</div>`).join("")}
+          </div>
+
+        </div>
+        <div class="op3-modal-foot">
+          <div style="font-size:12px;color:var(--text3)">Changes save automatically as you type.</div>
+          <button class="op3-save-btn" onclick="saveEntityDetail(${i})">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+            Save & Close
+          </button>
+        </div>
+      </div>
+    `;
+
+    modal.style.display = "flex";
+  }
+  global.openEntityDetail = openEntityDetail;
+
+  function renderDetailCompletionPill(e) {
+    const { filled, total } = entityCompletion(e);
+    const badge = entityStatusBadge(e);
+    return `<span style="color:${badge.color}">${badge.dot}</span> ${filled}/${total} details complete`;
+  }
+
+  function liveUpdateEntity(el, i) {
+    const e = OP.legalEntities[i];
+    if (!e) return;
+    e[el.dataset.field] = el.value;
+    const pill = document.getElementById("edm-comp-pill");
+    if (pill) pill.innerHTML = renderDetailCompletionPill(e);
+    refreshEntityCard(i);
+  }
+  global.liveUpdateEntity = liveUpdateEntity;
+
+  function toggleEntityArr(el, i, field, val) {
+    const e = OP.legalEntities[i];
+    if (!e) return;
+    if (!e[field]) e[field] = [];
+    const idx = e[field].indexOf(val);
+    if (idx > -1) e[field].splice(idx, 1); else e[field].push(val);
+    el.classList.toggle("sel");
+    const pill = document.getElementById("edm-comp-pill");
+    if (pill) pill.innerHTML = renderDetailCompletionPill(e);
+    refreshEntityCard(i);
+  }
+  global.toggleEntityArr = toggleEntityArr;
+
+  function refreshEntityCard(i) {
+    const card = document.getElementById("ent-card-" + i);
+    if (card && OP.legalEntities[i]) {
+      card.outerHTML = renderEntityCard(OP.legalEntities[i], i);
+    }
+  }
+
+  function saveEntityDetail(i) {
+    document.getElementById("op2-detail-modal").style.display = "none";
+    if (typeof toast==="function") toast("Entity details saved ✓");
+    renderOrgProfile();
+  }
+  global.saveEntityDetail = saveEntityDetail;
+
+  // ─────────────────────────────────────────────
+  // LEGACY HELPERS
+  // ─────────────────────────────────────────────
+
+  function opYN(el, key, val) {
     OP[key] = val;
-    el.closest(".radio-grid").querySelectorAll(".radio-card").forEach(c => c.classList.remove("sel"));
-    el.classList.add("sel");
+    el.closest(".yn-pair").querySelectorAll(".yn-btn").forEach(b => b.className = "yn-btn");
+    el.classList.add(val === "Yes" ? "sel-yes" : "sel-no");
+  }
+
+  function opToggleArr(el, key, val) {
+    if (!OP[key]) OP[key] = [];
+    const idx = OP[key].indexOf(val);
+    if (idx > -1) OP[key].splice(idx, 1); else OP[key].push(val);
+    el.classList.toggle("sel");
   }
 
   function opSelChipSingle(el, key, val) {
@@ -1432,73 +726,425 @@ function wzStepDocuments() {
     el.classList.add("sel");
   }
 
-  function opSelChipDeep(el, key, val) {
-    OP.deepDive[key] = val;
-    el.closest(".opt-grid").querySelectorAll(".opt-chip").forEach(c => c.classList.remove("sel"));
-    el.classList.add("sel");
-  }
+  // ─────────────────────────────────────────────
+  // STYLES
+  // ─────────────────────────────────────────────
 
-  function opToggleArr(el, key, val) {
-    if (!OP[key]) OP[key] = [];
-    const i = OP[key].indexOf(val);
-    if (i > -1) OP[key].splice(i, 1); else OP[key].push(val);
-    el.classList.toggle("sel");
-  }
+  function injectStyles() {
+    if (document.getElementById("op3-styles")) return;
+    const style = document.createElement("style");
+    style.id = "op3-styles";
+    style.textContent = `
+      /* ── Wrap ── */
+      .op3-wrap { max-width: 960px; }
 
-  function opToggleDeepArr(el, key, val) {
-    if (!OP.deepDive[key]) OP.deepDive[key] = [];
-    const i = OP.deepDive[key].indexOf(val);
-    if (i > -1) OP.deepDive[key].splice(i, 1); else OP.deepDive[key].push(val);
-    el.classList.toggle("sel");
-  }
+      /* ── Section header row ── */
+      .op3-section-row {
+        display: flex; align-items: center; justify-content: space-between;
+        margin-bottom: 16px;
+      }
+      .op3-section-label {
+        display: flex; align-items: center; gap: 8px;
+        font-size: 11px; font-weight: 800; text-transform: uppercase;
+        letter-spacing: .08em; color: var(--text3, #94a3b8);
+      }
+      .op3-sec-dot {
+        width: 6px; height: 6px; border-radius: 50%;
+        background: var(--primary, #0f5a7d);
+        display: inline-block;
+      }
+      .op3-count-pill {
+        background: var(--primary, #0f5a7d); color: #fff;
+        border-radius: 99px; padding: 1px 7px;
+        font-size: 10px; font-weight: 800;
+      }
 
-  function opYN(el, key, val) {
-    OP[key] = val;
-    el.closest(".yn-pair").querySelectorAll(".yn-btn").forEach(b => b.className = "yn-btn");
-    el.classList.add(val === "Yes" ? "sel-yes" : "sel-no");
-  }
+      /* ── Buttons ── */
+      .op3-edit-btn, .op3-add-btn, .op3-cancel-btn, .op3-save-btn {
+        display: inline-flex; align-items: center; gap: 6px;
+        border: none; border-radius: 8px; cursor: pointer;
+        font-size: 12.5px; font-weight: 700; padding: 7px 14px;
+        transition: all .15s; font-family: inherit;
+      }
+      .op3-edit-btn   { background: #f1f5f9; color: var(--text, #1a1a1a); border: 1px solid #e2e8f0; }
+      .op3-add-btn    { background: var(--primary, #0f5a7d); color: #fff; }
+      .op3-cancel-btn { background: #f1f5f9; color: var(--text, #1a1a1a); border: 1px solid #e2e8f0; }
+      .op3-save-btn   { background: var(--primary, #0f5a7d); color: #fff; }
+      .op3-edit-btn:hover, .op3-cancel-btn:hover { background: #e8edf3; }
+      .op3-add-btn:hover, .op3-save-btn:hover { opacity: .88; }
 
-  function opYNDeep(el, key, val) {
-    OP.deepDive[key] = val;
-    el.closest(".yn-pair").querySelectorAll(".yn-btn").forEach(b => b.className = "yn-btn");
-    el.classList.add(val === "Yes" ? "sel-yes" : "sel-no");
+      .op3-edit-panel { max-width: 960px; }
+      .op3-form-card {
+        background: #fff; border: 1px solid var(--border, #e2e8f0);
+        border-radius: 14px; padding: 22px 24px;
+        box-shadow: 0 1px 4px rgba(0,0,0,.04);
+      }
+      .op3-form-section-title {
+        font-size: 10.5px; font-weight: 800; text-transform: uppercase;
+        letter-spacing: .07em; color: var(--text3, #94a3b8);
+        margin-bottom: 12px; padding-bottom: 8px;
+        border-bottom: 1px solid #f1f5f9;
+      }
+
+      /* ── Identity Card ── */
+      .icard3 {
+        background: #fff; border: 1px solid var(--border, #e2e8f0);
+        border-radius: 16px; overflow: hidden;
+        box-shadow: 0 1px 8px rgba(0,0,0,.05);
+      }
+      .icard3-hero {
+        display: flex; align-items: center; gap: 18px;
+        padding: 22px 24px;
+        background: linear-gradient(135deg, #f8fafc 0%, #fff 60%);
+      }
+      .icard3-avatar-wrap { position: relative; flex-shrink: 0; }
+      .icard3-avatar {
+        width: 52px; height: 52px; border-radius: 14px;
+        background: var(--primary, #0f5a7d); color: #fff;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 24px; font-weight: 900; position: relative; z-index: 1;
+      }
+      .icard3-avatar-ring {
+        position: absolute; inset: -3px;
+        border-radius: 16px;
+        border: 1.5px dashed rgba(15,90,125,.2);
+        animation: spin-slow 12s linear infinite;
+      }
+      @keyframes spin-slow { to { transform: rotate(360deg); } }
+
+      .icard3-hero-info { flex: 1; min-width: 0; }
+      .icard3-name {
+        font-size: 19px; font-weight: 800; color: var(--text, #1a1a1a);
+        margin-bottom: 8px; line-height: 1.2;
+        white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      }
+      .icard3-subtitle { display: flex; flex-wrap: wrap; gap: 6px; }
+      .icard3-sub-chip {
+        font-size: 11px; font-weight: 700;
+        background: #f1f5f9; color: var(--text, #1a1a1a);
+        border-radius: 6px; padding: 3px 9px;
+      }
+      .icard3-reg-chip {
+        font-size: 11px; font-weight: 700;
+        background: #e8f4f9; color: var(--primary, #0f5a7d);
+        border-radius: 6px; padding: 3px 9px;
+        border: 1px solid rgba(15,90,125,.15);
+      }
+
+      /* Ring progress */
+      .icard3-completion-wrap {
+        flex-shrink: 0; position: relative; width: 60px; height: 60px;
+      }
+      .icard3-ring-svg {
+        width: 60px; height: 60px;
+        transform: rotate(-90deg);
+      }
+      .icard3-ring-svg circle { transition: stroke-dasharray .6s ease; }
+      .icard3-ring-label {
+        position: absolute; inset: 0;
+        display: flex; align-items: center; justify-content: center;
+      }
+      .icard3-ring-pct {
+        font-size: 13px; font-weight: 900; line-height: 1;
+      }
+
+      .icard3-divider { height: 1px; background: #f1f5f9; margin: 0 24px; }
+
+      /* Fields */
+      .icard3-fields {
+        display: grid; grid-template-columns: 1fr 1px 1fr;
+        gap: 0; padding: 20px 24px;
+      }
+      .icard3-col { display: flex; flex-direction: column; gap: 2px; }
+      .icard3-col-sep { background: #f1f5f9; margin: 0 20px; }
+
+      .icard3-field {
+        padding: 10px 0;
+        border-bottom: 1px solid #f8fafc;
+      }
+      .icard3-field:last-child { border-bottom: none; }
+      .icard3-field-lbl {
+        display: flex; align-items: center; gap: 5px;
+        font-size: 10px; font-weight: 700;
+        text-transform: uppercase; letter-spacing: .05em;
+        color: var(--text3, #94a3b8); margin-bottom: 4px;
+      }
+      .icard3-field-lbl svg { opacity: .6; flex-shrink: 0; }
+      .icard3-field-val {
+        font-size: 13px; font-weight: 600; color: var(--text, #1a1a1a);
+        padding-left: 17px;
+      }
+      .icard3-empty {
+        color: #cbd5e1 !important; font-weight: 500 !important;
+        font-style: italic;
+      }
+
+      /* Biz lines */
+      .icard3-biz-row {
+        display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+        padding: 16px 24px;
+        background: #fafbff;
+      }
+      .icard3-biz-label {
+        font-size: 10px; font-weight: 800; text-transform: uppercase;
+        letter-spacing: .06em; color: var(--text3); flex-shrink: 0;
+      }
+      .icard3-biz-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+      .icard3-biz-tag {
+        font-size: 11px; font-weight: 600; padding: 3px 10px;
+        border-radius: 99px; background: #f1f5f9; color: var(--text);
+        border: 1px solid #e8edf3;
+      }
+      .icard3-biz-more {
+        background: #e8f4f9; color: var(--primary); border-color: rgba(15,90,125,.2);
+      }
+
+      /* Empty state */
+      .icard3-empty {
+        text-align: center; padding: 48px 24px;
+        border: 1px solid var(--border, #e2e8f0); border-radius: 16px;
+        background: #fafbff;
+      }
+      .icard3-empty-icon {
+        width: 56px; height: 56px; border-radius: 16px;
+        background: #f1f5f9; color: var(--text3);
+        display: inline-flex; align-items: center; justify-content: center;
+        margin-bottom: 14px;
+      }
+      .icard3-empty-title {
+        font-size: 15px; font-weight: 800; color: var(--text); margin-bottom: 6px;
+      }
+      .icard3-empty-sub {
+        font-size: 13px; color: var(--text3); line-height: 1.6; max-width: 320px; margin: 0 auto;
+      }
+
+      /* ── Entity Grid ── */
+      .ent3-empty {
+        border: 2px dashed #e2e8f0; border-radius: 16px;
+        padding: 48px 24px; text-align: center;
+        background: #fafbff;
+      }
+      .ent3-empty-icon {
+        width: 56px; height: 56px; border-radius: 16px;
+        background: #f1f5f9; color: var(--text3);
+        display: inline-flex; align-items: center; justify-content: center;
+        margin-bottom: 14px;
+      }
+      .ent3-empty-title { font-size: 15px; font-weight: 800; color: var(--text); margin-bottom: 6px; }
+      .ent3-empty-sub   { font-size: 13px; color: var(--text3); line-height: 1.6; margin-bottom: 20px; }
+
+      .ent3-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+        gap: 16px;
+      }
+
+      .ent3-card {
+        background: #fff;
+        border: 1px solid #e8edf3;
+        border-radius: 16px;
+        overflow: hidden;
+        display: flex; flex-direction: column;
+        transition: box-shadow .2s, transform .2s;
+        position: relative;
+      }
+      .ent3-card:hover {
+        box-shadow: 0 8px 24px rgba(0,0,0,.09);
+        transform: translateY(-2px);
+      }
+      .ent3-card-accent-bar {
+        height: 3px;
+        background: var(--ent-accent, #3b82f6);
+        border-radius: 0;
+      }
+
+      .ent3-card-head {
+        display: flex; align-items: flex-start; gap: 12px;
+        padding: 16px 16px 12px;
+      }
+      .ent3-avatar {
+        width: 40px; height: 40px; border-radius: 11px;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 18px; font-weight: 900; flex-shrink: 0;
+      }
+      .ent3-head-info { flex: 1; min-width: 0; }
+      .ent3-name {
+        font-size: 14px; font-weight: 800; color: var(--text);
+        margin-bottom: 6px;
+        white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      }
+      .ent3-chips { display: flex; flex-wrap: wrap; gap: 5px; }
+      .ent3-type-chip {
+        font-size: 10.5px; font-weight: 700;
+        border-radius: 99px; padding: 2px 9px;
+        border: 1px solid transparent;
+        display: inline-flex; align-items: center;
+      }
+      .ent3-reg-chip {
+        font-size: 10.5px; font-weight: 700;
+        background: #f0f9ff; color: #0369a1;
+        border-radius: 99px; padding: 2px 9px;
+        border: 1px solid #bae6fd;
+      }
+
+      .ent3-remove {
+        border: none; background: none; cursor: pointer;
+        color: var(--text3); padding: 4px;
+        border-radius: 6px; flex-shrink: 0;
+        opacity: .45; transition: all .15s;
+        display: flex; align-items: center; justify-content: center;
+      }
+      .ent3-remove:hover { opacity: 1; color: #ef4444; background: #fff5f5; }
+
+      .ent3-card-body {
+        padding: 0 16px 12px;
+        display: flex; flex-direction: column; gap: 8px;
+        flex: 1;
+      }
+      .ent3-info-row {
+        display: flex; align-items: center; gap: 5px;
+        font-size: 12px; font-weight: 500; color: var(--text3);
+      }
+      .ent3-info-row svg { flex-shrink: 0; }
+      .ent3-activities { display: flex; flex-wrap: wrap; gap: 4px; }
+      .ent3-act-tag {
+        font-size: 10.5px; font-weight: 600;
+        background: #f8fafc; border: 1px solid #e8edf3;
+        border-radius: 5px; padding: 2px 7px; color: var(--text3);
+      }
+      .ent3-act-more {
+        background: #f0f9ff; border-color: #bae6fd; color: #0369a1;
+      }
+
+      .ent3-card-foot {
+        padding: 12px 16px;
+        border-top: 1px solid #f4f7fb;
+        display: flex; align-items: center; justify-content: space-between; gap: 10px;
+        background: #fafbff;
+      }
+      .ent3-progress { flex: 1; }
+      .ent3-progress-track {
+        height: 3px; background: #e8edf3; border-radius: 99px;
+        margin-bottom: 4px; overflow: hidden;
+      }
+      .ent3-progress-fill {
+        height: 100%; border-radius: 99px; transition: width .4s;
+      }
+      .ent3-progress-txt {
+        font-size: 10px; font-weight: 700;
+      }
+
+      .ent3-cta {
+        display: inline-flex; align-items: center; gap: 5px;
+        border: 1.5px solid var(--ent-accent, #3b82f6);
+        background: transparent; color: var(--ent-accent, #3b82f6);
+        border-radius: 8px; padding: 5px 11px;
+        font-size: 11.5px; font-weight: 700; cursor: pointer;
+        transition: all .15s; white-space: nowrap; flex-shrink: 0;
+        font-family: inherit;
+      }
+      .ent3-cta:hover {
+        background: var(--ent-accent, #3b82f6); color: #fff;
+      }
+
+      /* ── Form elements ── */
+      .ief-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px; }
+      .ief-grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; margin-bottom: 14px; }
+      .ief-fg     { display: flex; flex-direction: column; gap: 5px; }
+      .ief-lbl    { font-size: 11px; font-weight: 700; color: var(--text3); text-transform: uppercase; letter-spacing: .04em; }
+      .req        { color: #ef4444; }
+      .ief-input  {
+        border: 1.5px solid var(--border, #e2e8f0); border-radius: 8px;
+        padding: 8px 11px; font-size: 13px; color: var(--text);
+        background: #fff; width: 100%; box-sizing: border-box;
+        transition: border-color .15s; font-family: inherit;
+      }
+      .ief-input:focus { outline: none; border-color: var(--primary, #0f5a7d); box-shadow: 0 0 0 3px rgba(15,90,125,.07); }
+      .ief-chips  { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 4px; }
+      .ief-chip   {
+        border: 1.5px solid #e2e8f0; border-radius: 99px;
+        padding: 4px 12px; font-size: 12px; font-weight: 600; cursor: pointer;
+        color: var(--text3); background: #fff; transition: all .13s;
+        user-select: none;
+      }
+      .ief-chip.sel {
+        background: var(--primary, #0f5a7d); color: #fff;
+        border-color: var(--primary, #0f5a7d);
+      }
+      .ief-chip:hover:not(.sel) { border-color: var(--primary, #0f5a7d); color: var(--primary); }
+
+      /* ── Modals ── */
+      .op3-modal-overlay {
+        position: fixed; inset: 0;
+        background: rgba(15,20,40,.5);
+        display: flex; align-items: center; justify-content: center;
+        z-index: 9999; padding: 20px;
+        backdrop-filter: blur(4px);
+      }
+      .op3-modal {
+        background: #fff; border-radius: 18px;
+        width: 100%; max-width: 600px; max-height: 88vh;
+        display: flex; flex-direction: column;
+        box-shadow: 0 24px 64px rgba(0,0,0,.18);
+        animation: op3-modal-in .22s cubic-bezier(.22,.68,0,1.2);
+      }
+      .op3-modal-wide { max-width: 740px; }
+      @keyframes op3-modal-in {
+        from { transform: scale(.94) translateY(10px); opacity: 0; }
+        to   { transform: none; opacity: 1; }
+      }
+      .op3-modal-head {
+        display: flex; align-items: flex-start; justify-content: space-between;
+        padding: 22px 24px 18px; border-bottom: 1px solid #f1f5f9; flex-shrink: 0;
+      }
+      .op3-modal-title { font-size: 17px; font-weight: 800; color: var(--text); }
+      .op3-modal-sub   { font-size: 12.5px; color: var(--text3); margin-top: 3px; }
+      .op3-modal-close {
+        border: 1px solid #e8edf3; background: #f8fafc; border-radius: 8px;
+        width: 30px; height: 30px; cursor: pointer; flex-shrink: 0;
+        display: flex; align-items: center; justify-content: center;
+        color: var(--text3); transition: all .15s;
+      }
+      .op3-modal-close:hover { background: #fee2e2; color: #ef4444; border-color: #fca5a5; }
+      .op3-modal-body { overflow-y: auto; padding: 22px 24px; flex: 1; }
+      .op3-modal-foot {
+        display: flex; align-items: center; justify-content: space-between;
+        padding: 16px 24px; border-top: 1px solid #f1f5f9; flex-shrink: 0;
+        background: #fafbff; border-radius: 0 0 18px 18px;
+      }
+
+      /* Detail modal section titles */
+      .edm3-section {
+        font-size: 10.5px; font-weight: 800; text-transform: uppercase;
+        letter-spacing: .07em; color: var(--text3);
+        margin: 18px 0 10px; padding-bottom: 7px;
+        border-bottom: 1px solid #f1f5f9;
+      }
+      .edm3-section:first-child { margin-top: 0; }
+      .edm3-comp-pill {
+        font-size: 12px; font-weight: 700; color: var(--text3);
+        background: #f4f7fb; border-radius: 99px; padding: 5px 13px;
+        border: 1px solid #e8edf3;
+      }
+    `;
+    document.head.appendChild(style);
   }
 
   // ─────────────────────────────────────────────
   // EXPORTS
   // ─────────────────────────────────────────────
 
-  global.WZ_STEPS         = WZ_STEPS;
-  global.WZ_IDX           = WZ_IDX;
-  global.COMPLETION_STEPS = COMPLETION_STEPS;
-  global.calcCompletion   = calcCompletion;
-
-  global.openProfileWizard  = openProfileWizard;
-  global.closeProfileWizard = closeProfileWizard;
-  global.wzNext             = wzNext;
-  global.wzPrev             = wzPrev;
-  global.wzGoto             = wzGoto;
-  global.renderOrgProfile   = renderOrgProfile;
+  global.calcCompletion      = calcCompletion;
   global.refreshSidebarSteps = refreshSidebarSteps;
+  global.renderOrgProfile    = renderOrgProfile;
+  global.opYN                = opYN;
+  global.opToggleArr         = opToggleArr;
+  global.opSelChipSingle     = opSelChipSingle;
 
-  global.openAddLocationModal = openAddLocationModal;
-  global.saveLocation         = saveLocation;
-  global.removeLocation       = removeLocation;
-  global.openAddEntityModal   = openAddEntityModal;
-  global.saveLegalEntity      = saveLegalEntity;
-  global.removeLegalEntity    = removeLegalEntity;
-  global.addDepartment        = addDepartment;
-  global.quickAddDept         = quickAddDept;
-  global.removeDept           = removeDept;
-  global.addDivision          = addDivision;
-  global.removeDivision       = removeDivision;
-
-  global.opSel            = opSel;
-  global.opSelChipSingle  = opSelChipSingle;
-  global.opSelChipDeep    = opSelChipDeep;
-  global.opToggleArr      = opToggleArr;
-  global.opToggleDeepArr  = opToggleDeepArr;
-  global.opYN             = opYN;
-  global.opYNDeep         = opYNDeep;
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", injectStyles);
+  } else {
+    injectStyles();
+  }
 
 })(window);
