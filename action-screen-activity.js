@@ -315,9 +315,9 @@ function actdPaneOverview(a) {
                   onchange="actdArChange('${a.id}',this)">
             <option value="">— Select type —</option>
             <option value="Ask for Clarification">Ask for Clarification</option>
-            <option value="Update">Update</option>
+            ${document.body?.dataset?.userRole === 'assignee' ? '' : '<option value="Update">Update</option>'}
             <option value="Ask for Closure">Ask for Closure</option>
-            <option value="Ask for Open">Ask for Open</option>
+            ${document.body?.dataset?.userRole === 'assignee' ? '' : '<option value="Ask for Open">Ask for Open</option>'}
           </select>
         </div>
         <div class="tdp-ar-field">
@@ -715,6 +715,27 @@ window.actdArChange = function(actId, sel) {
   const n = notes[sel.value];
   if (n) { nd.style.display='block'; nd.style.background=n.bg; nd.style.color=n.color; nd.textContent=n.text; }
   else   { nd.style.display='none'; }
+
+  if (document.body?.dataset?.userRole === 'assignee') {
+    const personSel = document.getElementById(`actd-ar-person-${actId}`);
+    if (!personSel) return;
+    const a = (typeof ACTD_DUMMY !== 'undefined' && ACTD_DUMMY[actId]) ? ACTD_DUMMY[actId] : {};
+    if (sel.value === 'Ask for Closure') {
+      personSel.innerHTML = `
+        <option value="">— Select person —</option>
+        <option value="Priya Sharma">SPOC: Priya Sharma</option>
+        ${a.reviewer ? `<option value="${a.reviewer}">Reviewer: ${a.reviewer}</option>` : ''}
+        ${a.owner    ? `<option value="${a.owner}">Owner / Approver: ${a.owner}</option>` : ''}
+      `;
+    } else {
+      personSel.innerHTML = `
+        <option value="">— Select person —</option>
+        ${a.assignee ? `<option value="${a.assignee}">Assignee: ${a.assignee}</option>` : ''}
+        ${a.reviewer ? `<option value="${a.reviewer}">Reviewer: ${a.reviewer}</option>` : ''}
+        ${a.owner    ? `<option value="${a.owner}">Owner / Approver: ${a.owner}</option>` : ''}
+      `;
+    }
+  }
 };
 
 window.actdArSubmit = function(actId) {

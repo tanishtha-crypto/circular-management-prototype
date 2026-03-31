@@ -1511,16 +1511,56 @@ function tdInfoRow(label, value) {
 function tdPaneOverview(t) {
   const sc = s => ({ Complete:'#10b981', 'In Progress':'#f59e0b', Overdue:'#ef4444', Open:'#6366f1' })[s] || '#64748b';
 
-  const wfSteps = ['Assign','Draft','Execution','Review','Closed'];
-  const wfIdx   = wfSteps.indexOf(t.workflowStage);
+  const wfStatusMap = { 'Open': 1, 'In Progress': 2, 'Overdue': 2, 'Complete': 4 };
+  const wfActiveIdx = wfStatusMap[t.status] ?? 1;
+  const wfOverdue   = t.status === 'Overdue';
+  const wfDone      = t.status === 'Complete';
 
-  const stepPeople = [
-    { step:'Assign',    role:'Assignee', name: t.assignee || '—', dept: t.department || '', level: 1 },
-    { step:'Draft',     role:'Owner',    name: t.owner    || '—', dept: '',                 level: 2 },
-    { step:'Execution', role:'Assignee', name: t.assignee || '—', dept: t.department || '', level: 3 },
-    { step:'Review',    role:'Reviewer', name: t.reviewer || '—', dept: '',                 level: 4 },
-    { step:'Closed',    role:'Approver', name: t.owner    || '—', dept: '',                 level: 5 },
+  const wfStages = [
+    { label: 'Circular Received', role: 'Central Office', name: 'CO Team'               },
+    { label: 'Assigned',          role: 'SPOC',           name: 'Priya Sharma'          },
+    { label: 'In Progress',       role: 'Assignee',       name: t.assignee  || '—'      },
+    { label: 'Under Review',      role: 'Reviewer',       name: t.reviewer  || 'Pending' },
+    { label: 'Closed',            role: 'Approver',       name: t.owner     || 'Pending' },
   ];
+
+  const wfStepperHTML = wfStages.map((s, i) => {
+    const done   = i < wfActiveIdx;
+    const curr   = i === wfActiveIdx;
+    const cls    = done ? 'done' : curr ? 'current' : '';
+    const isLast = i === wfStages.length - 1;
+    return `
+      <div class="tdp-wfi-step ${cls}">
+        <div class="tdp-wfi-dot">${done ? '✓' : i + 1}</div>
+        <div class="tdp-wfi-lbl">${s.label}</div>
+      </div>
+      ${!isLast ? `<div class="tdp-wfi-line ${done ? 'done' : ''}"></div>` : ''}
+    `;
+  }).join('');
+
+  const wfPeopleHTML = wfStages.map((s, i) => {
+    const done    = i < wfActiveIdx;
+    const curr    = i === wfActiveIdx;
+    const pending = i > wfActiveIdx;
+    const stageSt    = done ? 'Completed' : curr ? (wfOverdue ? '⚠ Overdue' : 'Active') : 'Pending';
+    const stageColor = done ? '#10b981'   : curr ? (wfOverdue ? '#ef4444'   : '#6366f1') : '#94a3b8';
+    const avBg       = done ? '#dcfce7'   : curr ? (wfOverdue ? '#fee2e2'   : '#eef2ff') : '#f1f5f9';
+    const avColor    = done ? '#166534'   : curr ? (wfOverdue ? '#991b1b'   : '#4338ca') : '#94a3b8';
+    const avBorder   = done ? '#86efac'   : curr ? (wfOverdue ? '#fca5a5'   : '#c7d2fe') : '#e2e8f0';
+    return `
+      <div class="tdp-wfp-card" style="${pending ? 'opacity:0.45' : ''}">
+        <span class="tdp-av" style="background:${avBg};color:${avColor};border-color:${avBorder}">
+          ${done ? '✓' : tdInitials(s.name)}
+        </span>
+        <div class="tdp-wfp-info">
+          <div class="tdp-wfp-role">${s.role}</div>
+          <div class="tdp-wfp-name">${s.name}</div>
+          <div style="font-size:10px;font-weight:700;color:${stageColor};margin-top:2px;
+                      text-transform:uppercase;letter-spacing:.04em">${stageSt}</div>
+        </div>
+      </div>
+    `;
+  }).join('');
 
   return `
   <div class="tdp-inner">
@@ -1544,9 +1584,9 @@ function tdPaneOverview(t) {
           <select class="tdp-input tdp-ar-sel" id="tdp-ar-type-${t.id}" onchange="_tdArChange('${t.id}',this)">
             <option value="">— Select type —</option>
             <option value="Ask for Clarification">Ask for Clarification</option>
-            <option value="Update">Update</option>
+            ${document.body?.dataset?.userRole === 'assignee' ? '' : '<option value="Update">Update</option>'}
             <option value="Ask for Closure">Ask for Closure</option>
-            <option value="Ask for Open">Ask for Open</option>
+            ${document.body?.dataset?.userRole === 'assignee' ? '' : '<option value="Ask for Open">Ask for Open</option>'}
           </select>
         </div>
         <div class="tdp-ar-field">
@@ -1574,38 +1614,27 @@ function tdPaneOverview(t) {
     <div class="tdp-section-label" style="margin-top:28px">Workflow</div>
     <div class="tdp-wf-details-card">
 
-      <!-- Current level pill -->
-      <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px">
-        <span style="font-size:10px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.07em">Current Level</span>
-        <span style="background:#eef2ff;color:#4338ca;border:1px solid #c7d2fe;border-radius:20px;font-size:12px;font-weight:800;padding:3px 12px;">
-          Level ${t.workflowLevel || 0} — ${t.workflowStage || '—'}
+      <!-- Progress summary row -->
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+        <span style="font-size:10px;font-weight:700;color:#94a3b8;text-transform:uppercase;
+                     letter-spacing:.07em;white-space:nowrap">Current Stage</span>
+        <span style="background:${wfDone?'#dcfce7':wfOverdue?'#fee2e2':'#eef2ff'};
+                     color:${wfDone?'#166534':wfOverdue?'#991b1b':'#4338ca'};
+                     border:1px solid ${wfDone?'#86efac':wfOverdue?'#fca5a5':'#c7d2fe'};
+                     border-radius:20px;font-size:12px;font-weight:700;padding:3px 12px;white-space:nowrap">
+          ${wfActiveIdx + 1} / ${wfStages.length} — ${wfStages[wfActiveIdx].label}${wfOverdue ? ' · ⚠ Overdue' : ''}
         </span>
+        <div style="flex:1;min-width:60px;height:5px;background:#e2e8f0;border-radius:99px;overflow:hidden">
+          <div style="height:100%;width:${Math.round(((wfActiveIdx + 1) / wfStages.length) * 100)}%;
+                      background:${wfOverdue?'#ef4444':wfDone?'#10b981':'#6366f1'};border-radius:99px"></div>
+        </div>
       </div>
 
-      <!-- Stepper with people + level badge -->
-      <div class="tdp-wf-stepper-people">
-        ${wfSteps.map((st, i) => {
-          const p    = stepPeople[i];
-          const done = i <= wfIdx;
-          const curr = st === t.workflowStage;
-          return `
-          <div class="tdp-wfsp-col ${done ? 'done' : ''} ${curr ? 'current' : ''}">
-            <div class="tdp-wfsp-level-badge ${done ? 'done' : ''} ${curr ? 'current' : ''}">L${p.level}</div>
-            <div class="tdp-wfsp-dot">${i < wfIdx ? '✓' : i+1}</div>
-            <div class="tdp-wfsp-step-lbl">${st}</div>
-            <div class="tdp-wfsp-person-card">
-              <span class="tdp-av tdp-av-sm">${tdInitials(p.name)}</span>
-              <div>
-                <div class="tdp-wfsp-role">${p.role}</div>
-                <div class="tdp-wfsp-name">${p.name}</div>
-                ${p.dept ? `<div class="tdp-wfsp-dept">${p.dept}</div>` : ''}
-              </div>
-            </div>
-          </div>
-          ${i < wfSteps.length-1 ? `<div class="tdp-wfsp-connector ${i < wfIdx ? 'done' : ''}"></div>` : ''}
-          `;
-        }).join('')}
-      </div>
+      <!-- Step dots -->
+      <div class="tdp-wf-stepper-inline">${wfStepperHTML}</div>
+
+      <!-- People cards -->
+      <div class="tdp-wf-people">${wfPeopleHTML}</div>
 
     </div>
 
@@ -1777,6 +1806,27 @@ window._tdArChange = function (taskId, sel) {
   const n = notes[sel.value];
   if (n) { noteDisp.style.display = 'block'; noteDisp.style.background = n.bg; noteDisp.style.color = n.color; noteDisp.textContent = n.text; }
   else { noteDisp.style.display = 'none'; }
+
+  if (document.body?.dataset?.userRole === 'assignee') {
+    const personSel = document.getElementById(`tdp-ar-person-${taskId}`);
+    if (!personSel) return;
+    const t = getTasks().find(tk => tk.id === taskId) || {};
+    if (sel.value === 'Ask for Closure') {
+      personSel.innerHTML = `
+        <option value="">— Select person —</option>
+        <option value="Priya Sharma">SPOC: Priya Sharma</option>
+        ${t.reviewer ? `<option value="${t.reviewer}">Reviewer: ${t.reviewer}</option>` : ''}
+        ${t.owner    ? `<option value="${t.owner}">Owner / Approver: ${t.owner}</option>` : ''}
+      `;
+    } else {
+      personSel.innerHTML = `
+        <option value="">— Select person —</option>
+        ${t.assignee ? `<option value="${t.assignee}">Assignee: ${t.assignee}</option>` : ''}
+        ${t.reviewer ? `<option value="${t.reviewer}">Reviewer: ${t.reviewer}</option>` : ''}
+        ${t.owner    ? `<option value="${t.owner}">Owner / Approver: ${t.owner}</option>` : ''}
+      `;
+    }
+  }
 };
 
 window._tdArSubmit = function (taskId) {

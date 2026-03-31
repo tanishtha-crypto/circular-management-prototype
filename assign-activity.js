@@ -226,7 +226,7 @@
 //             <th class="aa-th-chk"></th>
 //             <th>Act ID</th>
 //             <th>Action</th>
-          
+
 //             <th>Dept</th>
 //             <th>Assignee</th>
 //             <th>Due Date</th>
@@ -308,7 +308,7 @@
 //   <th class="aa-col-sub-th"></th>
 //   <th class="aa-col-sub-th">Act ID</th>
 //   <th class="aa-col-sub-th">Action</th>
- 
+
 //   <th class="aa-col-sub-th">Dept</th>
 //   <th class="aa-col-sub-th">Assignee</th>
 //   <th class="aa-col-sub-th">Due Date</th>
@@ -352,7 +352,7 @@
 //     <span class="aa-act-name">${act.name}</span>
 //   </td>
 
- 
+
 //   <!-- Dept -->
 //   <td><span class="aa-dept-chip aa-dept-${g.dept.toLowerCase()}">${g.dept}</span></td>
 
@@ -1052,90 +1052,90 @@
  *  - UI mirrors assign-obligation.js
  */
 
-const AA_DEPTS = ['Compliance','Risk','Legal','IT','Operations','HR','Finance'];
+const AA_DEPTS = ['Compliance', 'Risk', 'Legal', 'IT', 'Operations', 'HR', 'Finance'];
 const AA_PEOPLE = {
-  Compliance: ['Sneha Das','Meera Pillai','Arjun Kumar','Ravi Menon'],
-  Risk:       ['Anand Krishnan','Neha Rao','Vikram Singh','Pooja Shah'],
-  Legal:      ['Priya Nair','Suresh Iyer','Kavitha Reddy'],
-  IT:         ['Raj Iyer','Sanjay Mehta','Divya Nair','Arun Thomas'],
-  Operations: ['Suresh Kumar','Lakshmi Rao','Rohit Gupta'],
-  HR:         ['Priya Sharma','Aditya Patel','Reshma Nair'],
-  Finance:    ['Rahul Verma','Shalini Menon','Kiran Bhat'],
+  Compliance: ['Sneha Das', 'Meera Pillai', 'Arjun Kumar', 'Ravi Menon'],
+  Risk: ['Anand Krishnan', 'Neha Rao', 'Vikram Singh', 'Pooja Shah'],
+  Legal: ['Priya Nair', 'Suresh Iyer', 'Kavitha Reddy'],
+  IT: ['Raj Iyer', 'Sanjay Mehta', 'Divya Nair', 'Arun Thomas'],
+  Operations: ['Suresh Kumar', 'Lakshmi Rao', 'Rohit Gupta'],
+  HR: ['Priya Sharma', 'Aditya Patel', 'Reshma Nair'],
+  Finance: ['Rahul Verma', 'Shalini Menon', 'Kiran Bhat'],
 };
 
 /* ── DATA ── */
 function _aaGetActivities(circId) {
   const base = [
     {
-      clauseId:'C1.1', clauseText:'The entity shall establish and maintain a Board-approved compliance policy framework.',
-      obligations:[
+      clauseId: 'C1.1', clauseText: 'The entity shall establish and maintain a Board-approved compliance policy framework.',
+      obligations: [
         {
-          obId:'OB-001', obText:'Establish and maintain a Board-approved compliance policy, reviewed annually.',
-          dept:'Compliance',
-          activities:[
-            { id:'AV-001', name:'Draft compliance policy document',        assignee:'Sneha Das',    status:'Assigned', dueDate:'2025-04-15' },
-            { id:'AV-002', name:'Present policy to Board for approval',    assignee:null,           status:'Unassigned', dueDate:'2025-04-30' },
-            { id:'AV-003', name:'Distribute approved policy to all depts', assignee:'Meera Pillai', status:'Assigned', dueDate:'2025-05-10' },
-            { id:'AV-004', name:'Schedule annual review cycle',            assignee:null,           status:'Unassigned', dueDate:'2025-05-15' },
+          obId: 'OB-001', obText: 'Establish and maintain a Board-approved compliance policy, reviewed annually.',
+          dept: 'Compliance',
+          activities: [
+            { id: 'AV-001', name: 'Draft compliance policy document', assignee: 'Sneha Das', status: 'Assigned', dueDate: '2025-04-15' },
+            { id: 'AV-002', name: 'Present policy to Board for approval', assignee: null, status: 'Unassigned', dueDate: '2025-04-30' },
+            { id: 'AV-003', name: 'Distribute approved policy to all depts', assignee: 'Meera Pillai', status: 'Assigned', dueDate: '2025-05-10' },
+            { id: 'AV-004', name: 'Schedule annual review cycle', assignee: null, status: 'Unassigned', dueDate: '2025-05-15' },
           ]
         },
       ]
     },
     {
-      clauseId:'C1.2', clauseText:'A designated Compliance Officer shall be appointed with Board-level reporting.',
-      obligations:[
+      clauseId: 'C1.2', clauseText: 'A designated Compliance Officer shall be appointed with Board-level reporting.',
+      obligations: [
         {
-          obId:'OB-003', obText:'Appoint a designated Compliance Officer with direct Board Audit Committee reporting.',
-          dept:'Compliance',
-          activities:[
-            { id:'AV-005', name:'Identify and shortlist CO candidates',  assignee:'Arjun Kumar', status:'Assigned', dueDate:'2025-03-31' },
-            { id:'AV-006', name:'Issue formal appointment letter',        assignee:'Arjun Kumar', status:'Assigned', dueDate:'2025-04-05' },
-            { id:'AV-007', name:'Notify regulator of CO appointment',    assignee:null,          status:'Unassigned', dueDate:'2025-04-20' },
+          obId: 'OB-003', obText: 'Appoint a designated Compliance Officer with direct Board Audit Committee reporting.',
+          dept: 'Compliance',
+          activities: [
+            { id: 'AV-005', name: 'Identify and shortlist CO candidates', assignee: 'Arjun Kumar', status: 'Assigned', dueDate: '2025-03-31' },
+            { id: 'AV-006', name: 'Issue formal appointment letter', assignee: 'Arjun Kumar', status: 'Assigned', dueDate: '2025-04-05' },
+            { id: 'AV-007', name: 'Notify regulator of CO appointment', assignee: null, status: 'Unassigned', dueDate: '2025-04-20' },
           ]
         },
       ]
     },
     {
-      clauseId:'C2.1', clauseText:'All customer-facing processes must reflect updated regulatory requirements within 30 days.',
-      obligations:[
+      clauseId: 'C2.1', clauseText: 'All customer-facing processes must reflect updated regulatory requirements within 30 days.',
+      obligations: [
         {
-          obId:'OB-006', obText:'Update all customer-facing processes within 30 days of the effective date.',
-          dept:'Operations',
-          activities:[
-            { id:'AV-013', name:'Map all affected customer-facing processes', assignee:'Suresh Kumar', status:'Assigned',   dueDate:'2025-04-08' },
-            { id:'AV-014', name:'Update SOPs and process documentation',      assignee:null,           status:'Unassigned', dueDate:'2025-04-20' },
-            { id:'AV-015', name:'Train frontline staff on updated processes',  assignee:'Lakshmi Rao',  status:'Assigned',   dueDate:'2025-05-01' },
+          obId: 'OB-006', obText: 'Update all customer-facing processes within 30 days of the effective date.',
+          dept: 'Operations',
+          activities: [
+            { id: 'AV-013', name: 'Map all affected customer-facing processes', assignee: 'Suresh Kumar', status: 'Assigned', dueDate: '2025-04-08' },
+            { id: 'AV-014', name: 'Update SOPs and process documentation', assignee: null, status: 'Unassigned', dueDate: '2025-04-20' },
+            { id: 'AV-015', name: 'Train frontline staff on updated processes', assignee: 'Lakshmi Rao', status: 'Assigned', dueDate: '2025-05-01' },
           ]
         },
       ]
     },
     {
-      clauseId:'C2.2', clauseText:'Transaction monitoring systems shall detect and report suspicious activity in real-time.',
-      obligations:[
+      clauseId: 'C2.2', clauseText: 'Transaction monitoring systems shall detect and report suspicious activity in real-time.',
+      obligations: [
         {
-          obId:'OB-008', obText:'Upgrade transaction monitoring to real-time detection with max 5s latency.',
-          dept:'IT',
-          activities:[
-            { id:'AV-008', name:'Assess current TMS gaps vs requirements', assignee:'Raj Iyer',     status:'Assigned',   dueDate:'2025-04-10' },
-            { id:'AV-009', name:'Evaluate and select TMS vendor',          assignee:null,           status:'Unassigned', dueDate:'2025-04-25' },
-            { id:'AV-010', name:'Configure real-time alert rules',         assignee:'Sanjay Mehta', status:'Assigned',   dueDate:'2025-05-15' },
-            { id:'AV-011', name:'UAT testing and performance benchmark',   assignee:null,           status:'Unassigned', dueDate:'2025-05-30' },
-            { id:'AV-012', name:'Go-live and post-deployment monitoring',  assignee:null,           status:'Unassigned', dueDate:'2025-06-15' },
+          obId: 'OB-008', obText: 'Upgrade transaction monitoring to real-time detection with max 5s latency.',
+          dept: 'IT',
+          activities: [
+            { id: 'AV-008', name: 'Assess current TMS gaps vs requirements', assignee: 'Raj Iyer', status: 'Assigned', dueDate: '2025-04-10' },
+            { id: 'AV-009', name: 'Evaluate and select TMS vendor', assignee: null, status: 'Unassigned', dueDate: '2025-04-25' },
+            { id: 'AV-010', name: 'Configure real-time alert rules', assignee: 'Sanjay Mehta', status: 'Assigned', dueDate: '2025-05-15' },
+            { id: 'AV-011', name: 'UAT testing and performance benchmark', assignee: null, status: 'Unassigned', dueDate: '2025-05-30' },
+            { id: 'AV-012', name: 'Go-live and post-deployment monitoring', assignee: null, status: 'Unassigned', dueDate: '2025-06-15' },
           ]
         },
       ]
     },
     {
-      clauseId:'C3.2', clauseText:'Annual third-party audit of compliance infrastructure, findings to Board within 30 days.',
-      obligations:[
+      clauseId: 'C3.2', clauseText: 'Annual third-party audit of compliance infrastructure, findings to Board within 30 days.',
+      obligations: [
         {
-          obId:'OB-012', obText:'Annual third-party audit of compliance infrastructure, findings to Board in 30 days.',
-          dept:'Risk',
-          activities:[
-            { id:'AV-016', name:'Identify and shortlist audit firms',  assignee:'Anand Krishnan', status:'Assigned',   dueDate:'2025-05-01' },
-            { id:'AV-017', name:'Define audit scope and deliverables', assignee:'Neha Rao',       status:'Assigned',   dueDate:'2025-05-10' },
-            { id:'AV-018', name:'Conduct audit and review findings',   assignee:null,             status:'Unassigned', dueDate:'2025-06-30' },
-            { id:'AV-019', name:'Present audit report to Board',       assignee:null,             status:'Unassigned', dueDate:'2025-07-30' },
+          obId: 'OB-012', obText: 'Annual third-party audit of compliance infrastructure, findings to Board in 30 days.',
+          dept: 'Risk',
+          activities: [
+            { id: 'AV-016', name: 'Identify and shortlist audit firms', assignee: 'Anand Krishnan', status: 'Assigned', dueDate: '2025-05-01' },
+            { id: 'AV-017', name: 'Define audit scope and deliverables', assignee: 'Neha Rao', status: 'Assigned', dueDate: '2025-05-10' },
+            { id: 'AV-018', name: 'Conduct audit and review findings', assignee: null, status: 'Unassigned', dueDate: '2025-06-30' },
+            { id: 'AV-019', name: 'Present audit report to Board', assignee: null, status: 'Unassigned', dueDate: '2025-07-30' },
           ]
         },
       ]
@@ -1153,38 +1153,52 @@ function _aaAllActs(circId) {
 /* ── CIRCULAR REF META ── */
 function _aaCircMeta(circId) {
   return {
-    circularRef: circId, regulator:'RBI', issueDate:'01 Apr 2024', effectiveDate:'01 Jul 2024',
-    dueDate:'31 Mar 2025', legalArea:'Banking Regulation', subLegalArea:'Prudential Norms',
-    act:'Banking Regulation Act 1949', section:'Section 12', subsection:'Clause (a)',
-    frequency:'Monthly', regulatoryBody:'Reserve Bank of India',
-    category:'Mandatory Compliance', type:'Master Direction',
-    docUrl:'#', docName:'RBI_Master_Direction_2024.pdf',
+    circularRef: circId, regulator: 'RBI', issueDate: '01 Apr 2024', effectiveDate: '01 Jul 2024',
+    dueDate: '31 Mar 2025', legalArea: 'Banking Regulation', subLegalArea: 'Prudential Norms',
+    act: 'Banking Regulation Act 1949', section: 'Section 12', subsection: 'Clause (a)',
+    frequency: 'Monthly', regulatoryBody: 'Reserve Bank of India',
+    category: 'Mandatory Compliance', type: 'Master Direction',
+    docUrl: '#', docName: 'RBI_Master_Direction_2024.pdf',
   };
 }
 
-function _aaSafeId(id){ return (id||'').replace(/\./g,'-').replace(/[^a-zA-Z0-9_-]/g,''); }
+function _aaSafeId(id) { return (id || '').replace(/\./g, '-').replace(/[^a-zA-Z0-9_-]/g, ''); }
 
 /* ── MAIN RENDER ── */
-window.renderAssignActivity = function(circId, deptFilter) {
+window.renderAssignActivity = function (circId, deptFilter, activeTab = 'activities') {
   const area = document.getElementById('content-area');
   if (!area) return;
   _aaInjectStyles();
+
   const circs = (typeof CMS_DATA !== 'undefined' && CMS_DATA.circulars) ? CMS_DATA.circulars : [
-    { id:'CIRC-001', title:'Cybersecurity Framework for Regulated Entities',      regulator:'RBI'   },
-    { id:'CIRC-002', title:'Enhanced KYC & AML Compliance Directive',             regulator:'SEBI'  },
-    { id:'CIRC-003', title:'Operational Risk Management Guidelines',              regulator:'RBI'   },
-    { id:'CIRC-005', title:'Third-Party & Vendor Risk Management Framework',      regulator:'IRDAI' },
+    { id: 'CIRC-001', title: 'Cybersecurity Framework for Regulated Entities', regulator: 'RBI' },
+    { id: 'CIRC-002', title: 'Enhanced KYC & AML Compliance Directive', regulator: 'SEBI' },
+    { id: 'CIRC-003', title: 'Operational Risk Management Guidelines', regulator: 'RBI' },
+    { id: 'CIRC-005', title: 'Third-Party & Vendor Risk Management Framework', regulator: 'IRDAI' },
   ];
-  const activeId   = circId || circs[0]?.id || 'CIRC-001';
+
+  const activeId = circId || circs[0]?.id || 'CIRC-001';
   const activeCirc = circs.find(c => c.id === activeId) || circs[0];
-  area.innerHTML = _aaBuildPage(circs, activeCirc, deptFilter || '');
-  _aaBindAll(activeCirc.id, deptFilter || '');
+
+  // only shell here
+  area.innerHTML = _aaBuildPage(circs, activeCirc, deptFilter || '', activeTab);
+
+  // render body based on tab
+  if (activeTab === 'obligation') {
+    if (typeof window.renderAssignObligation === 'function') {
+      window.renderAssignObligation(activeCirc.id, deptFilter || '');
+    }
+  } else {
+    _aaRenderActivitiesContent(activeCirc.id);
+  }
+
+  _aaBindAll(activeCirc.id, deptFilter || '', activeTab);
 };
 
 /* ── PAGE SHELL ── */
-function _aaBuildPage(circs, activeCirc, deptFilter) {
-  const allActs  = _aaAllActs(activeCirc.id);
-  const total    = allActs.length;
+function _aaBuildPage(circs, activeCirc, deptFilter, activeTab = 'activities') {
+  const allActs = _aaAllActs(activeCirc.id);
+  const total = allActs.length;
   const assigned = allActs.filter(a => a.status === 'Assigned').length;
   const unassigned = total - assigned;
 
@@ -1198,10 +1212,23 @@ function _aaBuildPage(circs, activeCirc, deptFilter) {
         <div class="aa-head-eyebrow">Department Assignment Console</div>
         <div class="aa-head-title">Activity Assignment</div>
         <div class="aa-head-sub">Clause → Obligation → Activity</div>
+       
       </div>
       <div class="aa-head-right">
         <button class="aa-btn aa-btn-ghost" onclick="window.history.back()">← Back</button>
         <button class="aa-btn aa-btn-pri" onclick="_aaSaveAll('${activeCirc.id}')">💾 Save All</button>
+         <div class="aa-tab-switch">
+  <button
+    class="aa-tab-btn ${activeTab === 'activities' ? 'active' : ''}"
+    onclick="_aaSwitchMainTab('activities','${activeCirc.id}')">
+    Activities
+  </button>
+  <button
+    class="aa-tab-btn ${activeTab === 'obligation' ? 'active' : ''}"
+    onclick="_aaSwitchMainTab('obligation','${activeCirc.id}')">
+    Obligation
+  </button>
+</div>
       </div>
     </div>
 
@@ -1211,13 +1238,13 @@ function _aaBuildPage(circs, activeCirc, deptFilter) {
         <div class="aa-custom-sel-wrap" id="aa-csel-wrap">
           <button class="aa-custom-sel-btn" id="aa-csel-btn">
             <span class="aa-csel-id">${activeCirc.id}</span>
-            <span class="aa-csel-title">${activeCirc.title.substring(0,34)}…</span>
+            <span class="aa-csel-title">${activeCirc.title.substring(0, 34)}…</span>
             <span class="aa-csel-arr">▾</span>
           </button>
           <div class="aa-csel-drop" id="aa-csel-drop" style="display:none;">
             <input class="aa-csel-search" id="aa-csel-search" placeholder="Search…" autocomplete="off"/>
             <div class="aa-csel-list">
-              ${circs.map(c=>`<div class="aa-csel-item ${c.id===activeCirc.id?'active':''}" onclick="_aaSwitchCirc('${c.id}')">
+              ${circs.map(c => `<div class="aa-csel-item ${c.id === activeCirc.id ? 'active' : ''}" onclick="_aaSwitchCirc('${c.id}')">
                 <span class="aa-csel-item-id">${c.id}</span>
                 <span class="aa-csel-item-title">${c.title}</span>
               </div>`).join('')}
@@ -1229,7 +1256,7 @@ function _aaBuildPage(circs, activeCirc, deptFilter) {
         <span class="aa-fc-label">Department</span>
         <select class="aa-flt-sel" id="aa-filter-dept" onchange="_aaApplyFilters('${activeCirc.id}')">
           <option value="">All Departments</option>
-          ${AA_DEPTS.map(d=>`<option ${d===deptFilter?'selected':''}>${d}</option>`).join('')}
+          ${AA_DEPTS.map(d => `<option ${d === deptFilter ? 'selected' : ''}>${d}</option>`).join('')}
         </select>
       </div>
       <div class="aa-fc-field">
@@ -1273,9 +1300,7 @@ function _aaBuildPage(circs, activeCirc, deptFilter) {
       </div>
     </div>
 
-    <div class="aa-clauses-list" id="aa-clauses-list">
-      ${_aaGetActivities(activeCirc.id).map((cl,ci) => _aaRenderClauseCard(cl, ci, activeCirc.id)).join('')}
-    </div>
+    <div id="aa-tab-content"></div>
   </div>
 
   <!-- BULK BAR -->
@@ -1290,7 +1315,7 @@ function _aaBuildPage(circs, activeCirc, deptFilter) {
         <span class="aa-bulk-lbl">Department</span>
         <select class="aa-bulk-sel" id="aa-bulk-dept">
           <option value="">Select dept…</option>
-          ${AA_DEPTS.map(d=>`<option value="${d}">${d}</option>`).join('')}
+          ${AA_DEPTS.map(d => `<option value="${d}">${d}</option>`).join('')}
         </select>
       </div>
       <div class="aa-bulk-f">
@@ -1311,13 +1336,25 @@ function _aaBuildPage(circs, activeCirc, deptFilter) {
 </div>`;
 }
 
+
+function _aaRenderActivitiesContent(circId) {
+  const mount = document.getElementById('aa-tab-content');
+  if (!mount) return;
+
+  mount.innerHTML = `
+    <div class="aa-clauses-list" id="aa-clauses-list">
+      ${_aaGetActivities(circId).map((cl, ci) => _aaRenderClauseCard(cl, ci, circId)).join('')}
+    </div>
+  `;
+}
+
 /* ── CLAUSE CARD (accordion) ── */
 function _aaRenderClauseCard(cl, ci, circId) {
   const allActs = cl.obligations.flatMap(ob => ob.activities);
   const assignedCnt = allActs.filter(a => a.status === 'Assigned').length;
   const safeClId = _aaSafeId(cl.clauseId);
 
-  const obligationsHtml = cl.obligations.map((ob,oi) => _aaRenderObGroup(ob, cl, oi, safeClId, circId)).join('');
+  const obligationsHtml = cl.obligations.map((ob, oi) => _aaRenderObGroup(ob, cl, oi, safeClId, circId)).join('');
 
   return `
 <div class="aa-cl-card" id="aa-cl-card-${safeClId}">
@@ -1327,13 +1364,13 @@ function _aaRenderClauseCard(cl, ci, circId) {
       <span class="aa-cl-id-badge">${cl.clauseId}</span>
       <span class="aa-cl-text">${cl.clauseText}</span>
       <div class="aa-cl-right">
-        <span class="aa-cl-meta">${cl.obligations.length} obligation${cl.obligations.length!==1?'s':''} · ${allActs.length} activities</span>
+        <span class="aa-cl-meta">${cl.obligations.length} obligation${cl.obligations.length !== 1 ? 's' : ''} · ${allActs.length} activities</span>
         <span class="aa-cl-prog-pill">${assignedCnt}/${allActs.length} assigned</span>
       </div>
     </div>
   </div>
   <div class="aa-cl-body" id="aa-cl-body-${safeClId}" style="display:none;">
-    ${cl.obligations.map((ob,oi) => _aaRenderObGroup(ob, cl, oi, safeClId, circId)).join('')}
+    ${cl.obligations.map((ob, oi) => _aaRenderObGroup(ob, cl, oi, safeClId, circId)).join('')}
   </div>
 </div>`;
 }
@@ -1352,7 +1389,7 @@ function _aaRenderObGroup(ob, cl, oi, safeClId, circId) {
         <div class="aa-ob-title-row">
           <span class="aa-ob-id-badge">${ob.obId}</span>
           <span class="aa-ob-text-inline">${ob.obText}</span>
-          <span class="aa-ob-act-total">${ob.activities.length} activit${ob.activities.length!==1?'ies':'y'}</span>
+          <span class="aa-ob-act-total">${ob.activities.length} activit${ob.activities.length !== 1 ? 'ies' : 'y'}</span>
           <span class="aa-ob-prog-pill">${assignedCnt}/${ob.activities.length} assigned</span>
         </div>
       </div>
@@ -1390,11 +1427,11 @@ function _aaRenderActRow(act, ob, cl, circId) {
   const safeObId = _aaSafeId(ob.obId);
 
   return `
-<tr class="aa-act-row ${act.status==='Unassigned'?'aa-act-unassigned':''}"
+<tr class="aa-act-row ${act.status === 'Unassigned' ? 'aa-act-unassigned' : ''}"
     id="aa-row-${act.id}"
     data-actid="${act.id}" data-circid="${circId}" data-obid="${safeObId}"
-    data-dept="${ob.dept||''}" data-status="${act.status}"
-    data-duedate="${act.dueDate||''}"
+    data-dept="${ob.dept || ''}" data-status="${act.status}"
+    data-duedate="${act.dueDate || ''}"
     data-search="${act.name.toLowerCase()} ${ob.obText.toLowerCase()} ${ob.dept.toLowerCase()}">
   <td class="aa-td-chk" onclick="event.stopPropagation()">
     <label class="aa-check-wrap">
@@ -1408,15 +1445,15 @@ function _aaRenderActRow(act, ob, cl, circId) {
   <td onclick="_aaOpenDrawer('${act.id}','${ob.obId}','${cl.clauseId}','${circId}')" class="aa-td-name">
     <span class="aa-act-name">${act.name}</span>
   </td>
-  <td><span class="aa-dept-chip aa-dept-${(ob.dept||'').toLowerCase()}">${ob.dept||'—'}</span></td>
+  <td><span class="aa-dept-chip aa-dept-${(ob.dept || '').toLowerCase()}">${ob.dept || '—'}</span></td>
   <td onclick="event.stopPropagation()" class="aa-td-assignee">
     <div class="aa-ita-wrap" id="aa-ita-wrap-${act.id}">
       ${act.assignee
-        ? `<div class="aa-assignee-filled" onclick="_aaOpenDrawer('${act.id}','${ob.obId}','${cl.clauseId}','${circId}')">
-             <span class="aa-av">${act.assignee.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2)}</span>
+      ? `<div class="aa-assignee-filled" onclick="_aaOpenDrawer('${act.id}','${ob.obId}','${cl.clauseId}','${circId}')">
+             <span class="aa-av">${act.assignee.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2)}</span>
              <span class="aa-assignee-name">${act.assignee}</span>
            </div>`
-        : `<div class="aa-assignee-empty">
+      : `<div class="aa-assignee-empty">
              <input class="aa-inline-assignee" placeholder="Assign…" autocomplete="off"
                     oninput="_aaInlineTypeahead('${act.id}','${ob.dept}',this.value,'${circId}','${ob.obId}','${cl.clauseId}')"
                     onfocus="_aaInlineTypeahead('${act.id}','${ob.dept}',this.value,'${circId}','${ob.obId}','${cl.clauseId}')"/>
@@ -1425,8 +1462,8 @@ function _aaRenderActRow(act, ob, cl, circId) {
     </div>
   </td>
   <td onclick="event.stopPropagation()">
-    <input type="date" class="aa-inline-date ${act.dueDate?'filled':''}"
-           value="${act.dueDate||''}"
+    <input type="date" class="aa-inline-date ${act.dueDate ? 'filled' : ''}"
+           value="${act.dueDate || ''}"
            onchange="_aaInlineDueChange('${act.id}','${ob.obId}','${circId}',this)"/>
   </td>
   <td><span class="aa-st-badge ${stCls}">${act.status}</span></td>
@@ -1435,9 +1472,9 @@ function _aaRenderActRow(act, ob, cl, circId) {
 }
 
 /* ── ACCORDION TOGGLES ── */
-window._aaToggleClause = function(safeClId) {
+window._aaToggleClause = function (safeClId) {
   const body = document.getElementById(`aa-cl-body-${safeClId}`);
-  const arr  = document.getElementById(`aa-cl-arr-${safeClId}`);
+  const arr = document.getElementById(`aa-cl-arr-${safeClId}`);
   const card = document.getElementById(`aa-cl-card-${safeClId}`);
   if (!body) return;
   const open = body.style.display !== 'none';
@@ -1446,9 +1483,9 @@ window._aaToggleClause = function(safeClId) {
   if (card) card.classList.toggle('aa-cl-card-open', !open);
 };
 
-window._aaToggleOb = function(safeObId) {
+window._aaToggleOb = function (safeObId) {
   const body = document.getElementById(`aa-ob-body-${safeObId}`);
-  const arr  = document.getElementById(`aa-ob-arr-${safeObId}`);
+  const arr = document.getElementById(`aa-ob-arr-${safeObId}`);
   if (!body) return;
   const open = body.style.display !== 'none';
   body.style.display = open ? 'none' : 'block';
@@ -1456,28 +1493,28 @@ window._aaToggleOb = function(safeObId) {
 };
 
 /* ── DRAWER ── */
-window._aaOverlayClick = function(e) { if(e.target.id==='aa-overlay')_aaCloseDrawerDirect(); };
+window._aaOverlayClick = function (e) { if (e.target.id === 'aa-overlay') _aaCloseDrawerDirect(); };
 
-window._aaOpenDrawer = function(actId, obId, clauseId, circId) {
+window._aaOpenDrawer = function (actId, obId, clauseId, circId) {
   const clauses = _aaGetActivities(circId);
-  let act=null, ob=null, cl=null;
+  let act = null, ob = null, cl = null;
   for (const c of clauses) {
     for (const o of c.obligations) {
-      const f = o.activities.find(a=>a.id===actId);
-      if (f) { act=f; ob=o; cl=c; break; }
+      const f = o.activities.find(a => a.id === actId);
+      if (f) { act = f; ob = o; cl = c; break; }
     }
     if (act) break;
   }
-  if (!act||!ob||!cl) return;
+  if (!act || !ob || !cl) return;
 
-  document.querySelectorAll('.aa-act-row').forEach(r=>r.classList.remove('aa-row-active'));
+  document.querySelectorAll('.aa-act-row').forEach(r => r.classList.remove('aa-row-active'));
   document.getElementById(`aa-row-${actId}`)?.classList.add('aa-row-active');
 
   const overlay = document.getElementById('aa-overlay');
-  const drawer  = document.getElementById('aa-drawer');
-  const dc      = document.getElementById('aa-drawer-content');
-  overlay.style.display='flex';
-  requestAnimationFrame(()=>requestAnimationFrame(()=>drawer.classList.add('open')));
+  const drawer = document.getElementById('aa-drawer');
+  const dc = document.getElementById('aa-drawer-content');
+  overlay.style.display = 'flex';
+  requestAnimationFrame(() => requestAnimationFrame(() => drawer.classList.add('open')));
 
   const meta = _aaCircMeta(circId);
 
@@ -1505,14 +1542,14 @@ window._aaOpenDrawer = function(actId, obId, clauseId, circId) {
         <label class="aa-dr-label">Department</label>
         <select class="aa-dr-input" id="aa-dr-dept-${actId}">
           <option value="">Select dept…</option>
-          ${AA_DEPTS.map(d=>`<option ${d===ob.dept?'selected':''}>${d}</option>`).join('')}
+          ${AA_DEPTS.map(d => `<option ${d === ob.dept ? 'selected' : ''}>${d}</option>`).join('')}
         </select>
       </div>
       <div class="aa-dr-field">
         <label class="aa-dr-label">Assign to Person</label>
         <div class="aa-ta-wrap" id="aa-dta-wrap-${actId}">
           <input class="aa-dr-input" id="aa-dr-assignee-${actId}"
-                 value="${act.assignee||''}" placeholder="Type name…" autocomplete="off"
+                 value="${act.assignee || ''}" placeholder="Type name…" autocomplete="off"
                  oninput="_aaDrawerTypeahead('${actId}','${ob.dept}',this.value)"
                  onfocus="_aaDrawerTypeahead('${actId}','${ob.dept}',this.value)"/>
           <div class="aa-sug-box" id="aa-dta-sug-${actId}" style="display:none;"></div>
@@ -1520,13 +1557,13 @@ window._aaOpenDrawer = function(actId, obId, clauseId, circId) {
       </div>
       <div class="aa-dr-field">
         <label class="aa-dr-label">Due Date</label>
-        <input type="date" class="aa-dr-input" id="aa-dr-due-${actId}" value="${act.dueDate||''}"/>
+        <input type="date" class="aa-dr-input" id="aa-dr-due-${actId}" value="${act.dueDate || ''}"/>
       </div>
     </div>
     <div class="aa-dr-field">
       <label class="aa-dr-label">Notes / Instructions</label>
       <textarea class="aa-dr-input aa-dr-ta" id="aa-dr-notes-${actId}"
-                placeholder="Add context or instructions for the assignee…">${act._notes||''}</textarea>
+                placeholder="Add context or instructions for the assignee…">${act._notes || ''}</textarea>
     </div>
   </div>
 
@@ -1603,14 +1640,14 @@ window._aaOpenDrawer = function(actId, obId, clauseId, circId) {
   </div>
 </div>`;
 
-  document.getElementById(`aa-dr-dept-${actId}`)?.addEventListener('change', function() {
-    _aaDrawerTypeahead(actId, this.value, document.getElementById(`aa-dr-assignee-${actId}`)?.value||'');
+  document.getElementById(`aa-dr-dept-${actId}`)?.addEventListener('change', function () {
+    _aaDrawerTypeahead(actId, this.value, document.getElementById(`aa-dr-assignee-${actId}`)?.value || '');
   });
 };
 
-window._aaToggleCircRef = function(actId) {
+window._aaToggleCircRef = function (actId) {
   const panel = document.getElementById(`aa-circ-ref-${actId}`);
-  const btn   = document.getElementById(`aa-dr-more-btn-${actId}`);
+  const btn = document.getElementById(`aa-dr-more-btn-${actId}`);
   if (!panel) return;
   const open = panel.style.display !== 'none';
   panel.style.display = open ? 'none' : 'block';
@@ -1618,22 +1655,32 @@ window._aaToggleCircRef = function(actId) {
   if (btn) btn.classList.toggle('aa-more-btn-active', !open);
 };
 
-window._aaCloseDrawerDirect = function() {
-  const overlay=document.getElementById('aa-overlay'), drawer=document.getElementById('aa-drawer');
-  if(!drawer||!overlay)return;
+window._aaCloseDrawerDirect = function () {
+  const overlay = document.getElementById('aa-overlay'), drawer = document.getElementById('aa-drawer');
+  if (!drawer || !overlay) return;
   drawer.classList.remove('open');
-  setTimeout(()=>{overlay.style.display='none';},300);
-  document.querySelectorAll('.aa-act-row').forEach(r=>r.classList.remove('aa-row-active'));
+  setTimeout(() => { overlay.style.display = 'none'; }, 300);
+  document.querySelectorAll('.aa-act-row').forEach(r => r.classList.remove('aa-row-active'));
 };
 
-window._aaHandleUpload = function(actId, input) {
+window._aaHandleUpload = function (actId, input) {
   const file = input.files?.[0];
   if (!file) return;
   const label = document.getElementById(`aa-upload-fname-${actId}`);
   if (label) label.textContent = file.name;
 };
 
-window._aaGoToAISuggestion = function(circId) {
+window._aaSwitchMainTab = function(tab, circId) {
+  const deptFilter = document.getElementById('aa-filter-dept')?.value || '';
+
+  if (tab === 'obligation') {
+    window.renderAssignObligation(circId,'obligation');
+  } else {
+    window.renderAssignActivity(circId, deptFilter, 'activities');
+  }
+};
+
+window._aaGoToAISuggestion = function (circId) {
   if (typeof renderAISuggestionPage === 'function') renderAISuggestionPage(circId);
   else if (typeof window.navigate === 'function') window.navigate('ai-suggestion', { circId });
   else {
@@ -1646,183 +1693,192 @@ window._aaGoToAISuggestion = function(circId) {
 };
 
 /* ── TYPEAHEAD ── */
-window._aaDrawerTypeahead = function(actId, dept, query) {
-  const sug = document.getElementById(`aa-dta-sug-${actId}`); if(!sug)return;
-  _aaShowSug(sug, dept, query, name=>{
-    const inp=document.getElementById(`aa-dr-assignee-${actId}`); if(inp)inp.value=name;
-    sug.style.display='none';
+window._aaDrawerTypeahead = function (actId, dept, query) {
+  const sug = document.getElementById(`aa-dta-sug-${actId}`); if (!sug) return;
+  _aaShowSug(sug, dept, query, name => {
+    const inp = document.getElementById(`aa-dr-assignee-${actId}`); if (inp) inp.value = name;
+    sug.style.display = 'none';
   });
 };
 
-window._aaInlineTypeahead = function(actId, dept, query, circId, obId, clauseId) {
-  const sug=document.getElementById(`aa-ita-sug-${actId}`); if(!sug)return;
-  _aaShowSug(sug, dept, query, name=>{
-    const clauses=_aaGetActivities(circId);
-    let act=null, ob=null, cl=null;
-    for(const c of clauses){ for(const o of c.obligations){ const f=o.activities.find(a=>a.id===actId); if(f){act=f;ob=o;cl=c;break;} } if(act)break; }
-    if(!act)return;
-    act.assignee=name; act.status='Assigned';
-    sug.style.display='none';
-    const safeObId=_aaSafeId(ob.obId);
-    const cell=document.getElementById(`aa-ita-wrap-${actId}`);
-    if(cell)cell.innerHTML=`<div class="aa-assignee-filled"><span class="aa-av">${name.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2)}</span><span class="aa-assignee-name">${name}</span></div>`;
-    const row=document.getElementById(`aa-row-${actId}`);
-    if(row){row.dataset.status='Assigned';const st=row.querySelector('.aa-st-badge');if(st){st.textContent='Assigned';st.className='aa-st-badge aa-s-asgn';}}
-    if(typeof showToast==='function')showToast(`Assigned to ${name}`,'success');
+window._aaInlineTypeahead = function (actId, dept, query, circId, obId, clauseId) {
+  const sug = document.getElementById(`aa-ita-sug-${actId}`); if (!sug) return;
+  _aaShowSug(sug, dept, query, name => {
+    const clauses = _aaGetActivities(circId);
+    let act = null, ob = null, cl = null;
+    for (const c of clauses) { for (const o of c.obligations) { const f = o.activities.find(a => a.id === actId); if (f) { act = f; ob = o; cl = c; break; } } if (act) break; }
+    if (!act) return;
+    act.assignee = name; act.status = 'Assigned';
+    sug.style.display = 'none';
+    const safeObId = _aaSafeId(ob.obId);
+    const cell = document.getElementById(`aa-ita-wrap-${actId}`);
+    if (cell) cell.innerHTML = `<div class="aa-assignee-filled"><span class="aa-av">${name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2)}</span><span class="aa-assignee-name">${name}</span></div>`;
+    const row = document.getElementById(`aa-row-${actId}`);
+    if (row) { row.dataset.status = 'Assigned'; const st = row.querySelector('.aa-st-badge'); if (st) { st.textContent = 'Assigned'; st.className = 'aa-st-badge aa-s-asgn'; } }
+    if (typeof showToast === 'function') showToast(`Assigned to ${name}`, 'success');
     _aaUpdateStats(circId);
   });
 };
 
 function _aaShowSug(sugBox, dept, query, onPick) {
-  let pool=dept&&AA_PEOPLE[dept]?AA_PEOPLE[dept]:Object.values(AA_PEOPLE).flat();
-  pool=[...new Set(pool)];
-  const q=(query||'').trim().toLowerCase();
-  const res=q?pool.filter(p=>p.toLowerCase().includes(q)):pool.slice(0,6);
-  if(!res.length){sugBox.style.display='none';return;}
-  sugBox.style.display='block';
-  sugBox.innerHTML=res.map(p=>`
-  <div class="aa-sug-item" onclick="(${onPick.toString()})('${p.replace(/'/g,"\\'")}')">
-    <span class="aa-sug-av">${p.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2)}</span>
+  let pool = dept && AA_PEOPLE[dept] ? AA_PEOPLE[dept] : Object.values(AA_PEOPLE).flat();
+  pool = [...new Set(pool)];
+  const q = (query || '').trim().toLowerCase();
+  const res = q ? pool.filter(p => p.toLowerCase().includes(q)) : pool.slice(0, 6);
+  if (!res.length) { sugBox.style.display = 'none'; return; }
+  sugBox.style.display = 'block';
+  sugBox.innerHTML = res.map(p => `
+  <div class="aa-sug-item" onclick="(${onPick.toString()})('${p.replace(/'/g, "\\'")}')">
+    <span class="aa-sug-av">${p.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2)}</span>
     <span class="aa-sug-name">${p}</span>
-    ${dept&&AA_PEOPLE[dept]?.includes(p)?`<span class="aa-sug-dept-tag">${dept}</span>`:''}
+    ${dept && AA_PEOPLE[dept]?.includes(p) ? `<span class="aa-sug-dept-tag">${dept}</span>` : ''}
   </div>`).join('');
-  setTimeout(()=>{
-    document.addEventListener('click',function h(e){if(!sugBox.contains(e.target)){sugBox.style.display='none';document.removeEventListener('click',h);}});
-  },0);
+  setTimeout(() => {
+    document.addEventListener('click', function h(e) { if (!sugBox.contains(e.target)) { sugBox.style.display = 'none'; document.removeEventListener('click', h); } });
+  }, 0);
 }
 
-window._aaBulkTypeahead = function(query) {
-  const sug=document.getElementById('aa-bulk-sug'); if(!sug)return;
-  let pool=[...new Set(Object.values(AA_PEOPLE).flat())];
-  const q=query.trim().toLowerCase();
-  const res=q?pool.filter(p=>p.toLowerCase().includes(q)):pool.slice(0,6);
-  if(!res.length){sug.style.display='none';return;}
-  sug.style.display='block';
-  sug.innerHTML=res.map(p=>`
-  <div class="aa-sug-item aa-sug-dark" onclick="_aaPickBulkPerson('${p.replace(/'/g,"\\'")}')">
-    <span class="aa-sug-av">${p.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2)}</span>
+window._aaBulkTypeahead = function (query) {
+  const sug = document.getElementById('aa-bulk-sug'); if (!sug) return;
+  let pool = [...new Set(Object.values(AA_PEOPLE).flat())];
+  const q = query.trim().toLowerCase();
+  const res = q ? pool.filter(p => p.toLowerCase().includes(q)) : pool.slice(0, 6);
+  if (!res.length) { sug.style.display = 'none'; return; }
+  sug.style.display = 'block';
+  sug.innerHTML = res.map(p => `
+  <div class="aa-sug-item aa-sug-dark" onclick="_aaPickBulkPerson('${p.replace(/'/g, "\\'")}')">
+    <span class="aa-sug-av">${p.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2)}</span>
     <span class="aa-sug-name">${p}</span>
   </div>`).join('');
 };
-window._aaPickBulkPerson = function(name) {
-  const inp=document.getElementById('aa-bulk-assignee'); if(inp)inp.value=name;
-  const sug=document.getElementById('aa-bulk-sug'); if(sug)sug.style.display='none';
+window._aaPickBulkPerson = function (name) {
+  const inp = document.getElementById('aa-bulk-assignee'); if (inp) inp.value = name;
+  const sug = document.getElementById('aa-bulk-sug'); if (sug) sug.style.display = 'none';
 };
 
 /* ── SAVE ── */
-window._aaDrawerSave = function(actId, obId, clauseId, circId) {
-  const clauses=_aaGetActivities(circId);
-  let act=null, ob=null, cl=null;
-  for(const c of clauses){ for(const o of c.obligations){ const f=o.activities.find(a=>a.id===actId); if(f){act=f;ob=o;cl=c;break;} } if(act)break; }
-  if(!act)return;
+window._aaDrawerSave = function (actId, obId, clauseId, circId) {
+  const clauses = _aaGetActivities(circId);
+  let act = null, ob = null, cl = null;
+  for (const c of clauses) { for (const o of c.obligations) { const f = o.activities.find(a => a.id === actId); if (f) { act = f; ob = o; cl = c; break; } } if (act) break; }
+  if (!act) return;
   act.assignee = document.getElementById(`aa-dr-assignee-${actId}`)?.value || act.assignee;
-  act.dueDate  = document.getElementById(`aa-dr-due-${actId}`)?.value      || act.dueDate;
-  act._notes   = document.getElementById(`aa-dr-notes-${actId}`)?.value    || '';
-  if(act.assignee) act.status='Assigned';
-  const safeObId=_aaSafeId(ob.obId);
-  const row=document.getElementById(`aa-row-${actId}`);
-  if(row) row.outerHTML=_aaRenderActRow(act, ob, cl, circId);
+  act.dueDate = document.getElementById(`aa-dr-due-${actId}`)?.value || act.dueDate;
+  act._notes = document.getElementById(`aa-dr-notes-${actId}`)?.value || '';
+  if (act.assignee) act.status = 'Assigned';
+  const safeObId = _aaSafeId(ob.obId);
+  const row = document.getElementById(`aa-row-${actId}`);
+  if (row) row.outerHTML = _aaRenderActRow(act, ob, cl, circId);
   _aaUpdateStats(circId); _aaCloseDrawerDirect();
-  if(typeof showToast==='function')showToast(`${actId} assigned to ${act.assignee||'—'} ✓`,'success');
+  if (typeof showToast === 'function') showToast(`${actId} assigned to ${act.assignee || '—'} ✓`, 'success');
 };
 
-window._aaInlineDueChange = function(actId, obId, circId, inp) {
-  const clauses=_aaGetActivities(circId);
-  for(const c of clauses){ for(const o of c.obligations){ const f=o.activities.find(a=>a.id===actId); if(f){f.dueDate=inp.value;inp.classList.toggle('filled',!!inp.value);return;} } }
+window._aaInlineDueChange = function (actId, obId, circId, inp) {
+  const clauses = _aaGetActivities(circId);
+  for (const c of clauses) { for (const o of c.obligations) { const f = o.activities.find(a => a.id === actId); if (f) { f.dueDate = inp.value; inp.classList.toggle('filled', !!inp.value); return; } } }
 };
 
 /* ── CHECKBOX + BULK ── */
-window._aaRowCheck = function() {
-  const sel=document.querySelectorAll('.aa-row-chk:checked');
-  const all=document.querySelectorAll('.aa-row-chk');
-  const selA=document.getElementById('aa-sel-all');
-  const badge=document.getElementById('aa-sel-badge');
-  const bar=document.getElementById('aa-bulk-bar');
-  const cnt=document.getElementById('aa-bulk-count');
-  if(selA)selA.indeterminate=sel.length>0&&sel.length<all.length;
-  if(badge){badge.textContent=`${sel.length} selected`;badge.style.display=sel.length?'inline-flex':'none';}
-  if(bar)bar.style.display=sel.length?'flex':'none';
-  if(cnt)cnt.textContent=`${sel.length} activit${sel.length!==1?'ies':'y'} selected`;
+window._aaRowCheck = function () {
+  const sel = document.querySelectorAll('.aa-row-chk:checked');
+  const all = document.querySelectorAll('.aa-row-chk');
+  const selA = document.getElementById('aa-sel-all');
+  const badge = document.getElementById('aa-sel-badge');
+  const bar = document.getElementById('aa-bulk-bar');
+  const cnt = document.getElementById('aa-bulk-count');
+  if (selA) selA.indeterminate = sel.length > 0 && sel.length < all.length;
+  if (badge) { badge.textContent = `${sel.length} selected`; badge.style.display = sel.length ? 'inline-flex' : 'none'; }
+  if (bar) bar.style.display = sel.length ? 'flex' : 'none';
+  if (cnt) cnt.textContent = `${sel.length} activit${sel.length !== 1 ? 'ies' : 'y'} selected`;
   // Sync ob-level checkboxes
-  document.querySelectorAll('.aa-ob-chk').forEach(cc=>{
-    const obId=cc.dataset.obid;
-    const obChks=[...document.querySelectorAll(`.aa-row-chk[data-obid="${obId}"]`)];
-    const checkedCount=obChks.filter(c=>c.checked).length;
-    cc.checked=checkedCount===obChks.length&&obChks.length>0;
-    cc.indeterminate=checkedCount>0&&checkedCount<obChks.length;
+  document.querySelectorAll('.aa-ob-chk').forEach(cc => {
+    const obId = cc.dataset.obid;
+    const obChks = [...document.querySelectorAll(`.aa-row-chk[data-obid="${obId}"]`)];
+    const checkedCount = obChks.filter(c => c.checked).length;
+    cc.checked = checkedCount === obChks.length && obChks.length > 0;
+    cc.indeterminate = checkedCount > 0 && checkedCount < obChks.length;
   });
 };
-window._aaObCheckAll = function(masterChk, obId) {
-  document.querySelectorAll(`.aa-row-chk[data-obid="${obId}"]`).forEach(c=>c.checked=masterChk.checked);
+window._aaObCheckAll = function (masterChk, obId) {
+  document.querySelectorAll(`.aa-row-chk[data-obid="${obId}"]`).forEach(c => c.checked = masterChk.checked);
   _aaRowCheck();
 };
-window._aaToggleAll = function(checked) {
-  document.querySelectorAll('.aa-row-chk').forEach(c=>c.checked=checked);
-  document.querySelectorAll('.aa-ob-chk').forEach(c=>{c.checked=checked;c.indeterminate=false;});
+window._aaToggleAll = function (checked) {
+  document.querySelectorAll('.aa-row-chk').forEach(c => c.checked = checked);
+  document.querySelectorAll('.aa-ob-chk').forEach(c => { c.checked = checked; c.indeterminate = false; });
   _aaRowCheck();
 };
-window._aaClearSel = function() {
-  document.querySelectorAll('.aa-row-chk,.aa-ob-chk').forEach(c=>{c.checked=false;c.indeterminate=false;});
-  const sa=document.getElementById('aa-sel-all'); if(sa){sa.checked=false;sa.indeterminate=false;}
+window._aaClearSel = function () {
+  document.querySelectorAll('.aa-row-chk,.aa-ob-chk').forEach(c => { c.checked = false; c.indeterminate = false; });
+  const sa = document.getElementById('aa-sel-all'); if (sa) { sa.checked = false; sa.indeterminate = false; }
   _aaRowCheck();
 };
-window._aaBulkAssign = function(circId) {
-  const sel=([...document.querySelectorAll('.aa-row-chk:checked')]).map(c=>c.dataset.id);
-  const assignee=document.getElementById('aa-bulk-assignee')?.value?.trim();
-  const dueDate=document.getElementById('aa-bulk-due')?.value;
-  if(!sel.length){if(typeof showToast==='function')showToast('No activities selected','warning');return;}
-  if(!assignee){if(typeof showToast==='function')showToast('Please enter an assignee','warning');return;}
-  const clauses=_aaGetActivities(circId);
-  sel.forEach(actId=>{
-    let act=null,ob=null,cl=null;
-    for(const c of clauses){ for(const o of c.obligations){ const f=o.activities.find(a=>a.id===actId); if(f){act=f;ob=o;cl=c;break;} } if(act)break; }
-    if(!act)return;
-    act.assignee=assignee; act.status='Assigned';
-    if(dueDate)act.dueDate=dueDate;
-    const row=document.getElementById(`aa-row-${actId}`);
-    if(row)row.outerHTML=_aaRenderActRow(act,ob,cl,circId);
+window._aaBulkAssign = function (circId) {
+  const sel = ([...document.querySelectorAll('.aa-row-chk:checked')]).map(c => c.dataset.id);
+  const assignee = document.getElementById('aa-bulk-assignee')?.value?.trim();
+  const dueDate = document.getElementById('aa-bulk-due')?.value;
+  if (!sel.length) { if (typeof showToast === 'function') showToast('No activities selected', 'warning'); return; }
+  if (!assignee) { if (typeof showToast === 'function') showToast('Please enter an assignee', 'warning'); return; }
+  const clauses = _aaGetActivities(circId);
+  sel.forEach(actId => {
+    let act = null, ob = null, cl = null;
+    for (const c of clauses) { for (const o of c.obligations) { const f = o.activities.find(a => a.id === actId); if (f) { act = f; ob = o; cl = c; break; } } if (act) break; }
+    if (!act) return;
+    act.assignee = assignee; act.status = 'Assigned';
+    if (dueDate) act.dueDate = dueDate;
+    const row = document.getElementById(`aa-row-${actId}`);
+    if (row) row.outerHTML = _aaRenderActRow(act, ob, cl, circId);
   });
   _aaUpdateStats(circId); _aaClearSel();
-  if(typeof showToast==='function')showToast(`${sel.length} activit${sel.length!==1?'ies':'y'} assigned to ${assignee} ✓`,'success');
+  if (typeof showToast === 'function') showToast(`${sel.length} activit${sel.length !== 1 ? 'ies' : 'y'} assigned to ${assignee} ✓`, 'success');
 };
 
 /* ── FILTERS ── */
-window._aaApplyFilters = function(circId) {
-  const fD=(document.getElementById('aa-filter-dept')?.value||'');
-  const fS=(document.getElementById('aa-filter-status')?.value||'');
-  const fFrom=(document.getElementById('aa-filter-from')?.value||'');
-  const fTo=(document.getElementById('aa-filter-to')?.value||'');
-  const fQ=(document.getElementById('aa-search')?.value||'').toLowerCase();
-  document.querySelectorAll('.aa-act-row').forEach(row=>{
-    const due=row.dataset.duedate||'';
-    const dateOk=(!fFrom||due>=fFrom)&&(!fTo||due<=fTo);
-    const ok=(!fD||row.dataset.dept===fD)&&(!fS||row.dataset.status===fS)&&dateOk&&(!fQ||row.dataset.search?.includes(fQ));
-    row.style.display=ok?'':'none';
+window._aaApplyFilters = function (circId) {
+  const fD = (document.getElementById('aa-filter-dept')?.value || '');
+  const fS = (document.getElementById('aa-filter-status')?.value || '');
+  const fFrom = (document.getElementById('aa-filter-from')?.value || '');
+  const fTo = (document.getElementById('aa-filter-to')?.value || '');
+  const fQ = (document.getElementById('aa-search')?.value || '').toLowerCase();
+  document.querySelectorAll('.aa-act-row').forEach(row => {
+    const due = row.dataset.duedate || '';
+    const dateOk = (!fFrom || due >= fFrom) && (!fTo || due <= fTo);
+    const ok = (!fD || row.dataset.dept === fD) && (!fS || row.dataset.status === fS) && dateOk && (!fQ || row.dataset.search?.includes(fQ));
+    row.style.display = ok ? '' : 'none';
   });
 };
 
 function _aaUpdateStats(circId) {
-  const all=circId?_aaAllActs(circId):[];
-  const assigned=all.filter(a=>a.status==='Assigned').length;
-  const unassigned=all.length-assigned;
-  const t=document.getElementById('aa-sp-total');
-  const u=document.getElementById('aa-sp-unassigned');
-  const g=document.getElementById('aa-sp-assigned');
-  if(t)t.textContent=`${all.length} total`;
-  if(u)u.textContent=`${unassigned} unassigned`;
-  if(g)g.textContent=`${assigned} assigned`;
+  const all = circId ? _aaAllActs(circId) : [];
+  const assigned = all.filter(a => a.status === 'Assigned').length;
+  const unassigned = all.length - assigned;
+  const t = document.getElementById('aa-sp-total');
+  const u = document.getElementById('aa-sp-unassigned');
+  const g = document.getElementById('aa-sp-assigned');
+  if (t) t.textContent = `${all.length} total`;
+  if (u) u.textContent = `${unassigned} unassigned`;
+  if (g) g.textContent = `${assigned} assigned`;
 }
 
-window._aaSwitchCirc = function(circId) { document.getElementById('aa-csel-drop').style.display='none'; renderAssignActivity(circId); };
-window._aaSaveAll    = function()       { if(typeof showToast==='function')showToast('All assignments saved ✓','success'); };
+window._aaSwitchCirc = function(circId) {
+  document.getElementById('aa-csel-drop').style.display = 'none';
+  const activeTab =
+    document.querySelector('.aa-tab-btn.active')?.textContent?.trim().toLowerCase() === 'obligation'
+      ? 'obligation'
+      : 'activities';
+
+  const deptFilter = document.getElementById('aa-filter-dept')?.value || '';
+  renderAssignActivity(circId, deptFilter, activeTab);
+};
+window._aaSaveAll = function () { if (typeof showToast === 'function') showToast('All assignments saved ✓', 'success'); };
 
 /* ── BIND ── */
 function _aaBindAll(circId, deptFilter) {
-  const btn=document.getElementById('aa-csel-btn'), drop=document.getElementById('aa-csel-drop'), srch=document.getElementById('aa-csel-search');
-  if(btn)btn.addEventListener('click',e=>{e.stopPropagation();drop.style.display=drop.style.display==='none'?'block':'none';if(drop.style.display!=='none'&&srch)srch.focus();});
-  if(srch)srch.addEventListener('input',function(){const q=this.value.toLowerCase();document.querySelectorAll('.aa-csel-item').forEach(i=>i.style.display=i.textContent.toLowerCase().includes(q)?'':'none');});
-  document.addEventListener('click',e=>{const wrap=document.getElementById('aa-csel-wrap');if(wrap&&!wrap.contains(e.target)&&drop)drop.style.display='none';});
-  if(deptFilter){const sel=document.getElementById('aa-filter-dept');if(sel){sel.value=deptFilter;_aaApplyFilters(circId);}}
+  const btn = document.getElementById('aa-csel-btn'), drop = document.getElementById('aa-csel-drop'), srch = document.getElementById('aa-csel-search');
+  if (btn) btn.addEventListener('click', e => { e.stopPropagation(); drop.style.display = drop.style.display === 'none' ? 'block' : 'none'; if (drop.style.display !== 'none' && srch) srch.focus(); });
+  if (srch) srch.addEventListener('input', function () { const q = this.value.toLowerCase(); document.querySelectorAll('.aa-csel-item').forEach(i => i.style.display = i.textContent.toLowerCase().includes(q) ? '' : 'none'); });
+  document.addEventListener('click', e => { const wrap = document.getElementById('aa-csel-wrap'); if (wrap && !wrap.contains(e.target) && drop) drop.style.display = 'none'; });
+  if (deptFilter) { const sel = document.getElementById('aa-filter-dept'); if (sel) { sel.value = deptFilter; _aaApplyFilters(circId); } }
 }
 
 /* ── STYLES ── */
@@ -1857,6 +1913,20 @@ function _aaInjectStyles() {
 .aa-head-title{font-size:24px;font-weight:800;margin-bottom:4px;}
 .aa-head-sub{font-size:12px;color:var(--aa-text-mut);}
 .aa-head-right{display:flex;gap:8px;}
+
+
+.aa-tab-btn {
+  padding: 6px 12px;
+  border: 1px solid #ccc;
+  background: #eee;
+  cursor: pointer;
+}
+.aa-tab-btn.active {
+  background: #333;
+  color: white;
+}
+
+
 
 /* Filter card */
 .aa-filter-card{display:flex;align-items:flex-end;gap:12px;padding:16px 20px;background:var(--aa-card);border:1px solid var(--aa-border);border-radius:var(--aa-rl);margin-bottom:12px;box-shadow:var(--aa-sh);flex-wrap:wrap;}

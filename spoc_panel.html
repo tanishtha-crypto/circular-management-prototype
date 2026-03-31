@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Assignee — Circular Management System</title>
+  <title>SPOC — Circular Management System</title>
   <link rel="stylesheet" href="./styles.css" />
   <!-- Chart.js CDN -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
@@ -15,7 +15,7 @@
     rel="stylesheet" />
 </head>
 
-<body data-user-role="assignee">
+<body data-user-role="spoc">
 
   <!-- ========== SIDEBAR ========== -->
   <aside id="sidebar">
@@ -38,7 +38,7 @@
           </a>
         </li>
 
-        <!-- My Inbox with submenu (My Items only, no Assignment) -->
+        <!-- My Inbox with submenu -->
         <li class="nav-item has-submenu" data-page="task-management">
           <a href="#" class="nav-link submenu-toggle">
             <span class="nav-icon">◉</span>
@@ -48,6 +48,9 @@
           <ul class="submenu">
             <li data-page="my-items-obligations">
               <a href="#my-items-obligations">My Items</a>
+            </li>
+            <li data-page="assign-activity">
+              <a href="#assign-activity">Assignment</a>
             </li>
           </ul>
         </li>
@@ -71,10 +74,10 @@
 
     <div class="sidebar-footer">
       <div class="user-mini">
-        <div class="user-avatar-sm">RS</div>
+        <div class="user-avatar-sm">PS</div>
         <div class="user-info-sm">
-          <span class="user-name-sm">Ravi Sharma</span>
-          <span class="user-role-sm">Assignee</span>
+          <span class="user-name-sm">Priya Sharma</span>
+          <span class="user-role-sm">SPOC</span>
         </div>
       </div>
     </div>
@@ -103,16 +106,16 @@
         <!-- Profile -->
         <div class="profile-dropdown-wrapper">
           <button class="profile-btn" id="profile-btn">
-            <div class="user-avatar">RS</div>
-            <span class="profile-name">Ravi Sharma</span>
+            <div class="user-avatar">PS</div>
+            <span class="profile-name">Priya Sharma</span>
             <span class="dropdown-arrow">▾</span>
           </button>
           <div class="profile-dropdown" id="profile-dropdown">
             <div class="profile-dropdown-header">
-              <div class="user-avatar lg">RS</div>
+              <div class="user-avatar lg">PS</div>
               <div>
-                <div class="pd-name">Ravi Sharma</div>
-                <div class="pd-email">ravi@cms.co.in</div>
+                <div class="pd-name">Priya Sharma</div>
+                <div class="pd-email">priya@cms.co.in</div>
               </div>
             </div>
             <hr />

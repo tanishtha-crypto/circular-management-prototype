@@ -117,7 +117,7 @@ function injectPDFViewerStyles() {
    ================================================================ */
 function buildLibraryHTML() {
   return `
-  <div class="fade-in">
+  <div class="fade-in" style="width:100%;min-width:0;box-sizing:border-box">
 
     <div style="margin-bottom:20px">
       <h2 style="font-size:20px;font-weight:800;color:var(--text-primary);margin-bottom:4px">Circular Library</h2>
@@ -126,31 +126,32 @@ function buildLibraryHTML() {
 
     <!-- TOOLBAR -->
     <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:16px;
-      padding:12px 16px;background:#fff;border:1px solid var(--border);border-radius:10px">
+      padding:12px 16px;background:#fff;border:1px solid var(--border);border-radius:10px;
+      width:100%;box-sizing:border-box">
 
-      <div style="position:relative;flex:1;min-width:220px;max-width:320px">
+      <div style="position:relative;flex:1;min-width:180px;max-width:300px">
         <span style="position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--text-muted);font-size:14px;pointer-events:none">⌕</span>
         <input type="text" class="form-control" id="lib-search"
           placeholder="Search by title, ID or regulator…"
-          style="padding-left:30px;width:100%"/>
+          style="padding-left:30px;width:100%;box-sizing:border-box"/>
       </div>
 
-      <select class="form-control" id="lib-filter-regulator" style="min-width:130px">
+      <select class="form-control" id="lib-filter-regulator" style="min-width:120px;flex-shrink:0">
         <option value="">All Regulators</option>
         <option>RBI</option><option>SEBI</option><option>MeitY</option><option>IRDAI</option>
       </select>
 
-      <select class="form-control" id="lib-filter-type" style="min-width:120px">
+      <select class="form-control" id="lib-filter-type" style="min-width:110px;flex-shrink:0">
         <option value="">All Types</option>
         <option>Master</option><option>Regular</option>
       </select>
 
-      <select class="form-control" id="lib-filter-risk" style="min-width:130px">
+      <select class="form-control" id="lib-filter-risk" style="min-width:120px;flex-shrink:0">
         <option value="">All Risk Levels</option>
         <option>High</option><option>Medium</option><option>Low</option>
       </select>
 
-      <div style="margin-left:auto;display:flex;gap:8px;align-items:center">
+      <div style="margin-left:auto;display:flex;gap:8px;align-items:center;flex-shrink:0">
         <span id="lib-count" style="font-size:12px;color:var(--text-muted);white-space:nowrap"></span>
         <button class="btn btn-ghost btn-sm" id="lib-clear-filters"
           style="font-size:12px;white-space:nowrap">✕ Clear</button>
@@ -158,7 +159,8 @@ function buildLibraryHTML() {
     </div>
 
     <!-- TABLE CARD -->
-    <div style="border-radius:12px;overflow:hidden;border:1px solid var(--border);background:#fff">
+    <div style="border-radius:12px;overflow:hidden;border:1px solid var(--border);background:#fff;
+                width:100%;box-sizing:border-box">
       <div style="display:flex;align-items:center;justify-content:space-between;
         padding:14px 18px;background:#fafbff;border-bottom:1px solid var(--border)">
         <div>
@@ -166,8 +168,8 @@ function buildLibraryHTML() {
           <div style="font-size:12px;color:var(--text-muted);margin-top:2px">Click any row to view full details · Use icons to preview or download</div>
         </div>
       </div>
-      <div style="overflow-x:auto">
-        <table style="width:100%;border-collapse:collapse">
+      <div style="overflow-x:auto;width:100%">
+        <table style="width:100%;min-width:760px;border-collapse:collapse">
           <thead>
             <tr style="background:#f8fafc">
               ${['Circular ID','Title','Regulator','Type','Issued','Effective','Due Date','Departments','View Circular']
@@ -236,9 +238,11 @@ function renderCircularTable() {
     const pdfFile = pdfMap[c.id] || 'RBI_Master_Circular.pdf';
     const safeTitleAttr = c.title.replace(/'/g, "\\'");
 
+    const isWithdrawn = c.status === 'Withdrawn';
     return `
-    <tr style="border-bottom:1px solid #f4f5f8;cursor:pointer;transition:background .12s"
-        onmouseover="this.style.background='#f5f6ff'"
+    <tr class="${isWithdrawn ? 'circ-row-withdrawn' : ''}"
+        style="border-bottom:1px solid #f4f5f8;cursor:pointer;transition:background .12s"
+        onmouseover="this.style.background='${isWithdrawn ? '#fef2f2' : '#f5f6ff'}'"
         onmouseout="this.style.background=''"
         onclick="openCircularScreen('${c.id}')">
 
@@ -252,8 +256,11 @@ function renderCircularTable() {
 </td>
 
       <td style="padding:12px 14px;max-width:240px">
-        <div style="font-size:13.5px;font-weight:600;color:var(--text-primary);
-          white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="${c.title}">${c.title}</div>
+        <div style="display:flex;align-items:center;gap:4px;flex-wrap:wrap">
+          <span style="font-size:13.5px;font-weight:600;color:var(--text-primary);
+            white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="${c.title}">${c.title}</span>
+          ${isWithdrawn ? '<span class="circ-withdrawn-badge">Withdrawn</span>' : ''}
+        </div>
         <div style="font-size:11px;color:${c.risk==='High'?'#dc2626':c.risk==='Medium'?'#d97706':'#059669'};font-weight:600;margin-top:2px">
           ${c.risk ? c.risk + ' Risk' : ''}
         </div>

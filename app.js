@@ -25,12 +25,14 @@
     'my-items-activity': () => { setTitle('My Items - Activity'); renderMyItemsActivity(); },
     'assign-activity': () => { setTitle('Assign Activity'); renderAssignActivity(); },
     'assign-obligation': () => { setTitle('Assign Obligation'); renderAssignObligation(); },
+    'assign-activity-obligation': () => { setTitle('Assign Obligation'); renderAssignActivityObligation(); },
     //  'assign-activity':() => { setTitle('Assign Action'); renderAssignActions(); },
 'circular-explorer': () => {
   setTitle('Circular Hierarchy');
   document.getElementById('content-area').innerHTML = '<div id="circular-explorer"></div>';
   CircularExplorer.init({ containerId: 'circular-explorer' });
 },
+    'flagged-evidence': () => { setTitle('Missing / Inaccurate Evidence'); renderFlaggedEvidence(); },
     'reports': () => { setTitle('Reports'); renderReports(); },
     'settings': () => { setTitle('Settings'); renderSettings(); }
   };
