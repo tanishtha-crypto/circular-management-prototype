@@ -221,6 +221,27 @@ function actBuildHTML() {
 
   return `
   <div class="fade-in">
+ 
+    <div class="aa-page-head" style="margin-bottom:16px;">
+      <div class="aa-head-left">
+
+
+        <div class="aa-tab-switch" style="margin-top:10px; display:flex; flex-direction:row-reverse; gap:8px;">
+          <button
+           style="padding:6px 12px; border:1px solid #d1d5db; background:#fff; color:#111827; border-radius:6px; cursor:pointer;"
+            onclick="actSwitchMainTab('activities')">
+            Activities
+          </button>
+          <button
+           style="padding:6px 12px; border:1px solid #111827; background:#111827; color:#fff; border-radius:6px; cursor:pointer;"
+            onclick="actSwitchMainTab('obligations')">
+            Obligations
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="task-toolbar-wrap">
     <div class="task-toolbar-wrap">
       <div class="tb-row tb-row-filters">
         <input type="text" class="form-control tb-search" id="act-search"
@@ -538,4 +559,16 @@ function actStatusClass(s) {
 }
 function actPriorityClass(p) {
   return ({Critical:'risk-high',High:'risk-high',Medium:'risk-medium',Low:'risk-low'})[p]||'';
+}
+
+function actSwitchMainTab(tab) {
+  if (tab === 'obligations') {
+    if (typeof renderMyItemsObligations === 'function') {
+      renderMyItemsObligations();
+    } else {
+      console.error('renderMyItemsObligations is not loaded');
+    }
+  } else {
+    renderMyItemsActivity();
+  }
 }

@@ -465,6 +465,18 @@ function buildTaskManagementHTML() {
 
   return `
   <div class="fade-in">
+  <div class="aa-tab-switch" style="margin-top:10px; display:flex; flex-direction:row-reverse; gap:8px; margin-bottom:10px;">
+  <button
+   style="padding:6px 12px; border:1px solid #111827; background:#111827; color:#fff; border-radius:6px; cursor:pointer;"
+    onclick="oblSwitchMainTab('activities')">
+    Activities
+  </button>
+  <button
+    style="padding:6px 12px; border:1px solid #d1d5db; background:#fff; color:#111827; border-radius:6px; cursor:pointer;"
+    onclick="oblSwitchMainTab('obligations')">
+    Obligations
+  </button>
+</div>
     <div class="task-toolbar-wrap">
 
       <!-- ROW 1: Search · Status · Department · Clear · Count — full width single row -->
@@ -982,4 +994,16 @@ function showToast(msg, type) {
   `;
   document.body.appendChild(t);
   setTimeout(() => t.remove(), 2500);
+}
+
+function oblSwitchMainTab(tab) {
+  if (tab === 'activities') {
+    if (typeof renderMyItemsActivity === 'function') {
+      renderMyItemsActivity();
+    } else {
+      console.error('renderMyItemsActivity is not loaded');
+    }
+  } else {
+    renderMyItemsObligations();
+  }
 }

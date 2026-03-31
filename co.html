@@ -1,16 +1,20 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>CMS — Circular Management System</title>
-  <link rel="stylesheet" href="./styles.css"/>
+  <link rel="stylesheet" href="./styles.css" />
   <!-- Chart.js CDN -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
   <!-- Google Fonts -->
-  <link rel="preconnect" href="https://fonts.googleapis.com"/>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=Syne:wght@600;700;800&display=swap" rel="stylesheet"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=Syne:wght@600;700;800&display=swap"
+    rel="stylesheet" />
 </head>
+
 <body>
 
   <!-- ========== SIDEBAR ========== -->
@@ -42,7 +46,7 @@
             <span class="submenu-arrow">›</span>
           </a>
           <ul class="submenu">
-             <li data-page="ai-overview"><a href="#ai-overview">Overview</a></li>
+            <li data-page="ai-overview"><a href="#ai-overview">Overview</a></li>
             <li data-page="ai-applicability"><a href="#ai-applicability">Applicability Analysis</a></li>
             <li data-page="ai-summary"><a href="#ai-summary">Executive Summary</a></li>
             <li data-page="ai-clause"><a href="#ai-clause">Clause Generation</a></li>
@@ -54,19 +58,19 @@
           <a href="#" class="nav-link submenu-toggle">
             <span class="nav-icon">◫</span>
             <span class="nav-label">Circular Library</span>
-             <span class="submenu-arrow">›</span>
+            <span class="submenu-arrow">›</span>
           </a>
           <ul class="submenu">
             <!-- <li data-page="ai-applicability"><a href="#ai-applicability"></a></li> -->
             <li data-page="ai-suggestion"><a href="#ai-suggestion">My Library</a></li>
             <li data-page="circular-library"><a href="#circular-library">Circular Repository</a></li>
             <li class="nav-item" data-page="circular-explorer">
-          <a href="#circular-explorer" class="nav-link">
-            <!-- <span class="nav-icon">🌲</span> -->
-            <span class="nav-label">Circular Hierarchy</span>
-          </a>
-        </li>
-           
+              <a href="#circular-explorer" class="nav-link">
+                <!-- <span class="nav-icon">🌲</span> -->
+                <span class="nav-label">Circular Hierarchy</span>
+              </a>
+            </li>
+
             <!-- <li data-page="drafts-circular-library"><a href="#drafts-circular-library">My Circular  Drafts</a></li> -->
             <!-- <li data-page="ai-evidence"><a href="#ai-evidence">Evaluate Evidence</a></li> -->
           </ul>
@@ -76,20 +80,52 @@
           <a href="#task-management" class="nav-link">
             <span class="nav-icon">◉</span>
             <span class="nav-label">My Inbox</span>
-              <span class="submenu-arrow">›</span>
+            <span class="submenu-arrow">›</span>
           </a>
-            <ul class="submenu">
+          <ul class="submenu">
             <!-- <li data-page="ai-applicability"><a href="#ai-applicability"></a></li> -->
-            <li data-page="my-items-obligations"><a href="#my-items-obligations">My Items - Obligations</a></li>
+            <li class="nav-item " data-page="my-items-obligations" a href="#my-items-obligations">
+              <a href="#task-management" class="nav-link">
+                <!-- <span class="nav-icon">◉</span> -->
+                <span class="nav-label">My Items</span>
+                <!-- <span class="submenu-arrow">›</span> -->
+              </a>
+              <ul class="submenu">
+                <!-- <li data-page="ai-applicability"><a href="#ai-applicability"></a></li> -->
+                <!-- <li data-page="my-items-obligations"  style="margin-left: 20px;"><a href="#my-items-obligations">Obligations</a></li>
+                <li data-page="my-items-activity"  style="margin-left: 20px;"><a href="#my-items-activity">Activities</a></li> -->
+                <!-- <li data-page="assign-obligation"><a href="#assign-obligation">Assign Obligation</a></li>
+                <li data-page="assign-activity"><a href="#assign-activity">Assign Activities</a></li> -->
+                <!-- <li data-page="drafts-circular-library"><a href="#drafts-circular-library">My Circular  Drafts</a></li> -->
+                <!-- <li data-page="ai-evidence"><a href="#ai-evidence">Evaluate Evidence</a></li> -->
+              </ul>
+            </li>
+            <li class="nav-item" data-page="assign-activity" href="#assign-activity">
+              <a  class="nav-link">
+                <!-- <span class="nav-icon">◉</span> -->
+                <span class="nav-label">Assignment</span>
+                
+              </a>
+              <ul class="submenu">
+                <!-- <li data-page="ai-applicability"><a href="#ai-applicability"></a></li> -->
+                <!-- <li data-page="assign-obligation"><a href="#assign-obligation" style="margin-left: 20px;"> Obligation</a></li>
+                <li data-page="assign-activity"><a href="#assign-activity" style="padding-left: 70px;"> Activities</a></li> -->
+                <!-- <li data-page="assign-obligation"><a href="#assign-obligation">Assign Obligation</a></li>
+                <li data-page="assign-activity"><a href="#assign-activity">Assign Activities</a></li> -->
+                <!-- <li data-page="drafts-circular-library"><a href="#drafts-circular-library">My Circular  Drafts</a></li> -->
+                <!-- <li data-page="ai-evidence"><a href="#ai-evidence">Evaluate Evidence</a></li> -->
+              </ul>
+            </li>
+            <!-- <li data-page="my-items-obligations"><a href="#my-items-obligations">My Items - Obligations</a></li>
             <li data-page="my-items-activity"><a href="#my-items-activity">My Items - Activities</a></li>
             <li data-page="assign-obligation"><a href="#assign-obligation">Assign Obligation</a></li>
-            <li data-page="assign-activity"><a href="#assign-activity">Assign Activities</a></li>
+            <li data-page="assign-activity"><a href="#assign-activity">Assign Activities</a></li> -->
             <!-- <li data-page="drafts-circular-library"><a href="#drafts-circular-library">My Circular  Drafts</a></li> -->
             <!-- <li data-page="ai-evidence"><a href="#ai-evidence">Evaluate Evidence</a></li> -->
           </ul>
         </li>
 
-        
+
 
         <li class="nav-item" data-page="reports">
           <a href="#reports" class="nav-link">
@@ -151,14 +187,15 @@
               <div class="user-avatar lg">AK</div>
               <div>
                 <div class="pd-name">Arjun Kumar</div>
-                <div class="pd-email"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="08697a627d66486b676578696671266b6765">[email&#160;protected]</a></div>
+                <div class="pd-email"><a href="/cdn-cgi/l/email-protection" class="__cf_email__"
+                    data-cfemail="08697a627d66486b676578696671266b6765">[email&#160;protected]</a></div>
               </div>
             </div>
-            <hr/>
+            <hr />
             <a href="#" class="pd-item">My Profile</a>
             <a href="#" class="pd-item">Account Settings</a>
             <a href="#" class="pd-item">Audit Log</a>
-            <hr/>
+            <hr />
             <a href="#" class="pd-item danger">Sign Out</a>
           </div>
         </div>
@@ -177,15 +214,19 @@
     <div class="search-modal-box">
       <div class="search-modal-header">
         <span class="search-modal-icon">◈</span>
-        <input type="text" id="ai-search-input" placeholder="Ask AI: 'Show cybersecurity circulars' or 'Which circular applies to Finance?'" autocomplete="off"/>
+        <input type="text" id="ai-search-input"
+          placeholder="Ask AI: 'Show cybersecurity circulars' or 'Which circular applies to Finance?'"
+          autocomplete="off" />
         <button id="close-search-modal" class="close-btn">✕</button>
       </div>
       <div class="search-modal-body" id="search-modal-body">
         <div class="search-hint">
           <p>Try asking:</p>
           <div class="search-suggestions">
-            <span class="suggestion-chip" data-q="Show cybersecurity related circulars">🔒 Cybersecurity circulars</span>
-            <span class="suggestion-chip" data-q="Which circular applies to Finance department?">💰 Finance circulars</span>
+            <span class="suggestion-chip" data-q="Show cybersecurity related circulars">🔒 Cybersecurity
+              circulars</span>
+            <span class="suggestion-chip" data-q="Which circular applies to Finance department?">💰 Finance
+              circulars</span>
             <span class="suggestion-chip" data-q="Show high risk overdue tasks">⚠️ High risk overdue tasks</span>
             <span class="suggestion-chip" data-q="Master circulars summary">📋 Master circulars</span>
           </div>
@@ -215,33 +256,34 @@
   </div>
 
   <!-- JS Modules -->
-  <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script src="js/data.js"></script>
+  <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script>
+  <script src="js/data.js"></script>
   <script src="./data.js"></script>
   <script src="./dashboard.js"></script>
-    <script src="./overview-panel.js"></script>
+  <script src="./overview-panel.js"></script>
   <script src="shared-circular.js"></script>
-<script src="applicability-panel.js"></script>
-<script src="summary-panel.js"></script>
-<script src="clause-panel.js"></script>
-<script src="evidence-panel.js"></script>
-<script src="ai-engine.js"></script>
+  <script src="applicability-panel.js"></script>
+  <script src="summary-panel.js"></script>
+  <script src="clause-panel.js"></script>
+  <script src="evidence-panel.js"></script>
+  <script src="ai-engine.js"></script>
   <script src="./circular-library.js"></script>
-   <script src="./my-items-obligations.js"></script>
-     <script src="./my-items-activity.js"></script>
-     <script src="./assign-action.js"></script>
-     <script src="./action-screen.js"></script>
-      <script src="./action-screen-activity.js"></script>
- 
- 
+  <script src="./my-items-obligations.js"></script>
+  <script src="./my-items-activity.js"></script>
+  <script src="./assign-action.js"></script>
+  <script src="./action-screen.js"></script>
+  <script src="./action-screen-activity.js"></script>
+
+
   <script src="./app.js"></script>
   <script src="./ai-suggestion.js"></script>
   <script src="./drafts-circular-library.js"></script>
-   
-   <script src="./assign-activity.js"></script>
-   <script src="./assign-obligation.js"></script>
+
+  <script src="./assign-activity.js"></script>
+  <script src="./assign-obligation.js"></script>
   <script src="./circular-explorer.js"></script>
-
-
   
+
+
 </body>
 </htm.

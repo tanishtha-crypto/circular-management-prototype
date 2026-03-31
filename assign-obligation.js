@@ -980,83 +980,49 @@
  *  - Bulk assign dept dropdown: readable dark text
  */
 
-const AO_DEPTS = ['Compliance','Risk','Legal','IT','Operations','HR','Finance'];
+const AO_DEPTS = ['Compliance', 'Risk', 'Legal', 'IT', 'Operations', 'HR', 'Finance'];
 const AO_PEOPLE = {
-  Compliance: ['Sneha Das','Meera Pillai','Arjun Kumar','Ravi Menon'],
-  Risk:       ['Anand Krishnan','Neha Rao','Vikram Singh','Pooja Shah'],
-  Legal:      ['Priya Nair','Suresh Iyer','Kavitha Reddy'],
-  IT:         ['Raj Iyer','Sanjay Mehta','Divya Nair','Arun Thomas'],
-  Operations: ['Suresh Kumar','Lakshmi Rao','Rohit Gupta'],
-  HR:         ['Priya Sharma','Aditya Patel','Reshma Nair'],
-  Finance:    ['Rahul Verma','Shalini Menon','Kiran Bhat'],
+  Compliance: ['Sneha Das', 'Meera Pillai', 'Arjun Kumar', 'Ravi Menon'],
+  Risk: ['Anand Krishnan', 'Neha Rao', 'Vikram Singh', 'Pooja Shah'],
+  Legal: ['Priya Nair', 'Suresh Iyer', 'Kavitha Reddy'],
+  IT: ['Raj Iyer', 'Sanjay Mehta', 'Divya Nair', 'Arun Thomas'],
+  Operations: ['Suresh Kumar', 'Lakshmi Rao', 'Rohit Gupta'],
+  HR: ['Priya Sharma', 'Aditya Patel', 'Reshma Nair'],
+  Finance: ['Rahul Verma', 'Shalini Menon', 'Kiran Bhat'],
 };
 
 /* ── DATA ── */
 function _aoGetData(circId) {
   const base = [
     {
-      chapterId:'CH-1', chapterTitle:'Chapter 1', chapterSub:'Governance & Policy',
-      sections:[
+      chapterId: 'CH-1', chapterTitle: 'Chapter 1', chapterSub: 'Governance & Policy',
+      sections: [
         {
-          sectionId:'S1.1', sectionTitle:'Compliance Policy Framework',
-          clauses:[
+          sectionId: 'S1.1', sectionTitle: 'Compliance Policy Framework',
+          clauses: [
             {
-              clauseId:'C1.1', clauseText:'The entity shall establish and maintain a Board-approved compliance policy framework.',
-              obligations:[
-                { id:'OB-001', text:'Establish and maintain a Board-approved compliance policy covering all aspects of this circular, reviewed at least annually.', dept:null, assignee:null, dueDate:'2025-06-15', priority:'High', status:'Unassigned' },
-                { id:'OB-002', text:'Distribute the approved policy to all relevant departments and obtain signed acknowledgement from department heads within 30 days.', dept:null, assignee:null, dueDate:'2025-06-30', priority:'Medium', status:'Unassigned' },
+              clauseId: 'C1.1', clauseText: 'The entity shall establish and maintain a Board-approved compliance policy framework.',
+              obligations: [
+                { id: 'OB-001', text: 'Establish and maintain a Board-approved compliance policy covering all aspects of this circular, reviewed at least annually.', dept: null, assignee: null, dueDate: '2025-06-15', priority: 'High', status: 'Unassigned' },
+                { id: 'OB-002', text: 'Distribute the approved policy to all relevant departments and obtain signed acknowledgement from department heads within 30 days.', dept: null, assignee: null, dueDate: '2025-06-30', priority: 'Medium', status: 'Unassigned' },
               ]
             },
             {
-              clauseId:'C1.2', clauseText:'A designated Compliance Officer shall be appointed with Board-level reporting.',
-              obligations:[
-                { id:'OB-003', text:'Appoint a designated Compliance Officer with direct reporting line to the Board Audit Committee.', dept:'Compliance', assignee:'Sneha Das', dueDate:'2025-04-30', priority:'Critical', status:'Assigned' },
-                { id:'OB-004', text:'Define and document the Compliance Officer mandate including scope, authority and escalation rights.', dept:null, assignee:null, dueDate:'2025-05-20', priority:'High', status:'Unassigned' },
+              clauseId: 'C1.2', clauseText: 'A designated Compliance Officer shall be appointed with Board-level reporting.',
+              obligations: [
+                { id: 'OB-003', text: 'Appoint a designated Compliance Officer with direct reporting line to the Board Audit Committee.', dept: 'Compliance', assignee: 'Sneha Das', dueDate: '2025-04-30', priority: 'Critical', status: 'Assigned' },
+                { id: 'OB-004', text: 'Define and document the Compliance Officer mandate including scope, authority and escalation rights.', dept: null, assignee: null, dueDate: '2025-05-20', priority: 'High', status: 'Unassigned' },
               ]
             },
           ]
         },
         {
-          sectionId:'S1.2', sectionTitle:'Committee & Governance',
-          clauses:[
+          sectionId: 'S1.2', sectionTitle: 'Committee & Governance',
+          clauses: [
             {
-              clauseId:'C1.3', clauseText:'Compliance Committee shall meet quarterly and submit minutes to the regulator.',
-              obligations:[
-                { id:'OB-005', text:'Conduct Compliance Committee meetings at least quarterly with minutes submitted to the regulator within 15 days of each meeting.', dept:null, assignee:null, dueDate:'2025-07-01', priority:'Medium', status:'Unassigned' },
-              ]
-            },
-          ]
-        },
-      ]
-    },
-    {
-      chapterId:'CH-2', chapterTitle:'Chapter 2', chapterSub:'Operational Requirements',
-      sections:[
-        {
-          sectionId:'S2.1', sectionTitle:'Process & Systems',
-          clauses:[
-            {
-              clauseId:'C2.1', clauseText:'All customer-facing processes must reflect updated regulatory requirements within 30 days.',
-              obligations:[
-                { id:'OB-006', text:'Update all customer-facing processes to reflect new regulatory requirements within 30 days of the effective date.', dept:'Operations', assignee:'Suresh Kumar', dueDate:'2025-05-15', priority:'High', status:'Acknowledged' },
-                { id:'OB-007', text:'Train all frontline staff on updated processes and maintain signed acknowledgement records for audit purposes.', dept:null, assignee:null, dueDate:'2025-05-31', priority:'Medium', status:'Unassigned' },
-              ]
-            },
-            {
-              clauseId:'C2.2', clauseText:'Transaction monitoring systems shall detect and report suspicious activity in real-time.',
-              obligations:[
-                { id:'OB-008', text:'Upgrade transaction monitoring systems to detect and report suspicious activity in real-time with a maximum alert latency of 5 seconds.', dept:null, assignee:null, dueDate:'2025-08-01', priority:'Critical', status:'Unassigned' },
-              ]
-            },
-          ]
-        },
-        {
-          sectionId:'S2.2', sectionTitle:'Business Continuity',
-          clauses:[
-            {
-              clauseId:'C2.3', clauseText:'Business Continuity Plan for critical compliance systems must be tested semi-annually.',
-              obligations:[
-                { id:'OB-009', text:'Test and update the Business Continuity Plan covering all critical compliance systems on a semi-annual basis with documented test results.', dept:'IT', assignee:'Raj Iyer', dueDate:'2025-06-01', priority:'Medium', status:'Assigned' },
+              clauseId: 'C1.3', clauseText: 'Compliance Committee shall meet quarterly and submit minutes to the regulator.',
+              obligations: [
+                { id: 'OB-005', text: 'Conduct Compliance Committee meetings at least quarterly with minutes submitted to the regulator within 15 days of each meeting.', dept: null, assignee: null, dueDate: '2025-07-01', priority: 'Medium', status: 'Unassigned' },
               ]
             },
           ]
@@ -1064,33 +1030,33 @@ function _aoGetData(circId) {
       ]
     },
     {
-      chapterId:'CH-3', chapterTitle:'Chapter 3', chapterSub:'Reporting & Disclosure',
-      sections:[
+      chapterId: 'CH-2', chapterTitle: 'Chapter 2', chapterSub: 'Operational Requirements',
+      sections: [
         {
-          sectionId:'S3.1', sectionTitle:'Regulatory Submissions',
-          clauses:[
+          sectionId: 'S2.1', sectionTitle: 'Process & Systems',
+          clauses: [
             {
-              clauseId:'C3.1', clauseText:'Monthly compliance status reports shall be submitted to the regulator by the 7th of each month.',
-              obligations:[
-                { id:'OB-010', text:'Submit monthly compliance status reports to the regulator in the prescribed format by the 7th of each calendar month without exception.', dept:null, assignee:null, dueDate:'2025-05-07', priority:'High', status:'Unassigned' },
-                { id:'OB-011', text:'Maintain an internal compliance reporting log with maker-checker controls for all regulatory submissions.', dept:null, assignee:null, dueDate:'2025-05-20', priority:'Medium', status:'Unassigned' },
+              clauseId: 'C2.1', clauseText: 'All customer-facing processes must reflect updated regulatory requirements within 30 days.',
+              obligations: [
+                { id: 'OB-006', text: 'Update all customer-facing processes to reflect new regulatory requirements within 30 days of the effective date.', dept: 'Operations', assignee: 'Suresh Kumar', dueDate: '2025-05-15', priority: 'High', status: 'Acknowledged' },
+                { id: 'OB-007', text: 'Train all frontline staff on updated processes and maintain signed acknowledgement records for audit purposes.', dept: null, assignee: null, dueDate: '2025-05-31', priority: 'Medium', status: 'Unassigned' },
+              ]
+            },
+            {
+              clauseId: 'C2.2', clauseText: 'Transaction monitoring systems shall detect and report suspicious activity in real-time.',
+              obligations: [
+                { id: 'OB-008', text: 'Upgrade transaction monitoring systems to detect and report suspicious activity in real-time with a maximum alert latency of 5 seconds.', dept: null, assignee: null, dueDate: '2025-08-01', priority: 'Critical', status: 'Unassigned' },
               ]
             },
           ]
         },
         {
-          sectionId:'S3.2', sectionTitle:'Audit & Breach Reporting',
-          clauses:[
+          sectionId: 'S2.2', sectionTitle: 'Business Continuity',
+          clauses: [
             {
-              clauseId:'C3.2', clauseText:'Annual third-party audit of compliance infrastructure, findings to Board within 30 days.',
-              obligations:[
-                { id:'OB-012', text:'Commission an annual third-party audit of the compliance infrastructure and present findings to the Board within 30 days of audit completion.', dept:'Risk', assignee:'Anand Krishnan', dueDate:'2025-07-31', priority:'High', status:'Assigned' },
-              ]
-            },
-            {
-              clauseId:'C3.3', clauseText:'Material breaches must be reported to the regulator within 24 hours.',
-              obligations:[
-                { id:'OB-013', text:'Report material breaches or near-misses to the regulator within 24 hours of identification, followed by a full incident report within 7 days.', dept:null, assignee:null, dueDate:'2025-04-25', priority:'Critical', status:'Unassigned' },
+              clauseId: 'C2.3', clauseText: 'Business Continuity Plan for critical compliance systems must be tested semi-annually.',
+              obligations: [
+                { id: 'OB-009', text: 'Test and update the Business Continuity Plan covering all critical compliance systems on a semi-annual basis with documented test results.', dept: 'IT', assignee: 'Raj Iyer', dueDate: '2025-06-01', priority: 'Medium', status: 'Assigned' },
               ]
             },
           ]
@@ -1098,21 +1064,55 @@ function _aoGetData(circId) {
       ]
     },
     {
-      chapterId:'CH-4', chapterTitle:'Chapter 4', chapterSub:'Technology & Systems',
-      sections:[
+      chapterId: 'CH-3', chapterTitle: 'Chapter 3', chapterSub: 'Reporting & Disclosure',
+      sections: [
         {
-          sectionId:'S4.1', sectionTitle:'Data Security & Access',
-          clauses:[
+          sectionId: 'S3.1', sectionTitle: 'Regulatory Submissions',
+          clauses: [
             {
-              clauseId:'C4.1', clauseText:'All data encryption must comply with AES-256 standards across all systems.',
-              obligations:[
-                { id:'OB-014', text:'Ensure all data encryption at rest and in transit complies with AES-256 standards across all customer-facing and internal compliance systems.', dept:'IT', assignee:null, dueDate:'2025-05-30', priority:'High', status:'Assigned' },
+              clauseId: 'C3.1', clauseText: 'Monthly compliance status reports shall be submitted to the regulator by the 7th of each month.',
+              obligations: [
+                { id: 'OB-010', text: 'Submit monthly compliance status reports to the regulator in the prescribed format by the 7th of each calendar month without exception.', dept: null, assignee: null, dueDate: '2025-05-07', priority: 'High', status: 'Unassigned' },
+                { id: 'OB-011', text: 'Maintain an internal compliance reporting log with maker-checker controls for all regulatory submissions.', dept: null, assignee: null, dueDate: '2025-05-20', priority: 'Medium', status: 'Unassigned' },
+              ]
+            },
+          ]
+        },
+        {
+          sectionId: 'S3.2', sectionTitle: 'Audit & Breach Reporting',
+          clauses: [
+            {
+              clauseId: 'C3.2', clauseText: 'Annual third-party audit of compliance infrastructure, findings to Board within 30 days.',
+              obligations: [
+                { id: 'OB-012', text: 'Commission an annual third-party audit of the compliance infrastructure and present findings to the Board within 30 days of audit completion.', dept: 'Risk', assignee: 'Anand Krishnan', dueDate: '2025-07-31', priority: 'High', status: 'Assigned' },
               ]
             },
             {
-              clauseId:'C4.2', clauseText:'Access control matrix for compliance-sensitive functions must be quarterly recertified by CISO.',
-              obligations:[
-                { id:'OB-015', text:'Review and recertify the access control matrix for all compliance-sensitive functions on a quarterly basis, signed off by the CISO.', dept:null, assignee:null, dueDate:'2025-06-30', priority:'Medium', status:'Unassigned' },
+              clauseId: 'C3.3', clauseText: 'Material breaches must be reported to the regulator within 24 hours.',
+              obligations: [
+                { id: 'OB-013', text: 'Report material breaches or near-misses to the regulator within 24 hours of identification, followed by a full incident report within 7 days.', dept: null, assignee: null, dueDate: '2025-04-25', priority: 'Critical', status: 'Unassigned' },
+              ]
+            },
+          ]
+        },
+      ]
+    },
+    {
+      chapterId: 'CH-4', chapterTitle: 'Chapter 4', chapterSub: 'Technology & Systems',
+      sections: [
+        {
+          sectionId: 'S4.1', sectionTitle: 'Data Security & Access',
+          clauses: [
+            {
+              clauseId: 'C4.1', clauseText: 'All data encryption must comply with AES-256 standards across all systems.',
+              obligations: [
+                { id: 'OB-014', text: 'Ensure all data encryption at rest and in transit complies with AES-256 standards across all customer-facing and internal compliance systems.', dept: 'IT', assignee: null, dueDate: '2025-05-30', priority: 'High', status: 'Assigned' },
+              ]
+            },
+            {
+              clauseId: 'C4.2', clauseText: 'Access control matrix for compliance-sensitive functions must be quarterly recertified by CISO.',
+              obligations: [
+                { id: 'OB-015', text: 'Review and recertify the access control matrix for all compliance-sensitive functions on a quarterly basis, signed off by the CISO.', dept: null, assignee: null, dueDate: '2025-06-30', priority: 'Medium', status: 'Unassigned' },
               ]
             },
           ]
@@ -1152,20 +1152,20 @@ function _aoCircMeta(circId) {
 }
 
 /* ── MAIN RENDER ── */
-window.renderAssignObligation = function(circId) {
+window.renderAssignObligation = function(circId, activeTab = 'obligation') {
   const area = document.getElementById('content-area');
   if (!area) return;
   _aoInjectStyles();
   const circs = (typeof CMS_DATA !== 'undefined' && CMS_DATA.circulars) ? CMS_DATA.circulars : [
-    { id:'CIRC-001', title:'Cybersecurity Framework for Regulated Entities',      regulator:'RBI',   risk:'High'   },
-    { id:'CIRC-002', title:'Enhanced KYC & AML Compliance Directive',             regulator:'SEBI',  risk:'High'   },
-    { id:'CIRC-003', title:'Operational Risk Management Guidelines',              regulator:'RBI',   risk:'Medium' },
-    { id:'CIRC-004', title:'Data Localisation & Privacy Compliance Requirements', regulator:'MCA',   risk:'Medium' },
-    { id:'CIRC-005', title:'Third-Party & Vendor Risk Management Framework',      regulator:'IRDAI', risk:'High'   },
+    { id: 'CIRC-001', title: 'Cybersecurity Framework for Regulated Entities', regulator: 'RBI', risk: 'High' },
+    { id: 'CIRC-002', title: 'Enhanced KYC & AML Compliance Directive', regulator: 'SEBI', risk: 'High' },
+    { id: 'CIRC-003', title: 'Operational Risk Management Guidelines', regulator: 'RBI', risk: 'Medium' },
+    { id: 'CIRC-004', title: 'Data Localisation & Privacy Compliance Requirements', regulator: 'MCA', risk: 'Medium' },
+    { id: 'CIRC-005', title: 'Third-Party & Vendor Risk Management Framework', regulator: 'IRDAI', risk: 'High' },
   ];
-  const activeId   = circId || circs[0]?.id || 'CIRC-001';
+  const activeId = circId || circs[0]?.id || 'CIRC-001';
   const activeCirc = circs.find(c => c.id === activeId) || circs[0];
-  area.innerHTML = _aoBuildPage(circs, activeCirc);
+  area.innerHTML = _aoBuildPage(circs, activeCirc, activeTab);
   _aoBindAll(activeCirc.id);
 };
 
@@ -1184,14 +1184,14 @@ function _aoTableHeader() {
 }
 
 /* ── PAGE SHELL ── */
-function _aoBuildPage(circs, activeCirc) {
-  const chapters   = _aoGetData(activeCirc.id);
-  const allObligs  = _aoAllObligs(activeCirc.id);
-  const total      = allObligs.length;
-  const assigned   = allObligs.filter(o => o.status !== 'Unassigned').length;
+function _aoBuildPage(circs, activeCirc, activeTab = 'obligation')  {
+  const chapters = _aoGetData(activeCirc.id);
+  const allObligs = _aoAllObligs(activeCirc.id);
+  const total = allObligs.length;
+  const assigned = allObligs.filter(o => o.status !== 'Unassigned').length;
   const unassigned = total - assigned;
-  const critical   = allObligs.filter(o => o.priority === 'Critical' && o.status === 'Unassigned').length;
-  const pct        = total ? Math.round(assigned / total * 100) : 0;
+  const critical = allObligs.filter(o => o.priority === 'Critical' && o.status === 'Unassigned').length;
+  const pct = total ? Math.round(assigned / total * 100) : 0;
 
   return `<div class="ao-page" id="ao-page">
   <div class="ao-overlay" id="ao-overlay" style="display:none;" onclick="_aoOverlayClick(event)">
@@ -1207,6 +1207,18 @@ function _aoBuildPage(circs, activeCirc) {
       <div class="ao-head-right">
         <button class="ao-btn ao-btn-ghost" onclick="window.history.back()">← Back</button>
         <button class="ao-btn ao-btn-pri" onclick="_aoSaveAll('${activeCirc.id}')">💾 Save All</button>
+      <div class="ao-tab-switch">
+  <button
+    class="ao-tab-btn ${activeTab === 'obligation' ? 'active' : ''}"
+    onclick="_aoSwitchMainTab('obligation','${activeCirc.id}')">
+    Obligation
+  </button>
+  <button
+    class="ao-tab-btn ${activeTab === 'activities' ? 'active' : ''}"
+    onclick="_aoSwitchMainTab('activities','${activeCirc.id}')">
+    Activities
+  </button>
+</div>
       </div>
     </div>
 
@@ -1225,8 +1237,8 @@ function _aoBuildPage(circs, activeCirc) {
           <div class="ao-csel-drop" id="ao-csel-drop" style="display:none;">
             <input class="ao-csel-search" id="ao-csel-search" placeholder="Search circulars…" autocomplete="off"/>
             <div class="ao-csel-list">
-              ${circs.map(c => `<div class="ao-csel-item ${c.id===activeCirc.id?'active':''}" onclick="_aoSwitchCirc('${c.id}')">
-                <div class="ao-csel-row1"><span class="ao-csel-item-id">${c.id}</span><span class="ao-csel-item-reg">${c.regulator||''}</span><span class="ao-risk-pip ao-risk-${(c.risk||'').toLowerCase()}"></span></div>
+              ${circs.map(c => `<div class="ao-csel-item ${c.id === activeCirc.id ? 'active' : ''}" onclick="_aoSwitchCirc('${c.id}')">
+                <div class="ao-csel-row1"><span class="ao-csel-item-id">${c.id}</span><span class="ao-csel-item-reg">${c.regulator || ''}</span><span class="ao-risk-pip ao-risk-${(c.risk || '').toLowerCase()}"></span></div>
                 <div class="ao-csel-item-title">${c.title}</div>
               </div>`).join('')}
             </div>
@@ -1260,7 +1272,7 @@ function _aoBuildPage(circs, activeCirc) {
       </div>
       <div class="ao-tl-right">
         <select class="ao-flt-sel" id="ao-filter-status" onchange="_aoApplyFilters()"><option value="">All Statuses</option><option>Unassigned</option><option>Assigned</option><option>Acknowledged</option></select>
-        <select class="ao-flt-sel" id="ao-filter-dept" onchange="_aoApplyFilters()"><option value="">All Departments</option>${AO_DEPTS.map(d=>`<option>${d}</option>`).join('')}</select>
+        <select class="ao-flt-sel" id="ao-filter-dept" onchange="_aoApplyFilters()"><option value="">All Departments</option>${AO_DEPTS.map(d => `<option>${d}</option>`).join('')}</select>
       </div>
     </div>
 
@@ -1280,7 +1292,7 @@ function _aoBuildPage(circs, activeCirc) {
         <span class="ao-bulk-lbl">Department</span>
         <select class="ao-bulk-sel" id="ao-bulk-dept">
           <option value="">Select dept…</option>
-          ${AO_DEPTS.map(d=>`<option value="${d}">${d}</option>`).join('')}
+          ${AO_DEPTS.map(d => `<option value="${d}">${d}</option>`).join('')}
         </select>
       </div>
       <div class="ao-bulk-f">
@@ -1303,9 +1315,9 @@ function _aoBuildPage(circs, activeCirc) {
 
 /* ── CHAPTER CARD ── */
 function _aoRenderChapter(ch, ci, circId) {
-  const obligs      = ch.sections.flatMap(s => s.clauses.flatMap(cl => cl.obligations));
+  const obligs = ch.sections.flatMap(s => s.clauses.flatMap(cl => cl.obligations));
   const assignedCnt = obligs.filter(o => o.status !== 'Unassigned').length;
-  const safeChId    = _aoSafeId(ch.chapterId);
+  const safeChId = _aoSafeId(ch.chapterId);
   const sectionsHtml = ch.sections.map((s, si) => _aoRenderSection(s, si, safeChId, circId)).join('');
 
   return `
@@ -1330,9 +1342,9 @@ function _aoRenderChapter(ch, ci, circId) {
         <thead>${_aoTableHeader()}</thead>
         <tbody id="ao-tbody-${safeChId}">
           ${ch.sections.flatMap(s => s.clauses.flatMap(cl => {
-            const safeClId = _aoSafeId(cl.clauseId);
-            return [_aoRenderClauseGroupHeader(cl, safeClId, circId), ...cl.obligations.map(ob => _aoRenderObRow(ob, safeClId, circId))];
-          })).join('')}
+    const safeClId = _aoSafeId(cl.clauseId);
+    return [_aoRenderClauseGroupHeader(cl, safeClId, circId), ...cl.obligations.map(ob => _aoRenderObRow(ob, safeClId, circId))];
+  })).join('')}
         </tbody>
       </table>
     </div>
@@ -1341,7 +1353,7 @@ function _aoRenderChapter(ch, ci, circId) {
 }
 
 /* ── SECTION HEADER (display only, no table rows) ── */
-function _aoSafeId(id) { return (id||'').replace(/\./g,'-').replace(/[^a-zA-Z0-9_-]/g,''); }
+function _aoSafeId(id) { return (id || '').replace(/\./g, '-').replace(/[^a-zA-Z0-9_-]/g, ''); }
 
 function _aoRenderSection(sec, si, safeChId, circId) {
   return ''; /* sections shown inline via clause group headers */
@@ -1363,8 +1375,8 @@ function _aoRenderClauseGroupHeader(cl, safeClId, circId) {
         <span class="ao-cl-id">${cl.clauseId}</span>
         <span class="ao-cl-text">${cl.clauseText}</span>
         <div class="ao-cl-right">
-          <span class="ao-cl-ob-cnt">${cl.obligations.length} obligation${cl.obligations.length!==1?'s':''}</span>
-          <span class="ao-cl-prog ${done?'done':''}">${assignedCnt}/${cl.obligations.length}</span>
+          <span class="ao-cl-ob-cnt">${cl.obligations.length} obligation${cl.obligations.length !== 1 ? 's' : ''}</span>
+          <span class="ao-cl-prog ${done ? 'done' : ''}">${assignedCnt}/${cl.obligations.length}</span>
         </div>
       </div>
     </td>
@@ -1373,12 +1385,12 @@ function _aoRenderClauseGroupHeader(cl, safeClId, circId) {
 
 /* ── OBLIGATION ROW ── */
 function _aoRenderObRow(ob, safeClauseId, circId) {
-  const stCls  = { Unassigned:'ao-s-none', Assigned:'ao-s-asgn', Acknowledged:'ao-s-ack' }[ob.status] || '';
+  const stCls = { Unassigned: 'ao-s-none', Assigned: 'ao-s-asgn', Acknowledged: 'ao-s-ack' }[ob.status] || '';
   return `
-<tr class="ao-ob-row ${ob.status==='Unassigned'?'ao-ob-unassigned':''}"
+<tr class="ao-ob-row ${ob.status === 'Unassigned' ? 'ao-ob-unassigned' : ''}"
     id="ao-row-${ob.id}"
     data-obid="${ob.id}" data-circid="${circId}" data-clauseid="${safeClauseId}"
-    data-status="${ob.status}" data-priority="${ob.priority}" data-dept="${ob.dept||''}">
+    data-status="${ob.status}" data-priority="${ob.priority}" data-dept="${ob.dept || ''}">
   <td class="ao-td-chk" onclick="event.stopPropagation()">
     <label class="ao-check-wrap">
       <input type="checkbox" class="ao-row-chk" data-id="${ob.id}" data-clause="${safeClauseId}" onchange="_aoRowCheck(this)"/>
@@ -1390,19 +1402,19 @@ function _aoRenderObRow(ob, safeClauseId, circId) {
     <span class="ao-ob-text">${ob.text}</span>
   </td>
   <td onclick="event.stopPropagation()">
-    <select class="ao-inline-sel ${ob.dept?'filled':''}" onchange="_aoInlineDeptChange('${ob.id}','${circId}',this)">
+    <select class="ao-inline-sel ${ob.dept ? 'filled' : ''}" onchange="_aoInlineDeptChange('${ob.id}','${circId}',this)">
       <option value="">Dept…</option>
-      ${AO_DEPTS.map(d=>`<option ${d===ob.dept?'selected':''}>${d}</option>`).join('')}
+      ${AO_DEPTS.map(d => `<option ${d === ob.dept ? 'selected' : ''}>${d}</option>`).join('')}
     </select>
   </td>
   <td onclick="event.stopPropagation()">
     ${ob.assignee
-      ? `<div class="ao-assignee-filled"><span class="ao-av">${ob.assignee.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2)}</span><span class="ao-assignee-name">${ob.assignee}</span></div>`
+      ? `<div class="ao-assignee-filled"><span class="ao-av">${ob.assignee.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2)}</span><span class="ao-assignee-name">${ob.assignee}</span></div>`
       : `<span class="ao-assignee-empty-lbl">—</span>`}
   </td>
   <td onclick="event.stopPropagation()">
-    <input type="date" class="ao-inline-date ${ob.dueDate?'filled':''}"
-           value="${ob.dueDate||''}"
+    <input type="date" class="ao-inline-date ${ob.dueDate ? 'filled' : ''}"
+           value="${ob.dueDate || ''}"
            onchange="_aoInlineDueChange('${ob.id}','${circId}',this)"/>
   </td>
   <td><span class="ao-st-badge ${stCls}">${ob.status}</span></td>
@@ -1411,16 +1423,16 @@ function _aoRenderObRow(ob, safeClauseId, circId) {
 }
 
 /* ── DRAWER ── */
-window._aoOverlayClick = function(e) { if (e.target.id==='ao-overlay') _aoCloseDrawerDirect(); };
+window._aoOverlayClick = function (e) { if (e.target.id === 'ao-overlay') _aoCloseDrawerDirect(); };
 
-window._aoOpenDrawer = function(obId, circId) {
+window._aoOpenDrawer = function (obId, circId) {
   const chapters = _aoGetData(circId);
-  let ob=null, clauseRef='', clauseText='', sectionTitle='', chapterTitle='';
+  let ob = null, clauseRef = '', clauseText = '', sectionTitle = '', chapterTitle = '';
   for (const ch of chapters) {
     for (const s of ch.sections) {
       for (const cl of s.clauses) {
-        const f = cl.obligations.find(o=>o.id===obId);
-        if (f) { ob=f; clauseRef=cl.clauseId; clauseText=cl.clauseText; sectionTitle=s.sectionTitle; chapterTitle=ch.chapterTitle+' — '+ch.chapterSub; break; }
+        const f = cl.obligations.find(o => o.id === obId);
+        if (f) { ob = f; clauseRef = cl.clauseId; clauseText = cl.clauseText; sectionTitle = s.sectionTitle; chapterTitle = ch.chapterTitle + ' — ' + ch.chapterSub; break; }
       }
       if (ob) break;
     }
@@ -1428,17 +1440,17 @@ window._aoOpenDrawer = function(obId, circId) {
   }
   if (!ob) return;
 
-  document.querySelectorAll('.ao-ob-row').forEach(r=>r.classList.remove('ao-row-active'));
+  document.querySelectorAll('.ao-ob-row').forEach(r => r.classList.remove('ao-row-active'));
   document.getElementById(`ao-row-${obId}`)?.classList.add('ao-row-active');
 
   const overlay = document.getElementById('ao-overlay');
-  const drawer  = document.getElementById('ao-drawer');
-  const dc      = document.getElementById('ao-drawer-content');
+  const drawer = document.getElementById('ao-drawer');
+  const dc = document.getElementById('ao-drawer-content');
   overlay.style.display = 'flex';
-  requestAnimationFrame(()=>requestAnimationFrame(()=>drawer.classList.add('open')));
+  requestAnimationFrame(() => requestAnimationFrame(() => drawer.classList.add('open')));
 
-  const meta   = _aoCircMeta(circId);
-  const priCls = { Critical:'ao-p-crit', High:'ao-p-high', Medium:'ao-p-med', Low:'ao-p-low' }[ob.priority]||'';
+  const meta = _aoCircMeta(circId);
+  const priCls = { Critical: 'ao-p-crit', High: 'ao-p-high', Medium: 'ao-p-med', Low: 'ao-p-low' }[ob.priority] || '';
 
   dc.innerHTML = `
 <div class="ao-dr-inner">
@@ -1465,14 +1477,14 @@ window._aoOpenDrawer = function(obId, circId) {
         <label class="ao-dr-label">Department</label>
         <select class="ao-dr-input" id="ao-dr-dept-${obId}">
           <option value="">Select department…</option>
-          ${AO_DEPTS.map(d=>`<option ${d===ob.dept?'selected':''}>${d}</option>`).join('')}
+          ${AO_DEPTS.map(d => `<option ${d === ob.dept ? 'selected' : ''}>${d}</option>`).join('')}
         </select>
       </div>
       <div class="ao-dr-field">
         <label class="ao-dr-label">Assign to Person</label>
         <div class="ao-ta-wrap" id="ao-ta-wrap-${obId}">
           <input class="ao-dr-input" id="ao-dr-assignee-${obId}"
-                 value="${ob.assignee||''}" placeholder="Type name…" autocomplete="off"
+                 value="${ob.assignee || ''}" placeholder="Type name…" autocomplete="off"
                  oninput="_aoTypeahead('${obId}',this.value)"
                  onfocus="_aoTypeahead('${obId}',this.value)"/>
           <div class="ao-sug-box" id="ao-sug-${obId}" style="display:none;"></div>
@@ -1480,14 +1492,14 @@ window._aoOpenDrawer = function(obId, circId) {
       </div>
       <div class="ao-dr-field">
         <label class="ao-dr-label">Due Date</label>
-        <input type="date" class="ao-dr-input" id="ao-dr-due-${obId}" value="${ob.dueDate||''}"/>
+        <input type="date" class="ao-dr-input" id="ao-dr-due-${obId}" value="${ob.dueDate || ''}"/>
       </div>
     </div>
 
     <div class="ao-dr-field">
       <label class="ao-dr-label">Notes / Instructions</label>
       <textarea class="ao-dr-input ao-dr-ta" id="ao-dr-notes-${obId}"
-                placeholder="Add context or instructions…">${ob._notes||''}</textarea>
+                placeholder="Add context or instructions…">${ob._notes || ''}</textarea>
     </div>
   </div>
 
@@ -1581,14 +1593,14 @@ window._aoOpenDrawer = function(obId, circId) {
   </div>
 </div>`;
 
-  document.getElementById(`ao-dr-dept-${obId}`)?.addEventListener('change', function() {
-    _aoTypeahead(obId, document.getElementById(`ao-dr-assignee-${obId}`)?.value||'');
+  document.getElementById(`ao-dr-dept-${obId}`)?.addEventListener('change', function () {
+    _aoTypeahead(obId, document.getElementById(`ao-dr-assignee-${obId}`)?.value || '');
   });
 };
 
-window._aoToggleCircRef = function(obId) {
+window._aoToggleCircRef = function (obId) {
   const panel = document.getElementById(`ao-circ-ref-${obId}`);
-  const btn   = document.getElementById(`ao-dr-more-btn-${obId}`);
+  const btn = document.getElementById(`ao-dr-more-btn-${obId}`);
   if (!panel) return;
   const open = panel.style.display !== 'none';
   panel.style.display = open ? 'none' : 'block';
@@ -1596,17 +1608,17 @@ window._aoToggleCircRef = function(obId) {
   if (btn) btn.classList.toggle('ao-more-btn-active', !open);
 };
 
-window._aoCloseDrawerDirect = function() {
+window._aoCloseDrawerDirect = function () {
   const overlay = document.getElementById('ao-overlay');
-  const drawer  = document.getElementById('ao-drawer');
-  if (!drawer||!overlay) return;
+  const drawer = document.getElementById('ao-drawer');
+  if (!drawer || !overlay) return;
   drawer.classList.remove('open');
-  setTimeout(()=>{ overlay.style.display='none'; }, 300);
-  document.querySelectorAll('.ao-ob-row').forEach(r=>r.classList.remove('ao-row-active'));
+  setTimeout(() => { overlay.style.display = 'none'; }, 300);
+  document.querySelectorAll('.ao-ob-row').forEach(r => r.classList.remove('ao-row-active'));
 };
 
 /* ── AI SUGGESTION NAVIGATION ── */
-window._aoGoToAISuggestion = function(circId) {
+window._aoGoToAISuggestion = function (circId) {
   if (typeof renderAISuggestionPage === 'function') {
     renderAISuggestionPage(circId);
   } else if (typeof window.navigate === 'function') {
@@ -1624,70 +1636,70 @@ window._aoGoToAISuggestion = function(circId) {
 };
 
 /* ── TYPEAHEAD ── */
-window._aoTypeahead = function(obId, query) {
-  const dept   = document.getElementById(`ao-dr-dept-${obId}`)?.value||'';
+window._aoTypeahead = function (obId, query) {
+  const dept = document.getElementById(`ao-dr-dept-${obId}`)?.value || '';
   const sugBox = document.getElementById(`ao-sug-${obId}`);
   if (!sugBox) return;
   // Only use people from selected dept if one is chosen, else all
   let pool = dept && AO_PEOPLE[dept] ? AO_PEOPLE[dept] : Object.values(AO_PEOPLE).flat();
   pool = [...new Set(pool)];
-  const q   = (query||'').trim().toLowerCase();
-  const res = q ? pool.filter(p=>p.toLowerCase().includes(q)) : pool.slice(0,6);
-  if (!res.length) { sugBox.style.display='none'; return; }
-  sugBox.style.display='block';
-  sugBox.innerHTML = res.map(p=>`
-  <div class="ao-sug-item" onclick="_aoPickPerson('${obId}','${p.replace(/'/g,"\\'")}')">
-    <span class="ao-sug-av">${p.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2)}</span>
+  const q = (query || '').trim().toLowerCase();
+  const res = q ? pool.filter(p => p.toLowerCase().includes(q)) : pool.slice(0, 6);
+  if (!res.length) { sugBox.style.display = 'none'; return; }
+  sugBox.style.display = 'block';
+  sugBox.innerHTML = res.map(p => `
+  <div class="ao-sug-item" onclick="_aoPickPerson('${obId}','${p.replace(/'/g, "\\'")}')">
+    <span class="ao-sug-av">${p.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2)}</span>
     <span class="ao-sug-name">${p}</span>
     ${dept && AO_PEOPLE[dept]?.includes(p) ? `<span class="ao-sug-dept-tag">${dept}</span>` : ''}
   </div>`).join('');
-  setTimeout(()=>{
-    document.addEventListener('click', function h(e){
-      if (!document.getElementById(`ao-ta-wrap-${obId}`)?.contains(e.target)){sugBox.style.display='none';document.removeEventListener('click',h);}
+  setTimeout(() => {
+    document.addEventListener('click', function h(e) {
+      if (!document.getElementById(`ao-ta-wrap-${obId}`)?.contains(e.target)) { sugBox.style.display = 'none'; document.removeEventListener('click', h); }
     });
-  },0);
+  }, 0);
 };
-window._aoPickPerson = function(obId, name) {
-  const inp = document.getElementById(`ao-dr-assignee-${obId}`); if(inp)inp.value=name;
-  const sug = document.getElementById(`ao-sug-${obId}`); if(sug)sug.style.display='none';
+window._aoPickPerson = function (obId, name) {
+  const inp = document.getElementById(`ao-dr-assignee-${obId}`); if (inp) inp.value = name;
+  const sug = document.getElementById(`ao-sug-${obId}`); if (sug) sug.style.display = 'none';
 };
 
 /* ── BULK TYPEAHEAD ── */
-window._aoBulkTypeahead = function(query) {
-  const sug = document.getElementById('ao-bulk-sug'); if(!sug)return;
+window._aoBulkTypeahead = function (query) {
+  const sug = document.getElementById('ao-bulk-sug'); if (!sug) return;
   let pool = [...new Set(Object.values(AO_PEOPLE).flat())];
   const q = query.trim().toLowerCase();
-  const res = q ? pool.filter(p=>p.toLowerCase().includes(q)) : pool.slice(0,6);
-  if (!res.length) { sug.style.display='none'; return; }
-  sug.style.display='block';
-  sug.innerHTML = res.map(p=>`
-  <div class="ao-sug-item ao-sug-dark" onclick="_aoPickBulkPerson('${p.replace(/'/g,"\\'")}')">
-    <span class="ao-sug-av">${p.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2)}</span>
+  const res = q ? pool.filter(p => p.toLowerCase().includes(q)) : pool.slice(0, 6);
+  if (!res.length) { sug.style.display = 'none'; return; }
+  sug.style.display = 'block';
+  sug.innerHTML = res.map(p => `
+  <div class="ao-sug-item ao-sug-dark" onclick="_aoPickBulkPerson('${p.replace(/'/g, "\\'")}')">
+    <span class="ao-sug-av">${p.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2)}</span>
     <span class="ao-sug-name">${p}</span>
   </div>`).join('');
 };
-window._aoPickBulkPerson = function(name) {
-  const inp = document.getElementById('ao-bulk-assignee'); if(inp)inp.value=name;
-  const sug = document.getElementById('ao-bulk-sug'); if(sug)sug.style.display='none';
+window._aoPickBulkPerson = function (name) {
+  const inp = document.getElementById('ao-bulk-assignee'); if (inp) inp.value = name;
+  const sug = document.getElementById('ao-bulk-sug'); if (sug) sug.style.display = 'none';
 };
 
 /* ── DRAWER SAVE ── */
-window._aoDrawerSave = function(obId, circId) {
+window._aoDrawerSave = function (obId, circId) {
   const chapters = _aoGetData(circId);
-  let ob=null, safeClId='';
-  for (const ch of chapters) { for (const s of ch.sections) { for (const cl of s.clauses) { const f=cl.obligations.find(o=>o.id===obId); if(f){ob=f;safeClId=_aoSafeId(cl.clauseId);break;} } if(ob)break; } if(ob)break; }
+  let ob = null, safeClId = '';
+  for (const ch of chapters) { for (const s of ch.sections) { for (const cl of s.clauses) { const f = cl.obligations.find(o => o.id === obId); if (f) { ob = f; safeClId = _aoSafeId(cl.clauseId); break; } } if (ob) break; } if (ob) break; }
   if (!ob) return;
-  ob.dept     = document.getElementById(`ao-dr-dept-${obId}`)?.value     || ob.dept;
+  ob.dept = document.getElementById(`ao-dr-dept-${obId}`)?.value || ob.dept;
   ob.assignee = document.getElementById(`ao-dr-assignee-${obId}`)?.value || ob.assignee;
-  ob.dueDate  = document.getElementById(`ao-dr-due-${obId}`)?.value      || ob.dueDate;
-  ob._notes   = document.getElementById(`ao-dr-notes-${obId}`)?.value    || '';
+  ob.dueDate = document.getElementById(`ao-dr-due-${obId}`)?.value || ob.dueDate;
+  ob._notes = document.getElementById(`ao-dr-notes-${obId}`)?.value || '';
   if (ob.dept) ob.status = 'Assigned';
   // Find which chapter body to update
   let chSafeId = '';
   for (const ch of chapters) {
     for (const s of ch.sections) {
       for (const cl of s.clauses) {
-        if (cl.obligations.find(o=>o.id===obId)) { chSafeId = _aoSafeId(ch.chapterId); break; }
+        if (cl.obligations.find(o => o.id === obId)) { chSafeId = _aoSafeId(ch.chapterId); break; }
       }
       if (chSafeId) break;
     }
@@ -1697,87 +1709,87 @@ window._aoDrawerSave = function(obId, circId) {
   if (row) row.outerHTML = _aoRenderObRow(ob, safeClId, circId);
   _aoUpdateStats(circId);
   _aoCloseDrawerDirect();
-  if (typeof showToast==='function') showToast(`${obId} assigned ✓`,'success');
+  if (typeof showToast === 'function') showToast(`${obId} assigned ✓`, 'success');
 };
 
 /* ── INLINE ── */
-window._aoInlineDeptChange = function(obId, circId, sel) {
+window._aoInlineDeptChange = function (obId, circId, sel) {
   const chapters = _aoGetData(circId);
-  let ob=null;
-  for (const ch of chapters) { for (const s of ch.sections) { for (const cl of s.clauses) { const f=cl.obligations.find(o=>o.id===obId); if(f){ob=f;break;} } if(ob)break; } if(ob)break; }
+  let ob = null;
+  for (const ch of chapters) { for (const s of ch.sections) { for (const cl of s.clauses) { const f = cl.obligations.find(o => o.id === obId); if (f) { ob = f; break; } } if (ob) break; } if (ob) break; }
   if (!ob) return;
-  ob.dept=sel.value||null; ob.status=sel.value?'Assigned':'Unassigned';
-  sel.classList.toggle('filled',!!sel.value);
-  const st=document.querySelector(`#ao-row-${obId} .ao-st-badge`);
-  if (st) { st.textContent=ob.status; st.className=`ao-st-badge ${{Unassigned:'ao-s-none',Assigned:'ao-s-asgn',Acknowledged:'ao-s-ack'}[ob.status]||''}`; }
+  ob.dept = sel.value || null; ob.status = sel.value ? 'Assigned' : 'Unassigned';
+  sel.classList.toggle('filled', !!sel.value);
+  const st = document.querySelector(`#ao-row-${obId} .ao-st-badge`);
+  if (st) { st.textContent = ob.status; st.className = `ao-st-badge ${{ Unassigned: 'ao-s-none', Assigned: 'ao-s-asgn', Acknowledged: 'ao-s-ack' }[ob.status] || ''}`; }
   _aoUpdateStats(circId);
 };
-window._aoInlineDueChange = function(obId, circId, inp) {
+window._aoInlineDueChange = function (obId, circId, inp) {
   const chapters = _aoGetData(circId);
-  for (const ch of chapters) { for (const s of ch.sections) { for (const cl of s.clauses) { const f=cl.obligations.find(o=>o.id===obId); if(f){f.dueDate=inp.value;inp.classList.toggle('filled',!!inp.value);return;} } } }
+  for (const ch of chapters) { for (const s of ch.sections) { for (const cl of s.clauses) { const f = cl.obligations.find(o => o.id === obId); if (f) { f.dueDate = inp.value; inp.classList.toggle('filled', !!inp.value); return; } } } }
 };
 
 /* ── CHECKBOX + BULK ── */
-window._aoRowCheck = function() {
-  const sel=document.querySelectorAll('.ao-row-chk:checked');
-  const all=document.querySelectorAll('.ao-row-chk');
-  const selA=document.getElementById('ao-sel-all');
-  const badge=document.getElementById('ao-sel-badge');
-  const bar=document.getElementById('ao-bulk-bar');
-  const cnt=document.getElementById('ao-bulk-count');
-  if(selA)selA.indeterminate=sel.length>0&&sel.length<all.length;
-  if(badge){badge.textContent=`${sel.length} selected`;badge.style.display=sel.length?'inline-flex':'none';}
-  if(bar)bar.style.display=sel.length?'flex':'none';
-  if(cnt)cnt.textContent=`${sel.length} obligation${sel.length!==1?'s':''} selected`;
+window._aoRowCheck = function () {
+  const sel = document.querySelectorAll('.ao-row-chk:checked');
+  const all = document.querySelectorAll('.ao-row-chk');
+  const selA = document.getElementById('ao-sel-all');
+  const badge = document.getElementById('ao-sel-badge');
+  const bar = document.getElementById('ao-bulk-bar');
+  const cnt = document.getElementById('ao-bulk-count');
+  if (selA) selA.indeterminate = sel.length > 0 && sel.length < all.length;
+  if (badge) { badge.textContent = `${sel.length} selected`; badge.style.display = sel.length ? 'inline-flex' : 'none'; }
+  if (bar) bar.style.display = sel.length ? 'flex' : 'none';
+  if (cnt) cnt.textContent = `${sel.length} obligation${sel.length !== 1 ? 's' : ''} selected`;
   // Update clause-level checkboxes
-  document.querySelectorAll('.ao-clause-chk').forEach(cc=>{
+  document.querySelectorAll('.ao-clause-chk').forEach(cc => {
     const clauseId = cc.dataset.clause;
     const clauseChks = [...document.querySelectorAll(`.ao-row-chk[data-clause="${clauseId}"]`)];
-    const checkedCount = clauseChks.filter(c=>c.checked).length;
+    const checkedCount = clauseChks.filter(c => c.checked).length;
     cc.checked = checkedCount === clauseChks.length && clauseChks.length > 0;
     cc.indeterminate = checkedCount > 0 && checkedCount < clauseChks.length;
   });
 };
-window._aoClauseCheckAll = function(masterChk, clauseId) {
-  document.querySelectorAll(`.ao-row-chk[data-clause="${clauseId}"]`).forEach(c=>c.checked=masterChk.checked);
+window._aoClauseCheckAll = function (masterChk, clauseId) {
+  document.querySelectorAll(`.ao-row-chk[data-clause="${clauseId}"]`).forEach(c => c.checked = masterChk.checked);
   _aoRowCheck();
 };
-window._aoToggleAll = function(checked) {
-  document.querySelectorAll('.ao-row-chk').forEach(c=>c.checked=checked);
-  document.querySelectorAll('.ao-clause-chk').forEach(c=>{c.checked=checked;c.indeterminate=false;});
+window._aoToggleAll = function (checked) {
+  document.querySelectorAll('.ao-row-chk').forEach(c => c.checked = checked);
+  document.querySelectorAll('.ao-clause-chk').forEach(c => { c.checked = checked; c.indeterminate = false; });
   _aoRowCheck();
 };
-window._aoClearSel = function() {
-  document.querySelectorAll('.ao-row-chk,.ao-clause-chk').forEach(c=>{c.checked=false;c.indeterminate=false;});
-  const sa=document.getElementById('ao-sel-all'); if(sa){sa.checked=false;sa.indeterminate=false;}
+window._aoClearSel = function () {
+  document.querySelectorAll('.ao-row-chk,.ao-clause-chk').forEach(c => { c.checked = false; c.indeterminate = false; });
+  const sa = document.getElementById('ao-sel-all'); if (sa) { sa.checked = false; sa.indeterminate = false; }
   _aoRowCheck();
 };
-window._aoBulkAssign = function(circId) {
-  const sel=([...document.querySelectorAll('.ao-row-chk:checked')]).map(c=>c.dataset.id);
-  const dept=document.getElementById('ao-bulk-dept')?.value;
-  const assignee=document.getElementById('ao-bulk-assignee')?.value?.trim();
-  const due=document.getElementById('ao-bulk-due')?.value;
-  if(!sel.length){if(typeof showToast==='function')showToast('No obligations selected','warning');return;}
-  if(!dept){if(typeof showToast==='function')showToast('Select a department','warning');return;}
-  const chapters=_aoGetData(circId);
-  sel.forEach(obId=>{
-    let ob=null, safeClId='';
-    for (const ch of chapters) { for (const s of ch.sections) { for (const cl of s.clauses) { const f=cl.obligations.find(o=>o.id===obId); if(f){ob=f;safeClId=_aoSafeId(cl.clauseId);break;} } if(ob)break; } if(ob)break; }
-    if(!ob)return;
-    ob.dept=dept; ob.status='Assigned';
-    if(assignee)ob.assignee=assignee;
-    if(due)ob.dueDate=due;
-    const row=document.getElementById(`ao-row-${obId}`);
-    if(row)row.outerHTML=_aoRenderObRow(ob,safeClId,circId);
+window._aoBulkAssign = function (circId) {
+  const sel = ([...document.querySelectorAll('.ao-row-chk:checked')]).map(c => c.dataset.id);
+  const dept = document.getElementById('ao-bulk-dept')?.value;
+  const assignee = document.getElementById('ao-bulk-assignee')?.value?.trim();
+  const due = document.getElementById('ao-bulk-due')?.value;
+  if (!sel.length) { if (typeof showToast === 'function') showToast('No obligations selected', 'warning'); return; }
+  if (!dept) { if (typeof showToast === 'function') showToast('Select a department', 'warning'); return; }
+  const chapters = _aoGetData(circId);
+  sel.forEach(obId => {
+    let ob = null, safeClId = '';
+    for (const ch of chapters) { for (const s of ch.sections) { for (const cl of s.clauses) { const f = cl.obligations.find(o => o.id === obId); if (f) { ob = f; safeClId = _aoSafeId(cl.clauseId); break; } } if (ob) break; } if (ob) break; }
+    if (!ob) return;
+    ob.dept = dept; ob.status = 'Assigned';
+    if (assignee) ob.assignee = assignee;
+    if (due) ob.dueDate = due;
+    const row = document.getElementById(`ao-row-${obId}`);
+    if (row) row.outerHTML = _aoRenderObRow(ob, safeClId, circId);
   });
   _aoUpdateStats(circId); _aoClearSel();
-  if(typeof showToast==='function')showToast(`${sel.length} obligation${sel.length!==1?'s':''} assigned to ${dept} ✓`,'success');
+  if (typeof showToast === 'function') showToast(`${sel.length} obligation${sel.length !== 1 ? 's' : ''} assigned to ${dept} ✓`, 'success');
 };
 
 /* ── CHAPTER TOGGLE ── */
-window._aoToggleChapter = function(safeChId) {
+window._aoToggleChapter = function (safeChId) {
   const body = document.getElementById(`ao-ch-body-${safeChId}`);
-  const arr  = document.getElementById(`ao-ch-arr-${safeChId}`);
+  const arr = document.getElementById(`ao-ch-arr-${safeChId}`);
   const card = document.getElementById(`ao-ch-card-${safeChId}`);
   if (!body) return;
   const open = body.style.display !== 'none';
@@ -1787,39 +1799,50 @@ window._aoToggleChapter = function(safeChId) {
 };
 
 /* ── FILTERS ── */
-window._aoApplyFilters = function() {
-  const fS=document.getElementById('ao-filter-status')?.value||'';
-  const fD=document.getElementById('ao-filter-dept')?.value||'';
-  document.querySelectorAll('.ao-ob-row').forEach(row=>{
-    const ok=(!fS||row.dataset.status===fS)&&(!fD||row.dataset.dept===fD);
-    row.style.display=ok?'':'none';
+window._aoApplyFilters = function () {
+  const fS = document.getElementById('ao-filter-status')?.value || '';
+  const fD = document.getElementById('ao-filter-dept')?.value || '';
+  document.querySelectorAll('.ao-ob-row').forEach(row => {
+    const ok = (!fS || row.dataset.status === fS) && (!fD || row.dataset.dept === fD);
+    row.style.display = ok ? '' : 'none';
   });
 };
 
 /* ── STATS ── */
 function _aoUpdateStats(circId) {
-  const all=_aoAllObligs(circId);
-  const asgn=all.filter(o=>o.status!=='Unassigned').length;
-  const pct=all.length?Math.round(asgn/all.length*100):0;
-  const nums=document.querySelectorAll('.ao-stat-num');
-  if(nums[1])nums[1].textContent=asgn;
-  if(nums[2])nums[2].textContent=all.length-asgn;
-  if(nums[3])nums[3].textContent=all.filter(o=>o.priority==='Critical'&&o.status==='Unassigned').length;
-  const fill=document.getElementById('ao-prog-fill'); if(fill)fill.style.width=pct+'%';
-  const lbl=document.getElementById('ao-prog-lbl'); if(lbl)lbl.textContent=pct+'% assigned';
+  const all = _aoAllObligs(circId);
+  const asgn = all.filter(o => o.status !== 'Unassigned').length;
+  const pct = all.length ? Math.round(asgn / all.length * 100) : 0;
+  const nums = document.querySelectorAll('.ao-stat-num');
+  if (nums[1]) nums[1].textContent = asgn;
+  if (nums[2]) nums[2].textContent = all.length - asgn;
+  if (nums[3]) nums[3].textContent = all.filter(o => o.priority === 'Critical' && o.status === 'Unassigned').length;
+  const fill = document.getElementById('ao-prog-fill'); if (fill) fill.style.width = pct + '%';
+  const lbl = document.getElementById('ao-prog-lbl'); if (lbl) lbl.textContent = pct + '% assigned';
 }
 
-window._aoSwitchCirc = function(circId) { document.getElementById('ao-csel-drop').style.display='none'; renderAssignObligation(circId); };
-window._aoSaveAll    = function()       { if(typeof showToast==='function')showToast('All assignments saved ✓','success'); };
+window._aoSwitchCirc = function (circId) { document.getElementById('ao-csel-drop').style.display = 'none'; renderAssignObligation(circId); };
+window._aoSaveAll = function () { if (typeof showToast === 'function') showToast('All assignments saved ✓', 'success'); };
+window._aoSwitchMainTab = function(tab, circId) {
+  if (tab === 'activities') {
+    if (typeof window.renderAssignActivity === 'function') {
+      window.renderAssignActivity(circId, '', 'activities');
+    } else {
+      console.error('renderAssignActivity is not loaded');
+    }
+  } else {
+    window.renderAssignObligation(circId, 'obligation');
+  }
+};
 
 /* ── BIND ── */
 function _aoBindAll(circId) {
-  const btn=document.getElementById('ao-csel-btn');
-  const drop=document.getElementById('ao-csel-drop');
-  const srch=document.getElementById('ao-csel-search');
-  if(btn)btn.addEventListener('click',e=>{e.stopPropagation();drop.style.display=drop.style.display==='none'?'block':'none';if(drop.style.display!=='none'&&srch)srch.focus();});
-  if(srch)srch.addEventListener('input',function(){const q=this.value.toLowerCase();document.querySelectorAll('.ao-csel-item').forEach(i=>i.style.display=i.textContent.toLowerCase().includes(q)?'':'none');});
-  document.addEventListener('click',e=>{const wrap=document.getElementById('ao-csel-wrap');if(wrap&&!wrap.contains(e.target)&&drop)drop.style.display='none';});
+  const btn = document.getElementById('ao-csel-btn');
+  const drop = document.getElementById('ao-csel-drop');
+  const srch = document.getElementById('ao-csel-search');
+  if (btn) btn.addEventListener('click', e => { e.stopPropagation(); drop.style.display = drop.style.display === 'none' ? 'block' : 'none'; if (drop.style.display !== 'none' && srch) srch.focus(); });
+  if (srch) srch.addEventListener('input', function () { const q = this.value.toLowerCase(); document.querySelectorAll('.ao-csel-item').forEach(i => i.style.display = i.textContent.toLowerCase().includes(q) ? '' : 'none'); });
+  document.addEventListener('click', e => { const wrap = document.getElementById('ao-csel-wrap'); if (wrap && !wrap.contains(e.target) && drop) drop.style.display = 'none'; });
 }
 
 /* ── STYLES ── */
@@ -1842,6 +1865,19 @@ function _aoInjectStyles() {
   --ao-r:8px; --ao-rl:12px;
   --ao-sh:0 1px 4px rgba(30,36,51,.07); --ao-shm:0 4px 16px rgba(30,36,51,.12); --ao-shl:0 8px 32px rgba(30,36,51,.18);
 }
+
+
+.ao-tab-btn {
+  padding: 6px 12px;
+  border: 1px solid #ccc;
+  background: #eee;
+  cursor: pointer;
+}
+.ao-tab-btn.active {
+  background: #333;
+  color: white;
+}
+
 *{box-sizing:border-box;}
 .ao-page{font-family:'DM Sans',system-ui,sans-serif;color:var(--ao-text);background:var(--ao-bg);min-height:100vh;position:relative;}
 .ao-wrap{max-width:1160px;margin:0 auto;padding:28px 24px 100px;}
