@@ -216,8 +216,8 @@ function _appRunAnalysis(extraCtx) {
   }
 
   const out = document.getElementById('app-output');
-  const et  = document.getElementById('app-etype')?.value
-    || (typeof ORG_PROFILE !== 'undefined' ? ORG_PROFILE.entityType : 'NBFC');
+ const et  = document.getElementById('app-etype')?.value
+    || (typeof ORG_PROFILE !== 'undefined' ? ORG_PROFILE.entityType : 'Bank');
 
   out.innerHTML = loadingHTML('AI is analysing circular applicability for your organisation…');
 
@@ -718,7 +718,7 @@ function _appStatusLabel(s) {
 ───────────────────────────────────────────────────────── */
 function _appDeriveEntities(entityType, circ) {
   const reg = circ?.regulator || 'RBI';
-  const et  = entityType || 'NBFC';
+ const et  = entityType || (typeof ORG_PROFILE !== 'undefined' ? ORG_PROFILE.entityType : 'Bank');
   if (Array.isArray(circ?.applicableEntities) && circ.applicableEntities.length) {
     return circ.applicableEntities.map(ent => ({
       name: typeof ent === 'string' ? ent : ent.name,
@@ -730,10 +730,10 @@ function _appDeriveEntities(entityType, circ) {
     }));
   }
   const rbiEntities = [
-    { name: 'All Scheduled Commercial Banks (excl. RRBs)', sub: null, match: et === 'Bank' },
-    { name: 'Non-Banking Financial Companies (NBFCs)', sub: 'Deposit-taking & Non-Deposit-taking', match: et === 'NBFC' },
-    { name: 'Housing Finance Companies (HFCs)', sub: null, match: et === 'HFC' },
-    { name: 'Microfinance Institutions (MFIs)', sub: null, match: et === 'MFI' },
+   
+    { name: 'Scheduled Commercial Banks (excluding RRBs)', match: true },
+  { name: 'Housing Finance Companies', sub: 'In aligned contexts via NHB/RBI guidance', match: false },
+  { name: 'Banks engaged in housing finance lending', match: true },
   ];
   const sebiEntities = [
     { name: 'Listed Companies', sub: 'Entities listed on NSE / BSE', match: (typeof ORG_PROFILE !== 'undefined' ? ORG_PROFILE.listed : 'No') === 'Yes' },
@@ -751,6 +751,54 @@ function _appDeriveParams(entityType, circ) {
   const reg = circ?.regulator || 'RBI';
   const et  = entityType || 'NBFC';
   const org = typeof ORG_PROFILE !== 'undefined' ? ORG_PROFILE : {};
+
+  // RBI Master Circular on Housing Finance specific data
+  if (circ?.id === 'RBI-HF-2024-001') {
+    return [
+      {
+        name: 'Entity Type',
+        threshold: 'Scheduled Commercial Bank engaged in housing finance lending',
+        status: et === 'Bank' ? 'yes' : 'no',
+        reason: et === 'Bank'
+          ? 'Your entity is a Scheduled Commercial Bank — directly within scope.'
+          : 'Circular applies only to banks engaged in housing finance lending. Your entity type does not meet this criterion.'
+      },
+      {
+        name: 'Housing Loan Origination',
+        threshold: 'Entity must originate or service housing loans',
+        status: et === 'Bank' ? 'yes' : 'no',
+        reason: et === 'Bank'
+          ? 'Banks originate housing loans and are subject to these directions.'
+          : 'AMCs and non-lending entities do not originate loans — not applicable.'
+      },
+      {
+        name: 'On-book Credit Exposure to Real Estate',
+        threshold: 'LTV and risk weights apply to lender balance sheet',
+        status: et === 'Bank' ? 'yes' : 'no',
+        reason: 'LTV and risk weight norms are prudential lending requirements for banks\' balance sheet exposures only.'
+      },
+      {
+        name: 'Investment in Real Estate-linked Securities',
+        threshold: 'Exposure through debt/equity instruments of real estate sector',
+        status: 'partial',
+        reason: 'Indirect exposure via REITs or real estate company securities may be impacted through market risk and SEBI-imposed exposure limits.'
+      },
+      {
+        name: 'RBI vs SEBI Jurisdiction',
+        threshold: 'RBI regulates banks/NBFCs; SEBI regulates AMCs',
+        status: reg === 'RBI' && et === 'Bank' ? 'yes' : 'partial',
+        reason: 'RBI directly regulates banks. For SEBI-regulated entities, RBI macro-prudential signals influence the risk environment but are not directly binding.'
+      },
+      {
+        name: 'Risk Management & Prudential Norms',
+        threshold: 'Concentration and exposure norms via applicable regulator',
+        status: 'partial',
+        reason: 'Though RBI norms apply directly only to banks, equivalent controls exist under SEBI Mutual Fund Regulations for other entity types.'
+      },
+    ];
+  }
+
+  // Default fallback for all other circulars
   return [
     { name: 'Scope of Application', threshold: reg === 'RBI' ? 'Applicable to all Scheduled Commercial Banks (excluding RRBs)' : reg === 'SEBI' ? 'Listed Companies, Brokers' : 'Regulated Entities', orgVal: et, status: (['NBFC', 'HFC', 'Bank'].includes(et) && reg === 'RBI') || (et === 'SEBI' && reg === 'SEBI') ? 'yes' : 'partial', reason: `Your entity type (${et}) ${['NBFC', 'HFC', 'Bank'].includes(et) ? 'falls within' : 'may fall within'} the circular's defined scope.` },
     { name: 'Individual Housing Loans (LTV & Risk)', threshold: 'LTV caps & risk weights prescribed', orgVal: reg, status: 'yes', reason: `Your organisation is registered under ${reg}, which directly issues this circular.` },

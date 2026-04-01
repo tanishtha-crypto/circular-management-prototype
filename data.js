@@ -166,46 +166,184 @@ const CMS_DATA = {
   ]
 },
     {
-      id: 'CIRC-2024-002',
-      title: 'KYC / AML Compliance Amendments 2024',
-      regulator: 'SEBI',
-      issuedDate: '2024-02-20',
-      effectiveDate: '2024-04-01',
-      dueDate: '2024-08-31',
-      type: 'Regular',
-      status: 'Active',
-      departments: ['Compliance', 'Finance', 'Legal'],
-      risk: 'High',
-      complianceScore: 55,
-      summary: 'Amendments to existing KYC/AML norms requiring enhanced due diligence for high-value transactions, updated PEP screening requirements, and mandatory transaction monitoring systems.',
-      chapters: [
+  "id": "SEBI-MF-2023-117",
+  "title": "Roles and Responsibilities of Trustees and AMCs",
+  "regulator": "SEBI",
+  "issuedDate": "2023-07-07",
+  "effectiveDate": "2024-01-01",
+  "dueDate": "2024-06-30",
+  "type": "Regular",
+  "status": "Active",
+  "departments": ["Compliance", "Legal", "Operations"],
+  "risk": "High",
+  "complianceScore": 55,
+  "summary": "SEBI circular defining core responsibilities of Trustees and governance requirements for AMCs including due diligence, conflict of interest management, system controls, and investor protection mechanisms.",
+  "chapters": [
+    {
+      "num": 1,
+      "title": "Core Responsibilities of Trustees",
+      "clauses": [
         {
-          num: 1, title: 'Enhanced Due Diligence',
-          clauses: [
-            {
-              id: 'C1.1', text: 'EDD mandatory for transactions exceeding INR 10 lakhs.',
-              obligations: 'Apply Enhanced Due Diligence for all transactions above INR 10 lakhs.',
-              actionables: 'Update transaction monitoring thresholds; train compliance officers on EDD procedures.',
-              department: 'Compliance', risk: 'High', status: 'In Progress'
-            }
-          ]
+          "id": "C1.1",
+          "text": "Trustees shall ensure the fairness of fees and expenses charged by AMCs.",
+          "obligation": "Ensure fairness of fees.",
+          "actionables": "Review fee structure.",
+          "department": "Compliance",
+          "risk": "High",
+          "status": "Open"
         },
         {
-          num: 2, title: 'PEP Screening',
-          clauses: [
-            {
-              id: 'C2.1', text: 'All customers shall be screened against updated PEP lists on a daily basis.',
-              obligations: 'Implement daily automated PEP screening for entire customer base.',
-              actionables: 'Integrate PEP screening API; configure daily batch jobs; set up alert workflows.',
-              department: 'IT', risk: 'High', status: 'Open'
-            }
-          ]
+          "id": "C1.2",
+          "text": "Trustees shall review the performance of AMC vis-a-vis benchmarks.",
+          "obligation": "Review performance.",
+          "actionables": "Compare with benchmarks.",
+          "department": "Risk",
+          "risk": "Medium",
+          "status": "Open"
+        },
+        {
+          "id": "C1.3",
+          "text": "Trustees shall ensure AMCs have systems to prevent mis-selling.",
+          "obligation": "Ensure systems exist.",
+          "actionables": "Verify system controls.",
+          "department": "Compliance",
+          "risk": "High",
+          "status": "Open"
+        },
+        {
+          "id": "C1.4",
+          "text": "Trustees shall ensure operations of AMCs are not influenced by sponsors or associates.",
+          "obligation": "Ensure independence.",
+          "actionables": "Review governance structure.",
+          "department": "Legal",
+          "risk": "High",
+          "status": "Open"
+        },
+        {
+          "id": "C1.5",
+          "text": "Trustees shall address conflicts of interest between stakeholders and unitholders.",
+          "obligation": "Manage conflicts.",
+          "actionables": "Identify and address conflicts.",
+          "department": "Compliance",
+          "risk": "High",
+          "status": "Open"
         }
-      ],
-      amendments: [
-        { date: '2024-03-15', version: '1.1', description: 'PEP screening frequency changed from weekly to daily.' }
       ]
     },
+    {
+      "num": 2,
+      "title": "System and Reporting Requirements",
+      "clauses": [
+        {
+          "id": "C2.1",
+          "text": "Trustees shall ensure system-level checks to prevent fraudulent transactions including front running.",
+          "obligation": "Ensure system checks.",
+          "actionables": "Review system controls.",
+          "department": "Risk",
+          "risk": "High",
+          "status": "Open"
+        },
+        {
+          "id": "C2.2",
+          "text": "AMCs shall provide system-based reports and alerts to Trustees.",
+          "obligation": "Provide reports.",
+          "actionables": "Generate reports.",
+          "department": "Operations",
+          "risk": "Medium",
+          "status": "Open"
+        },
+        {
+          "id": "C2.3",
+          "text": "Trustees shall evaluate compliance independently and not rely only on AMC submissions.",
+          "obligation": "Perform independent evaluation.",
+          "actionables": "Conduct independent review.",
+          "department": "Compliance",
+          "risk": "High",
+          "status": "Open"
+        }
+      ]
+    },
+    {
+      "num": 3,
+      "title": "KYC and Compliance Monitoring",
+      "clauses": [
+        {
+          "id": "C3.1",
+          "text": "Trustees shall review steps taken for folios without complete KYC attributes.",
+          "obligation": "Review KYC completeness.",
+          "actionables": "Monitor KYC updates.",
+          "department": "Compliance",
+          "risk": "High",
+          "status": "Open"
+        }
+      ]
+    },
+    {
+      "num": 4,
+      "title": "Unit Holder Protection Committee",
+      "clauses": [
+        {
+          "id": "C4.1",
+          "text": "AMC shall constitute a Unit Holder Protection Committee.",
+          "obligation": "Constitute committee.",
+          "actionables": "Form UHPC.",
+          "department": "Legal",
+          "risk": "High",
+          "status": "Open"
+        },
+        {
+          "id": "C4.2",
+          "text": "UHPC shall ensure protection of interest of unit holders.",
+          "obligation": "Protect investors.",
+          "actionables": "Monitor investor protection.",
+          "department": "Compliance",
+          "risk": "High",
+          "status": "Open"
+        },
+        {
+          "id": "C4.3",
+          "text": "UHPC shall review compliance issues and investor grievances.",
+          "obligation": "Review grievances.",
+          "actionables": "Track complaints.",
+          "department": "Operations",
+          "risk": "Medium",
+          "status": "Open"
+        }
+      ]
+    },
+    {
+      "num": 5,
+      "title": "Governance Requirements",
+      "clauses": [
+        {
+          "id": "C5.1",
+          "text": "Chairperson of Trustee company shall be an independent director.",
+          "obligation": "Ensure independent chairperson.",
+          "actionables": "Verify board composition.",
+          "department": "Legal",
+          "risk": "Medium",
+          "status": "Open"
+        },
+        {
+          "id": "C5.2",
+          "text": "Board of AMC and Trustee company shall meet at least once a year.",
+          "obligation": "Ensure annual meeting.",
+          "actionables": "Schedule meetings.",
+          "department": "Compliance",
+          "risk": "Low",
+          "status": "Open"
+        }
+      ]
+    }
+  ],
+  "amendments": [
+    {
+      "date": "2023-06-27",
+      "version": "1.1",
+      "description": "Amendments to MF Regulations introducing core responsibilities."
+    }
+  ]
+},
     {
       id: 'CIRC-2024-003',
       title: 'Data Localisation and Cloud Policy',

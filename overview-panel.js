@@ -380,11 +380,11 @@ function _ovRenderDetails(circ, mode) {
   const grid = `
     <div class="ov-detail-grid">
       ${[
-      ['Issue Date', circ.issueDate || circ.date || '—'],
+      ['Issue Date', circ.issuedDate || circ.date || '—'],
       ['Effective Date', circ.effectiveDate || '—'],
       ['Regulator', circ.regulator || '—'],
       ['Circular Type', circ.type || '—'],
-      ['Department', circ.department || '—'],
+      ['Department', circ.departments || '—'],
       ['Reference No.', circ.refNo || circ.referenceNo || circ.id],
     ].map(([l, v]) => `
         <div class="ov-detail-cell">
