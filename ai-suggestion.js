@@ -1819,10 +1819,26 @@ window._drGoNext = function(currentStep) {
   if (stepper) stepper.scrollIntoView({ behavior:'smooth', block:'nearest' });
 };
 
+window._DR_HISTORY = window._DR_HISTORY || {};
+window._drCurrentCircId = null;
+
+window._drRecordHistory = function(circId, panel, action, detail) {
+  if (!circId) return;
+  if (!window._DR_HISTORY[circId]) window._DR_HISTORY[circId] = {};
+  if (!window._DR_HISTORY[circId][panel]) window._DR_HISTORY[circId][panel] = [];
+  window._DR_HISTORY[circId][panel].push({ ts: new Date(), label: action, detail: detail || '' });
+};
+
+window._drGetHistory = function(panel) {
+  var id = window._drCurrentCircId;
+  return (id && window._DR_HISTORY[id] && window._DR_HISTORY[id][panel]) || [];
+};
+
 function _drRenderStep(step, circId) {
   var flow  = window._savedFlow[circId];
   var panel = document.getElementById('dr-panel-area');
   if (!flow || !panel) return;
+  window._drCurrentCircId = circId;
   var fns = [_drPanelOverview, _drPanelApplicability, _drPanelSummary, _drPanelClauses];
   panel.innerHTML = fns[step] ? fns[step](flow, circId) : '';
   _drBindPanel(step, flow, circId);
@@ -1846,6 +1862,7 @@ function _drPanelOverview(flow) {
       '<div class="dr-toolbar-actions">' +
         '<label class="dr-tool-btn"><input type="file" style="display:none;" accept=".pdf,.docx"/>&#x1F4C1; Upload Circular</label>' +
         '<button class="dr-tool-btn dr-tool-edit-toggle" data-target="dr-ov-edit" data-hide="dr-ov-details">&#x270E; Edit</button>' +
+        '<button class="dr-tool-btn" onclick="window._cmsShowHistoryModal(\'Overview History\', window._drGetHistory(\'Overview\'))">&#x1F551; History</button>' +
       '</div>' +
     '</div>' +
     '<div class="dr-ov-hero">' +
@@ -1869,7 +1886,7 @@ function _drPanelOverview(flow) {
       '</div>' +
       '<div class="dr-edit-foot">' +
         '<button class="dr-btn dr-btn-ghost" data-close="dr-ov-edit" data-show="dr-ov-details">&#x2715; Cancel</button>' +
-        '<button class="dr-btn dr-btn-pri dr-btn-sm" onclick="showToast(\'Changes saved.\',\'success\');document.getElementById(\'dr-ov-edit\').style.display=\'none\';document.getElementById(\'dr-ov-details\').style.display=\'block\';">&#x2713; Save Changes</button>' +
+        '<button class="dr-btn dr-btn-pri dr-btn-sm" onclick="_drRecordHistory(window._drCurrentCircId,\'Overview\',\'Fields Edited\',\'Overview fields updated\');showToast(\'Changes saved.\',\'success\');document.getElementById(\'dr-ov-edit\').style.display=\'none\';document.getElementById(\'dr-ov-details\').style.display=\'block\';">&#x2713; Save Changes</button>' +
       '</div>' +
     '</div>' +
     '<div id="dr-ov-details">' +
@@ -1920,6 +1937,7 @@ function _drPanelApplicability(flow) {
       '<div class="dr-toolbar-actions">' +
         '<button class="dr-tool-btn" id="dr-app-tbl-edit-btn" onclick="_drToggleTableEdit()">&#x270E; Edit Tables</button>' +
         '<button class="dr-tool-btn dr-tool-edit-toggle" data-target="dr-app-edit" data-hide="dr-app-details">&#x270E; Edit Fields</button>' +
+        '<button class="dr-tool-btn" onclick="window._cmsShowHistoryModal(\'Applicability History\', window._drGetHistory(\'Applicability\'))">&#x1F551; History</button>' +
       '</div>' +
     '</div>' +
     '<div class="dr-verdict-banner" style="background:' + vb + ';border-color:' + vc + '30;">' +
@@ -1937,7 +1955,7 @@ function _drPanelApplicability(flow) {
       '</div>' +
       '<div class="dr-edit-foot">' +
         '<button class="dr-btn dr-btn-ghost" data-close="dr-app-edit" data-show="dr-app-details">&#x2715; Cancel</button>' +
-        '<button class="dr-btn dr-btn-pri dr-btn-sm" onclick="showToast(\'Saved.\',\'success\');document.getElementById(\'dr-app-edit\').style.display=\'none\';document.getElementById(\'dr-app-details\').style.display=\'block\';">&#x2713; Save</button>' +
+        '<button class="dr-btn dr-btn-pri dr-btn-sm" onclick="_drRecordHistory(window._drCurrentCircId,\'Applicability\',\'Fields Edited\',\'Applicability fields updated\');showToast(\'Saved.\',\'success\');document.getElementById(\'dr-app-edit\').style.display=\'none\';document.getElementById(\'dr-app-details\').style.display=\'block\';">&#x2713; Save</button>' +
       '</div>' +
     '</div>' +
     '<div id="dr-app-details">' +
@@ -2050,7 +2068,7 @@ function _drPanelSummary(flow) {
     '<div class="dr-panel">' +
     '<div class="dr-panel-toolbar">' +
       '<div class="dr-panel-title-wrap"><span class="dr-panel-icon">&#x1F4C4;</span><span class="dr-panel-title">Executive Summary</span></div>' +
-      '<div class="dr-toolbar-actions"><button class="dr-tool-btn dr-tool-edit-toggle" data-target="dr-sum-purpose-edit" data-hide="dr-sum-purpose-disp">&#x270E; Edit Purpose</button></div>' +
+      '<div class="dr-toolbar-actions"><button class="dr-tool-btn dr-tool-edit-toggle" data-target="dr-sum-purpose-edit" data-hide="dr-sum-purpose-disp">&#x270E; Edit Purpose</button><button class="dr-tool-btn" onclick="window._cmsShowHistoryModal(\'Summary History\', window._drGetHistory(\'Executive Summary\'))">&#x1F551; History</button></div>' +
     '</div>' +
     '<div class="dr-block-pad" id="dr-sum-purpose-disp">' +
       '<div class="dr-info-block"><div class="dr-ib-label">Purpose &amp; Background</div><div class="dr-ib-text">' + s.purpose + '</div></div>' +
@@ -2062,7 +2080,7 @@ function _drPanelSummary(flow) {
       '</div>' +
       '<div class="dr-edit-foot">' +
         '<button class="dr-btn dr-btn-ghost" data-close="dr-sum-purpose-edit" data-show="dr-sum-purpose-disp">&#x2715; Cancel</button>' +
-        '<button class="dr-btn dr-btn-pri dr-btn-sm" onclick="var t=document.getElementById(\'dr-sum-pta\').value;document.getElementById(\'dr-sum-purpose-disp\').querySelector(\'.dr-ib-text\').textContent=t;document.getElementById(\'dr-sum-purpose-edit\').style.display=\'none\';document.getElementById(\'dr-sum-purpose-disp\').style.display=\'block\';showToast(\'Saved.\',\'success\');">&#x2713; Save</button>' +
+        '<button class="dr-btn dr-btn-pri dr-btn-sm" onclick="_drRecordHistory(window._drCurrentCircId,\'Executive Summary\',\'Purpose Edited\',\'Purpose & Background updated\');var t=document.getElementById(\'dr-sum-pta\').value;document.getElementById(\'dr-sum-purpose-disp\').querySelector(\'.dr-ib-text\').textContent=t;document.getElementById(\'dr-sum-purpose-edit\').style.display=\'none\';document.getElementById(\'dr-sum-purpose-disp\').style.display=\'block\';showToast(\'Saved.\',\'success\');">&#x2713; Save</button>' +
       '</div>' +
     '</div>' +
     '<div class="dr-sum-accordions">' +
@@ -2103,11 +2121,12 @@ function _drPanelClauses(flow, circId) {
       '</div>' +
       '<div class="dr-toolbar-actions">' +
         '<label class="dr-tool-btn" title="Upload Excel to bulk-import clauses">' +
-          '<input type="file" accept=".xlsx,.xls,.csv" style="display:none;" onchange="showToast(\'Excel imported successfully.\',\'success\')"/>' +
+          '<input type="file" accept=".xlsx,.xls,.csv" style="display:none;" onchange="_drRecordHistory(window._drCurrentCircId,\'Clause Generation\',\'Excel Imported\',\'Bulk clause import via Excel\');showToast(\'Excel imported successfully.\',\'success\')"/>' +
           '&#x1F4CA; Import Excel' +
         '</label>' +
         '<button class="dr-tool-btn dr-tool-btn-pri" id="dr-cl-add-ch-btn">+ Add Chapter</button>' +
-        '<button class="dr-btn dr-btn-sec dr-btn-sm" onclick="showToast(\'Clauses saved.\',\'success\')">&#x1F4BE; Save</button>' +
+        '<button class="dr-btn dr-btn-sec dr-btn-sm" onclick="_drRecordHistory(window._drCurrentCircId,\'Clause Generation\',\'Clauses Saved\',\'Clause data saved\');showToast(\'Clauses saved.\',\'success\')">&#x1F4BE; Save</button>' +
+        '<button class="dr-tool-btn" onclick="window._cmsShowHistoryModal(\'Clause Generation History\', window._drGetHistory(\'Clause Generation\'))">&#x1F551; History</button>' +
       '</div>' +
     '</div>' +
 
@@ -2775,6 +2794,7 @@ function _drBindPanel(step, flow, circId) {
   if (addChBtn) addChBtn.addEventListener('click', function(){
     var tree = document.getElementById('dr-cl-nav-tree'); if (!tree) return;
     var ci   = tree.querySelectorAll('.dr-cl-nav-chapter').length;
+    _drRecordHistory(window._drCurrentCircId, 'Clause Generation', 'Chapter Added', 'New Chapter ' + (ci + 1) + ' added');
     var div  = document.createElement('div');
     div.innerHTML = _drBuildNavChapter({title:'New Chapter '+(ci+1), clauses:[]}, ci, circId);
     tree.appendChild(div.firstElementChild);

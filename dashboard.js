@@ -1055,14 +1055,16 @@ function buildSPOCDashboardHTML() {
     return `
       <tr class="clickable"
           onclick="window.CMS && window.CMS.navigateTo('circular-library', '${rc.id}')">
-        <td><span style="font-family:monospace;font-size:11px;font-weight:700;color:var(--accent)">${rc.id}</span></td>
+        <td><span style="display:inline-block;font-family:monospace;font-size:11px;font-weight:600;color:var(--accent);background:color-mix(in srgb,var(--accent) 10%,transparent);border:1px solid color-mix(in srgb,var(--accent) 25%,transparent);border-radius:4px;padding:2px 6px;letter-spacing:0.3px">${rc.id}</span></td>
         <td style="max-width:200px">
-          <div style="display:flex;align-items:center;gap:5px;flex-wrap:wrap">
-            <span style="font-weight:600;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"
+          <div>
+            <span style="font-weight:600;font-size:13px;display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"
                  title="${rc.title}">${rc.title}</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text-muted);margin-top:2px">
+            <span>${rc.regulator}</span>
             ${rc.status === 'Withdrawn' ? '<span class="circ-withdrawn-badge">Withdrawn</span>' : ''}
           </div>
-          <div style="font-size:11px;color:var(--text-muted);margin-top:2px">${rc.regulator}</div>
         </td>
         <td style="font-size:12px;color:var(--text-secondary);white-space:nowrap">${rc.releaseDate ? formatDate(rc.releaseDate) : '—'}</td>
         <td style="font-size:12px;color:var(--text-secondary);white-space:nowrap">${formatDate(rc.receivedDate)}</td>
@@ -1751,14 +1753,16 @@ function buildSPOCDashboardHTML() {
     return `
       <tr class="clickable"
           onclick="window.CMS && window.CMS.navigateTo('circular-library', '${rc.id}')">
-        <td><span style="font-family:monospace;font-size:11px;font-weight:700;color:var(--accent)">${rc.id}</span></td>
+        <td><span style="display:inline-block;font-family:monospace;font-size:11px;font-weight:600;color:var(--accent);background:color-mix(in srgb,var(--accent) 10%,transparent);border:1px solid color-mix(in srgb,var(--accent) 25%,transparent);border-radius:4px;padding:2px 6px;letter-spacing:0.3px">${rc.id}</span></td>
         <td style="max-width:200px">
-          <div style="display:flex;align-items:center;gap:5px;flex-wrap:wrap">
-            <span style="font-weight:600;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"
+          <div>
+            <span style="font-weight:600;font-size:13px;display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"
                  title="${rc.title}">${rc.title}</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text-muted);margin-top:2px">
+            <span>${rc.regulator}</span>
             ${rc.status === 'Withdrawn' ? '<span class="circ-withdrawn-badge">Withdrawn</span>' : ''}
           </div>
-          <div style="font-size:11px;color:var(--text-muted);margin-top:2px">${rc.regulator}</div>
         </td>
         <td style="font-size:12px;color:var(--text-secondary);white-space:nowrap">${rc.releaseDate ? formatDate(rc.releaseDate) : '—'}</td>
         <td style="font-size:12px;color:var(--text-secondary);white-space:nowrap">${formatDate(rc.receivedDate)}</td>

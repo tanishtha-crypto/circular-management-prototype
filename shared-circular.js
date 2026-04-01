@@ -923,6 +923,99 @@ function injectSharedCSS() {
   .ai-loading-text { font-size:13px; color:#9499aa; font-family:'DM Sans',sans-serif; }
   .spinner         { width:28px; height:28px; border:3px solid #eef0f3; border-top-color:#1a1a2e; border-radius:50%; animation:spin 0.7s linear infinite; }
   @keyframes spin  { to { transform:rotate(360deg); } }
+
+  /* ── shared history modal ── */
+  .cms-hist-overlay { position:fixed;inset:0;background:rgba(15,20,35,.45);z-index:8000;display:flex;align-items:center;justify-content:center;padding:24px;backdrop-filter:blur(3px);opacity:0;pointer-events:none;transition:opacity .18s; }
+  .cms-hist-overlay.cms-hist-open { opacity:1;pointer-events:all; }
+  .cms-hist-box { background:#fff;border-radius:14px;width:100%;max-width:520px;max-height:76vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 24px 60px rgba(0,0,0,.22);transform:translateY(12px) scale(.98);transition:transform .18s; }
+  .cms-hist-overlay.cms-hist-open .cms-hist-box { transform:none; }
+  .cms-hist-head { display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid #eef0f3;background:#f8f9fb;flex-shrink:0; }
+  .cms-hist-title { font-size:13px;font-weight:700;color:#1a1a2e;display:flex;align-items:center;gap:7px; }
+  .cms-hist-close { background:none;border:none;font-size:16px;color:#9499aa;cursor:pointer;padding:2px 6px;border-radius:4px;line-height:1;transition:all .12s; }
+  .cms-hist-close:hover { background:#eef0f3;color:#1a1a2e; }
+  .cms-hist-body { flex:1;overflow-y:auto;padding:16px 18px;display:flex;flex-direction:column;gap:10px; }
+  .cms-hist-empty { font-size:13px;color:#9499aa;text-align:center;padding:32px 20px;background:#f5f6f8;border-radius:8px;border:1px dashed #dde0e6;line-height:1.6; }
+  .cms-hist-entry { background:#f8f9fb;border:1px solid #eef0f3;border-radius:8px;padding:11px 14px;display:flex;flex-direction:column;gap:5px; }
+  .cms-hist-entry-meta { display:flex;align-items:center;gap:8px;flex-wrap:wrap; }
+  .cms-hist-vnum { font-family:'DM Mono',monospace;font-size:10px;font-weight:700;background:#1a1a2e;color:#fff;padding:1px 7px;border-radius:4px; }
+  .cms-hist-ts { font-size:11px;color:#9499aa; }
+  .cms-hist-badge { font-size:10px;font-weight:700;padding:2px 8px;background:#eff6ff;border:1px solid #bfdbfe;color:#2563eb;border-radius:20px; }
+  .cms-hist-detail { font-size:12px;color:#4a5068;line-height:1.6;padding-top:2px; }
   `;
   document.head.appendChild(s);
 }
+
+/* ================================================================
+   SHARED HISTORY MODAL
+   ================================================================ */
+function _injectCmsHistCSS() {
+  if (document.getElementById('cms-hist-css')) return;
+  const s = document.createElement('style');
+  s.id = 'cms-hist-css';
+  s.textContent = `
+  .cms-hist-overlay { position:fixed;inset:0;background:rgba(15,20,35,.45);z-index:8000;display:flex;align-items:center;justify-content:center;padding:24px;backdrop-filter:blur(3px);opacity:0;pointer-events:none;transition:opacity .18s; }
+  .cms-hist-overlay.cms-hist-open { opacity:1;pointer-events:all; }
+  .cms-hist-box { background:#fff;border-radius:14px;width:100%;max-width:520px;max-height:76vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 24px 60px rgba(0,0,0,.22);transform:translateY(12px) scale(.98);transition:transform .18s; }
+  .cms-hist-overlay.cms-hist-open .cms-hist-box { transform:none; }
+  .cms-hist-head { display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid #eef0f3;background:#f8f9fb;flex-shrink:0; }
+  .cms-hist-title { font-size:13px;font-weight:700;color:#1a1a2e;display:flex;align-items:center;gap:7px;font-family:'DM Sans',sans-serif; }
+  .cms-hist-close { background:none;border:none;font-size:16px;color:#9499aa;cursor:pointer;padding:2px 6px;border-radius:4px;line-height:1;transition:all .12s; }
+  .cms-hist-close:hover { background:#eef0f3;color:#1a1a2e; }
+  .cms-hist-body { flex:1;overflow-y:auto;padding:16px 18px;display:flex;flex-direction:column;gap:10px; }
+  .cms-hist-empty { font-size:13px;color:#9499aa;text-align:center;padding:32px 20px;background:#f5f6f8;border-radius:8px;border:1px dashed #dde0e6;line-height:1.6;font-family:'DM Sans',sans-serif; }
+  .cms-hist-entry { background:#f8f9fb;border:1px solid #eef0f3;border-radius:8px;padding:11px 14px;display:flex;flex-direction:column;gap:5px; }
+  .cms-hist-entry-meta { display:flex;align-items:center;gap:8px;flex-wrap:wrap; }
+  .cms-hist-vnum { font-family:'DM Mono',monospace;font-size:10px;font-weight:700;background:#1a1a2e;color:#fff;padding:1px 7px;border-radius:4px; }
+  .cms-hist-ts { font-size:11px;color:#9499aa;font-family:'DM Sans',sans-serif; }
+  .cms-hist-badge { font-size:10px;font-weight:700;padding:2px 8px;background:#eff6ff;border:1px solid #bfdbfe;color:#2563eb;border-radius:20px;font-family:'DM Sans',sans-serif; }
+  .cms-hist-detail { font-size:12px;color:#4a5068;line-height:1.6;padding-top:2px;font-family:'DM Sans',sans-serif; }
+  `;
+  document.head.appendChild(s);
+}
+
+window._cmsShowHistoryModal = function (title, entries) {
+  _injectCmsHistCSS();
+  let overlay = document.getElementById('cms-hist-modal');
+  if (!overlay) {
+    overlay = document.createElement('div');
+    overlay.id = 'cms-hist-modal';
+    overlay.className = 'cms-hist-overlay';
+    overlay.innerHTML = `
+      <div class="cms-hist-box" onclick="event.stopPropagation()">
+        <div class="cms-hist-head">
+          <div class="cms-hist-title">🕑 <span id="cms-hist-modal-title">History</span></div>
+          <button class="cms-hist-close" onclick="window._cmsCloseHistoryModal()">✕</button>
+        </div>
+        <div class="cms-hist-body" id="cms-hist-modal-body"></div>
+      </div>`;
+    overlay.addEventListener('click', e => { if (e.target === overlay) window._cmsCloseHistoryModal(); });
+    document.body.appendChild(overlay);
+  }
+
+  document.getElementById('cms-hist-modal-title').textContent = title;
+
+  const body = document.getElementById('cms-hist-modal-body');
+  if (!entries.length) {
+    body.innerHTML = `<div class="cms-hist-empty">No history recorded yet.<br>Actions like generating, regenerating, or applying context will appear here.</div>`;
+  } else {
+    body.innerHTML = [...entries].reverse().map((e, i) => {
+      const ts = e.ts instanceof Date ? e.ts : new Date(e.ts);
+      const timeStr = ts.toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' });
+      return `
+        <div class="cms-hist-entry">
+          <div class="cms-hist-entry-meta">
+            <span class="cms-hist-vnum">v${entries.length - i}</span>
+            <span class="cms-hist-ts">${timeStr}</span>
+            <span class="cms-hist-badge">${e.label}</span>
+          </div>
+          ${e.detail ? `<div class="cms-hist-detail">${e.detail}</div>` : ''}
+        </div>`;
+    }).join('');
+  }
+
+  requestAnimationFrame(() => overlay.classList.add('cms-hist-open'));
+};
+
+window._cmsCloseHistoryModal = function () {
+  document.getElementById('cms-hist-modal')?.classList.remove('cms-hist-open');
+};
