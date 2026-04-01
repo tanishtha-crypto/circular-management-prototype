@@ -523,7 +523,7 @@ function renderApplicabilityTab(c) {
       </div>
       <div style="text-align:right;flex-shrink:0;margin-left:12px">
         <div style="font-size:9px;font-weight:700;color:#9499aa;text-transform:uppercase;letter-spacing:.05em;margin-bottom:2px">Deadline</div>
-        <div style="font-size:14px;font-weight:800;color:#1a1a2e">${a?.deadline || '—'}</div>
+        <div style="font-size:14px;font-weight:800;color:#1a1a2e">${a?.deadline || '14-10-2025'}</div>
       </div>
     </div>
 

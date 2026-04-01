@@ -1850,9 +1850,9 @@ function _drPanelOverview(flow) {
   if (!c) return _drNotSaved('Overview');
   var fields = [
     ['Circular ID',c.id],['Regulator',c.regulator||'—'],
-    ['Issue Date',c.issueDate||c.date||'—'],['Effective Date',c.effectiveDate||'—'],
+    ['Issue Date',c.issuedDate||c.date||'—'],['Effective Date',c.effectiveDate||'—'],
     ['Risk Level',c.risk||'—'],['Status',c.status||'—'],
-    ['Department',c.department||'—'],['Deadline',c.deadline||'—'],
+    ['Department',c.departments||'—'],['Deadline',c.dueDate||'-'],
   ];
   var riskCls = c.risk ? ' dr-chip-risk-' + c.risk.toLowerCase() : '';
   return (
