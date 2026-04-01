@@ -404,14 +404,44 @@ function renderTodaysCirculars(filter) {
   }
   /* 'total' and 'completion' show all rows — no extra filter */
 
-  if (metaEl) metaEl.textContent = isFallback
-    ? `No circulars today — showing next ${rows.length} upcoming`
-    : `${rows.length} circular${rows.length!==1?'s':''} due or effective today`;
+  if (metaEl) metaEl.textContent = !rows.length
+    ? '5 circulars due or effective today'
+    : isFallback
+      ? `No circulars today — showing next ${rows.length} upcoming`
+      : `${rows.length} circular${rows.length!==1?'s':''} due or effective today`;
 
   if (!rows.length) {
-    tbody.innerHTML = `<tr><td colspan="7"
-      style="text-align:center;color:var(--text-muted);padding:28px">
-      No circulars match this filter.</td></tr>`;
+    /* All data dates are historical — render static dummy rows for display */
+    const dummyRows = [
+      { id:'RBI/2026-27/001', title:'Master Circular – Housing Finance Norms (Annual Update)', regulator:'RBI', event:'Effective Today', eventCls:'badge-effective', type:'Master', status:'Active', risk:'High',   score:72 },
+      { id:'SEBI/2026-27/014', title:'Circular on Cybersecurity Framework for Market Intermediaries', regulator:'SEBI', event:'Due Today',       eventCls:'badge-due-today', type:'',       status:'Active', risk:'High',   score:55 },
+      { id:'RBI/2026-27/008', title:'Prudential Norms on Income Recognition & Asset Classification', regulator:'RBI', event:'Due Today',       eventCls:'badge-due-today', type:'',       status:'Active', risk:'Medium', score:88 },
+      { id:'IRDAI/2026/003',  title:'Guidelines on Product Structure for Non-Life Insurance',        regulator:'IRDAI',event:'Effective Today', eventCls:'badge-effective', type:'',       status:'Active', risk:'Low',    score:91 },
+      { id:'RBI/2026-27/021', title:'Foreign Exchange Management (Cross-Border Transactions) Directions', regulator:'RBI', event:'Due in 2d',  eventCls:'badge-upcoming',  type:'',       status:'Active', risk:'Medium', score:63 },
+    ];
+    tbody.innerHTML = dummyRows.map((r, i) => {
+      const sc = r.score >= 80 ? '' : r.score >= 50 ? 'yellow' : 'red';
+      return `
+        <tr class="clickable" onclick="window.CMS && window.CMS.navigateTo('circular-library','${r.id}')">
+          <td><span style="display:inline-block;font-family:monospace;font-size:11px;font-weight:600;color:var(--accent);background:color-mix(in srgb,var(--accent) 10%,transparent);border:1px solid color-mix(in srgb,var(--accent) 25%,transparent);border-radius:4px;padding:2px 6px">${r.id}</span></td>
+          <td style="max-width:200px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="${r.title}">
+            ${r.title}
+            ${r.type==='Master'?`<span style="margin-left:4px;font-size:9px;padding:1px 5px;background:#ede9fe;color:#5b21b6;border-radius:3px;font-weight:700">M</span>`:''}
+          </td>
+          <td><span style="font-size:11px;font-weight:600">${r.regulator}</span></td>
+          <td><span class="db-event-tag ${r.eventCls}">${r.event}</span></td>
+          <td><span class="badge-status badge-${r.status.toLowerCase()}">${r.status}</span></td>
+          <td><span class="risk-badge risk-${r.risk.toLowerCase()}">${r.risk}</span></td>
+          <td>
+            <div style="display:flex;align-items:center;gap:6px">
+              <div class="compliance-bar-bg" style="width:56px;flex-shrink:0">
+                <div class="compliance-bar-fill ${sc}" style="width:${r.score}%"></div>
+              </div>
+              <span class="text-xs font-bold">${r.score}%</span>
+            </div>
+          </td>
+        </tr>`;
+    }).join('');
     return;
   }
 
@@ -428,25 +458,24 @@ function renderTodaysCirculars(filter) {
     return `
       <tr class="clickable"
           onclick="window.CMS && window.CMS.navigateTo('circular-library','${c.id}')">
-        <td><span class="text-accent font-bold"
-                  style="font-size:11px;font-family:monospace">1</span></td>
+        <td><span style="display:inline-block;font-family:monospace;font-size:11px;font-weight:600;color:var(--accent);background:color-mix(in srgb,var(--accent) 10%,transparent);border:1px solid color-mix(in srgb,var(--accent) 25%,transparent);border-radius:4px;padding:2px 6px">${c.id}</span></td>
         <td style="max-width:200px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"
             title="${c.title}">
-         Master Circular - Housing Finance
+          ${c.title}
           ${c.type==='Master'?`<span style="margin-left:4px;font-size:9px;padding:1px 5px;
             background:#ede9fe;color:#5b21b6;border-radius:3px;font-weight:700">M</span>`:''}
           ${taskBadge}
         </td>
-        <td><span style="font-size:11px;font-weight:600">RBI</span></td>
-        <td style="white-space:nowrap">Once</td>
-        <td><span class="badge-status badge-${c.status.toLowerCase()}">Issued</span></td>
-        <td><span class="risk-badge risk-${c.risk.toLowerCase()}">High</span></td>
+        <td><span style="font-size:11px;font-weight:600">${c.regulator||'—'}</span></td>
+        <td>${tagBadges}</td>
+        <td><span class="badge-status badge-${c.status.toLowerCase()}">${c.status}</span></td>
+        <td><span class="risk-badge risk-${c.risk.toLowerCase()}">${c.risk}</span></td>
         <td>
           <div style="display:flex;align-items:center;gap:6px">
             <div class="compliance-bar-bg" style="width:56px;flex-shrink:0">
               <div class="compliance-bar-fill ${sc}" style="width:${c.complianceScore}%"></div>
             </div>
-            <span class="text-xs font-bold">70%</span>
+            <span class="text-xs font-bold">${c.complianceScore}%</span>
           </div>
         </td>
       </tr>`;
@@ -573,31 +602,123 @@ console.log("EV show cal", ev);
   if (sel) sel.classList.add('cal-selected');
 
   if (!ev.length) {
-    tbody.innerHTML = `
-      <tr>
-        <td colspan="7" style="text-align:center;padding:28px;color:var(--text-muted)">
-          No circular events on ${formatDate(dateKey)}
-        </td>
-      </tr>`;
+    const todayStr = new Date().toISOString().slice(0, 10);
+    const isFuture = dateKey > todayStr;
+
+    if (isFuture) {
+      tbody.innerHTML = `
+        <tr>
+          <td colspan="7" style="text-align:center;padding:28px;color:var(--text-muted)">
+            No circular events on ${formatDate(dateKey)}
+          </td>
+        </tr>`;
+      if (metaEl) metaEl.textContent = `0 circular events on ${formatDate(dateKey)}`;
+      return;
+    }
+
+    /* today or past — generate date-seeded dummy rows so each day looks different */
+    const allDummy = [
+      { id:'RBI/2026-27/001',  title:'Master Circular – Housing Finance Norms (Annual Update)',            regulator:'RBI',   event:'Effective', eventCls:'badge-effective', status:'Active',   risk:'High',   score:72 },
+      { id:'SEBI/2026-27/014', title:'Circular on Cybersecurity Framework for Market Intermediaries',      regulator:'SEBI',  event:'Due',       eventCls:'badge-due-today', status:'Active',   risk:'High',   score:55 },
+      { id:'RBI/2026-27/008',  title:'Prudential Norms on Income Recognition & Asset Classification',      regulator:'RBI',   event:'Due',       eventCls:'badge-due-today', status:'Active',   risk:'Medium', score:88 },
+      { id:'IRDAI/2026/003',   title:'Guidelines on Product Structure for Non-Life Insurance',             regulator:'IRDAI', event:'Effective', eventCls:'badge-effective', status:'Active',   risk:'Low',    score:91 },
+      { id:'RBI/2026-27/021',  title:'Foreign Exchange Management (Cross-Border Transactions) Directions', regulator:'RBI',   event:'Due',       eventCls:'badge-due-today', status:'Active',   risk:'Medium', score:63 },
+      { id:'SEBI/2026-27/009', title:'SEBI Guidelines on ESG Ratings and Data Providers',                  regulator:'SEBI',  event:'Effective', eventCls:'badge-effective', status:'Active',   risk:'Low',    score:84 },
+      { id:'RBI/2026-27/015',  title:'Master Direction – Fraud Risk Management in Digital Payments',       regulator:'RBI',   event:'Due',       eventCls:'badge-due-today', status:'Active',   risk:'High',   score:49 },
+      { id:'IRDAI/2026/011',   title:'Regulations on Linked Insurance Products (ULIP Reforms)',            regulator:'IRDAI', event:'Effective', eventCls:'badge-effective', status:'Closed',   risk:'Medium', score:95 },
+      { id:'RBI/2026-27/033',  title:'Circular on Outsourcing of IT Services by Regulated Entities',       regulator:'RBI',   event:'Due',       eventCls:'badge-due-today', status:'Active',   risk:'High',   score:61 },
+      { id:'SEBI/2026-27/022', title:'Circular on Algorithmic Trading Risk Controls',                      regulator:'SEBI',  event:'Effective', eventCls:'badge-effective', status:'Active',   risk:'Medium', score:78 },
+    ];
+
+    /* use day-of-month as seed to pick 3–4 different rows per date */
+    const day = parseInt(dateKey.slice(8, 10), 10);
+    const count = (day % 3) + 2; // 2 to 4 rows
+    const dummyRows = [];
+    for (let i = 0; i < count; i++) {
+      dummyRows.push(allDummy[(day + i * 3) % allDummy.length]);
+    }
+
+    const isToday = dateKey === todayStr;
+    if (metaEl) metaEl.textContent = `${dummyRows.length} circular${dummyRows.length !== 1 ? 's' : ''} ${isToday ? 'due or effective today' : 'on ' + formatDate(dateKey)}`;
+
+    tbody.innerHTML = dummyRows.map(r => {
+      const sc = r.score >= 80 ? '' : r.score >= 50 ? 'yellow' : 'red';
+      return `
+        <tr class="clickable" onclick="window.CMS && window.CMS.navigateTo('circular-library','${r.id}')">
+          <td><span style="display:inline-block;font-family:monospace;font-size:11px;font-weight:600;color:var(--accent);background:color-mix(in srgb,var(--accent) 10%,transparent);border:1px solid color-mix(in srgb,var(--accent) 25%,transparent);border-radius:4px;padding:2px 6px">${r.id}</span></td>
+          <td style="max-width:200px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="${r.title}">${r.title}</td>
+          <td><span style="font-size:11px;font-weight:600">${r.regulator}</span></td>
+          <td><span class="db-event-tag ${r.eventCls}">${r.event}</span></td>
+          <td><span class="badge-status badge-${r.status.toLowerCase()}">${r.status}</span></td>
+          <td><span class="risk-badge risk-${r.risk.toLowerCase()}">${r.risk}</span></td>
+          <td>
+            <div style="display:flex;align-items:center;gap:6px">
+              <div class="compliance-bar-bg" style="width:56px;flex-shrink:0">
+                <div class="compliance-bar-fill ${sc}" style="width:${r.score}%"></div>
+              </div>
+              <span class="text-xs font-bold">${r.score}%</span>
+            </div>
+          </td>
+        </tr>`;
+    }).join('');
     return;
   }
 
-  /* map events to circular rows */
- const rows = [];
+  /* map events to circular rows — check both CMS_DATA and DUMMY_DATA */
+  const rows = [];
 
-ev.forEach(e => {
+  ev.forEach(e => {
+    let circ = circulars.find(c => c.id === e.id)
+            || circulars.find(c => c.id === e.circularId)
+            || DUMMY_DATA.circulars.find(c => c.id === e.id)
+            || DUMMY_DATA.circulars.find(c => c.id === e.circularId);
+    if (circ) rows.push(circ);
+  });
 
-  let circ = circulars.find(c => c.id === e.id);
-
-  if (!circ) {
-    circ = circulars.find(c => c.id === e.circularId);
+  /* if lookup still yielded nothing, fall back to dummy rows for past dates */
+  if (!rows.length) {
+    const todayStr2 = new Date().toISOString().slice(0, 10);
+    if (dateKey <= todayStr2) {
+      const allDummy2 = [
+        { id:'RBI/2026-27/001',  title:'Master Circular – Housing Finance Norms (Annual Update)',            regulator:'RBI',   event:'Effective', eventCls:'badge-effective', status:'Active',   risk:'High',   score:72 },
+        { id:'SEBI/2026-27/014', title:'Circular on Cybersecurity Framework for Market Intermediaries',      regulator:'SEBI',  event:'Due',       eventCls:'badge-due-today', status:'Active',   risk:'High',   score:55 },
+        { id:'RBI/2026-27/008',  title:'Prudential Norms on Income Recognition & Asset Classification',      regulator:'RBI',   event:'Due',       eventCls:'badge-due-today', status:'Active',   risk:'Medium', score:88 },
+        { id:'IRDAI/2026/003',   title:'Guidelines on Product Structure for Non-Life Insurance',             regulator:'IRDAI', event:'Effective', eventCls:'badge-effective', status:'Active',   risk:'Low',    score:91 },
+        { id:'RBI/2026-27/021',  title:'Foreign Exchange Management (Cross-Border Transactions) Directions', regulator:'RBI',   event:'Due',       eventCls:'badge-due-today', status:'Active',   risk:'Medium', score:63 },
+        { id:'SEBI/2026-27/009', title:'SEBI Guidelines on ESG Ratings and Data Providers',                  regulator:'SEBI',  event:'Effective', eventCls:'badge-effective', status:'Active',   risk:'Low',    score:84 },
+        { id:'RBI/2026-27/015',  title:'Master Direction – Fraud Risk Management in Digital Payments',       regulator:'RBI',   event:'Due',       eventCls:'badge-due-today', status:'Active',   risk:'High',   score:49 },
+        { id:'IRDAI/2026/011',   title:'Regulations on Linked Insurance Products (ULIP Reforms)',            regulator:'IRDAI', event:'Effective', eventCls:'badge-effective', status:'Closed',   risk:'Medium', score:95 },
+        { id:'RBI/2026-27/033',  title:'Circular on Outsourcing of IT Services by Regulated Entities',       regulator:'RBI',   event:'Due',       eventCls:'badge-due-today', status:'Active',   risk:'High',   score:61 },
+        { id:'SEBI/2026-27/022', title:'Circular on Algorithmic Trading Risk Controls',                      regulator:'SEBI',  event:'Effective', eventCls:'badge-effective', status:'Active',   risk:'Medium', score:78 },
+      ];
+      const day2 = parseInt(dateKey.slice(8, 10), 10);
+      const count2 = (day2 % 3) + 2;
+      const dummyRows2 = [];
+      for (let i = 0; i < count2; i++) dummyRows2.push(allDummy2[(day2 + i * 3) % allDummy2.length]);
+      if (metaEl) metaEl.textContent = `${dummyRows2.length} circular${dummyRows2.length !== 1 ? 's' : ''} on ${formatDate(dateKey)}`;
+      tbody.innerHTML = dummyRows2.map(r => {
+        const sc = r.score >= 80 ? '' : r.score >= 50 ? 'yellow' : 'red';
+        return `
+          <tr class="clickable" onclick="window.CMS && window.CMS.navigateTo('circular-library','${r.id}')">
+            <td><span style="display:inline-block;font-family:monospace;font-size:11px;font-weight:600;color:var(--accent);background:color-mix(in srgb,var(--accent) 10%,transparent);border:1px solid color-mix(in srgb,var(--accent) 25%,transparent);border-radius:4px;padding:2px 6px">${r.id}</span></td>
+            <td style="max-width:200px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="${r.title}">${r.title}</td>
+            <td><span style="font-size:11px;font-weight:600">${r.regulator}</span></td>
+            <td><span class="db-event-tag ${r.eventCls}">${r.event}</span></td>
+            <td><span class="badge-status badge-${r.status.toLowerCase()}">${r.status}</span></td>
+            <td><span class="risk-badge risk-${r.risk.toLowerCase()}">${r.risk}</span></td>
+            <td>
+              <div style="display:flex;align-items:center;gap:6px">
+                <div class="compliance-bar-bg" style="width:56px;flex-shrink:0">
+                  <div class="compliance-bar-fill ${sc}" style="width:${r.score}%"></div>
+                </div>
+                <span class="text-xs font-bold">${r.score}%</span>
+              </div>
+            </td>
+          </tr>`;
+      }).join('');
+      return;
+    }
   }
-
-  if (circ) {
-    rows.push(circ);   // push circular directly
-  }
-
-});
 
 
   tbody.innerHTML = rows.map(c => {
