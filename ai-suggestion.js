@@ -1849,38 +1849,29 @@ function _drPanelOverview(flow) {
   var c = flow.overview;
   if (!c) return _drNotSaved('Overview');
   var fields = [
-    ['Circular ID',c.id],['Regulator',c.regulator||'—'],
-    ['Issue Date',c.issueDate||c.date||'—'],['Effective Date',c.effectiveDate||'—'],
-    ['Risk Level',c.risk||'—'],['Status',c.status||'—'],
-    ['Department',c.department||'—'],['Deadline',c.deadline||'—'],
+    ['Circular ID', c.id],       ['Regulator', c.regulator||'—'],
+    ['Issue Date', c.issueDate||c.date||'—'], ['Effective Date', c.effectiveDate||'—'], ['Deadline', c.deadline||'—'],
+    ['Risk Level', c.risk||'—'], ['Type', c.type||'—'],
+    ['Status', c.status||'—'],   ['Department', c.department||'—'], ['', ''],
   ];
-  var riskCls = c.risk ? ' dr-chip-risk-' + c.risk.toLowerCase() : '';
   return (
     '<div class="dr-panel">' +
     '<div class="dr-panel-toolbar">' +
-      '<div class="dr-panel-title-wrap"><span class="dr-panel-icon">&#x1F4CB;</span><span class="dr-panel-title">Overview</span></div>' +
+      '<div class="dr-panel-title-wrap"><span class="dr-panel-icon">&#x1F4CB;</span><span class="dr-panel-title">' + (c.title || 'Overview') + '</span></div>' +
       '<div class="dr-toolbar-actions">' +
-        '<label class="dr-tool-btn"><input type="file" style="display:none;" accept=".pdf,.docx"/>&#x1F4C1; Upload Circular</label>' +
-        '<button class="dr-tool-btn dr-tool-edit-toggle" data-target="dr-ov-edit" data-hide="dr-ov-details">&#x270E; Edit</button>' +
-        '<button class="dr-tool-btn" onclick="window._cmsShowHistoryModal(\'Overview History\', window._drGetHistory(\'Overview\'))">&#x1F551; History</button>' +
-      '</div>' +
-    '</div>' +
-    '<div class="dr-ov-hero">' +
-      '<div class="dr-ov-hero-left">' +
-        '<div class="dr-ov-id">' + c.id + '</div>' +
-        '<div class="dr-ov-title">' + c.title + '</div>' +
-        '<div class="dr-ov-chips">' +
-          '<span class="dr-chip">' + (c.regulator||'N/A') + '</span>' +
-          (c.risk ? '<span class="dr-chip' + riskCls + '">' + c.risk + ' Risk</span>' : '') +
-          (c.status ? '<span class="dr-chip dr-chip-status">' + c.status + '</span>' : '') +
-          (c.type ? '<span class="dr-chip dr-chip-blue">' + c.type + '</span>' : '') +
+        '<div class="dr-kebab-wrap">' +
+          '<button class="dr-kebab-btn" onclick="event.stopPropagation();this.closest(\'.dr-kebab-wrap\').classList.toggle(\'open\')">&#x22EE;</button>' +
+          '<div class="dr-kebab-menu">' +
+            '<label class="dr-kebab-item"><input type="file" style="display:none;" accept=".pdf,.docx" onchange="this.closest(\'.dr-kebab-wrap\').classList.remove(\'open\')"/>&#x1F4C1;&nbsp; Upload Circular</label>' +
+            '<button class="dr-kebab-item dr-tool-edit-toggle" data-target="dr-ov-edit" data-hide="dr-ov-details" onclick="this.closest(\'.dr-kebab-wrap\').classList.remove(\'open\')">&#x270E;&nbsp; Edit</button>' +
+            '<button class="dr-kebab-item" onclick="this.closest(\'.dr-kebab-wrap\').classList.remove(\'open\');window._cmsShowHistoryModal(\'Overview History\', window._drGetHistory(\'Overview\'))">&#x1F551;&nbsp; History</button>' +
+          '</div>' +
         '</div>' +
       '</div>' +
-      (c.deadline ? '<div class="dr-deadline-box"><div class="dr-dl-label">Compliance Deadline</div><div class="dr-dl-date">' + c.deadline + '</div></div>' : '') +
     '</div>' +
     '<div class="dr-edit-drawer" id="dr-ov-edit" style="display:none;">' +
       '<div class="dr-edit-grid">' +
-        fields.map(function(f) { return '<div class="dr-edit-field"><label class="dr-edit-label">' + f[0] + '</label><input class="dr-edit-input" value="' + f[1] + '"/></div>'; }).join('') +
+        [['Circular ID',c.id],['Regulator',c.regulator||''],['Issue Date',c.issueDate||c.date||''],['Effective Date',c.effectiveDate||''],['Deadline',c.deadline||''],['Risk Level',c.risk||''],['Type',c.type||''],['Status',c.status||''],['Department',c.department||'']].map(function(f) { return '<div class="dr-edit-field"><label class="dr-edit-label">' + f[0] + '</label><input class="dr-edit-input" value="' + f[1] + '"/></div>'; }).join('') +
         '<div class="dr-edit-field dr-edit-field-full"><label class="dr-edit-label">Summary</label><textarea class="dr-edit-ta">' + (c.summary||'') + '</textarea></div>' +
         '<div class="dr-edit-field dr-edit-field-full"><label class="dr-edit-label">Tags (comma separated)</label><input class="dr-edit-input" value="' + (c.tags||[]).join(', ') + '"/></div>' +
       '</div>' +
@@ -1890,8 +1881,11 @@ function _drPanelOverview(flow) {
       '</div>' +
     '</div>' +
     '<div id="dr-ov-details">' +
-      '<div class="dr-detail-grid">' +
-        fields.map(function(f) { return '<div class="dr-detail-cell"><div class="dr-dc-label">' + f[0] + '</div><div class="dr-dc-val">' + f[1] + '</div></div>'; }).join('') +
+      '<div class="dr-detail-grid dr-detail-grid-5">' +
+        fields.map(function(f) {
+          if (!f[0]) return '<div class="dr-detail-cell"></div>';
+          return '<div class="dr-detail-cell"><div class="dr-dc-label">' + f[0] + '</div><div class="dr-dc-val">' + f[1] + '</div></div>';
+        }).join('') +
       '</div>' +
       (c.summary ? '<div class="dr-block-pad"><div class="dr-info-block"><div class="dr-ib-label">Summary</div><div class="dr-ib-text">' + c.summary + '</div></div></div>' : '') +
       ((c.tags||[]).length ? '<div class="dr-tags-row">' + c.tags.map(function(t){return '<span class="dr-tag">'+t+'</span>';}).join('') + '</div>' : '') +
@@ -2702,6 +2696,13 @@ window._drRefreshMappedRefs = function(ck, mapKey, type) {
 
 /* ================================================================ BIND PANEL */
 function _drBindPanel(step, flow, circId) {
+  /* close kebab menu when clicking outside */
+  document.addEventListener('click', function _kebabOutside(e) {
+    if (!e.target.closest('.dr-kebab-wrap')) {
+      document.querySelectorAll('.dr-kebab-wrap.open').forEach(function(w){ w.classList.remove('open'); });
+    }
+  });
+
   /* edit toggles */
   document.querySelectorAll('.dr-tool-edit-toggle').forEach(function(btn){
     btn.addEventListener('click', function(){
@@ -2993,9 +2994,19 @@ function injectDraftReviewCSS() {
 /* OVERVIEW */
 .dr-ov-hero{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;padding:16px 18px;border-bottom:1px solid var(--dr-border-lt);flex-wrap:wrap;}
 .dr-ov-hero-left{flex:1;min-width:0;}
-.dr-ov-id{font-family:var(--dr-mono);font-size:10px;font-weight:700;color:var(--dr-t3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px;}
+.dr-ov-id-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:4px;}
+.dr-ov-id{font-family:var(--dr-mono);font-size:10px;font-weight:700;color:var(--dr-t3);text-transform:uppercase;letter-spacing:.08em;}
 .dr-ov-title{font-size:15px;font-weight:700;line-height:1.4;margin-bottom:8px;}
 .dr-ov-chips{display:flex;gap:6px;flex-wrap:wrap;}
+/* KEBAB MENU */
+.dr-kebab-wrap{position:relative;}
+.dr-kebab-btn{background:none;border:1px solid var(--dr-border);border-radius:6px;width:30px;height:30px;display:flex;align-items:center;justify-content:center;font-size:16px;color:var(--dr-t2);cursor:pointer;transition:all .12s;line-height:1;}
+.dr-kebab-btn:hover{background:var(--dr-hover);border-color:var(--dr-t2);}
+.dr-kebab-menu{display:none;position:absolute;right:0;top:calc(100% + 4px);background:#fff;border:1px solid var(--dr-border);border-radius:8px;box-shadow:0 4px 16px rgba(0,0,0,.12);min-width:160px;z-index:500;overflow:hidden;flex-direction:column;}
+.dr-kebab-wrap.open .dr-kebab-menu{display:flex;}
+.dr-kebab-item{display:flex;align-items:center;gap:8px;padding:9px 14px;background:none;border:none;width:100%;text-align:left;font-family:inherit;font-size:12px;font-weight:600;color:var(--dr-t2);cursor:pointer;transition:background .1s;}
+.dr-kebab-item:hover{background:var(--dr-hover);color:var(--dr-t1);}
+label.dr-kebab-item{cursor:pointer;}
 .dr-deadline-box{padding:10px 16px;background:var(--dr-amber-lt);border:1.5px solid #fcd34d;border-radius:10px;text-align:center;flex-shrink:0;}
 .dr-dl-label{font-size:9px;font-weight:700;color:var(--dr-amber);text-transform:uppercase;letter-spacing:.06em;margin-bottom:2px;}
 .dr-dl-date{font-size:13px;font-weight:700;color:#92400e;}
@@ -3007,6 +3018,7 @@ function injectDraftReviewCSS() {
 .dr-chip-risk-medium{background:var(--dr-amber-lt);border-color:#fcd34d;color:var(--dr-amber);}
 .dr-chip-risk-low{background:var(--dr-green-lt);border-color:#6ee7b7;color:var(--dr-green);}
 .dr-detail-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--dr-border-lt);}
+.dr-detail-grid-5{grid-template-columns:repeat(5,1fr);}
 .dr-detail-cell{background:#fafbfc;padding:9px 14px;}
 .dr-dc-label{font-size:9px;font-weight:700;color:var(--dr-t3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:2px;}
 .dr-dc-val{font-size:12px;font-weight:600;}

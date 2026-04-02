@@ -165,65 +165,30 @@ const CMS_DATA = {
     }
   ]
 },
-    {
-  "id": "SEBI-MF-2023-117",
-  "title": "Roles and Responsibilities of Trustees and AMCs",
+   {
+  "id": "SEBI-AIF-2024-135",
+  "title": "Specific Due Diligence of Investors and Investments of AIFs",
   "regulator": "SEBI",
-  "issuedDate": "2023-07-07",
-  "effectiveDate": "2024-01-01",
-  "dueDate": "2024-06-30",
-  "type": "Regular",
+  "issuedDate": "2024-10-08",
+  "effectiveDate": "2024-10-08",
+  "dueDate": "2025-04-07",
+  "type": "Regulatory",
   "status": "Active",
-  "departments": ["Compliance", "Legal", "Operations"],
+  "departments": ["Compliance", "Risk", "Operations", "Legal"],
   "risk": "High",
-  "complianceScore": 55,
-  "summary": "SEBI circular defining core responsibilities of Trustees and governance requirements for AMCs including due diligence, conflict of interest management, system controls, and investor protection mechanisms.",
+  "complianceScore": 40,
+  "summary": "SEBI circular mandating specific due diligence for AIFs, managers, and KMPs to prevent regulatory circumvention across QIB/QB benefits, RBI norms, and cross-border investments, along with strict reporting obligations.",
+  
   "chapters": [
     {
       "num": 1,
-      "title": "Core Responsibilities of Trustees",
+      "title": "Due Diligence Obligations",
       "clauses": [
         {
           "id": "C1.1",
-          "text": "Trustees shall ensure the fairness of fees and expenses charged by AMCs.",
-          "obligation": "Ensure fairness of fees.",
-          "actionables": "Review fee structure.",
-          "department": "Compliance",
-          "risk": "High",
-          "status": "Open"
-        },
-        {
-          "id": "C1.2",
-          "text": "Trustees shall review the performance of AMC vis-a-vis benchmarks.",
-          "obligation": "Review performance.",
-          "actionables": "Compare with benchmarks.",
-          "department": "Risk",
-          "risk": "Medium",
-          "status": "Open"
-        },
-        {
-          "id": "C1.3",
-          "text": "Trustees shall ensure AMCs have systems to prevent mis-selling.",
-          "obligation": "Ensure systems exist.",
-          "actionables": "Verify system controls.",
-          "department": "Compliance",
-          "risk": "High",
-          "status": "Open"
-        },
-        {
-          "id": "C1.4",
-          "text": "Trustees shall ensure operations of AMCs are not influenced by sponsors or associates.",
-          "obligation": "Ensure independence.",
-          "actionables": "Review governance structure.",
-          "department": "Legal",
-          "risk": "High",
-          "status": "Open"
-        },
-        {
-          "id": "C1.5",
-          "text": "Trustees shall address conflicts of interest between stakeholders and unitholders.",
-          "obligation": "Manage conflicts.",
-          "actionables": "Identify and address conflicts.",
+          "text": "AIFs, managers, and KMPs shall exercise specific due diligence on investors and investments.",
+          "obligation": "Perform due diligence.",
+          "actionables": "Implement due diligence framework.",
           "department": "Compliance",
           "risk": "High",
           "status": "Open"
@@ -232,32 +197,14 @@ const CMS_DATA = {
     },
     {
       "num": 2,
-      "title": "System and Reporting Requirements",
+      "title": "QIB-related Due Diligence",
       "clauses": [
         {
           "id": "C2.1",
-          "text": "Trustees shall ensure system-level checks to prevent fraudulent transactions including front running.",
-          "obligation": "Ensure system checks.",
-          "actionables": "Review system controls.",
+          "text": "Schemes with ≥50% contribution from a single/group investor must undergo due diligence before availing QIB benefits.",
+          "obligation": "Validate investor eligibility.",
+          "actionables": "Apply SFA standards before QIB benefits.",
           "department": "Risk",
-          "risk": "High",
-          "status": "Open"
-        },
-        {
-          "id": "C2.2",
-          "text": "AMCs shall provide system-based reports and alerts to Trustees.",
-          "obligation": "Provide reports.",
-          "actionables": "Generate reports.",
-          "department": "Operations",
-          "risk": "Medium",
-          "status": "Open"
-        },
-        {
-          "id": "C2.3",
-          "text": "Trustees shall evaluate compliance independently and not rely only on AMC submissions.",
-          "obligation": "Perform independent evaluation.",
-          "actionables": "Conduct independent review.",
-          "department": "Compliance",
           "risk": "High",
           "status": "Open"
         }
@@ -265,13 +212,13 @@ const CMS_DATA = {
     },
     {
       "num": 3,
-      "title": "KYC and Compliance Monitoring",
+      "title": "QB (SARFAESI) Compliance",
       "clauses": [
         {
           "id": "C3.1",
-          "text": "Trustees shall review steps taken for folios without complete KYC attributes.",
-          "obligation": "Review KYC completeness.",
-          "actionables": "Monitor KYC updates.",
+          "text": "Schemes with ≥50% concentration must undergo due diligence before investing in Security Receipts.",
+          "obligation": "Ensure QB eligibility.",
+          "actionables": "Perform due diligence before SR investments.",
           "department": "Compliance",
           "risk": "High",
           "status": "Open"
@@ -280,31 +227,85 @@ const CMS_DATA = {
     },
     {
       "num": 4,
-      "title": "Unit Holder Protection Committee",
+      "title": "RBI Norms & Evergreening Prevention",
       "clauses": [
         {
           "id": "C4.1",
-          "text": "AMC shall constitute a Unit Holder Protection Committee.",
-          "obligation": "Constitute committee.",
-          "actionables": "Form UHPC.",
-          "department": "Legal",
+          "text": "Schemes with RBI-regulated investors (≥25% or control rights) must undergo due diligence.",
+          "obligation": "Prevent regulatory circumvention.",
+          "actionables": "Identify RBI-regulated exposure.",
+          "department": "Risk",
           "risk": "High",
           "status": "Open"
         },
         {
           "id": "C4.2",
-          "text": "UHPC shall ensure protection of interest of unit holders.",
-          "obligation": "Protect investors.",
-          "actionables": "Monitor investor protection.",
+          "text": "AIFs shall not enable indirect exposure disallowed for RBI-regulated entities.",
+          "obligation": "Restrict indirect exposure.",
+          "actionables": "Block non-permissible investments.",
+          "department": "Compliance",
+          "risk": "High",
+          "status": "Open"
+        }
+      ]
+    },
+    {
+      "num": 5,
+      "title": "Investment Decision Controls",
+      "clauses": [
+        {
+          "id": "C5.1",
+          "text": "Investments failing due diligence must be rejected or investors excluded.",
+          "obligation": "Enforce investment restrictions.",
+          "actionables": "Implement investment approval checks.",
+          "department": "Operations",
+          "risk": "High",
+          "status": "Open"
+        }
+      ]
+    },
+    {
+      "num": 6,
+      "title": "Existing Investment Review",
+      "clauses": [
+        {
+          "id": "C6.1",
+          "text": "Existing investments must be reviewed against due diligence standards.",
+          "obligation": "Review legacy investments.",
+          "actionables": "Conduct retrospective due diligence.",
           "department": "Compliance",
           "risk": "High",
           "status": "Open"
         },
         {
-          "id": "C4.3",
-          "text": "UHPC shall review compliance issues and investor grievances.",
-          "obligation": "Review grievances.",
-          "actionables": "Track complaints.",
+          "id": "C6.2",
+          "text": "Non-compliant investments must be reported to custodians by April 07, 2025.",
+          "obligation": "Report exceptions.",
+          "actionables": "Submit Annexure I report.",
+          "department": "Operations",
+          "risk": "High",
+          "status": "Open"
+        }
+      ]
+    },
+    {
+      "num": 7,
+      "title": "Cross-border Investment Checks",
+      "clauses": [
+        {
+          "id": "C7.1",
+          "text": "Schemes with ≥50% investors from land-border countries require due diligence.",
+          "obligation": "Identify high-risk jurisdictions.",
+          "actionables": "Apply enhanced due diligence.",
+          "department": "Risk",
+          "risk": "High",
+          "status": "Open"
+        },
+        {
+          "id": "C7.2",
+          "text": "Investments ≥10% in investee companies must be reported to custodians.",
+          "obligation": "Report material investments.",
+          "actionables": "Submit investment details within 30 days.",
           "department": "Operations",
           "risk": "Medium",
           "status": "Open"
@@ -312,35 +313,42 @@ const CMS_DATA = {
       ]
     },
     {
-      "num": 5,
-      "title": "Governance Requirements",
+      "num": 8,
+      "title": "Custodian & SEBI Reporting",
       "clauses": [
         {
-          "id": "C5.1",
-          "text": "Chairperson of Trustee company shall be an independent director.",
-          "obligation": "Ensure independent chairperson.",
-          "actionables": "Verify board composition.",
-          "department": "Legal",
+          "id": "C8.1",
+          "text": "Custodians shall report compiled data to SEBI.",
+          "obligation": "Ensure regulatory reporting.",
+          "actionables": "Coordinate with custodian.",
+          "department": "Operations",
           "risk": "Medium",
           "status": "Open"
-        },
+        }
+      ]
+    },
+    {
+      "num": 9,
+      "title": "Governance & Compliance Reporting",
+      "clauses": [
         {
-          "id": "C5.2",
-          "text": "Board of AMC and Trustee company shall meet at least once a year.",
-          "obligation": "Ensure annual meeting.",
-          "actionables": "Schedule meetings.",
+          "id": "C9.1",
+          "text": "Compliance Test Report must include adherence to this circular.",
+          "obligation": "Integrate into compliance reporting.",
+          "actionables": "Update CTR framework.",
           "department": "Compliance",
-          "risk": "Low",
+          "risk": "Medium",
           "status": "Open"
         }
       ]
     }
   ],
+
   "amendments": [
     {
-      "date": "2023-06-27",
+      "date": "2024-04-25",
       "version": "1.1",
-      "description": "Amendments to MF Regulations introducing core responsibilities."
+      "description": "Insertion of Regulation 20(20) requiring due diligence."
     }
   ]
 },
