@@ -162,7 +162,7 @@ function _sumBuildDoc(circ, data, org, aud, dep, date) {
       <div class="sum-dh-meta">
         <span class="sum-dh-pill sum-dh-pill-reg">${circ.regulator||'N/A'}</span>
         <span class="sum-dh-pill">${circ.id}</span>
-        <span class="sum-dh-pill">Issued: ${circ.date||circ.issueDate||'—'}</span>
+        <span class="sum-dh-pill">Issued: ${circ.date||circ.issuedDate||'—'}</span>
         <span class="sum-dh-pill">Effective: ${circ.effectiveDate||'Immediate'}</span>
         <span class="sum-dh-pill sum-dh-pill-deadline">⚠ Comply by: ${circ.deadline||'As specified'}</span>
         <span class="sum-dh-pill sum-dh-pill-risk-${(circ.risk||'medium').toLowerCase()}">${circ.risk||'Medium'} Risk</span>

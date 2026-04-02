@@ -10,6 +10,452 @@
 const CMS_DATA = {
 
   circulars: [
+    {
+      "id": "RBI-HF-2024-001",
+      "title": "Master Circular on Housing Finance",
+      "regulator": "RBI",
+      "issuedDate": "2024-04-02",
+      "effectiveDate": "2024-04-02",
+      "dueDate": "2024-12-31",
+      "type": "Master",
+      "status": "Active",
+      "docUrl": "./RBI Master Circular.pdf",
+      "departments": ["Credit", "Risk", "Operations"],
+      "risk": "High",
+      "complianceScore": 70,
+      "summary": "The Master Circular on Housing Finance consolidates RBI guidelines for banks on housing loans.",
+      "chapters": [
+        {
+          "num": 2,
+          "title": "Housing Loan Regulations",
+          "clauses": [
+            {
+              "id": "C2.1",
+              "text": "Banks may grant loans for purchase, construction, repair, and improvement of housing units.",
+              "obligations": [
+                "Ensure loans are sanctioned only for eligible housing purposes.",
+                "Ensure internal policy clearly defines permissible loan categories.",
+                "Ensure end-use of funds aligns with approved housing purpose."
+              ],
+              "actionables": [
+                "Define eligible housing loan categories in credit policy.",
+                "Implement purpose validation in loan origination system (LOS).",
+                "Conduct post-disbursement end-use verification."
+              ],
+              "department": "Credit",
+              "risk": "High",
+              "status": "Open",
+              "pageNo": 4
+            },
+            {
+              "id": "C2.2",
+              "text": "Loans shall not be granted for speculative real estate activities or unauthorized constructions.",
+              "obligations": [
+                "Restrict financing to authorized and legally compliant properties.",
+                "Ensure no exposure to speculative real estate activities.",
+                "Ensure property approvals and legal clearances are verified."
+              ],
+              "actionables": [
+                "Perform legal due diligence including title verification.",
+                "Verify sanctioned building plans and approvals.",
+                "Implement negative list for speculative projects."
+              ],
+              "department": "Risk",
+              "risk": "High",
+              "status": "In Progress"
+            },
+            {
+              "id": "C2.3",
+              "text": "Banks must ensure borrower compliance with sanctioned plans and obtain necessary certificates.",
+              "obligations": [
+                "Ensure sanctioned building plan is obtained before loan approval.",
+                "Obtain borrower undertaking for adherence to sanctioned plan.",
+                "Ensure architect certification during construction stages.",
+                "Ensure completion certificate is obtained post construction."
+              ],
+              "actionables": [
+                "Include sanctioned plan in documentation checklist.",
+                "Collect borrower affidavit for compliance.",
+                "Empanel architects for stage-wise certification.",
+                "Track and obtain completion certificate within defined timeline."
+              ],
+              "department": "Operations",
+              "risk": "Medium",
+              "status": "Open"
+            }
+          ],
+          "sections": [
+            {
+              "id": "Section 1",
+              "text": "Eligible Housing Finance Activities",
+              "clauses": ["C2.1"]
+            },
+            {
+              "id": "Section 2",
+              "text": "Restrictions and Compliance",
+              "clauses": ["C2.2", "C2.3"]
+            }
+          ]
+        },
+        {
+          "num": 3,
+          "title": "Loan Exposure and Risk Management",
+          "clauses": [
+            {
+              "id": "C3.1",
+              "text": "Banks must adhere to prescribed Loan-to-Value (LTV) ratios and risk weights.",
+              "obligations": [
+                "Ensure LTV ratios are within RBI prescribed limits.",
+                "Ensure risk weights are applied as per regulatory norms.",
+                "Ensure property valuation excludes ineligible components."
+              ],
+              "actionables": [
+                "Configure LOS to auto-calculate LTV.",
+                "Implement system validation to restrict breaches.",
+                "Update valuation policy excluding stamp duty where applicable."
+              ],
+              "department": "Risk",
+              "risk": "High",
+              "status": "Open"
+            },
+            {
+              "id": "C3.2",
+              "text": "Banks must frame board-approved policies on real estate exposure limits.",
+              "obligations": [
+                "Establish board-approved exposure limits for housing sector.",
+                "Ensure periodic review of exposure policies.",
+                "Ensure compliance with prudential norms."
+              ],
+              "actionables": [
+                "Draft exposure policy and present to Board.",
+                "Set exposure thresholds in risk systems.",
+                "Conduct periodic policy review and update."
+              ],
+              "department": "Risk",
+              "risk": "High",
+              "status": "In Progress"
+            }
+          ]
+        },
+        {
+          "num": 4,
+          "title": "Disbursement and Product Guidelines",
+          "clauses": [
+            {
+              "id": "C4.1",
+              "text": "Loan disbursement must be linked to stages of construction.",
+              "obligations": [
+                "Ensure disbursement is linked to construction progress.",
+                "Avoid upfront disbursement in under-construction projects.",
+                "Ensure inspection before each disbursement."
+              ],
+              "actionables": [
+                "Define stage-wise disbursement matrix.",
+                "Link disbursement to inspection approval.",
+                "Restrict bulk disbursement in LOS."
+              ],
+              "department": "Operations",
+              "risk": "High",
+              "status": "Open"
+            },
+            {
+              "id": "C4.2",
+              "text": "Banks must ensure customers are informed of risks in innovative loan products.",
+              "obligations": [
+                "Ensure transparency in loan product features.",
+                "Ensure customers are informed of associated risks.",
+                "Ensure suitability of loan products for borrowers."
+              ],
+              "actionables": [
+                "Update product disclosure documents.",
+                "Implement customer acknowledgment process.",
+                "Train staff on product suitability assessment."
+              ],
+              "department": "Compliance",
+              "risk": "Medium",
+              "status": "In Progress"
+            }
+          ]
+        },
+        {
+          "num": 5,
+          "title": "Regulatory Compliance and Fair Practices",
+          "clauses": [
+            {
+              "id": "C5.1",
+              "text": "Banks must comply with RBI directions on interest rates and EMI reset.",
+              "obligations": [
+                "Ensure compliance with RBI interest rate guidelines.",
+                "Ensure proper implementation of EMI reset norms.",
+                "Ensure transparency in interest rate changes."
+              ],
+              "actionables": [
+                "Align loan systems with RBI rate guidelines.",
+                "Automate EMI reset calculations.",
+                "Notify customers of rate changes."
+              ],
+              "department": "Finance",
+              "risk": "Medium",
+              "status": "Open"
+            },
+            {
+              "id": "C5.2",
+              "text": "Disclosure of mortgage details by builders must be ensured.",
+              "obligations": [
+                "Ensure builder discloses mortgage details to buyers.",
+                "Ensure disclosure in project marketing materials.",
+                "Restrict funding where disclosure is absent."
+              ],
+              "actionables": [
+                "Include disclosure clause in agreements.",
+                "Verify builder disclosures before disbursement.",
+                "Maintain disclosure records."
+              ],
+              "department": "Legal",
+              "risk": "Medium",
+              "status": "Open"
+            },
+            {
+              "id": "C5.3",
+              "text": "Banks must follow fair lending practices including penal charges and document release.",
+              "obligations": [
+                "Ensure compliance with RBI fair lending guidelines.",
+                "Ensure transparency in penal charges.",
+                "Ensure timely release of property documents.",
+                "Ensure customer protection standards are followed."
+              ],
+              "actionables": [
+                "Update fair lending policy.",
+                "Disclose penal charges clearly.",
+                "Define document release timelines.",
+                "Monitor customer complaints and grievances."
+              ],
+              "department": "Compliance",
+              "risk": "High",
+              "status": "In Progress"
+            }
+          ]
+        }
+      ],
+      "amendments": [
+        {
+          "date": "2023-08-18",
+          "version": "1.1",
+          "description": "Guidelines on penal charges and EMI reset incorporated."
+        },
+        {
+          "date": "2023-09-13",
+          "version": "1.2",
+          "description": "Responsible lending conduct guidelines added."
+        }
+      ]
+    },
+    {
+      "id": "SEBI-LODR-2024-001",
+      "title": "SEBI Master Circular for LODR Compliance",
+      "regulator": "SEBI",
+      "issuedDate": "2024-11-11",
+      "effectiveDate": "2024-11-11",
+      "type": "Master",
+      "status": "Active",
+      "docUrl": "./SEBI Master Circular.pdf",
+      "departments": ["Compliance", "Legal", "Finance", "Secretarial"],
+      "risk": "High",
+      "complianceScore": 65,
+      "summary": "Master circular consolidating SEBI LODR compliance requirements including disclosures, governance, and reporting obligations for listed entities.",
+
+      "chapters": [
+        {
+          "num": 1,
+          "title": "Uniform Listing Agreement",
+          "clauses": [
+            {
+              "id": "C1.1",
+              "text": "Listed entities shall comply with the Uniform Listing Agreement prescribed by SEBI.",
+              "obligations": [
+                "Ensure execution of uniform listing agreement",
+                "Ensure compliance with all terms of listing agreement",
+                "Ensure alignment with LODR provisions"
+              ],
+              "actionables": [
+                "Adopt SEBI prescribed listing agreement format",
+                "Maintain signed agreements with stock exchanges",
+                "Track compliance with agreement clauses"
+              ],
+          "department": "Legal",
+              "risk": "High",
+              "status": "Open",
+              "pageNo": 7
+            }
+          ],
+              "sections": [
+                {
+                  "id": "Section 1",
+                  "text": "Listing Agreement Compliance",
+                  "clauses": ["C1.1"]
+                }
+              ]
+        },
+        {
+          "num": 2,
+          "title": "Periodic Disclosures (Non-Financial)",
+          "clauses": [
+            {
+              "id": "C2.1",
+              "text": "Listed entities shall disclose shareholding pattern periodically.",
+              "obligations": [
+                "Ensure periodic disclosure of shareholding pattern",
+                "Ensure accuracy of promoter and public shareholding",
+                "Ensure submission within timelines"
+              ],
+              "actionables": [
+                "Generate shareholding reports",
+                "Validate promoter holdings",
+                "Submit to stock exchange within due date"
+              ],
+              "department": "Compliance",
+              "risk": "High",
+              "status": "Open",
+              "pageNo": 8
+            },
+            {
+              "id": "C2.2",
+              "text": "Listed entities shall submit corporate governance compliance reports.",
+              "obligations": [
+                "Ensure quarterly corporate governance reporting",
+                "Ensure compliance with board composition norms",
+                "Ensure disclosure of governance practices"
+              ],
+              "actionables": [
+                "Prepare quarterly governance report",
+                "Validate board committee composition",
+                "File report with exchanges"
+              ],
+              "department": "Secretarial",
+              "risk": "High",
+              "status": "Open",
+              "pageNo": 12
+            }
+          ],
+          
+  "sections": [
+    {
+      "id": "Section 1",
+      "text": "Shareholding Disclosures",
+      "clauses": ["C2.1"]
+    },
+    {
+      "id": "Section 2",
+      "text": "Corporate Governance Reporting",
+      "clauses": ["C2.2"]
+    }
+  ]
+        },
+        {
+          "num": 3,
+          "title": "Financial Disclosures",
+          "clauses": [
+            {
+              "id": "C3.1",
+              "text": "Listed entities shall disclose financial results periodically.",
+              "obligations": [
+                "Ensure quarterly and annual financial disclosures",
+                "Ensure audit or limited review compliance",
+                "Ensure transparency in financial reporting"
+              ],
+              "actionables": [
+                "Prepare financial statements",
+                "Obtain auditor review",
+                "Submit results to stock exchange"
+              ],
+              "department": "Finance",
+              "risk": "High",
+              "status": "Open",
+              "pageNo": 14
+            },
+            {
+              "id": "C3.2",
+              "text": "Listed entities shall disclose related party transactions.",
+              "obligations": [
+                "Ensure disclosure of related party transactions",
+                "Ensure approval of audit committee",
+                "Ensure arm’s length compliance"
+              ],
+              "actionables": [
+                "Identify related party transactions",
+                "Obtain approvals",
+                "Disclose in prescribed format"
+              ],
+              "department": "Finance",
+              "risk": "High",
+              "status": "Open",
+              "pageNo": 18
+            }
+          ]
+        },
+        {
+          "num": 4,
+          "title": "Annual Disclosures",
+          "clauses": [
+            {
+              "id": "C4.1",
+              "text": "Listed entities shall submit annual secretarial compliance report.",
+              "obligations": [
+                "Ensure annual secretarial audit",
+                "Ensure compliance certification",
+                "Ensure submission within timelines"
+              ],
+              "actionables": [
+                "Appoint practicing company secretary",
+                "Conduct audit",
+                "Submit report"
+              ],
+              "department": "Secretarial",
+              "risk": "Medium",
+              "status": "Open",
+              "pageNo": 22
+            }
+          ]
+        },
+        {
+          "num": 5,
+          "title": "Event-Based Disclosures",
+          "clauses": [
+            {
+              "id": "C5.1",
+              "text": "Listed entities shall disclose material events to stock exchanges.",
+              "obligations": [
+                "Ensure timely disclosure of material events",
+                "Ensure accuracy of disclosures",
+                "Ensure compliance with regulation 30"
+              ],
+              "actionables": [
+                "Identify material events",
+                "Prepare disclosure",
+                "Submit to exchange promptly"
+              ],
+              "department": "Compliance",
+              "risk": "High",
+              "status": "Open",
+              "pageNo": 26
+            }
+          ]
+        }
+      ],
+
+      "amendments": [
+        {
+          "date": "2023-07-11",
+          "version": "1.0",
+          "description": "Initial master circular issued consolidating LODR provisions."
+        },
+        {
+          "date": "2024-11-11",
+          "version": "2.0",
+          "description": "Updated master circular including amendments up to September 30, 2024."
+        }
+      ]
+    },
    {
   "id": "RBI-HF-2024-001",
   "title": "Master Circular on Housing Finance",
@@ -654,7 +1100,7 @@ const CMS_DATA = {
   tasks: [
     {
       id: 'ACT-001',
-      obligationId:'OB-001',
+      obligationId: 'OB-001',
       title: 'Establish Board Cybersecurity Committee',
       circularId: 'CIRC-2024-001',
       clauseRef: 'C1.1',
@@ -667,7 +1113,7 @@ const CMS_DATA = {
     },
     {
       id: 'ACT-002',
-      obligationId:'OB-002',
+      obligationId: 'OB-002',
       title: 'Appoint CISO – Credentials Verification',
       circularId: 'CIRC-2024-001',
       clauseRef: 'C1.2',
@@ -680,7 +1126,7 @@ const CMS_DATA = {
     },
     {
       id: 'ACT-003',
-      obligationId:'OB-003',
+      obligationId: 'OB-003',
       title: 'Annual Cybersecurity Risk Assessment – Q2',
       circularId: 'CIRC-2024-001',
       clauseRef: 'C2.1',
@@ -693,7 +1139,7 @@ const CMS_DATA = {
     },
     {
       id: 'ACT-004',
-       obligationId:'OB-004',
+      obligationId: 'OB-004',
       title: 'Implement SIEM for Cyber Incident Detection',
       circularId: 'CIRC-2024-001',
       clauseRef: 'C3.1',
@@ -706,7 +1152,7 @@ const CMS_DATA = {
     },
     {
       id: 'ACT-005',
-       obligationId:'OB-005',
+      obligationId: 'OB-005',
       title: 'Update Transaction Monitoring Thresholds',
       circularId: 'CIRC-2024-002',
       clauseRef: 'C1.1',
@@ -719,7 +1165,7 @@ const CMS_DATA = {
     },
     {
       id: 'ACT-006',
-       obligationId:'OB-006',
+      obligationId: 'OB-006',
       title: 'PEP Screening API Integration',
       circularId: 'CIRC-2024-002',
       clauseRef: 'C2.1',
@@ -732,7 +1178,7 @@ const CMS_DATA = {
     },
     {
       id: 'ACT-007',
-      obligationId:'OB-007',
+      obligationId: 'OB-007',
       title: 'Cloud Data Migration – Sensitive PII',
       circularId: 'CIRC-2024-003',
       clauseRef: 'C1.1',
@@ -745,7 +1191,7 @@ const CMS_DATA = {
     },
     {
       id: 'ACT-008',
-      obligationId:'OB-008',
+      obligationId: 'OB-008',
       title: 'ESG Scope 1 & 2 Emissions Measurement',
       circularId: 'CIRC-2024-004',
       clauseRef: 'C1.1',
@@ -758,7 +1204,7 @@ const CMS_DATA = {
     },
     {
       id: 'ACT-009',
-      obligationId:'OB-009',
+      obligationId: 'OB-009',
       title: 'Vendor Classification Matrix Development',
       circularId: 'CIRC-2024-005',
       clauseRef: 'C1.1',
@@ -771,7 +1217,7 @@ const CMS_DATA = {
     },
     {
       id: 'ACT-010',
-      obligationId:'OB-0010',
+      obligationId: 'OB-0010',
       title: 'Quarterly Risk Register Review – Q2',
       circularId: 'CIRC-2024-001',
       clauseRef: 'C2.2',
@@ -784,7 +1230,7 @@ const CMS_DATA = {
     },
     {
       id: 'ACT-011',
-      obligationId:'OB-011',
+      obligationId: 'OB-011',
       title: 'EDD Training for Compliance Officers',
       circularId: 'CIRC-2024-002',
       clauseRef: 'C1.1',
@@ -797,7 +1243,7 @@ const CMS_DATA = {
     },
     {
       id: 'ACT-012',
-      obligationId:'OB-0012',
+      obligationId: 'OB-0012',
       title: 'Legal Review – Updated Vendor Contracts',
       circularId: 'CIRC-2024-005',
       clauseRef: 'C1.1',
@@ -1224,17 +1670,17 @@ CMS_DATA.updateTaskStatus = function (taskId, newStatus) {
    ================================================================ */
 CMS_DATA.spocDashboard = {
   kpi: {
-    pendingReview:        7,
-    overdueObligations:   3,
+    pendingReview: 7,
+    overdueObligations: 3,
     unassignedActivities: 11,
-    complianceScore:      68
+    complianceScore: 68
   },
   pipeline: [
-    { stage: 'Received',           count: 14, color: '#6366f1' },
-    { stage: 'Activities Mapped',  count: 11, color: '#3b82f6' },
-    { stage: 'Assigned',           count: 8,  color: '#f59e0b' },
-    { stage: 'Evidence Uploaded',  count: 5,  color: '#10b981' },
-    { stage: 'Closed',             count: 2,  color: '#9ca3af' }
+    { stage: 'Received', count: 14, color: '#6366f1' },
+    { stage: 'Activities Mapped', count: 11, color: '#3b82f6' },
+    { stage: 'Assigned', count: 8, color: '#f59e0b' },
+    { stage: 'Evidence Uploaded', count: 5, color: '#10b981' },
+    { stage: 'Closed', count: 2, color: '#9ca3af' }
   ],
   recentCirculars: [
     {

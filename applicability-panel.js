@@ -216,8 +216,8 @@ function _appRunAnalysis(extraCtx) {
   }
 
   const out = document.getElementById('app-output');
- const et  = document.getElementById('app-etype')?.value
-    || (typeof ORG_PROFILE !== 'undefined' ? ORG_PROFILE.entityType : 'Bank');
+  const et  = document.getElementById('app-etype')?.value
+    || (typeof ORG_PROFILE !== 'undefined' ? ORG_PROFILE.entityType : 'NBFC');
 
   out.innerHTML = loadingHTML('AI is analysing circular applicability for your organisation…');
 
@@ -718,7 +718,17 @@ function _appStatusLabel(s) {
 ───────────────────────────────────────────────────────── */
 function _appDeriveEntities(entityType, circ) {
   const reg = circ?.regulator || 'RBI';
- const et  = entityType || (typeof ORG_PROFILE !== 'undefined' ? ORG_PROFILE.entityType : 'Bank');
+  const et  = entityType || 'NBFC';
+
+  if (circ?.id === 'RBI-HF-2024-001') {
+    return [
+      { name: 'Scheduled Commercial Banks (excluding Regional Rural Banks)', sub: null, match: et === 'Bank' },
+      { name: 'Housing Finance Companies', sub: 'In aligned contexts where applicable via NHB/RBI guidance', match: et === 'HFC' },
+      { name: 'Banks engaged in housing finance lending activities', sub: null, match: et === 'Bank' },
+    ];
+  }
+
+  // existing fallback below — unchanged
   if (Array.isArray(circ?.applicableEntities) && circ.applicableEntities.length) {
     return circ.applicableEntities.map(ent => ({
       name: typeof ent === 'string' ? ent : ent.name,
@@ -729,11 +739,11 @@ function _appDeriveEntities(entityType, circ) {
         : (ent.match !== undefined ? ent.match : ent.name?.toLowerCase().includes(et.toLowerCase())),
     }));
   }
+
   const rbiEntities = [
-   
     { name: 'Scheduled Commercial Banks (excluding RRBs)', match: true },
-  { name: 'Housing Finance Companies', sub: 'In aligned contexts via NHB/RBI guidance', match: false },
-  { name: 'Banks engaged in housing finance lending', match: true },
+    { name: 'Housing Finance Companies', sub: 'In aligned contexts via NHB/RBI guidance', match: false },
+    { name: 'Banks engaged in housing finance lending', match: true },
   ];
   const sebiEntities = [
     { name: 'Listed Companies', sub: 'Entities listed on NSE / BSE', match: (typeof ORG_PROFILE !== 'undefined' ? ORG_PROFILE.listed : 'No') === 'Yes' },

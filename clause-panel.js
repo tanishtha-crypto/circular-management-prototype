@@ -362,7 +362,7 @@ function _clShowClause(circ, ch, cl) {
             <span class="cl-wc-ch">${`Chapter ${(window._CL_ACTIVE_CIRC?.chapters || []).indexOf(ch) + 1} : ${ch.title}` || 'Chapter'}</span>
             <span class="cl-wc-sep" style="font-weight:800">›></span>
             <span class="cl-wc-id">${cl.id}</span>
-            <span>  <span class="cl-wc-page-chip" onclick="clOpenDocPage(${cl.pageNo})">📄 Page 1</span></span>
+            <span>  <span class="cl-wc-page-chip" onclick="clOpenDocPage(${cl.pageNo})">📄 ${cl.pageNo}</span></span>
           </div>
           <div class="cl-wc-badges">
   ${cl.risk ? `<span class="cl-wc-badge cl-wc-risk-${cl.risk.toLowerCase()}">${cl.risk} Risk</span>` : ''}
@@ -502,8 +502,11 @@ window._clBackToStack = function () {
   document.getElementById('cl-ws-stack').style.display = 'block';
   window._CL_ACTIVE_CLAUSE = null;
 };
-window.clOpenDocPage = function (p) { showToast(`Opening document at page ${p}…`, 'info'); };
-
+window.clOpenDocPage = function (p) {
+  const circ = window._CL_ACTIVE_CIRC;
+  const docUrl = circ?.docUrl || './RBI Master Circular.pdf';
+  window.open(`${docUrl}#page=${p || 1}`, '_blank');
+};
 /* ──────────────────────────────────────────── OBLIGATIONS
    Clean formatted accordion — trigger row shows num + dept + page + text preview
    Body: mini meta grid (5 fields) + regen + evidence + optional actions
@@ -518,10 +521,26 @@ function _clBuildObligations(cl, actions, level) {
     { text: 'Adequate IT systems and infrastructure shall be in place to support digital compliance, data security and full audit trail requirements.', dept: 'IT', pageNo: 15, actions: ['Conduct gap assessment of current IT systems', 'Implement required system controls and access restrictions', 'Enable full audit trail logging for all relevant transactions', 'Test system controls in UAT before go-live'] },
   ];
 
-  const obligs = Array.isArray(cl.obligations_list)
-    ? cl.obligations_list.map(ob => ({ text: typeof ob === 'string' ? ob : (ob.text || '—'), dept: ob.department || 'Compliance', pageNo: ob.pageNo || null, actions: typeof ob === 'string' ? actions : (ob.actions || actions) }))
-    : MOCK;
+  const obligsRaw = cl.obligations || cl.obligation || null;
+const actionsRaw = cl.actionables || [];
 
+// obligations is now an array in JSON
+const obligsArray = Array.isArray(obligsRaw) ? obligsRaw
+  : typeof obligsRaw === 'string' ? [obligsRaw]
+  : null;
+
+const actionsArray = Array.isArray(actionsRaw) ? actionsRaw
+  : typeof actionsRaw === 'string' ? actionsRaw.split(';').map(a => a.trim()).filter(Boolean)
+  : [];
+
+const obligs = obligsArray
+  ? obligsArray.map((ob, i) => ({
+      text: typeof ob === 'string' ? ob : (ob.text || '—'),
+      dept: cl.department || 'Compliance',
+      pageNo: cl.pageNo || null,
+      actions: actionsArray
+    }))
+  : MOCK;
   return obligs.map((ob, oi) => {
     const m = _clObligMeta(oi);
     const actList = ob.actions || [];
@@ -732,38 +751,185 @@ function _clInjectRelFAB() {
   document.body.appendChild(fab);
 
   /* Dialog overlay */
-  const REL_DATA = {
-    type: {
-      label: 'Type of Circular', desc: 'Classification of this circular in the regulatory hierarchy.', items: [
-        { id: 'MD-001', type: 'Master Direction', title: 'Master Direction – Non-Banking Financial Companies', reg: 'RBI', date: '01 Sep 2016', status: 'Active', hierarchy: 'Top-level directive — supersedes all prior circulars on this subject.', tags: ['Prudential', 'NBFC', 'Governance'], docUrl: '#' },
-        // {id:'MC-2024-04',type:'Master Circular',title:'Master Circular on Prudential Norms for NBFCs',reg:'RBI',date:'01 Apr 2024',status:'Active',hierarchy:'Annual consolidation of instructions on NBFC prudential norms.',tags:['Prudential','Annual'],docUrl:'#'},
-      ]
-    },
-    belongs: {
-      label: 'Belongs To', desc: 'The parent directive or master circular this circular falls under.', items: [
-        { id: 'MD-001', type: 'Master Direction', title: 'Master Direction – Non-Banking Financial Companies', reg: 'RBI', date: '01 Sep 2016', status: 'Active', hierarchy: 'Parent — this circular derives authority from this Master Direction.', tags: ['Parent', 'Master'], docUrl: '#' },
-      ]
-    },
-    based: {
-      label: 'Based On', desc: 'Earlier circulars or legislation this circular is founded upon.', items: [
-        { id: 'RBI/2019-20/88', type: 'Circular', title: 'Liquidity Risk Management Framework for NBFCs', reg: 'RBI', date: '04 Nov 2019', status: 'Superseded', hierarchy: 'Foundation circular — current circular extends and updates these provisions.', tags: ['Liquidity', 'Risk'], docUrl: '#' },
-        { id: 'BR-ACT-1949', type: 'Legislation', title: 'Banking Regulation Act, 1949 – Section 21', reg: 'Parliament of India', date: '—', status: 'Active', hierarchy: 'Primary legislation empowering RBI to issue these directions.', tags: ['Primary Law', 'Statutory'], docUrl: '#' },
-      ]
-    },
-    refers: {
-      label: 'Refers To', desc: 'Other circulars or guidelines cross-referenced in this circular.', items: [
-        { id: 'RBI/2022-23/101', type: 'Circular', title: 'Scale-Based Regulation (SBR): Revised Regulatory Framework for NBFCs', reg: 'RBI', date: '22 Oct 2021', status: 'Active', hierarchy: 'Cross-reference — applicability criteria defined in this SBR circular.', tags: ['SBR', 'Framework'], docUrl: '#' },
-        { id: 'SEBI/LAD-NRO/2023/45', type: 'Circular', title: 'SEBI Listing Obligations and Disclosure Requirements', reg: 'SEBI', date: '10 Jun 2023', status: 'Active', hierarchy: 'Cross-regulator reference — SEBI norms applicable to listed NBFCs.', tags: ['SEBI', 'Listed'], docUrl: '#' },
-      ]
-    },
-    version: {
-      label: 'Version Chain', desc: 'Full amendment and revision history of this circular.', items: [
-        { id: 'RBI/2016-17/26', type: 'Original Issue', title: 'Original Circular – Housing Finance Guidelines', reg: 'RBI', date: '01 Jul 2016', status: 'Superseded', hierarchy: 'v1.0 — Original issue, fully superseded.', tags: ['v1.0', 'Original'], docUrl: '#' },
-        { id: 'RBI/2019-20/156', type: 'Amendment', title: 'Amendment – LTV Ratio and Risk Weight Revision', reg: 'RBI', date: '03 Mar 2020', status: 'Superseded', hierarchy: 'v2.0 — Revised LTV caps and risk weights.', tags: ['v2.0', 'Amendment'], docUrl: '#' },
-        { id: 'RBI/2023-24/53', type: 'Current Version', title: 'Consolidated Circular – Housing Finance Norms (Current)', reg: 'RBI', date: '15 Sep 2023', status: 'Active', hierarchy: 'v4.0 — Current version, consolidates all prior amendments.', tags: ['v4.0', 'Current'], docUrl: '#' },
-      ]
-    },
-  };
+const REL_DATA = {
+  type: {
+    label: 'Circular',
+    desc: 'Classification of this circular in the regulatory hierarchy.',
+    items: [
+      {
+        id: 'RBI-HF-2024-001',
+        type: 'Master Circular',
+        title: 'Master Circular on Housing Finance',
+        reg: 'RBI',
+        date: '2024-04-02',
+        status: 'Active',
+        hierarchy: 'Top-level consolidation of all housing finance instructions issued up to March 31, 2024.',
+        tags: ['Housing Finance', 'Prudential', 'Lending'],
+        docUrl: './RBI Master Circular.pdf'
+      }
+    ]
+  },
+
+  belongs: {
+    label: 'Belongs To which ACT',
+    desc: 'The statutory framework under which RBI issues housing finance directions.',
+    items: [
+      {
+        id: 'RBI-ACT-1934',
+        type: 'Legislation',
+        title: 'Reserve Bank of India Act, 1934',
+        reg: 'Parliament of India',
+        date: '1934',
+        status: 'Active',
+        hierarchy: 'Primary legislation empowering RBI to regulate banking system.',
+        tags: ['Primary Law', 'RBI Authority'],
+        docUrl: '#'
+      },
+      {
+        id: 'BR-ACT-1949',
+        type: 'Legislation',
+        title: 'Banking Regulation Act, 1949 – Section 21 & 35A',
+        reg: 'Parliament of India',
+        date: '1949',
+        status: 'Active',
+        hierarchy: 'Provides RBI power to issue directions on advances and lending practices.',
+        tags: ['Banking Law', 'Lending Powers'],
+        docUrl: '#'
+      }
+    ]
+  },
+
+  based: {
+    label: 'Based On which Circular',
+    desc: 'Earlier RBI circulars consolidated into this Master Circular.',
+    items: [
+      {
+        id: 'RBI/2015-16/LTV',
+        type: 'Circular',
+        title: 'Housing Loans – LTV Ratio Guidelines',
+        reg: 'RBI',
+        date: '2015',
+        status: 'Superseded',
+        hierarchy: 'Foundation for Loan-to-Value ratio norms.',
+        tags: ['LTV', 'Risk'],
+        docUrl: '#'
+      },
+      {
+        id: 'RBI/2017-18/RISK',
+        type: 'Circular',
+        title: 'Risk Weights for Housing Loans',
+        reg: 'RBI',
+        date: '2017',
+        status: 'Superseded',
+        hierarchy: 'Defines capital adequacy treatment for housing loans.',
+        tags: ['Risk Weight', 'Capital'],
+        docUrl: '#'
+      },
+      {
+        id: 'RBI/2018-19/DISB',
+        type: 'Circular',
+        title: 'Disbursement of Housing Loans Linked to Construction Stages',
+        reg: 'RBI',
+        date: '2018',
+        status: 'Superseded',
+        hierarchy: 'Introduced stage-wise disbursement norms.',
+        tags: ['Disbursement', 'Construction'],
+        docUrl: '#'
+      }
+    ]
+  },
+
+  refers: {
+    label: 'Refers To which Circular',
+    desc: 'Other RBI directions and frameworks referenced in this circular.',
+    items: [
+      {
+        id: 'RBI-IRD-2023',
+        type: 'Master Direction',
+        title: 'Interest Rate on Advances Directions',
+        reg: 'RBI',
+        date: '2023',
+        status: 'Active',
+        hierarchy: 'Defines interest rate framework applicable to housing loans.',
+        tags: ['Interest Rate', 'Lending'],
+        docUrl: '#'
+      },
+      {
+        id: 'RBI-FLP-2023',
+        type: 'Guidelines',
+        title: 'Fair Lending Practice Guidelines – Penal Charges & Transparency',
+        reg: 'RBI',
+        date: '2023',
+        status: 'Active',
+        hierarchy: 'Referenced for borrower protection and transparency norms.',
+        tags: ['Fair Lending', 'Customer Protection'],
+        docUrl: '#'
+      },
+      {
+        id: 'NBC-NDMA',
+        type: 'Guidelines',
+        title: 'National Building Code & NDMA Guidelines',
+        reg: 'Government of India',
+        date: '—',
+        status: 'Active',
+        hierarchy: 'Safety and construction compliance standards referenced in housing finance.',
+        tags: ['Safety', 'Construction'],
+        docUrl: '#'
+      }
+    ]
+  },
+
+  version: {
+    label: 'Version Chain',
+    desc: 'Annual consolidation history of Housing Finance Master Circular.',
+    items: [
+      {
+        id: 'RBI-HF-2021',
+        type: 'Master Circular',
+        title: 'Master Circular – Housing Finance 2021',
+        reg: 'RBI',
+        date: '2021-07-01',
+        status: 'Superseded',
+        hierarchy: 'Earlier consolidated version.',
+        tags: ['v1', 'Historical'],
+        docUrl: '#'
+      },
+      {
+        id: 'RBI-HF-2022',
+        type: 'Master Circular',
+        title: 'Master Circular – Housing Finance 2022',
+        reg: 'RBI',
+        date: '2022-07-01',
+        status: 'Superseded',
+        hierarchy: 'Updated consolidation with revised norms.',
+        tags: ['v2', 'Update'],
+        docUrl: '#'
+      },
+      {
+        id: 'RBI-HF-2023',
+        type: 'Master Circular',
+        title: 'Master Circular – Housing Finance 2023',
+        reg: 'RBI',
+        date: '2023-07-01',
+        status: 'Superseded',
+        hierarchy: 'Immediate previous version.',
+        tags: ['v3', 'Previous'],
+        docUrl: '#'
+      },
+      {
+        id: 'RBI-HF-2024',
+        type: 'Master Circular',
+        title: 'Master Circular – Housing Finance 2024',
+        reg: 'RBI',
+        date: '2024-04-02',
+        status: 'Active',
+        hierarchy: 'Current version consolidating all instructions up to March 31, 2024.',
+        tags: ['v4', 'Current'],
+        docUrl: './RBI Master Circular.pdf'
+      }
+    ]
+  }
+};
 
   const overlay = document.createElement('div');
   overlay.id = 'cl-rel-overlay'; overlay.className = 'cl-rel-overlay';

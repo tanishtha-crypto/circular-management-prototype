@@ -1849,6 +1849,10 @@ function _drPanelOverview(flow) {
   var c = flow.overview;
   if (!c) return _drNotSaved('Overview');
   var fields = [
+    ['Circular ID',c.id],['Regulator',c.regulator||'—'],
+    ['Issue Date',c.issuedDate||c.date||'—'],['Effective Date',c.effectiveDate||'—'],
+    ['Risk Level',c.risk||'—'],['Status',c.status||'—'],
+    ['Department',c.departments||'—'],['Deadline',c.dueDate||'-'],
     ['Circular ID', c.id],       ['Regulator', c.regulator||'—'],
     ['Issue Date', c.issueDate||c.date||'—'], ['Effective Date', c.effectiveDate||'—'], ['Deadline', c.deadline||'—'],
     ['Risk Level', c.risk||'—'], ['Type', c.type||'—'],

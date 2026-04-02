@@ -1463,7 +1463,7 @@ window._tdShowInfoModal = function(taskId) {
           ${tdInfoRow('Category',             task.category     || 'Governance')}
           ${tdInfoRow('Obligation Type',      task.obligationType || 'Mandatory')}
           ${tdInfoRow('Effective Date',       task.effectiveDate || '—')}
-          ${tdInfoRow('Issue Date',           task.issueDate     || '—')}
+          ${tdInfoRow('Issue Date',           task.issueDate     || '17-1-2024')}
         </div>
       </div>
 
