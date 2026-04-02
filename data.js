@@ -456,6 +456,348 @@ const CMS_DATA = {
         }
       ]
     },
+   {
+  "id": "RBI-HF-2024-001",
+  "title": "Master Circular on Housing Finance",
+  "regulator": "RBI",
+  "issuedDate": "2024-04-02",
+  "effectiveDate": "2024-04-02",
+  "dueDate": "2024-12-31",
+  "type": "Master",
+  "status": "Active",
+  "departments": ["Credit", "Risk", "Operations"],
+  "risk": "High",
+  "complianceScore": 70,
+  "summary": "The Master Circular on Housing Finance consolidates RBI guidelines for banks on housing loans, including eligible purposes such as purchase, construction, repairs, lending restrictions, exposure norms, loan-to-value ratios, risk weights, fair lending practices, and regulatory compliance requirements.",
+  "chapters": [
+   
+    {
+      "num": 2,
+      "title": "Housing Loan Regulations",
+      "clauses": [
+        {
+          "id": "C2.1",
+          "text": "Banks may grant loans for purchase, construction, repair, and improvement of housing units.",
+          "obligations": "Ensure loans are sanctioned only for permitted housing purposes.",
+          "actionables": "Define eligible housing loan categories in policy.",
+          "department": "Credit",
+          "risk": "High",
+          "status": "Open"
+        },
+        {
+          "id": "C2.2",
+          "text": "Loans shall not be granted for speculative real estate activities or unauthorized constructions.",
+          "obligations": "Restrict financing to compliant and authorized properties.",
+          "actionables": "Implement due diligence checks including approvals and sanctioned plans.",
+          "department": "Risk",
+          "risk": "High",
+          "status": "In Progress"
+        },
+        {
+          "id": "C2.3",
+          "text": "Banks must ensure borrower compliance with sanctioned plans and obtain necessary certificates.",
+          "obligations": "Ensure documentation such as sanctioned plan and completion certificate.",
+          "actionables": "Update loan documentation checklist.",
+          "department": "Operations",
+          "risk": "Medium",
+          "status": "Open"
+        }
+      ],
+      "sections": [
+        {
+          "id": "Section 1",
+          "text": "Eligible Housing Finance Activities",
+          "clauses": ["C2.1"]
+        },
+        {
+          "id": "Section 2",
+          "text": "Restrictions and Compliance",
+          "clauses": ["C2.2", "C2.3"]
+        }
+      ]
+    },
+    {
+      "num": 3,
+      "title": "Loan Exposure and Risk Management",
+      "clauses": [
+        {
+          "id": "C3.1",
+          "text": "Banks must adhere to prescribed Loan-to-Value (LTV) ratios and risk weights.",
+          "obligations": "Ensure housing loans comply with RBI LTV and capital adequacy norms.",
+          "actionables": "Configure systems to enforce LTV thresholds.",
+          "department": "Risk",
+          "risk": "High",
+          "status": "Open"
+        },
+        {
+          "id": "C3.2",
+          "text": "Banks must frame board-approved policies on real estate exposure limits.",
+          "obligations": "Establish prudential norms for exposure to housing sector.",
+          "actionables": "Draft and approve exposure policy at Board level.",
+          "department": "Risk",
+          "risk": "High",
+          "status": "In Progress"
+        }
+      ]
+    },
+    {
+      "num": 4,
+      "title": "Disbursement and Product Guidelines",
+      "clauses": [
+        {
+          "id": "C4.1",
+          "text": "Loan disbursement must be linked to stages of construction.",
+          "obligations": "Avoid upfront disbursement in under-construction projects.",
+          "actionables": "Implement stage-wise disbursement controls.",
+          "department": "Operations",
+          "risk": "High",
+          "status": "Open"
+        },
+        {
+          "id": "C4.2",
+          "text": "Banks must ensure customers are informed of risks in innovative loan products.",
+          "obligations": "Ensure transparency and suitability of loan products.",
+          "actionables": "Update product disclosures and customer communication.",
+          "department": "Compliance",
+          "risk": "Medium",
+          "status": "In Progress"
+        }
+      ]
+    },
+    {
+      "num": 5,
+      "title": "Regulatory Compliance and Fair Practices",
+      "clauses": [
+        {
+          "id": "C5.1",
+          "text": "Banks must comply with RBI directions on interest rates and EMI reset.",
+          "obligations": "Ensure adherence to RBI interest rate guidelines.",
+          "actionables": "Align loan systems with RBI directions.",
+          "department": "Finance",
+          "risk": "Medium",
+          "status": "Open"
+        },
+        {
+          "id": "C5.2",
+          "text": "Disclosure of mortgage details by builders must be ensured.",
+          "obligations": "Ensure transparency in housing projects financed.",
+          "actionables": "Include disclosure clauses in loan agreements.",
+          "department": "Legal",
+          "risk": "Medium",
+          "status": "Open"
+        },
+        {
+          "id": "C5.3",
+          "text": "Banks must follow fair lending practices including penal charges and document release.",
+          "obligations": "Ensure customer protection and transparency.",
+          "actionables": "Update fair lending policy as per RBI circulars.",
+          "department": "Compliance",
+          "risk": "High",
+          "status": "In Progress"
+        }
+      ]
+    }
+  ],
+  "amendments": [
+    {
+      "date": "2023-08-18",
+      "version": "1.1",
+      "description": "Guidelines on penal charges and EMI reset incorporated."
+    },
+    {
+      "date": "2023-09-13",
+      "version": "1.2",
+      "description": "Responsible lending conduct guidelines added."
+    }
+  ]
+},
+   {
+  "id": "SEBI-AIF-2024-135",
+  "title": "Specific Due Diligence of Investors and Investments of AIFs",
+  "regulator": "SEBI",
+  "issuedDate": "2024-10-08",
+  "effectiveDate": "2024-10-08",
+  "dueDate": "2025-04-07",
+  "type": "Regulatory",
+  "status": "Active",
+  "departments": ["Compliance", "Risk", "Operations", "Legal"],
+  "risk": "High",
+  "complianceScore": 40,
+  "summary": "SEBI circular mandating specific due diligence for AIFs, managers, and KMPs to prevent regulatory circumvention across QIB/QB benefits, RBI norms, and cross-border investments, along with strict reporting obligations.",
+  
+  "chapters": [
+    {
+      "num": 1,
+      "title": "Due Diligence Obligations",
+      "clauses": [
+        {
+          "id": "C1.1",
+          "text": "AIFs, managers, and KMPs shall exercise specific due diligence on investors and investments.",
+          "obligation": "Perform due diligence.",
+          "actionables": "Implement due diligence framework.",
+          "department": "Compliance",
+          "risk": "High",
+          "status": "Open"
+        }
+      ]
+    },
+    {
+      "num": 2,
+      "title": "QIB-related Due Diligence",
+      "clauses": [
+        {
+          "id": "C2.1",
+          "text": "Schemes with ≥50% contribution from a single/group investor must undergo due diligence before availing QIB benefits.",
+          "obligation": "Validate investor eligibility.",
+          "actionables": "Apply SFA standards before QIB benefits.",
+          "department": "Risk",
+          "risk": "High",
+          "status": "Open"
+        }
+      ]
+    },
+    {
+      "num": 3,
+      "title": "QB (SARFAESI) Compliance",
+      "clauses": [
+        {
+          "id": "C3.1",
+          "text": "Schemes with ≥50% concentration must undergo due diligence before investing in Security Receipts.",
+          "obligation": "Ensure QB eligibility.",
+          "actionables": "Perform due diligence before SR investments.",
+          "department": "Compliance",
+          "risk": "High",
+          "status": "Open"
+        }
+      ]
+    },
+    {
+      "num": 4,
+      "title": "RBI Norms & Evergreening Prevention",
+      "clauses": [
+        {
+          "id": "C4.1",
+          "text": "Schemes with RBI-regulated investors (≥25% or control rights) must undergo due diligence.",
+          "obligation": "Prevent regulatory circumvention.",
+          "actionables": "Identify RBI-regulated exposure.",
+          "department": "Risk",
+          "risk": "High",
+          "status": "Open"
+        },
+        {
+          "id": "C4.2",
+          "text": "AIFs shall not enable indirect exposure disallowed for RBI-regulated entities.",
+          "obligation": "Restrict indirect exposure.",
+          "actionables": "Block non-permissible investments.",
+          "department": "Compliance",
+          "risk": "High",
+          "status": "Open"
+        }
+      ]
+    },
+    {
+      "num": 5,
+      "title": "Investment Decision Controls",
+      "clauses": [
+        {
+          "id": "C5.1",
+          "text": "Investments failing due diligence must be rejected or investors excluded.",
+          "obligation": "Enforce investment restrictions.",
+          "actionables": "Implement investment approval checks.",
+          "department": "Operations",
+          "risk": "High",
+          "status": "Open"
+        }
+      ]
+    },
+    {
+      "num": 6,
+      "title": "Existing Investment Review",
+      "clauses": [
+        {
+          "id": "C6.1",
+          "text": "Existing investments must be reviewed against due diligence standards.",
+          "obligation": "Review legacy investments.",
+          "actionables": "Conduct retrospective due diligence.",
+          "department": "Compliance",
+          "risk": "High",
+          "status": "Open"
+        },
+        {
+          "id": "C6.2",
+          "text": "Non-compliant investments must be reported to custodians by April 07, 2025.",
+          "obligation": "Report exceptions.",
+          "actionables": "Submit Annexure I report.",
+          "department": "Operations",
+          "risk": "High",
+          "status": "Open"
+        }
+      ]
+    },
+    {
+      "num": 7,
+      "title": "Cross-border Investment Checks",
+      "clauses": [
+        {
+          "id": "C7.1",
+          "text": "Schemes with ≥50% investors from land-border countries require due diligence.",
+          "obligation": "Identify high-risk jurisdictions.",
+          "actionables": "Apply enhanced due diligence.",
+          "department": "Risk",
+          "risk": "High",
+          "status": "Open"
+        },
+        {
+          "id": "C7.2",
+          "text": "Investments ≥10% in investee companies must be reported to custodians.",
+          "obligation": "Report material investments.",
+          "actionables": "Submit investment details within 30 days.",
+          "department": "Operations",
+          "risk": "Medium",
+          "status": "Open"
+        }
+      ]
+    },
+    {
+      "num": 8,
+      "title": "Custodian & SEBI Reporting",
+      "clauses": [
+        {
+          "id": "C8.1",
+          "text": "Custodians shall report compiled data to SEBI.",
+          "obligation": "Ensure regulatory reporting.",
+          "actionables": "Coordinate with custodian.",
+          "department": "Operations",
+          "risk": "Medium",
+          "status": "Open"
+        }
+      ]
+    },
+    {
+      "num": 9,
+      "title": "Governance & Compliance Reporting",
+      "clauses": [
+        {
+          "id": "C9.1",
+          "text": "Compliance Test Report must include adherence to this circular.",
+          "obligation": "Integrate into compliance reporting.",
+          "actionables": "Update CTR framework.",
+          "department": "Compliance",
+          "risk": "Medium",
+          "status": "Open"
+        }
+      ]
+    }
+  ],
+
+  "amendments": [
+    {
+      "date": "2024-04-25",
+      "version": "1.1",
+      "description": "Insertion of Regulation 20(20) requiring due diligence."
+    }
+  ]
+},
     {
       id: 'CIRC-2024-003',
       title: 'Data Localisation and Cloud Policy',
