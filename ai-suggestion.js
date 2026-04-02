@@ -1849,14 +1849,10 @@ function _drPanelOverview(flow) {
   var c = flow.overview;
   if (!c) return _drNotSaved('Overview');
   var fields = [
-    ['Circular ID',c.id],['Regulator',c.regulator||'—'],
-    ['Issue Date',c.issuedDate||c.date||'—'],['Effective Date',c.effectiveDate||'—'],
-    ['Risk Level',c.risk||'—'],['Status',c.status||'—'],
-    ['Department',c.departments||'—'],['Deadline',c.dueDate||'-'],
-    ['Circular ID', c.id],       ['Regulator', c.regulator||'—'],
-    ['Issue Date', c.issueDate||c.date||'—'], ['Effective Date', c.effectiveDate||'—'], ['Deadline', c.deadline||'—'],
-    ['Risk Level', c.risk||'—'], ['Type', c.type||'—'],
-    ['Status', c.status||'—'],   ['Department', c.department||'—'], ['', ''],
+    ['Circular ID', c.id],                          ['Regulator', c.regulator||'—'],
+    ['Issue Date', c.issuedDate||c.date||'—'],       ['Effective Date', c.effectiveDate||'—'], ['Deadline', c.dueDate||'—'],
+    ['Risk Level', c.risk||'—'],                     ['Type', c.type||'—'],
+    ['Status', c.status||'—'],                       ['Department', c.departments||'—'],        ['__viewBtn__', ''],
   ];
   return (
     '<div class="dr-panel">' +
@@ -1884,17 +1880,20 @@ function _drPanelOverview(flow) {
         '<button class="dr-btn dr-btn-pri dr-btn-sm" onclick="_drRecordHistory(window._drCurrentCircId,\'Overview\',\'Fields Edited\',\'Overview fields updated\');showToast(\'Changes saved.\',\'success\');document.getElementById(\'dr-ov-edit\').style.display=\'none\';document.getElementById(\'dr-ov-details\').style.display=\'block\';">&#x2713; Save Changes</button>' +
       '</div>' +
     '</div>' +
-    '<div id="dr-ov-details">' +
-      '<div class="dr-detail-grid dr-detail-grid-5">' +
-        fields.map(function(f) {
-          if (!f[0]) return '<div class="dr-detail-cell"></div>';
-          return '<div class="dr-detail-cell"><div class="dr-dc-label">' + f[0] + '</div><div class="dr-dc-val">' + f[1] + '</div></div>';
-        }).join('') +
+    '<div id="dr-ov-details" style="background:#fff;padding:16px 18px;">' +
+      (c.summary ? '<div class="dr-block-pad" style="margin-bottom:14px;"><div class="dr-info-block"><div class="dr-ib-label">Summary</div><div class="dr-ib-text">' + c.summary + '</div></div></div>' : '') +
+      '<div style="border:1px solid var(--dr-border,#e2e5ed);border-radius:8px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.06);">' +
+        '<div class="dr-detail-grid dr-detail-grid-5">' +
+          fields.map(function(f) {
+            if (f[0] === '__viewBtn__') return '<div class="dr-detail-cell" style="display:flex;align-items:center;justify-content:center;background:#f5f6f8;"><button class="dr-btn dr-view-circ-btn" onclick="showToast(\'Opening circular...\',\'info\')">&#x1F4C4; View Circular</button></div>';
+            if (!f[0]) return '<div class="dr-detail-cell" style="background:#f5f6f8;"></div>';
+            return '<div class="dr-detail-cell" style="background:#f5f6f8;"><div class="dr-dc-label">' + f[0] + '</div><div class="dr-dc-val">' + f[1] + '</div></div>';
+          }).join('') +
+        '</div>' +
       '</div>' +
-      (c.summary ? '<div class="dr-block-pad"><div class="dr-info-block"><div class="dr-ib-label">Summary</div><div class="dr-ib-text">' + c.summary + '</div></div></div>' : '') +
       ((c.tags||[]).length ? '<div class="dr-tags-row">' + c.tags.map(function(t){return '<span class="dr-tag">'+t+'</span>';}).join('') + '</div>' : '') +
     '</div>' +
-    '<div class="dr-panel-foot"><span></span><button class="dr-btn dr-btn-next" onclick="_drGoNext(0)">Applicability Analysis &#x2192;</button></div>' +
+    '<div class="dr-panel-foot" style="background:#fff;"><span></span><button class="dr-btn dr-btn-next" onclick="_drGoNext(0)">Applicability Analysis &#x2192;</button></div>' +
     '</div>'
   );
 }
@@ -2302,6 +2301,7 @@ window._drShowClauseStack = function(ci, circId, clauses, chNum, chTitle, secLab
       }
     });
   });
+
 };
 
 /* ────────────────────────────────────────────
@@ -2320,11 +2320,9 @@ window._drShowClauseWorkspace = function(cl, ci, cli, circId) {
   var chapterTitle = chapter ? (chapter.title || 'Chapter ' + (ci+1)) : '';
   var chNum        = 'Chapter ' + (ci + 1);
   var actions      = (cl.actionable||'').split(';').map(function(a){return a.trim();}).filter(Boolean);
-  var rCls         = {High:'dr-chip-risk-high',Medium:'dr-chip-risk-medium',Low:'dr-chip-risk-low'}[cl.risk]||'';
   var mapKey       = (circId||'') + ':' + cl.id;
   var mappedClauses= window._mappedClauses[mapKey] || [];
 
-  /* Mapped refs — always rendered (visible if any, placeholder if none) */
   var mappedHtml =
     '<div class="dr-mapped-refs" id="dr-mapped-refs-' + ck + '">' +
       (mappedClauses.length
@@ -2342,19 +2340,14 @@ window._drShowClauseWorkspace = function(cl, ci, cli, circId) {
 
     '<button class="dr-ws-back-btn" onclick="_drBackToStack()">← Back to clauses</button>' +
 
-    /* ── CLAUSE HEADER CARD (clause-panel style) ── */
     '<div class="dr-ws-clause-card">' +
-
-      /* Card header row */
       '<div class="dr-wc-header">' +
         '<div class="dr-wc-header-left">' +
-          /* Breadcrumb */
           '<div class="dr-cl-ws-bc">' +
             '<span class="dr-ws-bc-ch">' + chNum + (chapterTitle ? ' · ' + chapterTitle : '') + '</span>' +
             '<span class="dr-ws-bc-sep">›</span>' +
             '<span class="dr-ws-bc-id">' + cl.id + '</span>' +
           '</div>' +
-          /* Badges row */
           '<div class="dr-wc-badges">' +
             (cl.risk       ? '<span class="dr-wc-badge dr-wc-risk-' + (cl.risk||'').toLowerCase() + '">' + cl.risk + ' Risk</span>' : '') +
             (cl.department ? '<span class="dr-wc-badge dr-wc-dept">' + cl.department + '</span>' : '') +
@@ -2362,7 +2355,6 @@ window._drShowClauseWorkspace = function(cl, ci, cli, circId) {
           '</div>' +
         '</div>' +
         '<div class="dr-wc-header-right">' +
-          /* ⓘ toggles metadata table */
           '<button class="dr-wc-info-btn" id="dr-info-btn-' + ck + '" onclick="_drToggleMeta(\'' + metaId + '\',\'dr-info-btn-' + ck + '\')" title="Show regulatory details">' +
             '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>' +
           '</button>' +
@@ -2371,14 +2363,12 @@ window._drShowClauseWorkspace = function(cl, ci, cli, circId) {
         '</div>' +
       '</div>' +
 
-      /* Clause text — 10-line clamp + show more */
       '<div class="dr-wc-text dr-txt-clamped" id="dr-cl-txt-' + ck + '">' + clauseText + '</div>' +
       (clauseText.length > 200 ?
         '<button class="dr-view-more-btn" id="dr-vmore-' + ck + '" onclick="_drToggleTxt(\'' + ck + '\')">' +
           'Show more &#x25BE;' +
         '</button>' : '') +
 
-      /* Metadata table — hidden until ⓘ clicked */
       '<div class="dr-meta-table-wrap" id="' + metaId + '" style="display:none;">' +
         '<div class="dr-meta-table-inner">' +
           [
@@ -2397,12 +2387,10 @@ window._drShowClauseWorkspace = function(cl, ci, cli, circId) {
         '</div>' +
       '</div>' +
 
-    '</div>' + /* end clause card */
+    '</div>' +
 
-    /* Mapped refs — always visible */
     mappedHtml +
 
-    /* Controls bar (dept / status / tags) */
     '<div class="dr-clause-controls">' +
       '<div class="dr-ctrl-group"><span class="dr-ctrl-label">Dept</span>' +
         '<select class="dr-ctrl-select">' +
@@ -2424,10 +2412,7 @@ window._drShowClauseWorkspace = function(cl, ci, cli, circId) {
       '</div>' +
     '</div>' +
 
-    /* VIEW MODE */
     '<div id="dr-cl-view-' + ck + '">' +
-
-      /* Obligations */
       '<div class="dr-ws-section">' +
         '<div class="dr-ws-section-head">' +
           '<span class="dr-ws-section-label">Obligations</span>' +
@@ -2440,10 +2425,8 @@ window._drShowClauseWorkspace = function(cl, ci, cli, circId) {
           ) +
         '</div>' +
       '</div>' +
+    '</div>' +
 
-    '</div>' + /* end view */
-
-    /* EDIT DRAWER */
     '<div class="dr-edit-drawer" id="dr-cl-edit-' + ck + '" style="display:none;">' +
       '<div class="dr-edit-grid">' +
         '<div class="dr-edit-field dr-edit-field-full"><label class="dr-edit-label">Clause Text</label><textarea class="dr-edit-ta" id="dr-cl-edit-text-' + ck + '">' + cl.text + '</textarea></div>' +
@@ -2455,9 +2438,8 @@ window._drShowClauseWorkspace = function(cl, ci, cli, circId) {
       '</div>' +
     '</div>' +
 
-    '</div>'; /* end ws-inner */
+    '</div>';
 
-  /* view more/less toggle */
   window._drToggleTxt = function(ck2) {
     var el  = document.getElementById('dr-cl-txt-' + ck2);
     var btn = document.getElementById('dr-vmore-' + ck2);
@@ -2466,7 +2448,6 @@ window._drShowClauseWorkspace = function(cl, ci, cli, circId) {
     btn.innerHTML = c ? 'Show more &#x25BE;' : 'Show less &#x25B4;';
   };
 
-  /* meta table toggle */
   window._drToggleMeta = function(mid, btnId) {
     var el = document.getElementById(mid), btn = document.getElementById(btnId);
     if (!el) return;
@@ -2475,7 +2456,6 @@ window._drShowClauseWorkspace = function(cl, ci, cli, circId) {
     if (btn) btn.classList.toggle('dr-wc-info-btn-active', !visible);
   };
 
-  /* edit drawer toggle */
   var editToggle = content.querySelector('.dr-tool-edit-toggle[data-target="dr-cl-edit-' + ck + '"]');
   if (editToggle) editToggle.addEventListener('click', function() {
     var drawer = document.getElementById('dr-cl-edit-' + ck);
@@ -2485,7 +2465,6 @@ window._drShowClauseWorkspace = function(cl, ci, cli, circId) {
     view.style.display   = opening ? 'none'  : 'block';
   });
 
-  /* obligation accordion toggles */
   content.querySelectorAll('.dr-oblig-trigger').forEach(function(btn) {
     btn.addEventListener('click', function() {
       var oi   = btn.dataset.oi;
@@ -2498,6 +2477,291 @@ window._drShowClauseWorkspace = function(cl, ci, cli, circId) {
     });
   });
 };
+
+/* REMOVED NEW FUNCTIONS START — delete through _drBindMsDropdowns */
+function _drBuildClauseAccordion_DELETED(cl, ci, cli, circId, ck) {
+  var riskCls = cl.risk ? 'dr-wc-risk-' + (cl.risk||'').toLowerCase() : '';
+  var depts   = Array.isArray(cl.departments) ? cl.departments : (cl.department ? [cl.department] : []);
+  var hasSubs = cl.subClauses && cl.subClauses.length > 0;
+  var obligs  = Array.isArray(cl.obligations) ? cl.obligations : (cl.obligation ? [cl.obligation] : []);
+  var actions = Array.isArray(cl.actionables) ? cl.actionables : ((cl.actionable||'').split(';').map(function(a){return a.trim();}).filter(Boolean));
+  var allDepts = ['Compliance','Risk','Legal','IT','Operations','HR','Finance','Credit'];
+
+  /* Multi-select dept chips */
+  var deptPickerHtml =
+    '<div class="dr-ms-wrap" id="dr-ms-' + ck + '">' +
+      '<div class="dr-ms-selected" id="dr-ms-sel-' + ck + '">' +
+        (depts.length
+          ? depts.map(function(d){return '<span class="dr-ms-chip">' + d + '<button onclick="event.stopPropagation();_drMsRemove(\'' + ck + '\',\'' + d + '\')">&#xD7;</button></span>';}).join('')
+          : '<span class="dr-ms-placeholder">Select departments\u2026</span>'
+        ) +
+      '</div>' +
+      '<div class="dr-ms-dropdown" id="dr-ms-drop-' + ck + '">' +
+        allDepts.map(function(d){
+          var sel = depts.indexOf(d) >= 0;
+          return '<label class="dr-ms-opt"><input type="checkbox" value="' + d + '"' + (sel?' checked':'') + ' onchange="_drMsChange(\'' + ck + '\')">' + d + '</label>';
+        }).join('') +
+      '</div>' +
+    '</div>';
+
+  /* Status badge */
+  var statusOpts = ['Reviewed & Applicable','Assigned'];
+  var currentStatus = (cl.status === 'Open' || cl.status === 'In Progress') ? 'Reviewed & Applicable' : 'Assigned';
+  var statusHtml =
+    '<select class="dr-ctrl-select dr-status-sel" onchange="">' +
+      statusOpts.map(function(s){return '<option'+(s===currentStatus?' selected':'')+'>'+s+'</option>';}).join('') +
+    '</select>';
+
+  /* Sub-clause table */
+  var subClauseTable = '';
+  if (hasSubs) {
+    subClauseTable =
+      '<div class="dr-subcl-table-wrap">' +
+        '<div class="dr-subcl-table-title">Sub-clauses</div>' +
+        '<table class="dr-subcl-table">' +
+          '<thead><tr>' +
+            '<th>Clause ID</th>' +
+            '<th>Obligations</th>' +
+            '<th>Actions</th>' +
+            '<th>Departments</th>' +
+            '<th>Status</th>' +
+          '</tr></thead>' +
+          '<tbody>' +
+            cl.subClauses.map(function(sc, sci) {
+              var scObligs  = Array.isArray(sc.obligations) ? sc.obligations : [];
+              var scActions = Array.isArray(sc.actionables) ? sc.actionables : [];
+              var scDepts   = Array.isArray(sc.departments) ? sc.departments : [];
+              var scStatus  = (sc.status === 'Assigned') ? 'Assigned' : 'Reviewed & Applicable';
+              var scStatusCls = scStatus === 'Assigned' ? 'dr-subcl-badge-assigned' : 'dr-subcl-badge-reviewed';
+              return '<tr class="dr-subcl-row" data-ck="' + ck + '" data-sci="' + sci + '" onclick="_drToggleSubClause(\'' + ck + '\',' + sci + ',this)">' +
+                '<td><span class="dr-cl-nav-cl-id">' + sc.id + '</span></td>' +
+                '<td>' + (scObligs[0] ? scObligs[0].substring(0,40) + (scObligs[0].length>40?'\u2026':'') : '\u2014') + '</td>' +
+                '<td>' + (scActions[0] ? scActions[0].substring(0,30) + (scActions[0].length>30?'\u2026':'') : '\u2014') + '</td>' +
+                '<td>' + scDepts.join(', ') + '</td>' +
+                '<td><span class="dr-subcl-badge ' + scStatusCls + '">' + scStatus + '</span></td>' +
+              '</tr>' +
+              '<tr class="dr-subcl-detail-row" id="dr-subcl-detail-' + ck + '-' + sci + '" style="display:none;">' +
+                '<td colspan="5">' + _drBuildSubClauseCard(sc, ck, sci, circId) + '</td>' +
+              '</tr>';
+            }).join('') +
+          '</tbody>' +
+        '</table>' +
+      '</div>';
+  }
+
+  return (
+    '<div class="dr-cl-accordion" id="dr-cl-acc-' + ck + '">' +
+      /* Trigger row */
+      '<button class="dr-cl-acc-btn" data-ck="' + ck + '">' +
+        '<div class="dr-cl-acc-left">' +
+          '<span class="dr-cl-nav-cl-id">' + cl.id + '</span>' +
+          (cl.risk ? '<span class="dr-wc-badge ' + riskCls + '">' + cl.risk + ' Risk</span>' : '') +
+          (cl.category ? '<span class="dr-wc-badge dr-wc-dept">' + cl.category + '</span>' : '') +
+          (cl.status ? '<span class="dr-wc-badge dr-wc-status">' + currentStatus + '</span>' : '') +
+        '</div>' +
+        '<div class="dr-cl-acc-right">' +
+          '<span class="dr-cl-acc-preview">' + (cl.text||'').substring(0,80) + ((cl.text||'').length>80?'\u2026':'') + '</span>' +
+          '<span class="dr-cl-acc-arrow"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg></span>' +
+        '</div>' +
+      '</button>' +
+      /* Body */
+      '<div class="dr-cl-acc-body" id="dr-cl-acc-body-' + ck + '">' +
+        /* Clause info card */
+        '<div class="dr-cl-detail-card">' +
+          '<div class="dr-cl-detail-top">' +
+            '<div class="dr-cl-detail-id-row">' +
+              '<span class="dr-ws-bc-id">' + cl.id + '</span>' +
+              (cl.risk ? '<span class="dr-wc-badge ' + riskCls + '">' + cl.risk + ' Risk</span>' : '') +
+              (cl.category ? '<span class="dr-wc-badge dr-wc-dept">' + cl.category + '</span>' : '') +
+            '</div>' +
+            '<div class="dr-cl-detail-actions">' +
+              '<button class="dr-map-btn" onclick="_drOpenMapModal(\'' + (circId||'') + '\',\'' + cl.id + '\',\'' + ck + '\',\'clause\')">&#x21C4; Map Clause</button>' +
+              '<button class="dr-tool-btn" onclick="var d=document.getElementById(\'dr-cl-edit2-' + ck + '\');var v=document.getElementById(\'dr-cl-view2-' + ck + '\');if(d.style.display===\'none\'){d.style.display=\'block\';v.style.display=\'none\';}else{d.style.display=\'none\';v.style.display=\'block\';}">&#x270E; Edit</button>' +
+            '</div>' +
+          '</div>' +
+          '<div class="dr-wc-text" id="dr-cl-view2-' + ck + '">' + (cl.text||'') + '</div>' +
+          /* Edit drawer */
+          '<div id="dr-cl-edit2-' + ck + '" style="display:none;padding:10px 16px;">' +
+            '<textarea class="dr-edit-ta" id="dr-cl-edit2-ta-' + ck + '" style="width:100%;">' + (cl.text||'') + '</textarea>' +
+            '<div style="display:flex;gap:8px;margin-top:8px;">' +
+              '<button class="dr-btn dr-btn-ghost" onclick="document.getElementById(\'dr-cl-edit2-' + ck + '\').style.display=\'none\';document.getElementById(\'dr-cl-view2-' + ck + '\').style.display=\'block\';">&#x2715; Cancel</button>' +
+              '<button class="dr-btn dr-btn-pri dr-btn-sm" onclick="document.getElementById(\'dr-cl-view2-' + ck + '\').textContent=document.getElementById(\'dr-cl-edit2-ta-' + ck + '\').value;document.getElementById(\'dr-cl-edit2-' + ck + '\').style.display=\'none\';document.getElementById(\'dr-cl-view2-' + ck + '\').style.display=\'block\';showToast(\'Saved.\',\'success\');">&#x2713; Save</button>' +
+            '</div>' +
+          '</div>' +
+          /* Controls */
+          '<div class="dr-clause-controls" style="margin:10px 16px 0;">' +
+            '<div class="dr-ctrl-group"><span class="dr-ctrl-label">Dept</span>' + deptPickerHtml + '</div>' +
+            '<div class="dr-ctrl-group"><span class="dr-ctrl-label">Status</span>' + statusHtml + '</div>' +
+            '<div class="dr-tags-ctrl">' +
+              '<span class="dr-ctrl-label">Tags</span>' +
+              '<div class="dr-tags-list" id="dr-tlist-' + ck + '">' +
+                (cl.tags||[]).map(function(t){return '<span class="dr-ctag">'+t+'<button onclick="this.parentElement.remove()">&#xD7;</button></span>';}).join('') +
+              '</div>' +
+              '<input class="dr-tag-input" id="dr-tinput-' + ck + '" placeholder="+ tag" onkeydown="if(event.key===\'Enter\'||event.key===\',\'){_drAddTag(\'' + ck + '\');event.preventDefault();}"/>' +
+              '<button class="dr-tag-add-btn" onclick="_drAddTag(\'' + ck + '\')">+</button>' +
+            '</div>' +
+          '</div>' +
+          /* Obligations */
+          '<div class="dr-ws-section" style="padding:12px 16px;">' +
+            '<div class="dr-ws-section-head">' +
+              '<span class="dr-ws-section-label">Obligations</span>' +
+              '<button class="dr-add-sub-btn" onclick="_drAddObligation(\'' + ck + '\',\'' + (circId||'') + '\',\'' + cl.id + '\')">+ Add Obligation</button>' +
+            '</div>' +
+            '<div class="dr-ws-oblig-list" id="dr-oblig-wrap-' + ck + '">' +
+              (obligs.length
+                ? obligs.map(function(ob, oi) {
+                    var obText = typeof ob === 'string' ? ob : (ob.text || '');
+                    return _drBuildObligationItem(obText, actions, ck, circId, cl.id, oi, false);
+                  }).join('')
+                : '<div class="dr-empty-hint" id="dr-no-oblig-' + ck + '">No obligations yet — click + Add Obligation above</div>'
+              ) +
+            '</div>' +
+          '</div>' +
+        '</div>' +
+        /* Sub-clause table */
+        subClauseTable +
+      '</div>' +
+    '</div>'
+  );
+}
+
+/* Build sub-clause detail card (shown when table row clicked) */
+function _drBuildSubClauseCard(sc, parentCk, sci, circId) {
+  var riskCls = sc.risk ? 'dr-wc-risk-' + (sc.risk||'').toLowerCase() : '';
+  var depts   = Array.isArray(sc.departments) ? sc.departments : [];
+  var obligs  = Array.isArray(sc.obligations) ? sc.obligations : [];
+  var actions = Array.isArray(sc.actionables) ? sc.actionables : [];
+  var statusOpts = ['Reviewed & Applicable','Assigned'];
+  var currentStatus = sc.status === 'Assigned' ? 'Assigned' : 'Reviewed & Applicable';
+  var allDepts = ['Compliance','Risk','Legal','IT','Operations','HR','Finance','Credit'];
+  var ck2 = parentCk + '-sc' + sci;
+
+  var deptPickerHtml =
+    '<div class="dr-ms-wrap" id="dr-ms-' + ck2 + '">' +
+      '<div class="dr-ms-selected" id="dr-ms-sel-' + ck2 + '">' +
+        (depts.length
+          ? depts.map(function(d){return '<span class="dr-ms-chip">' + d + '<button onclick="event.stopPropagation();_drMsRemove(\'' + ck2 + '\',\'' + d + '\')">&#xD7;</button></span>';}).join('')
+          : '<span class="dr-ms-placeholder">Select departments\u2026</span>'
+        ) +
+      '</div>' +
+      '<div class="dr-ms-dropdown" id="dr-ms-drop-' + ck2 + '">' +
+        allDepts.map(function(d){
+          return '<label class="dr-ms-opt"><input type="checkbox" value="' + d + '"' + (depts.indexOf(d)>=0?' checked':'') + ' onchange="_drMsChange(\'' + ck2 + '\')"> ' + d + '</label>';
+        }).join('') +
+      '</div>' +
+    '</div>';
+
+  return (
+    '<div class="dr-cl-detail-card dr-subcl-detail-card">' +
+      '<div class="dr-cl-detail-top">' +
+        '<div class="dr-cl-detail-id-row">' +
+          '<span class="dr-ws-bc-id">' + sc.id + '</span>' +
+          (sc.risk ? '<span class="dr-wc-badge ' + riskCls + '">' + sc.risk + ' Risk</span>' : '') +
+        '</div>' +
+      '</div>' +
+      '<div class="dr-wc-text">' + (sc.text||'') + '</div>' +
+      '<div class="dr-clause-controls" style="margin:10px 16px 0;">' +
+        '<div class="dr-ctrl-group"><span class="dr-ctrl-label">Dept</span>' + deptPickerHtml + '</div>' +
+        '<div class="dr-ctrl-group"><span class="dr-ctrl-label">Status</span>' +
+          '<select class="dr-ctrl-select dr-status-sel">' +
+            statusOpts.map(function(s){return '<option'+(s===currentStatus?' selected':'')+'>'+s+'</option>';}).join('') +
+          '</select>' +
+        '</div>' +
+      '</div>' +
+      (obligs.length ? '<div class="dr-ws-section" style="padding:10px 16px;">' +
+        '<div class="dr-ws-section-head"><span class="dr-ws-section-label">Obligations</span></div>' +
+        '<div class="dr-ws-oblig-list">' +
+          obligs.map(function(ob,oi){
+            return '<div class="dr-subcl-oblig"><span class="dr-oblig-badge" style="font-size:9px;min-width:20px;height:20px;">O'+(oi+1)+'</span><span>'+ob+'</span></div>';
+          }).join('') +
+        '</div>' +
+      '</div>' : '') +
+    '</div>'
+  );
+}
+
+/* Toggle sub-clause detail row */
+window._drToggleSubClause = function(ck, sci, row) {
+  var detailRow = document.getElementById('dr-subcl-detail-' + ck + '-' + sci);
+  if (!detailRow) return;
+  var isOpen = detailRow.style.display !== 'none';
+  /* close all other detail rows in same clause */
+  var tbody = row.closest('tbody');
+  if (tbody) tbody.querySelectorAll('.dr-subcl-detail-row').forEach(function(r){ r.style.display='none'; });
+  tbody && tbody.querySelectorAll('.dr-subcl-row').forEach(function(r){ r.classList.remove('dr-subcl-row-active'); });
+  if (!isOpen) {
+    detailRow.style.display = '';
+    row.classList.add('dr-subcl-row-active');
+    /* bind multi-select in sub-clause card */
+    _drBindMsDropdowns(detailRow);
+  }
+};
+
+/* Bind clause accordions — one open at a time */
+function _drBindClauseAccordions(container, circId) {
+  container.querySelectorAll('.dr-cl-acc-btn').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      var ck   = btn.dataset.ck;
+      var body = document.getElementById('dr-cl-acc-body-' + ck);
+      var isOpen = body && body.classList.contains('open');
+      /* close all */
+      container.querySelectorAll('.dr-cl-acc-body').forEach(function(b){ b.classList.remove('open'); });
+      container.querySelectorAll('.dr-cl-acc-btn').forEach(function(b){ b.classList.remove('dr-cl-acc-active'); });
+      if (!isOpen && body) {
+        body.classList.add('open');
+        btn.classList.add('dr-cl-acc-active');
+        /* bind obligation accordions inside */
+        body.querySelectorAll('.dr-oblig-trigger').forEach(function(t){
+          if (t._drBound) return; t._drBound = true;
+          t.addEventListener('click', function(){
+            var oi   = t.dataset.oi;
+            var obBody = document.getElementById('dr-oblig-body-' + oi + '-' + ck);
+            if (!obBody) return;
+            var obOpen = obBody.classList.contains('open');
+            body.querySelectorAll('.dr-oblig-body.open').forEach(function(b){b.classList.remove('open');});
+            body.querySelectorAll('.dr-oblig-arr').forEach(function(a){a.textContent='▶';});
+            if (!obOpen) { obBody.classList.add('open'); var arr=t.querySelector('.dr-oblig-arr'); if(arr)arr.textContent='▼'; }
+          });
+        });
+        /* bind multi-select dropdowns */
+        _drBindMsDropdowns(body);
+      }
+    });
+  });
+}
+
+/* Multi-select dept dropdown helpers */
+window._drMsChange = function(ck) {
+  var drop = document.getElementById('dr-ms-drop-' + ck);
+  var sel  = document.getElementById('dr-ms-sel-' + ck);
+  if (!drop || !sel) return;
+  var checked = Array.from(drop.querySelectorAll('input:checked')).map(function(i){return i.value;});
+  sel.innerHTML = checked.length
+    ? checked.map(function(d){return '<span class="dr-ms-chip">'+d+'<button onclick="event.stopPropagation();_drMsRemove(\''+ck+'\',\''+d+'\')">&#xD7;</button></span>';}).join('')
+    : '<span class="dr-ms-placeholder">Select departments\u2026</span>';
+};
+window._drMsRemove = function(ck, dept) {
+  var drop = document.getElementById('dr-ms-drop-' + ck);
+  if (drop) { var cb = drop.querySelector('input[value="'+dept+'"]'); if(cb) cb.checked = false; }
+  window._drMsChange(ck);
+};
+function _drBindMsDropdowns(container) {
+  container.querySelectorAll('.dr-ms-selected').forEach(function(sel) {
+    if (sel._drMsBound) return; sel._drMsBound = true;
+    sel.addEventListener('click', function(e) {
+      e.stopPropagation();
+      var wrap = sel.closest('.dr-ms-wrap');
+      var drop = wrap && wrap.querySelector('.dr-ms-dropdown');
+      if (!drop) return;
+      var isOpen = drop.classList.contains('open');
+      document.querySelectorAll('.dr-ms-dropdown.open').forEach(function(d){d.classList.remove('open');});
+      if (!isOpen) drop.classList.add('open');
+    });
+  });
+  document.addEventListener('click', function() {
+    document.querySelectorAll('.dr-ms-dropdown.open').forEach(function(d){d.classList.remove('open');});
+  }, {once:false, capture:false});
+}
 
 /* ── Build obligation item (NO evidence button) ── */
 function _drBuildObligationItem(obligText, actionsArr, ck, circId, clauseId, oi, actionsOpen) {
@@ -2559,16 +2823,14 @@ window._drSaveClauseEdit = function(ck) {
     var oblFull = viewEl.querySelector('.dr-oblig-text-full');
     if (oblFull) oblFull.textContent = oblEl.value;
   }
-  document.getElementById('dr-cl-edit-' + ck).style.display = 'none';
+  var editEl = document.getElementById('dr-cl-edit-' + ck);
+  if (editEl) editEl.style.display = 'none';
   if (viewEl) viewEl.style.display = 'block';
   showToast('Clause saved.', 'success');
 };
 
 window._drBackToStack = function() {
-  var content = document.getElementById('dr-cl-ws-content');
-  var stack   = document.getElementById('dr-cl-ws-stack');
-  if (content) { content.style.display = 'none'; content.innerHTML = ''; }
-  if (stack) stack.style.display = 'block';
+  /* no-op — kept for any stray references; new design doesn't use a back button */
 };
 
 window._drAddObligTag = function(oi, ck) {
@@ -3004,6 +3266,9 @@ function injectDraftReviewCSS() {
 .dr-ov-chips{display:flex;gap:6px;flex-wrap:wrap;}
 /* KEBAB MENU */
 .dr-kebab-wrap{position:relative;}
+.dr-view-circ-btn{font-size:12px;padding:7px 14px;display:inline-flex;align-items:center;gap:6px;background:#fff;color:var(--dr-t1,#1a1a2e);border:1.5px solid var(--dr-border,#e2e5ed);border-radius:6px;cursor:pointer;font-family:inherit;font-weight:600;transition:background .15s,border-color .15s,box-shadow .15s,transform .1s;}
+.dr-view-circ-btn:hover{background:#f5f6f8;border-color:var(--dr-t1,#1a1a2e);box-shadow:0 2px 8px rgba(0,0,0,.1);transform:translateY(-1px);}
+.dr-view-circ-btn:active{transform:translateY(0);box-shadow:none;}
 .dr-kebab-btn{background:none;border:1px solid var(--dr-border);border-radius:6px;width:30px;height:30px;display:flex;align-items:center;justify-content:center;font-size:16px;color:var(--dr-t2);cursor:pointer;transition:all .12s;line-height:1;}
 .dr-kebab-btn:hover{background:var(--dr-hover);border-color:var(--dr-t2);}
 .dr-kebab-menu{display:none;position:absolute;right:0;top:calc(100% + 4px);background:#fff;border:1px solid var(--dr-border);border-radius:8px;box-shadow:0 4px 16px rgba(0,0,0,.12);min-width:160px;z-index:500;overflow:hidden;flex-direction:column;}
@@ -3277,6 +3542,79 @@ label.dr-kebab-item{cursor:pointer;}
 .dr-add-sub-btn:hover{border-color:var(--dr-purple);color:var(--dr-purple);}
 .dr-empty-hint{font-size:11px;color:#c4c8d4;font-style:italic;padding:4px 0;}
 .dr-editable:focus{outline:1.5px dashed var(--dr-blue-mid);border-radius:4px;padding:2px 5px;}
+
+/* ══ FLAT CHAPTER BUTTON (new nav) ══ */
+.dr-cl-nav-ch-flat-btn{flex:1;display:flex;align-items:center;gap:7px;padding:10px 8px 10px 14px;background:none;border:none;cursor:pointer;font-family:inherit;text-align:left;transition:background .1s;min-width:0;border-left:3px solid transparent;}
+.dr-cl-nav-ch-flat-btn:hover{background:var(--dr-bg);}
+.dr-cl-nav-ch-active{background:var(--dr-blue-lt)!important;border-left-color:var(--dr-blue)!important;}
+.dr-cl-nav-ch-active .dr-cl-nav-ch-num{color:var(--dr-blue);}
+
+/* ══ SECTION ACCORDION (right panel) ══ */
+.dr-sec-accordion{border-bottom:1px solid var(--dr-border-lt);}
+.dr-sec-acc-btn{width:100%;display:flex;align-items:center;gap:8px;padding:11px 18px;background:var(--dr-nav);border:none;cursor:pointer;font-family:inherit;text-align:left;transition:background .12s;}
+.dr-sec-acc-btn:hover,.dr-sec-acc-active{background:var(--dr-blue-lt);}
+.dr-sec-acc-icon{font-size:10px;font-weight:700;color:var(--dr-blue);background:var(--dr-blue-lt);border:1px solid var(--dr-blue-mid);padding:1px 5px;border-radius:3px;flex-shrink:0;}
+.dr-sec-acc-active .dr-sec-acc-icon{background:var(--dr-blue);color:#fff;border-color:var(--dr-blue);}
+.dr-sec-acc-label{flex:1;font-size:12px;font-weight:600;color:var(--dr-t1);}
+.dr-sec-acc-count{font-size:10px;color:var(--dr-t3);background:#e8ebf1;padding:1px 7px;border-radius:9px;flex-shrink:0;}
+.dr-sec-acc-arrow{flex-shrink:0;color:var(--dr-t3);transition:transform .2s;display:flex;align-items:center;}
+.dr-sec-acc-active .dr-sec-acc-arrow{transform:rotate(180deg);}
+.dr-sec-acc-body{display:none;background:#fff;}
+.dr-sec-acc-body.open{display:block;}
+
+/* ══ CLAUSE ACCORDION (right panel) ══ */
+.dr-ch-content-wrap{display:flex;flex-direction:column;}
+.dr-cl-accordion{border-bottom:1px solid var(--dr-border-lt);}
+.dr-cl-acc-btn{width:100%;display:flex;align-items:center;gap:10px;padding:11px 18px;background:#fff;border:none;cursor:pointer;font-family:inherit;text-align:left;transition:background .12s;border-left:3px solid transparent;}
+.dr-cl-acc-btn:hover{background:var(--dr-nav);}
+.dr-cl-acc-active{background:var(--dr-blue-lt)!important;border-left-color:var(--dr-blue)!important;}
+.dr-cl-acc-left{display:flex;align-items:center;gap:6px;flex-shrink:0;}
+.dr-cl-acc-right{display:flex;align-items:center;gap:8px;flex:1;min-width:0;}
+.dr-cl-acc-preview{flex:1;font-size:11.5px;color:var(--dr-t2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.dr-cl-acc-arrow{flex-shrink:0;color:var(--dr-t3);transition:transform .2s;display:flex;align-items:center;}
+.dr-cl-acc-active .dr-cl-acc-arrow{transform:rotate(180deg);}
+.dr-cl-acc-body{display:none;border-top:1px solid var(--dr-border-lt);background:#fafbfc;}
+.dr-cl-acc-body.open{display:block;}
+
+/* ══ CLAUSE DETAIL CARD (inside accordion body) ══ */
+.dr-cl-detail-card{background:#fff;border:1px solid var(--dr-border-lt);border-radius:var(--dr-r);margin:14px 16px;box-shadow:var(--dr-sh);}
+.dr-subcl-detail-card{margin:0;border-radius:0;box-shadow:none;border:none;border-top:1px solid var(--dr-border-lt);background:#fafbfc;}
+.dr-cl-detail-top{display:flex;align-items:center;justify-content:space-between;padding:11px 16px;border-bottom:1px solid var(--dr-border-lt);background:var(--dr-nav);}
+.dr-cl-detail-id-row{display:flex;align-items:center;gap:7px;flex-wrap:wrap;}
+.dr-cl-detail-actions{display:flex;align-items:center;gap:6px;flex-shrink:0;}
+
+/* ══ SUB-CLAUSE TABLE ══ */
+.dr-subcl-table-wrap{margin:0 16px 16px;border:1px solid var(--dr-border-lt);border-radius:var(--dr-r);overflow:hidden;}
+.dr-subcl-table-title{font-size:9px;font-weight:800;color:var(--dr-t3);text-transform:uppercase;letter-spacing:.1em;padding:8px 14px;background:var(--dr-nav);border-bottom:1px solid var(--dr-border-lt);}
+.dr-subcl-table{width:100%;border-collapse:collapse;font-size:12px;}
+.dr-subcl-table th{text-align:left;padding:7px 12px;background:#f0f2f7;border-bottom:1px solid var(--dr-border-lt);font-size:10px;font-weight:700;color:var(--dr-t3);text-transform:uppercase;letter-spacing:.04em;}
+.dr-subcl-row{cursor:pointer;transition:background .12s;}
+.dr-subcl-row td{padding:9px 12px;border-bottom:1px solid var(--dr-border-lt);color:var(--dr-t2);font-size:12px;vertical-align:middle;}
+.dr-subcl-row:hover td{background:var(--dr-blue-lt);}
+.dr-subcl-row-active td{background:var(--dr-blue-lt);}
+.dr-subcl-detail-row td{padding:0;}
+.dr-subcl-badge{display:inline-flex;align-items:center;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700;}
+.dr-subcl-badge-reviewed{background:var(--dr-green-lt);color:var(--dr-green);}
+.dr-subcl-badge-assigned{background:var(--dr-blue-lt);color:var(--dr-blue);}
+.dr-subcl-oblig{display:flex;align-items:flex-start;gap:8px;padding:5px 0;font-size:12px;color:var(--dr-t2);}
+
+/* ══ MULTI-SELECT DEPT DROPDOWN ══ */
+.dr-ms-wrap{position:relative;min-width:160px;}
+.dr-ms-selected{display:flex;flex-wrap:wrap;align-items:center;gap:4px;padding:4px 8px;background:#fff;border:1px solid var(--dr-border);border-radius:5px;cursor:pointer;min-height:30px;transition:border-color .14s;}
+.dr-ms-selected:hover{border-color:var(--dr-blue);}
+.dr-ms-chip{display:inline-flex;align-items:center;gap:3px;padding:2px 7px;background:var(--dr-blue-lt);border:1px solid var(--dr-blue-mid);border-radius:20px;font-size:10px;font-weight:600;color:var(--dr-blue);}
+.dr-ms-chip button{background:none;border:none;color:var(--dr-t3);cursor:pointer;font-size:11px;padding:0;line-height:1;}
+.dr-ms-placeholder{font-size:11px;color:var(--dr-t3);font-style:italic;}
+.dr-ms-dropdown{display:none;position:absolute;top:calc(100% + 3px);left:0;z-index:200;background:#fff;border:1px solid var(--dr-border);border-radius:7px;box-shadow:0 4px 16px rgba(0,0,0,.12);min-width:180px;padding:4px 0;max-height:200px;overflow-y:auto;}
+.dr-ms-dropdown.open{display:block;}
+.dr-ms-opt{display:flex;align-items:center;gap:8px;padding:7px 12px;font-size:12px;color:var(--dr-t1);cursor:pointer;transition:background .1s;}
+.dr-ms-opt:hover{background:var(--dr-blue-lt);}
+.dr-ms-opt input{accent-color:var(--dr-blue);}
+
+/* ══ STATUS SELECT ══ */
+.dr-status-sel option[value="Reviewed & Applicable"]{color:var(--dr-green);}
+.dr-status-sel option[value="Assigned"]{color:var(--dr-blue);}
+
 .dr-map-btn{padding:4px 11px;background:var(--dr-purple-lt);border:1.5px solid #c4b5fd;border-radius:5px;font-family:inherit;font-size:10px;font-weight:700;color:var(--dr-purple);cursor:pointer;transition:all .13s;}
 .dr-map-btn:hover{background:#ede9fe;border-color:var(--dr-purple);}
 .dr-not-saved{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:56px 24px;background:#fff;border:2px dashed var(--dr-border);border-radius:var(--dr-r-lg);text-align:center;}
