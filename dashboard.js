@@ -259,7 +259,7 @@ function buildDashboardHTML() {
             <table>
               <thead><tr>
                 <th>ID</th><th>Title</th><th>Regulator</th>
-                <th>Event</th><th>Status</th><th>Risk</th><th>Compliance</th>
+                <th>Event</th><th>Status</th><th>Compliance</th>
               </tr></thead>
               <tbody id="today-circulars-body"></tbody>
             </table>
@@ -431,7 +431,7 @@ function renderTodaysCirculars(filter) {
           <td><span style="font-size:11px;font-weight:600">${r.regulator}</span></td>
           <td><span class="db-event-tag ${r.eventCls}">${r.event}</span></td>
           <td><span class="badge-status badge-${r.status.toLowerCase()}">${r.status}</span></td>
-          <td><span class="risk-badge risk-${r.risk.toLowerCase()}">${r.risk}</span></td>
+
           <td>
             <div style="display:flex;align-items:center;gap:6px">
               <div class="compliance-bar-bg" style="width:56px;flex-shrink:0">
