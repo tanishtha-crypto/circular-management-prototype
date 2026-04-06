@@ -1693,6 +1693,12 @@ function renderAISuggestionPage(circId) {
   }
   injectDraftReviewCSS();
 
+  /* ── If no circular selected, show the My Library listing ── */
+  if (!circId) {
+    _mlRenderLibrary();
+    return;
+  }
+
   area.innerHTML =
     '<div class="dr-page">' +
     '<div class="dr-page-head">' +
@@ -1810,6 +1816,460 @@ function _initCustomSelect(circId) {
     var autoItem = list.querySelector('.dr-csel-item[data-id="' + circId + '"]');
     if (autoItem) _selectCirc(autoItem);
   }
+}
+
+/* ================================================================
+   MY LIBRARY — listing view (table + hierarchical)
+   ================================================================ */
+
+/* ── Persistent filter state across view switches ── */
+window._mlFilters    = { circ: '', dept: '', status: '', from: '', to: '', search: '' };
+window._mlActiveView = 'table';
+
+function _mlRenderLibrary() {
+  var area = document.getElementById('content-area');
+  if (!area) return;
+  _aaInjectStyles();   /* pull in aa- CSS vars & classes */
+
+  /* reset filters each time the library page is freshly opened */
+  window._mlFilters    = { circ: '', dept: '', status: '', from: '', to: '', search: '' };
+  window._mlActiveView = 'table';
+
+  area.innerHTML =
+    '<div class="dr-page">' +
+      '<div class="dr-page-head">' +
+        '<div>' +
+          '<div class="dr-page-title">My Library</div>' +
+          '<div class="dr-page-sub">Your saved and reviewed circulars</div>' +
+        '</div>' +
+        '<div class="dr-head-actions">' +
+          '<div class="ml-seg-ctrl" id="ml-seg">' +
+            '<button class="ml-seg-btn active" data-view="table">&#8801;&nbsp; Table View</button>' +
+            '<button class="ml-seg-btn" data-view="hierarchical">&#8862;&nbsp; Hierarchical View</button>' +
+          '</div>' +
+        '</div>' +
+      '</div>' +
+      '<div id="ml-view-area"></div>' +
+    '</div>';
+
+  _mlShowTableView();
+  _mlBindSegToggle();
+}
+
+/* ── Segmented toggle ── */
+function _mlBindSegToggle() {
+  var seg = document.getElementById('ml-seg');
+  if (!seg) return;
+  seg.querySelectorAll('.ml-seg-btn').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      seg.querySelectorAll('.ml-seg-btn').forEach(function(b) { b.classList.remove('active'); });
+      btn.classList.add('active');
+      if (btn.dataset.view === 'table') {
+        _mlShowTableView();
+      } else {
+        _mlShowHierarchicalView();
+      }
+    });
+  });
+}
+
+/* ── Helpers shared by both views ── */
+function _mlGetAllDepts() {
+  var d = [];
+  CMS_DATA.circulars.forEach(function(c) {
+    (c.departments||[]).forEach(function(dep) { if (d.indexOf(dep) < 0) d.push(dep); });
+  });
+  return d.sort();
+}
+
+function _mlGetFilteredCircs() {
+  var f = window._mlFilters;
+  return CMS_DATA.circulars.filter(function(c) {
+    if (f.circ   && c.id !== f.circ) return false;
+    if (f.dept   && !(c.departments||[]).includes(f.dept)) return false;
+    if (f.status && (c.libraryStatus||'Reviewed & Applicable') !== f.status) return false;
+    if (f.from   && c.issuedDate && c.issuedDate < f.from) return false;
+    if (f.to     && c.issuedDate && c.issuedDate > f.to) return false;
+    if (f.search) {
+      var q = f.search.toLowerCase();
+      if (!((c.id||'').toLowerCase().includes(q) ||
+            (c.title||'').toLowerCase().includes(q) ||
+            (c.regulator||'').toLowerCase().includes(q))) return false;
+    }
+    return true;
+  });
+}
+
+function _mlBuildFilterBar() {
+  var f      = window._mlFilters;
+  var circs  = CMS_DATA.circulars;
+  var depts  = _mlGetAllDepts();
+  var activeCirc = circs.find(function(c) { return c.id === f.circ; }) || null;
+
+  var total      = circs.length;
+  var assigned   = circs.filter(function(c) { return (c.libraryStatus||'Reviewed & Applicable') === 'Assigned'; }).length;
+  var unassigned = total - assigned;
+
+  return (
+    '<div class="aa-filter-card" id="ml-flt-card">' +
+      '<div class="aa-fc-field">' +
+        '<span class="aa-fc-label">Circular</span>' +
+        '<div class="aa-custom-sel-wrap" id="ml-csel-wrap">' +
+          '<button class="aa-custom-sel-btn" id="ml-csel-btn">' +
+            (activeCirc
+              ? '<span class="aa-csel-id">' + activeCirc.id + '</span>' +
+                '<span class="aa-csel-title">' + activeCirc.title.substring(0,30) + (activeCirc.title.length > 30 ? '\u2026' : '') + '</span>'
+              : '<span class="aa-csel-title" style="color:var(--aa-text-mut);">All Circulars</span>') +
+            '<span class="aa-csel-arr">&#9662;</span>' +
+          '</button>' +
+          '<div class="aa-csel-drop" id="ml-csel-drop" style="display:none;">' +
+            '<input class="aa-csel-search" id="ml-csel-search" placeholder="Search\u2026" autocomplete="off"/>' +
+            '<div class="aa-csel-list" id="ml-csel-list">' +
+              '<div class="aa-csel-item' + (!f.circ ? ' active' : '') + '" data-id="">' +
+                '<span class="aa-csel-item-title" style="color:var(--aa-text-mut);">All Circulars</span>' +
+              '</div>' +
+              circs.map(function(c) {
+                return '<div class="aa-csel-item' + (c.id === f.circ ? ' active' : '') + '" data-id="' + c.id + '">' +
+                  '<span class="aa-csel-item-id">' + c.id + '</span>' +
+                  '<span class="aa-csel-item-title">' + c.title + '</span>' +
+                '</div>';
+              }).join('') +
+            '</div>' +
+          '</div>' +
+        '</div>' +
+      '</div>' +
+      '<div class="aa-fc-field">' +
+        '<span class="aa-fc-label">Department</span>' +
+        '<select class="aa-flt-sel" id="ml-flt-dept">' +
+          '<option value="">All Departments</option>' +
+          depts.map(function(d) { return '<option' + (d === f.dept ? ' selected' : '') + '>' + d + '</option>'; }).join('') +
+        '</select>' +
+      '</div>' +
+      '<div class="aa-fc-field">' +
+        '<span class="aa-fc-label">Status</span>' +
+        '<select class="aa-flt-sel" id="ml-flt-status">' +
+          '<option value="">All Statuses</option>' +
+          '<option' + (f.status === 'Reviewed & Applicable' ? ' selected' : '') + '>Reviewed &amp; Applicable</option>' +
+          '<option' + (f.status === 'Assigned' ? ' selected' : '') + '>Assigned</option>' +
+        '</select>' +
+      '</div>' +
+      '<div class="aa-fc-field">' +
+        '<span class="aa-fc-label">From Date</span>' +
+        '<input type="date" class="aa-flt-date" id="ml-flt-from" value="' + (f.from||'') + '"/>' +
+      '</div>' +
+      '<div class="aa-fc-field">' +
+        '<span class="aa-fc-label">To Date</span>' +
+        '<input type="date" class="aa-flt-date" id="ml-flt-to" value="' + (f.to||'') + '"/>' +
+      '</div>' +
+      '<div class="aa-fc-field aa-fc-search">' +
+        '<span class="aa-fc-label">Search</span>' +
+        '<input class="aa-search-inp" id="ml-flt-search" placeholder="Search activities, obligations\u2026" value="' + (f.search||'') + '"/>' +
+      '</div>' +
+      '<div class="aa-stats-row">' +
+        '<div class="aa-stat-pill" id="ml-sp-total">'      + total      + ' total</div>' +
+        '<div class="aa-stat-pill aa-sp-amber" id="ml-sp-unassigned">' + unassigned + ' unassigned</div>' +
+        '<div class="aa-stat-pill aa-sp-green"  id="ml-sp-assigned">'  + assigned   + ' assigned</div>' +
+      '</div>' +
+    '</div>'
+  );
+}
+
+function _mlBindFilterBar() {
+  /* ── Circular custom dropdown ── */
+  var cselBtn    = document.getElementById('ml-csel-btn');
+  var cselDrop   = document.getElementById('ml-csel-drop');
+  var cselSearch = document.getElementById('ml-csel-search');
+  var cselList   = document.getElementById('ml-csel-list');
+
+  if (cselBtn && cselDrop) {
+    cselBtn.addEventListener('click', function(e) {
+      e.stopPropagation();
+      cselDrop.style.display = cselDrop.style.display === 'none' ? 'block' : 'none';
+      if (cselDrop.style.display !== 'none' && cselSearch) cselSearch.focus();
+    });
+    /* close on outside click */
+    function _mlCselOutside(e) {
+      var wrap = document.getElementById('ml-csel-wrap');
+      if (!wrap || !wrap.contains(e.target)) {
+        cselDrop.style.display = 'none';
+        document.removeEventListener('click', _mlCselOutside);
+      }
+    }
+    document.addEventListener('click', _mlCselOutside);
+  }
+
+  if (cselSearch && cselList) {
+    cselSearch.addEventListener('input', function() {
+      var q = cselSearch.value.toLowerCase();
+      cselList.querySelectorAll('.aa-csel-item').forEach(function(item) {
+        item.style.display = item.textContent.toLowerCase().includes(q) ? '' : 'none';
+      });
+    });
+  }
+
+  if (cselList) {
+    cselList.querySelectorAll('.aa-csel-item').forEach(function(item) {
+      item.addEventListener('click', function() {
+        window._mlFilters.circ = item.dataset.id || '';
+        if (cselDrop) cselDrop.style.display = 'none';
+        _mlApplyAllFilters();
+      });
+    });
+  }
+
+  /* ── Standard filter controls ── */
+  var deptSel   = document.getElementById('ml-flt-dept');
+  var statusSel = document.getElementById('ml-flt-status');
+  var fromInp   = document.getElementById('ml-flt-from');
+  var toInp     = document.getElementById('ml-flt-to');
+  var searchInp = document.getElementById('ml-flt-search');
+
+  if (deptSel)   deptSel.addEventListener('change', _mlApplyAllFilters);
+  if (statusSel) statusSel.addEventListener('change', _mlApplyAllFilters);
+  if (fromInp)   fromInp.addEventListener('change', _mlApplyAllFilters);
+  if (toInp)     toInp.addEventListener('change', _mlApplyAllFilters);
+  if (searchInp) searchInp.addEventListener('input', _mlApplyAllFilters);
+}
+
+function _mlApplyAllFilters() {
+  /* Read current control values into filter state */
+  var f = window._mlFilters;
+  var deptSel   = document.getElementById('ml-flt-dept');
+  var statusSel = document.getElementById('ml-flt-status');
+  var fromInp   = document.getElementById('ml-flt-from');
+  var toInp     = document.getElementById('ml-flt-to');
+  var searchInp = document.getElementById('ml-flt-search');
+
+  if (deptSel)   f.dept   = deptSel.value;
+  if (statusSel) f.status = statusSel.value;
+  if (fromInp)   f.from   = fromInp.value;
+  if (toInp)     f.to     = toInp.value;
+  if (searchInp) f.search = searchInp.value;
+
+  var filtered   = _mlGetFilteredCircs();
+  var total      = filtered.length;
+  var assigned   = filtered.filter(function(c) { return (c.libraryStatus||'Reviewed & Applicable') === 'Assigned'; }).length;
+  var unassigned = total - assigned;
+
+  /* Update badge counts */
+  var spTotal = document.getElementById('ml-sp-total');
+  var spUn    = document.getElementById('ml-sp-unassigned');
+  var spAss   = document.getElementById('ml-sp-assigned');
+  if (spTotal) spTotal.textContent = total      + ' total';
+  if (spUn)    spUn.textContent    = unassigned + ' unassigned';
+  if (spAss)   spAss.textContent   = assigned   + ' assigned';
+
+  /* Update circular dropdown label to reflect selection */
+  var activeCirc = CMS_DATA.circulars.find(function(c) { return c.id === f.circ; }) || null;
+  var cselBtn    = document.getElementById('ml-csel-btn');
+  if (cselBtn) {
+    cselBtn.innerHTML =
+      (activeCirc
+        ? '<span class="aa-csel-id">' + activeCirc.id + '</span>' +
+          '<span class="aa-csel-title">' + activeCirc.title.substring(0,30) + (activeCirc.title.length > 30 ? '\u2026' : '') + '</span>'
+        : '<span class="aa-csel-title" style="color:var(--aa-text-mut);">All Circulars</span>') +
+      '<span class="aa-csel-arr">&#9662;</span>';
+  }
+
+  /* Re-render the appropriate content area */
+  if (window._mlActiveView === 'table') {
+    _mlRenderTable(filtered);
+  } else {
+    _mlRenderHierCards(filtered);
+  }
+}
+
+/* ── Table view ── */
+function _mlShowTableView() {
+  window._mlActiveView = 'table';
+  var area = document.getElementById('ml-view-area');
+  if (!area) return;
+
+  area.innerHTML =
+    _mlBuildFilterBar() +
+    '<div class="table-card ml-table-card">' +
+      '<div class="table-wrapper">' +
+        '<table>' +
+          '<thead><tr>' +
+            '<th>Circular ID</th>' +
+            '<th>Circular Name</th>' +
+            '<th>Department</th>' +
+            '<th>Status</th>' +
+          '</tr></thead>' +
+          '<tbody id="ml-tbody"></tbody>' +
+        '</table>' +
+      '</div>' +
+    '</div>';
+
+  _mlRenderTable(_mlGetFilteredCircs());
+  _mlBindFilterBar();
+}
+
+function _mlRenderTable(circs) {
+  var tbody   = document.getElementById('ml-tbody');
+  var countEl = document.getElementById('ml-count');
+  if (!tbody) return;
+  if (countEl) countEl.textContent = circs.length + ' circular' + (circs.length !== 1 ? 's' : '');
+
+  if (circs.length === 0) {
+    tbody.innerHTML =
+      '<tr><td colspan="4" style="text-align:center;padding:32px 16px;color:var(--dr-t3);font-style:italic;">' +
+      'No circulars match your filters</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = circs.map(function(c) {
+    var statusVal = c.libraryStatus || 'Reviewed & Applicable';
+    var statusCls = statusVal === 'Assigned' ? 'ml-status-assigned' : 'ml-status-reviewed';
+    return '<tr>' +
+      '<td><button class="ml-circ-id-btn" data-id="' + c.id + '">' + c.id + '</button></td>' +
+      '<td class="ml-circ-name" title="' + (c.title||'') + '">' + (c.title||'') + '</td>' +
+      '<td>' + (c.departments||[]).map(function(d) {
+        return '<span class="task-dept-chip">' + d + '</span>';
+      }).join(' ') + '</td>' +
+      '<td>' +
+        '<select class="ml-status-sel ' + statusCls + '" data-id="' + c.id + '">' +
+          '<option value="Reviewed & Applicable"' + (statusVal === 'Reviewed & Applicable' ? ' selected' : '') + '>Reviewed &amp; Applicable</option>' +
+          '<option value="Assigned"' + (statusVal === 'Assigned' ? ' selected' : '') + '>Assigned</option>' +
+        '</select>' +
+      '</td>' +
+    '</tr>';
+  }).join('');
+
+  tbody.querySelectorAll('.ml-circ-id-btn').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      renderAISuggestionPage(btn.dataset.id);
+    });
+  });
+
+  tbody.querySelectorAll('.ml-status-sel').forEach(function(sel) {
+    sel.addEventListener('change', function() {
+      var circ = CMS_DATA.circulars.find(function(c) { return c.id === sel.dataset.id; });
+      if (circ) circ.libraryStatus = sel.value;
+      sel.className = 'ml-status-sel ' + (sel.value === 'Assigned' ? 'ml-status-assigned' : 'ml-status-reviewed');
+      _mlUpdateStatusBadges();
+    });
+  });
+}
+
+function _mlUpdateStatusBadges() {
+  var filtered   = _mlGetFilteredCircs();
+  var total      = filtered.length;
+  var assigned   = filtered.filter(function(c) { return (c.libraryStatus||'Reviewed & Applicable') === 'Assigned'; }).length;
+  var spTotal = document.getElementById('ml-sp-total');
+  var spUn    = document.getElementById('ml-sp-unassigned');
+  var spAss   = document.getElementById('ml-sp-assigned');
+  if (spTotal) spTotal.textContent = total + ' total';
+  if (spUn)    spUn.textContent    = (total - assigned) + ' unassigned';
+  if (spAss)   spAss.textContent   = assigned + ' assigned';
+}
+
+/* ── Hierarchical view ── */
+function _mlShowHierarchicalView() {
+  window._mlActiveView = 'hierarchical';
+  var area = document.getElementById('ml-view-area');
+  if (!area) return;
+  area.innerHTML = _mlBuildFilterBar() + '<div class="ml-hier-list" id="ml-hier-mount"></div>';
+  _mlRenderHierCards(_mlGetFilteredCircs());
+  _mlBindFilterBar();
+}
+
+function _mlRenderHierCards(circs) {
+  var mount = document.getElementById('ml-hier-mount');
+  if (!mount) return;
+  if (circs.length === 0) {
+    mount.innerHTML = '<div style="text-align:center;padding:40px;color:var(--aa-text-mut);font-style:italic;">No circulars match your filters</div>';
+    return;
+  }
+  mount.innerHTML = circs.map(function(c, i) {
+    var statusVal = c.libraryStatus || 'Reviewed & Applicable';
+    var statusCls = statusVal === 'Assigned' ? 'ml-status-assigned' : 'ml-status-reviewed';
+    var riskCls   = c.risk ? ' ml-risk-' + c.risk.toLowerCase() : '';
+    return (
+      '<div class="ml-hier-card">' +
+        '<div class="ml-hier-head" data-idx="' + i + '">' +
+          '<div class="ml-hier-head-left">' +
+            '<span class="ml-hier-arrow" id="ml-harrow-' + i + '">&#9654;</span>' +
+            '<span class="ml-hier-id">' + c.id + '</span>' +
+            (c.risk ? '<span class="ml-risk-badge' + riskCls + '">' + c.risk + '</span>' : '') +
+            '<span class="ml-hier-title">' + (c.title||'') + '</span>' +
+          '</div>' +
+          '<div class="ml-hier-head-right">' +
+            '<select class="ml-status-sel ' + statusCls + '" data-id="' + c.id + '" onclick="event.stopPropagation()">' +
+              '<option value="Reviewed & Applicable"' + (statusVal === 'Reviewed & Applicable' ? ' selected' : '') + '>Reviewed &amp; Applicable</option>' +
+              '<option value="Assigned"' + (statusVal === 'Assigned' ? ' selected' : '') + '>Assigned</option>' +
+            '</select>' +
+          '</div>' +
+        '</div>' +
+        '<div class="ml-hier-body" id="ml-hbody-' + i + '" style="display:none;">' +
+          _mlBuildHierBodyHtml(c) +
+        '</div>' +
+      '</div>'
+    );
+  }).join('');
+
+  mount.querySelectorAll('.ml-hier-head').forEach(function(head) {
+    head.addEventListener('click', function(e) {
+      if (e.target.closest('.ml-status-sel')) return;
+      var idx   = head.dataset.idx;
+      var body  = document.getElementById('ml-hbody-'  + idx);
+      var arrow = document.getElementById('ml-harrow-' + idx);
+      if (!body) return;
+      var open = body.style.display !== 'none';
+      body.style.display = open ? 'none' : 'block';
+      if (arrow) arrow.innerHTML = open ? '&#9654;' : '&#9660;';
+      head.classList.toggle('ml-hier-head-open', !open);
+    });
+  });
+
+  mount.querySelectorAll('.ml-status-sel').forEach(function(sel) {
+    sel.addEventListener('change', function() {
+      var circ = CMS_DATA.circulars.find(function(c) { return c.id === sel.dataset.id; });
+      if (circ) circ.libraryStatus = sel.value;
+      sel.className = 'ml-status-sel ' + (sel.value === 'Assigned' ? 'ml-status-assigned' : 'ml-status-reviewed');
+      _mlUpdateStatusBadges();
+    });
+  });
+}
+
+function _mlBuildHierBodyHtml(c) {
+  var depts = c.departments || [];
+  var rows = [
+    ['Regulator',      c.regulator    || '\u2014'],
+    ['Type',           c.type         || '\u2014'],
+    ['Risk Level',     c.risk
+      ? '<span class="ml-risk-badge ml-risk-' + c.risk.toLowerCase() + '">' + c.risk + '</span>'
+      : '\u2014'],
+    ['Issued Date',    c.issuedDate   || '\u2014'],
+    ['Effective Date', c.effectiveDate|| '\u2014'],
+    ['Due Date',       c.dueDate      || '\u2014'],
+  ];
+
+  return (
+    '<div class="ml-hier-body-inner">' +
+      '<div class="ml-detail-grid">' +
+        rows.map(function(r) {
+          return (
+            '<div class="ml-detail-row">' +
+              '<span class="ml-detail-label">' + r[0] + '</span>' +
+              '<span class="ml-detail-value">'  + r[1] + '</span>' +
+            '</div>'
+          );
+        }).join('') +
+        '<div class="ml-detail-row ml-detail-row-full ml-dept-row">' +
+          '<span class="ml-detail-label">Departments</span>' +
+          '<div class="ml-dept-row-inner">' +
+            '<span class="ml-dept-tags">' +
+              (depts.length
+                ? depts.map(function(d) { return '<span class="ml-dept-tag">' + d + '</span>'; }).join('')
+                : '\u2014') +
+            '</span>' +
+            '<button class="dr-btn dr-btn-sec ml-view-details-btn" onclick="renderAISuggestionPage(\'' + c.id + '\')">&#x2197;&nbsp; View Details</button>' +
+          '</div>' +
+        '</div>' +
+      '</div>' +
+    '</div>'
+  );
 }
 
 window._drGoNext = function(currentStep) {
