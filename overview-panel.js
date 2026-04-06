@@ -64,29 +64,44 @@ function buildOverviewPanel() {
     <div id="ov-details-wrap" class="ov-reveal-wrap" style="display:none;">
       <div class="sh-card" id="ov-card2">
         <div class="sh-card-head">
-          <div class="sh-dot done" id="ov-s2">✓</div>
-          <div style="flex:1;">
-            <div class="sh-card-title" id="ov-details-heading">Circular Overview</div>
-            <div class="sh-card-sub" id="ov-details-sub">Key information about this circular</div>
-          </div>
-          <!-- HEADER ACTIONS — shown after confirm -->
-          <div class="ov-details-actions" id="ov-details-actions" style="display:none;">
-            <button class="ov-action-btn" id="ov-btn-change">✕ Change</button>
-            <button class="ov-action-btn ov-action-btn-primary" id="ov-btn-regenerate" style="display:none;">
-              ✦ Generate with AI
-            </button>
-            <button class="ov-action-btn ov-action-btn-regen" id="ov-btn-regen-existing" style="display:none;">
-              ↺ Regenerate
-            </button>
-          </div>
-        </div>
+  <div class="sh-dot done" id="ov-s2">✓</div>
+  <div style="flex:1;min-width:0;">
+    <div class="sh-card-title" id="ov-details-heading">Circular Overview</div>
+    <div class="sh-card-sub" id="ov-details-sub">Key information about this circular</div>
+  </div>
+  <div class="ov-details-actions" id="ov-details-actions" style="display:none;">
+   
+  
+    <!-- APPLICABILITY BADGE -->
+    <button class="ov-saved-toggle"
+     id="ov-saved-toggle" data-saved="false">
+  🔖 Save
+</button>
+    <div class="ov-applic-badge" id="ov-applic-badge" style="display:none;" title="Click to view Applicability">
+      <span id="ov-applic-icon">—</span>
+      <span id="ov-applic-label">Applicability</span>
+    </div>
+    <!-- 3-DOTS -->
+    <div class="ov-dots-wrap" id="ov-dots-wrap" style="display:none;">
+      <button class="ov-dots-btn" id="ov-dots-btn">⋮</button>
+      <div class="ov-dots-menu" id="ov-dots-menu" style="display:none;">
+        <div class="ov-dots-item" id="ov-mi-edit">✏️&nbsp; Edit</div>
+        <div class="ov-dots-item" id="ov-mi-history">🕓&nbsp; History</div>
+        <div class="ov-dots-item" id="ov-mi-upload">📁&nbsp; Upload</div>
+        <div class="ov-dots-item" id="ov-mi-regen">↺&nbsp; Regenerate</div>
+        <div class="ov-dots-item" id="ov-mi-execsummary">📝&nbsp; Executive Summary</div>
+      </div>
+    </div>
+  </div>
+</div>
         <div class="sh-card-body" id="ov-details-body"></div>
       </div>
     </div>
 
     <!-- FOOTER -->
     <div class="ov-footer ov-reveal-wrap" id="ov-footer" style="display:none;">
-      <button class="ov-next-btn" id="ov-btn-next">Proceed to Applicability Analysis →</button>
+     
+      <button class="ov-next-btn" id="ov-btn-next">Generate Clause →</button>
     </div>
 
   </div>`;
@@ -258,7 +273,7 @@ function initOverviewListeners() {
     body.style.opacity = '0.4';
     setTimeout(() => {
       const Force_Fail = true;
-      const aiScore = Force_Fail ? 0.3 :0.8; // replace with real score
+      const aiScore = Force_Fail ? 0.3 : 0.8; // replace with real score
 
       if (aiScore < 0.5) {
         showExtractionFailureModal();
@@ -271,7 +286,7 @@ function initOverviewListeners() {
       body.innerHTML = _ovUploadExtractedHTML();
       body.style.opacity = '1';
       this.textContent = '✦ Re-extract';
-      this.style.color="Yellow"
+      this.style.color = "Yellow"
       this.disabled = false;
       showToast('AI extraction complete.', 'success');
 
@@ -279,8 +294,21 @@ function initOverviewListeners() {
   });
 
   /* ── NEXT → APPLICABILITY ── */
-  document.getElementById('ov-btn-next')?.addEventListener('click', () => {
-    document.querySelector('[data-tab="applicability"]')?.click();
+document.getElementById('ov-btn-next')?.addEventListener('click', () => {
+    const clauseTab = document.querySelector('[data-tab="clause"]');
+    if (clauseTab) {
+      clauseTab.click();
+    } else {
+      /* tab bar not in DOM — navigate directly */
+      document.querySelectorAll('.ai-tab').forEach(x => x.classList.remove('active'));
+      document.querySelectorAll('.ai-panel').forEach(x => x.classList.remove('active'));
+      const panel = document.getElementById('panel-clause');
+      if (panel) {
+        panel.classList.add('active');
+        sessionStorage.setItem('cms_active_tab', 'clause');
+        _renderPanel('clause');
+      }
+    }
   });
 
   /* ── AUTO-RESTORE ── */
@@ -302,6 +330,84 @@ function initOverviewListeners() {
     const s1 = document.getElementById('ov-s1');
     if (s1) { s1.classList.add('done'); s1.textContent = '✓'; }
   }
+ /* ── 3-DOTS MENU — event delegation so elements don't need to exist yet ── */
+  document.addEventListener('click', (e) => {
+    const menu = document.getElementById('ov-dots-menu');
+    const btn  = document.getElementById('ov-dots-btn');
+
+    /* toggle menu on dots button click */
+    if (e.target === btn || btn?.contains(e.target)) {
+      e.stopPropagation();
+      if (menu) menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
+      return;
+    }
+
+    /* close menu on outside click */
+    if (menu && !menu.contains(e.target)) {
+      menu.style.display = 'none';
+    }
+
+    /* EDIT */
+    if (e.target.id === 'ov-mi-edit' || e.target.closest('#ov-mi-edit')) {
+      if (menu) menu.style.display = 'none';
+      const circId = AI_LIFECYCLE_STATE.selectedCircularId;
+      const circ   = circId ? (CMS_DATA?.circulars || []).find(c => c.id === circId) : null;
+      if (!circ) { showToast('No circular selected.', 'warning'); return; }
+      _ovOpenEditModal(circ);
+    }
+
+    /* HISTORY */
+    if (e.target.id === 'ov-mi-history' || e.target.closest('#ov-mi-history')) {
+      if (menu) menu.style.display = 'none';
+      _ovOpenHistoryModal();
+    }
+
+    /* UPLOAD */
+    if (e.target.id === 'ov-mi-upload' || e.target.closest('#ov-mi-upload')) {
+      if (menu) menu.style.display = 'none';
+      const newBtn = document.querySelector('.ov-mode-btn[data-mode="new"]');
+      if (newBtn) newBtn.click();
+      document.getElementById('ov-card1')?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      setTimeout(() => document.getElementById('ov-file-input')?.click(), 400);
+    }
+
+    /* REGENERATE */
+    if (e.target.id === 'ov-mi-regen' || e.target.closest('#ov-mi-regen')) {
+      if (menu) menu.style.display = 'none';
+      const circId = AI_LIFECYCLE_STATE.selectedCircularId;
+      const circ   = circId ? (CMS_DATA?.circulars || []).find(c => c.id === circId) : null;
+      if (!circ) { showToast('No circular selected.', 'warning'); return; }
+      const body = document.getElementById('ov-details-body');
+      if (body) {
+        body.style.opacity = '0.4';
+        body.innerHTML = `<div class="ai-loading"><div class="spinner"></div><div class="ai-loading-text">Regenerating overview…</div></div>`;
+      }
+      setTimeout(() => {
+        _ovRenderDetails(circ, 'existing');
+        if (body) body.style.opacity = '1';
+        showToast('Overview regenerated.', 'success');
+      }, 900);
+    }
+
+    /* EXECUTIVE SUMMARY */
+    if (e.target.id === 'ov-mi-execsummary' || e.target.closest('#ov-mi-execsummary')) {
+      if (menu) menu.style.display = 'none';
+      const circId = AI_LIFECYCLE_STATE.selectedCircularId;
+      const circ   = circId ? (CMS_DATA?.circulars || []).find(c => c.id === circId) : null;
+      if (!circ) { showToast('Please select a circular first.', 'warning'); return; }
+      _ovOpenExecSummaryPopup(circ);
+    }
+  });
+
+  document.getElementById('ov-saved-toggle')?.addEventListener('click', function () {
+  const saved = this.dataset.saved === 'true';
+  this.dataset.saved = (!saved).toString();
+  this.innerHTML = saved ? '🔖 Save' : '✓ Saved';
+  this.style.background    = saved ? '' : '#dcfce7';
+  this.style.borderColor   = saved ? '' : '#86efac';
+  this.style.color         = saved ? '' : '#15803d';
+  showToast(saved ? 'Removed from library.' : '✓ Saved to library.', saved ? 'warning' : 'success');
+});
 }
 
 /* ================================================================ RENDER DETAILS */
@@ -355,42 +461,27 @@ function _ovRenderDetails(circ, mode) {
   if (btnAI) btnAI.style.display = 'none';
   if (btnRegen) btnRegen.style.display = 'inline-flex';
 
-  const riskClass = (circ.risk || '').toLowerCase();
-  const statusClass = (circ.status || '').toLowerCase().replace(/\s+/g, '-');
+ const riskClass = (circ.risk || '').toLowerCase();
+
+  /* set heading to circular name */
+  if (heading) heading.textContent = circ.title;
+  if (sub) sub.textContent = 'Key information about this circular';
+
+  /* show 3-dots and applicability badge */
+  const dotsWrap = document.getElementById('ov-dots-wrap');
+  if (dotsWrap) dotsWrap.style.display = 'block';
+
+  /* update applicability badge */
+  _ovUpdateApplicBadge(circ);
 
   const hero = `
     <div class="ov-hero">
-      <div class="ov-hero-left">
-        <div class="ov-hero-id">${circ.id}</div>
-        <div class="ov-hero-title">${circ.title}</div>
-        <div class="ov-hero-meta">
-          <span class="ov-meta-chip">${circ.regulator || 'N/A'}</span>
-          ${circ.type ? `<span class="ov-meta-chip ov-chip-type">${circ.type}</span>` : ''}
-          <span class="ov-risk-badge ov-risk-${riskClass}">${circ.risk || 'N/A'} Risk</span>
-          <span class="ov-status-badge ov-status-${statusClass}">${circ.status || 'N/A'}</span>
-        </div>
-      </div>
+      
       ${circ.deadline ? `
       <div class="ov-deadline-box">
         <div class="ov-dl-label">Compliance Deadline</div>
         <div class="ov-dl-date">${circ.deadline}</div>
       </div>` : ''}
-    </div>`;
-
-  const grid = `
-    <div class="ov-detail-grid">
-      ${[
-      ['Issue Date', circ.issuedDate || circ.date || '—'],
-      ['Effective Date', circ.effectiveDate || '—'],
-      ['Regulator', circ.regulator || '—'],
-      ['Circular Type', circ.type || '—'],
-      ['Department', circ.departments || '—'],
-      ['Reference No.', circ.refNo || circ.referenceNo || circ.id],
-    ].map(([l, v]) => `
-        <div class="ov-detail-cell">
-          <div class="ov-dc-label">${l}</div>
-          <div class="ov-dc-val">${v}</div>
-        </div>`).join('')}
     </div>`;
 
   const summary = circ.summary || circ.description || circ.overview || '';
@@ -400,20 +491,217 @@ function _ovRenderDetails(circ, mode) {
       <div class="ov-sb-text">${summary}</div>
     </div>` : '';
 
-  const tags = circ.tags || circ.topics || circ.keywords || [];
-  const tagsBlock = tags.length ? `
-    <div class="ov-tags-row">${tags.map(t => `<span class="ov-tag">${t}</span>`).join('')}</div>` : '';
+  const docUrl = circ.docUrl || '#';
+  const grid = `
+    <div class="ov-detail-grid-2r5c">
+      ${[
+        ['Reference No.', circ.refNo || circ.referenceNo || circ.id],
+        ['View Doc',      docUrl !== '#'
+          ? `<a href="${docUrl}" target="_blank" class="ov-view-doc-link">📄 Open</a>`
+          : `<span class="ov-no-doc">—</span>`],
+           ['Type',          circ.type || '—'],
+        ['Issue Date',    circ.issuedDate || circ.date || '—'],
+        ['Effective Date',circ.effectiveDate || '—'],
+         ['Due Date',      circ.dueDate || '—'],
+        ['Regulator',     circ.regulator || '—'],
+        ['Department',    circ.departments || '—'],
+        ['Status',        circ.status || '—'],
+        ['Risk',          circ.risk || '—'],
+       
+       
+      ].map(([l, v]) => `
+        <div class="ov-detail-cell">
+          <div class="ov-dc-label">${l}</div>
+          <div class="ov-dc-val">${v}</div>
+        </div>`).join('')}
+    </div>`;
 
-  const chapCount = circ.chapters?.length || 0;
-  const clauseCount = circ.chapters?.reduce((s, ch) => s + (ch.clauses?.length || 0), 0) || 0;
-  const statsBlock = (chapCount || clauseCount) ? `
-    <div class="ov-stats-row">
-      ${chapCount ? `<div class="ov-stat-pill"><span class="ov-stat-num">${chapCount}</span><span class="ov-stat-lbl">Chapters</span></div>` : ''}
-      ${clauseCount ? `<div class="ov-stat-pill"><span class="ov-stat-num">${clauseCount}</span><span class="ov-stat-lbl">Clauses</span></div>` : ''}
-    </div>` : '';
+  body.innerHTML = hero + summaryBlock + grid;
+  /* update applicability badge */
+  _ovUpdateApplicBadge(circ);
 
-  body.innerHTML = hero + grid + summaryBlock + tagsBlock + statsBlock;
+
+/* ── EXECUTIVE SUMMARY POPUP ── */
+
 }
+
+function _ovOpenExecSummaryPopup(circ) {
+  document.querySelector('.ov-execsum-popup-overlay')?.remove();
+  const overlay = document.createElement('div');
+  overlay.className = 'ov-applic-popup-overlay ov-execsum-popup-overlay';
+  overlay.innerHTML = `
+    <div class="ov-applic-popup">
+      <div class="ov-applic-popup-head">
+        <button class="ov-applic-popup-back" onclick="this.closest('.ov-execsum-popup-overlay').remove()">←</button>
+        <div>
+          <div class="ov-applic-popup-title">Executive Summary</div>
+          <div class="ov-applic-popup-sub">${circ.id} — ${circ.title}</div>
+        </div>
+        <div style= "
+    justify-items: end;
+    margin-left: auto;
+    display: flex;
+    gap: 5px;
+">
+        <button class="ov-popup-save-btn" id="ov-execsum-save-btn">🔖 Save to My Library</button>
+        <button class="ov-applic-popup-close" onclick="this.closest('.ov-execsum-popup-overlay').remove()">✕</button>
+        </div>
+       
+      </div>
+      <div class="ov-applic-popup-body" id="ov-execsum-popup-body">
+        <div class="ai-loading"><div class="spinner"></div><div class="ai-loading-text">Loading Executive Summary…</div></div>
+      </div>
+    </div>`;
+  document.body.appendChild(overlay);
+  document.getElementById('ov-execsum-save-btn')?.addEventListener('click', function() {
+    this.innerHTML = '✓ Saved';
+    this.disabled  = true;
+    this.style.background  = '#f0fdf4';
+    this.style.borderColor = '#86efac';
+    this.style.color       = '#16a34a';
+    showToast('✓ Summary saved to your library.', 'success');
+  });
+  overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });
+
+  setTimeout(() => {
+    const popBody = document.getElementById('ov-execsum-popup-body');
+    if (!popBody) return;
+    popBody.innerHTML = typeof buildSummaryPanel === 'function'
+      ? buildSummaryPanel()
+      : '<div style="padding:16px;color:#9499aa;font-size:13px;">Not available.</div>';
+    if (typeof initSummaryListeners === 'function') initSummaryListeners();
+  }, 400);
+}
+
+
+
+
+/* ── EDIT MODAL ── */
+function _ovOpenEditModal(circ) {
+  document.querySelector('.ov-edit-modal-overlay')?.remove();
+  const overlay = document.createElement('div');
+  overlay.className = 'ov-applic-popup-overlay ov-edit-modal-overlay';
+  overlay.innerHTML = `
+    <div class="ov-applic-popup" style="max-width:560px;">
+      <div class="ov-applic-popup-head">
+        <button class="ov-applic-popup-back" onclick="this.closest('.ov-edit-modal-overlay').remove()">←</button>
+        <div>
+          <div class="ov-applic-popup-title">Edit Circular Details</div>
+          <div class="ov-applic-popup-sub">${circ.id} — ${circ.title}</div>
+        </div>
+        <button class="ov-applic-popup-close" onclick="this.closest('.ov-edit-modal-overlay').remove()">✕</button>
+      </div>
+      <div class="ov-applic-popup-body">
+        <div class="ov-edit-form">
+          ${[
+            ['Title',          'title',         circ.title           || ''],
+            ['Regulator',      'regulator',     circ.regulator       || ''],
+            ['Type',           'type',          circ.type            || ''],
+            ['Status',         'status',        circ.status          || ''],
+            ['Risk',           'risk',          circ.risk            || ''],
+            ['Issue Date',     'issuedDate',    circ.issuedDate      || circ.date || ''],
+            ['Effective Date', 'effectiveDate', circ.effectiveDate   || ''],
+            ['Deadline',       'deadline',      circ.deadline        || ''],
+            ['Department',     'departments',   circ.departments     || ''],
+            ['Reference No.',  'refNo',         circ.refNo || circ.referenceNo || circ.id],
+          ].map(([label, field, val]) => `
+            <div class="ov-edit-field">
+              <label class="ov-dc-label">${label}</label>
+              <input class="ov-edit-input" data-field="${field}" value="${val}" />
+            </div>`).join('')}
+          <div class="ov-edit-field" style="grid-column:1/-1;">
+            <label class="ov-dc-label">Summary</label>
+            <textarea class="ov-edit-textarea" data-field="summary">${circ.summary || circ.description || ''}</textarea>
+          </div>
+        </div>
+        <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:16px;">
+          <button class="ov-action-btn" onclick="this.closest('.ov-edit-modal-overlay').remove()">Cancel</button>
+          <button class="ov-action-btn ov-action-btn-primary" onclick="_ovSaveEdit(this)">✓ Save Changes</button>
+        </div>
+      </div>
+    </div>`;
+  document.body.appendChild(overlay);
+  overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });
+}
+
+window._ovSaveEdit = function(btn) {
+  const overlay = btn.closest('.ov-edit-modal-overlay');
+  const circId  = AI_LIFECYCLE_STATE.selectedCircularId;
+  const circ    = circId ? (CMS_DATA?.circulars || []).find(c => c.id === circId) : null;
+  if (!circ) return;
+
+  /* push snapshot to history before saving */
+  if (!window._OV_HISTORY) window._OV_HISTORY = [];
+  window._OV_HISTORY.push({ ts: new Date(), snapshot: { ...circ } });
+
+  /* apply edits */
+  overlay.querySelectorAll('[data-field]').forEach(el => {
+    circ[el.dataset.field] = el.value ?? el.textContent;
+  });
+
+  overlay.remove();
+  /* re-render with updated data */
+  _ovRenderDetails(circ, 'existing');
+  showToast('✓ Changes saved.', 'success');
+};
+
+/* ── HISTORY MODAL ── */
+function _ovOpenHistoryModal() {
+  document.querySelector('.ov-history-modal-overlay')?.remove();
+  const history = window._OV_HISTORY || [];
+  const overlay = document.createElement('div');
+  overlay.className = 'ov-applic-popup-overlay ov-history-modal-overlay';
+  overlay.innerHTML = `
+    <div class="ov-applic-popup" style="max-width:520px;">
+      <div class="ov-applic-popup-head">
+        <button class="ov-applic-popup-back" onclick="this.closest('.ov-history-modal-overlay').remove()">←</button>
+        <div>
+          <div class="ov-applic-popup-title">🕓 Edit History</div>
+          <div class="ov-applic-popup-sub">All saved versions of this circular's details</div>
+        </div>
+        <button class="ov-applic-popup-close" onclick="this.closest('.ov-history-modal-overlay').remove()">✕</button>
+      </div>
+      <div class="ov-applic-popup-body">
+        ${!history.length ? `
+          <div style="text-align:center;padding:40px 20px;color:#9499aa;font-size:13px;background:#f5f6f8;border-radius:8px;border:1px dashed #dde0e6;">
+            No edits recorded yet. Use Edit to make changes — they'll appear here.
+          </div>` :
+          [...history].reverse().map((v, i) => {
+            const ts  = v.ts instanceof Date ? v.ts : new Date(v.ts);
+            const num = history.length - i;
+            const timeStr = ts.toLocaleString('en-IN', { dateStyle:'medium', timeStyle:'short' });
+            return `
+            <div class="ov-hist-entry">
+              <div class="ov-hist-meta">
+                <span class="ov-hist-num">v${num}</span>
+                <span class="ov-hist-ts">${timeStr}</span>
+                <span class="ov-hist-badge">Manual Edit</span>
+              </div>
+              <div class="ov-hist-title">${v.snapshot.title || '—'}</div>
+              <button class="ov-hist-restore" onclick="_ovRestoreVersion(${history.length - 1 - i})">↩ Restore</button>
+            </div>`;
+          }).join('')
+        }
+      </div>
+    </div>`;
+  document.body.appendChild(overlay);
+  overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });
+}
+
+window._ovRestoreVersion = function(idx) {
+  const v = (window._OV_HISTORY || [])[idx];
+  if (!v) return;
+  const circId = AI_LIFECYCLE_STATE.selectedCircularId;
+  const circ   = circId ? (CMS_DATA?.circulars || []).find(c => c.id === circId) : null;
+  if (!circ) return;
+  Object.assign(circ, v.snapshot);
+  document.querySelector('.ov-history-modal-overlay')?.remove();
+  _ovRenderDetails(circ, 'existing');
+  showToast(`✓ Restored to v${idx + 1}.`, 'success');
+};
+
+
+
 
 /* ── Mock AI-extracted result for new upload ── */
 function _ovUploadExtractedHTML() {
@@ -445,6 +733,263 @@ function _ovUploadExtractedHTML() {
     <div class="ov-sb-head">AI Extracted Summary</div>
     <div class="ov-sb-text">Summary extracted from uploaded document. Connect to the AI API to populate real extracted content from the PDF/DOCX.</div>
   </div>`;
+}
+
+
+
+function _ovUpdateApplicBadge(circ) {
+  const badge = document.getElementById('ov-applic-badge');
+  const icon = document.getElementById('ov-applic-icon');
+  const label = document.getElementById('ov-applic-label');
+  if (!badge || !icon || !label) return;
+
+  /* mock: treat circ.applicable field, fallback to status Active = applicable */
+  const isApplicable = circ.applicable !== undefined
+    ? !!circ.applicable
+    : (circ.status || '').toLowerCase() === 'active';
+
+  badge.className = 'ov-applic-badge ' + (isApplicable ? 'ov-applic-yes' : 'ov-applic-no');
+  icon.textContent = isApplicable ? '✓' : '✗';
+  label.textContent = isApplicable ? 'Applicable ⓘ' : 'Not Applicable';
+  badge.style.display = 'inline-flex';
+
+  badge.onclick = () => {
+    if (isApplicable) _ovOpenApplicabilityPopup(circ);
+    else showToast('This circular is not applicable.', 'warning');
+  };
+}
+
+function _ovOpenApplicabilityPopup(circ) {
+  document.querySelector('.ov-applic-popup-overlay')?.remove();
+  const overlay = document.createElement('div');
+  overlay.className = 'ov-applic-popup-overlay';
+  overlay.innerHTML = `
+    <div class="ov-applic-popup">
+
+      <!-- HEADER -->
+      <div class="ov-applic-popup-head">
+        <button class="ov-applic-popup-back" onclick="this.closest('.ov-applic-popup-overlay').remove()">←</button>
+        <div style="flex:1;min-width:0;">
+          <div class="ov-applic-popup-title">Applicability Analysis</div>
+          <div class="ov-applic-popup-sub">${circ.id} — ${circ.title}</div>
+        </div>
+        <button class="ov-popup-save-btn" id="ov-popup-save-btn">🔖 Save to My Library</button>
+        <button class="ov-applic-popup-close" onclick="this.closest('.ov-applic-popup-overlay').remove()">✕</button>
+      </div>
+
+      <!-- BODY -->
+      <div class="ov-applic-popup-body" id="ov-applic-popup-body">
+        <div class="ai-loading"><div class="spinner"></div><div class="ai-loading-text">Analysing applicability…</div></div>
+      </div>
+
+    </div>`;
+
+  document.body.appendChild(overlay);
+  overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });
+
+  /* Save button */
+  document.getElementById('ov-popup-save-btn')?.addEventListener('click', function() {
+    this.innerHTML = '✓ Saved';
+    this.disabled  = true;
+    this.style.background   = '#f0fdf4';
+    this.style.borderColor  = '#86efac';
+    this.style.color        = '#16a34a';
+    showToast('✓ Analysis saved to your library.', 'success');
+  });
+
+  setTimeout(() => {
+    const popBody = document.getElementById('ov-applic-popup-body');
+    if (!popBody) return;
+
+    /* inject CSS */
+    injectAppCSS();
+
+    AI_LIFECYCLE_STATE.selectedCircularId = circ.id;
+
+    const et       = (typeof ORG_PROFILE !== 'undefined' ? ORG_PROFILE.entityType : '') || 'NBFC';
+    const params   = _appDeriveParams(et, circ);
+    const entities = _appDeriveEntities(et, circ);
+
+    window._APP_ENT_DATA   = entities.map(e => ({ ...e }));
+    window._APP_PARAM_DATA = params.map(p => ({ ...p }));
+    _APP_HISTORY.entities  = [];
+    _APP_HISTORY.params    = [];
+
+    const yesC  = params.filter(p => p.status === 'yes').length;
+    const partC = params.filter(p => p.status === 'partial').length;
+    const noC   = params.filter(p => p.status === 'no').length;
+    const naC   = params.filter(p => p.status === 'na').length;
+
+    /* verdict */
+    let vClass = 'app-v-yes', vLabel = 'Applicable', vIcon = '✅';
+    let vReason = `This circular is <strong>directly applicable</strong> to your organisation. ${yesC} of ${params.length} parameters match your entity profile (${et}).`;
+    if (noC >= params.length / 2) {
+      vClass  = 'app-v-no';
+      vLabel  = 'Not Applicable';
+      vIcon   = '🚫';
+      vReason = `This circular is <strong>not applicable</strong> to your organisation. The regulatory scope does not match your entity profile.`;
+    } else if (partC >= 2) {
+      vClass  = 'app-v-partial';
+      vLabel  = 'Partially Applicable';
+      vIcon   = '⚠️';
+      vReason = `This circular is <strong>partially applicable</strong>. ${partC} parameter${partC > 1 ? 's' : ''} require further legal review.`;
+    }
+
+    popBody.innerHTML = `
+    <div class="app-results">
+
+      <!-- VERDICT -->
+      <div class="app-verdict-banner ${vClass}">
+        <div class="app-verdict-icon">${vIcon}</div>
+        <div class="app-verdict-body">
+          <div class="app-verdict-title">AI Verdict — ${vLabel}</div>
+          <div class="app-verdict-text">${vReason}</div>
+        </div>
+        <span class="app-verdict-badge">${vLabel}</span>
+      </div>
+
+      <!-- TABLE 1: APPLICABLE ENTITIES -->
+      <div class="app-section-card">
+        <div class="app-sec-head">
+          <div>
+            <span class="app-sec-title">Applicable Entities</span>
+            <span class="app-sec-sub">Entity types this circular is issued for</span>
+          </div>
+          <div class="app-sec-actions">
+            <div class="app-dots-wrap">
+              <button class="app-dots-btn" id="ov-ent-dots-btn">⋮</button>
+              <div class="app-dots-menu" id="ov-ent-dots-menu" style="display:none;">
+                <div class="app-dots-item" id="ov-ent-edit">✏️&nbsp; Edit</div>
+                <div class="app-dots-item" id="ov-ent-history">🕑&nbsp; History</div>
+                <div class="app-dots-item" id="ov-ent-regen">✦&nbsp; Regen with AI Context</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="app-table-wrap">
+          <table class="app-table" id="app-ent-table">
+            <thead><tr>
+              <th style="width:55%">Entity Type</th>
+              <th style="width:110px;">Applicable</th>
+              <th class="app-th-edit-only" style="width:80px;display:none;">Action</th>
+            </tr></thead>
+            <tbody id="app-ent-tbody">
+              ${entities.map((e, i) => _appEntityRow(e, i)).join('')}
+            </tbody>
+          </table>
+        </div>
+        <div class="app-edit-bar" id="app-ent-edit-bar" style="display:none;">
+          <span class="app-edit-bar-info">✎ Edit mode — toggle Applicable status per row</span>
+          <button class="app-edit-bar-cancel" onclick="_appCancelEntityEdit()">Cancel</button>
+          <button class="app-edit-bar-save"   onclick="_appSaveEntityEdit()">Save Changes</button>
+        </div>
+      </div>
+
+      <!-- TABLE 2: PARAMETERS -->
+      <div class="app-section-card">
+        <div class="app-sec-head">
+          <div>
+            <span class="app-sec-title">Applicability Parameters</span>
+            <span class="app-sec-sub">Requirements, thresholds &amp; conditions</span>
+          </div>
+          <div class="app-sec-actions">
+            <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;">
+              <span class="app-pill app-pill-yes">${yesC} Met</span>
+              ${partC > 0 ? `<span class="app-pill app-pill-part">${partC} Partial</span>` : ''}
+              ${noC   > 0 ? `<span class="app-pill app-pill-no">${noC} Not Met</span>`     : ''}
+              ${naC   > 0 ? `<span class="app-pill app-pill-na">${naC} N/A</span>`         : ''}
+            </div>
+            <div class="app-dots-wrap">
+              <button class="app-dots-btn" id="ov-param-dots-btn">⋮</button>
+              <div class="app-dots-menu" id="ov-param-dots-menu" style="display:none;">
+                <div class="app-dots-item" id="ov-param-edit">✏️&nbsp; Edit</div>
+                <div class="app-dots-item" id="ov-param-history">🕑&nbsp; History</div>
+                <div class="app-dots-item" id="ov-param-regen">✦&nbsp; Regen with AI Context</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="app-table-wrap">
+          <table class="app-table" id="app-param-table">
+            <thead><tr>
+              <th>Requirement</th>
+              <th>Threshold / Condition</th>
+              <th style="width:120px;">Applicable</th>
+              <th style="width:54px;text-align:center;">Why</th>
+              <th class="app-th-edit-only" style="width:70px;display:none;text-align:center;">Action</th>
+            </tr></thead>
+            <tbody id="app-param-tbody">
+              ${params.map((p, i) => _appParamRow(p, i)).join('')}
+            </tbody>
+          </table>
+        </div>
+        <div class="app-edit-bar" id="app-param-edit-bar" style="display:none;">
+          <span class="app-edit-bar-info">✎ Edit mode — click cells to edit values</span>
+          <button class="app-edit-bar-cancel" onclick="_appCancelParamEdit()">Cancel</button>
+          <button class="app-edit-bar-save"   onclick="_appSaveParamEdit()">Save Changes</button>
+        </div>
+      </div>
+
+    </div>`;
+
+    /* wire dots with event delegation AFTER innerHTML is set */
+    _ovWireApplicPopupDots();
+
+  }, 600);
+}
+
+/* ── wire dots inside applicability popup ── */
+function _ovWireApplicPopupDots() {
+
+  /* ENTITIES dots */
+  document.getElementById('ov-ent-dots-btn')?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const menu = document.getElementById('ov-ent-dots-menu');
+    const pm   = document.getElementById('ov-param-dots-menu');
+    if (pm) pm.style.display = 'none';
+    if (menu) menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
+  });
+  document.getElementById('ov-ent-edit')?.addEventListener('click', () => {
+    document.getElementById('ov-ent-dots-menu').style.display = 'none';
+    _appToggleEntityEdit();
+  });
+  document.getElementById('ov-ent-history')?.addEventListener('click', () => {
+    document.getElementById('ov-ent-dots-menu').style.display = 'none';
+    _appOpenVerModal('entities');
+  });
+  document.getElementById('ov-ent-regen')?.addEventListener('click', () => {
+    document.getElementById('ov-ent-dots-menu').style.display = 'none';
+    _appOpenCtxModal();
+  });
+
+  /* PARAMS dots */
+  document.getElementById('ov-param-dots-btn')?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const menu = document.getElementById('ov-param-dots-menu');
+    const em   = document.getElementById('ov-ent-dots-menu');
+    if (em) em.style.display = 'none';
+    if (menu) menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
+  });
+  document.getElementById('ov-param-edit')?.addEventListener('click', () => {
+    document.getElementById('ov-param-dots-menu').style.display = 'none';
+    _appToggleParamEdit();
+  });
+  document.getElementById('ov-param-history')?.addEventListener('click', () => {
+    document.getElementById('ov-param-dots-menu').style.display = 'none';
+    _appOpenVerModal('params');
+  });
+  document.getElementById('ov-param-regen')?.addEventListener('click', () => {
+    document.getElementById('ov-param-dots-menu').style.display = 'none';
+    _appOpenCtxModal();
+  });
+
+  /* close both menus on outside click */
+  document.addEventListener('click', function _closePopupDots(e) {
+    if (!e.target.closest('.app-dots-wrap')) {
+      document.getElementById('ov-ent-dots-menu')?.style && (document.getElementById('ov-ent-dots-menu').style.display = 'none');
+      document.getElementById('ov-param-dots-menu')?.style && (document.getElementById('ov-param-dots-menu').style.display = 'none');
+    }
+  });
 }
 
 /* ================================================================ UTILS */
@@ -482,7 +1027,7 @@ function retryExtraction() {
 
 function manualEntry() {
   closeModal();
-   renderAISuggestionPage();
+  renderAISuggestionPage();
   showToast('Switching to manual entry mode...', 'info');
 }
 
@@ -587,6 +1132,108 @@ function injectOverviewCSS() {
   #ov-card1 .sh-card-body { overflow:visible !important; }
   #ov-card1               { overflow:visible !important; }
 
+
+.ov-saved-toggle { padding:4px 10px;background:#fff;border:1.5px solid #dde0e6;border-radius:8px;
+  font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;color:#4a5068;
+  cursor:pointer;transition:all 0.14s;
+  }
+
+.ov-saved-toggle:hover { border-color:#86efac;color:#15803d; }
+
+
+  /* ── 2-ROW 5-COL GRID ── */
+  .ov-detail-grid-2r5c { display:grid;grid-template-columns:repeat(5,1fr);gap:1px;background:#dde0e6;border-radius:8px;overflow:hidden;margin-bottom:12px; }
+
+  /* ── 3-DOTS ── */
+  .ov-dots-wrap { position:relative;flex-shrink:0; }
+  .ov-dots-btn  { width:30px;height:30px;border:1px solid #dde0e6;border-radius:6px;
+    background:#fff;font-size:20px;line-height:1;cursor:pointer;color:#4a5068;
+    display:flex;align-items:center;justify-content:center;transition:all 0.13s; }
+  .ov-dots-btn:hover { background:#f5f6f8;border-color:#9499aa;color:#1a1a2e; }
+  .ov-dots-menu { position:absolute;top:calc(100% + 5px);right:0;background:#fff;
+    border:1.5px solid #dde0e6;border-radius:10px;min-width:180px;z-index:9999;
+    box-shadow:0 8px 24px rgba(26,26,46,0.12);overflow:hidden; }
+  .ov-dots-item { padding:9px 14px;font-size:12px;font-weight:600;color:#4a5068;
+    cursor:pointer;transition:background 0.1s;display:flex;align-items:center;gap:8px; }
+  .ov-dots-item:hover { background:#f5f6f8;color:#1a1a2e; }
+  .ov-dots-item + .ov-dots-item { border-top:1px solid #f0f1f4; }
+
+
+  /* ── EDIT MODAL ── */
+  .ov-edit-form { display:grid;grid-template-columns:1fr 1fr;gap:10px; }
+  .ov-edit-field { display:flex;flex-direction:column;gap:4px; }
+  .ov-edit-input { padding:8px 10px;background:#f5f6f8;border:1.5px solid #dde0e6;border-radius:7px;
+    font-family:'DM Sans',sans-serif;font-size:12px;color:#1a1a2e;outline:none;transition:border-color 0.13s; }
+  .ov-edit-input:focus { border-color:#1a1a2e;background:#fff; }
+  .ov-edit-textarea { padding:8px 10px;background:#f5f6f8;border:1.5px solid #dde0e6;border-radius:7px;
+    font-family:'DM Sans',sans-serif;font-size:12px;color:#1a1a2e;outline:none;min-height:80px;
+    resize:vertical;transition:border-color 0.13s; }
+  .ov-edit-textarea:focus { border-color:#1a1a2e;background:#fff; }
+
+  /* ── HISTORY MODAL ── */
+  .ov-hist-entry { background:#f5f6f8;border:1px solid #dde0e6;border-radius:8px;
+    padding:12px 14px;display:flex;flex-direction:column;gap:6px;margin-bottom:8px; }
+  .ov-hist-meta  { display:flex;align-items:center;gap:8px;flex-wrap:wrap; }
+  .ov-hist-num   { font-family:'DM Mono',monospace;font-size:11px;font-weight:700;
+    background:#1a1a2e;color:#fff;padding:1px 7px;border-radius:4px; }
+  .ov-hist-ts    { font-size:11px;color:#9499aa; }
+  .ov-hist-badge { font-size:10px;font-weight:700;padding:2px 8px;background:#eff6ff;
+    border:1px solid #bfdbfe;color:#2563eb;border-radius:20px; }
+  .ov-hist-title { font-size:12px;font-weight:600;color:#1a1a2e; }
+  .ov-hist-restore { align-self:flex-start;padding:4px 12px;background:#fff;
+    border:1.5px solid #dde0e6;border-radius:6px;font-size:11px;font-weight:600;
+    color:#4a5068;cursor:pointer;transition:all 0.12s; }
+  .ov-hist-restore:hover { background:#1a1a2e;color:#fff;border-color:#1a1a2e; }
+
+
+  /* ── APPLICABILITY BADGE ── */
+  .ov-applic-badge { display:none;align-items:center;gap:5px;padding:4px 11px;
+    border-radius:20px;font-size:11px;font-weight:700;cursor:pointer;
+    border:1.5px solid;transition:all 0.14s;flex-shrink:0; }
+  .ov-applic-yes { background:#dcfce7;border-color:#86efac;color:#15803d; }
+  .ov-applic-yes:hover { background:#bbf7d0; }
+  .ov-applic-no  { background:#fee2e2;border-color:#fca5a5;color:#b91c1c; }
+  .ov-applic-no:hover  { background:#fecaca; }
+
+  /* ── APPLICABILITY + EXEC SUMMARY POPUP ── */
+  .ov-applic-popup-overlay { position:fixed;inset:0;background:rgba(0,0,0,0.45);
+    display:flex;align-items:center;justify-content:center;z-index:9998;padding:20px; }
+  .ov-applic-popup { background:#fff;border-radius:16px;width:min(820px,95vw);
+    max-height:88vh;display:flex;flex-direction:column;overflow:hidden;
+    box-shadow:0 20px 48px rgba(26,26,46,0.18); }
+  .ov-applic-popup-head { display:flex;align-items:center;gap:10px;
+    padding:16px 20px;border-bottom:1px solid #dde0e6;flex-shrink:0; }
+  .ov-applic-popup-back { width:30px;height:30px;border:1px solid #dde0e6;border-radius:6px;
+    background:#fff;cursor:pointer;font-size:15px;color:#4a5068;flex-shrink:0;
+    display:flex;align-items:center;justify-content:center;transition:all 0.12s; }
+  .ov-applic-popup-back:hover { background:#f5f6f8;color:#1a1a2e; }
+  .ov-applic-popup-title { font-size:15px;font-weight:700;color:#1a1a2e; }
+  .ov-applic-popup-sub   { font-size:11px;color:#9499aa;margin-top:2px; }
+  .ov-applic-popup-close { width:28px;height:28px;border:1px solid #dde0e6;border-radius:6px;
+    background:#fff;cursor:pointer;font-size:13px;color:#9499aa;margin-left:auto;flex-shrink:0;
+    display:flex;align-items:center;justify-content:center;transition:all 0.12s; }
+  .ov-applic-popup-close:hover { background:#fee2e2;color:#b91c1c;border-color:#fca5a5; }
+  .ov-applic-popup-body { flex:1;overflow-y:auto;padding:18px 20px; }
+
+  /* ── VIEW DOC ── */
+  .ov-view-doc-link { color:#2563eb;font-weight:600;text-decoration:none;font-size:12px; }
+  .ov-view-doc-link:hover { text-decoration:underline; }
+  .ov-no-doc { color:#9499aa;font-size:12px; }
+
+/* ── 3-DOTS MENU ── */
+.app-dots-wrap { position:relative;flex-shrink:0; }
+.app-dots-btn  { width:30px;height:30px;border:1.5px solid #dde0e6;border-radius:6px;
+  background:#fff;font-size:18px;line-height:1;cursor:pointer;color:#4a5068;
+  display:flex;align-items:center;justify-content:center;transition:all 0.13s;
+  font-family:'DM Sans',sans-serif; }
+.app-dots-btn:hover { background:#f5f6f8;border-color:#9499aa;color:#1a1a2e; }
+.app-dots-menu { position:absolute;top:calc(100% + 5px);right:0;background:#fff;
+  border:1.5px solid #dde0e6;border-radius:10px;min-width:190px;z-index:9999;
+  box-shadow:0 8px 24px rgba(26,26,46,0.12);overflow:hidden; }
+.app-dots-item { padding:9px 14px;font-size:12px;font-weight:600;color:#4a5068;
+  cursor:pointer;transition:background 0.1s;display:flex;align-items:center;gap:8px; }
+.app-dots-item:hover { background:#f5f6f8;color:#1a1a2e; }
+.app-dots-item + .app-dots-item { border-top:1px solid #f0f1f4; }
   /* dropdown */
   .ov-dropdown { position:absolute;top:calc(100% + 4px);left:0;right:0;background:#fff;
     border:1.5px solid #dde0e6;border-radius:10px;z-index:9999;max-height:240px;
@@ -621,6 +1268,15 @@ function injectOverviewCSS() {
   .ov-confirm-btn:disabled { background:#c4c8d4;cursor:not-allowed;opacity:0.65; }
   .ov-confirm-btn:not(:disabled):hover { background:#2d2d4e; }
 
+
+  /* ── POPUP SAVE BUTTON ── */
+  .ov-popup-save-btn { padding:5px 12px;background:#fff;border:1.5px solid #86efac;
+    border-radius:6px;font-family:'DM Sans',sans-serif;font-size:11px;font-weight:600;
+    color:#16a34a;cursor:pointer;white-space:nowrap;transition:all 0.13s;flex-shrink:0; }
+  .ov-popup-save-btn:hover { background:#f0fdf4; }
+  .ov-popup-save-btn:disabled { opacity:0.7;cursor:default; }
+
+  
   /* ── DETAILS CARD HEADER ACTIONS ── */
   .ov-details-actions { display:flex;align-items:center;gap:8px;flex-shrink:0;margin-left:auto; }
   .ov-action-btn { padding:5px 12px;background:#fff;border:1px solid #dde0e6;border-radius:6px;

@@ -250,212 +250,377 @@ const CMS_DATA = {
         }
       ]
     },
+    ///HDFC Document 1
     {
-      "id": "SEBI-LODR-2024-001",
-      "title": "SEBI Master Circular for LODR Compliance",
-      "regulator": "SEBI",
-      "issuedDate": "2024-11-11",
-      "effectiveDate": "2024-11-11",
-      "type": "Master",
-      "status": "Active",
-      "docUrl": "./SEBI Master Circular.pdf",
-      "departments": ["Compliance", "Legal", "Finance", "Secretarial"],
-      "risk": "High",
-      "complianceScore": 65,
-      "summary": "Master circular consolidating SEBI LODR compliance requirements including disclosures, governance, and reporting obligations for listed entities.",
-
-      "chapters": [
+  "id": "SEBI-MF-2023-117",
+  "title": "Roles and Responsibilities of Trustees and Board of Directors of AMCs of Mutual Funds",
+  "regulator": "SEBI",
+  "issuedDate": "2023-07-07",
+  "effectiveDate": "2024-01-01",
+  "type": "Circular",
+  "status": "Active",
+  "docUrl": "./2023-07-07 - Role & Resp of Trustees and AMC directors of a Mutual Fund.pdf",
+  "departments": ["Compliance", "Risk", "Legal"],
+  "risk": "High",
+  "complianceScore": 0,
+  "summary": "Defines core responsibilities of Trustees and operational mechanisms through UHPC to protect unitholders.",
+  
+  "chapters": [
+    {
+      "num": 4,
+      "title": "Core Responsibilities of Trustees",
+      "clauses": [
         {
-          "num": 1,
-          "title": "Uniform Listing Agreement",
-          "clauses": [
-            {
-              "id": "C1.1",
-              "text": "Listed entities shall comply with the Uniform Listing Agreement prescribed by SEBI.",
-              "obligations": [
-                "Ensure execution of uniform listing agreement",
-                "Ensure compliance with all terms of listing agreement",
-                "Ensure alignment with LODR provisions"
-              ],
-              "actionables": [
-                "Adopt SEBI prescribed listing agreement format",
-                "Maintain signed agreements with stock exchanges",
-                "Track compliance with agreement clauses"
-              ],
-          "department": "Legal",
-              "risk": "High",
-              "status": "Open",
-              "pageNo": 7
-            }
+          "id": "4.1.1(a)",
+          "text": "Trustees shall ensure fairness of fees and expenses charged by AMCs.",
+          "obligations": [
+            "Ensure fairness of AMC fees and expenses"
           ],
-              "sections": [
-                {
-                  "id": "Section 1",
-                  "text": "Listing Agreement Compliance",
-                  "clauses": ["C1.1"]
-                }
-              ]
-        },
-        {
-          "num": 2,
-          "title": "Periodic Disclosures (Non-Financial)",
-          "clauses": [
-            {
-              "id": "C2.1",
-              "text": "Listed entities shall disclose shareholding pattern periodically.",
-              "obligations": [
-                "Ensure periodic disclosure of shareholding pattern",
-                "Ensure accuracy of promoter and public shareholding",
-                "Ensure submission within timelines"
-              ],
-              "actionables": [
-                "Generate shareholding reports",
-                "Validate promoter holdings",
-                "Submit to stock exchange within due date"
-              ],
-              "department": "Compliance",
-              "risk": "High",
-              "status": "Open",
-              "pageNo": 8
-            },
-            {
-              "id": "C2.2",
-              "text": "Listed entities shall submit corporate governance compliance reports.",
-              "obligations": [
-                "Ensure quarterly corporate governance reporting",
-                "Ensure compliance with board composition norms",
-                "Ensure disclosure of governance practices"
-              ],
-              "actionables": [
-                "Prepare quarterly governance report",
-                "Validate board committee composition",
-                "File report with exchanges"
-              ],
-              "department": "Secretarial",
-              "risk": "High",
-              "status": "Open",
-              "pageNo": 12
-            }
+          "actionables": [
+            "Review fee structure periodically",
+            "Benchmark fees with peers"
           ],
-          
-  "sections": [
-    {
-      "id": "Section 1",
-      "text": "Shareholding Disclosures",
-      "clauses": ["C2.1"]
-    },
-    {
-      "id": "Section 2",
-      "text": "Corporate Governance Reporting",
-      "clauses": ["C2.2"]
-    }
-  ]
+          "department": "Compliance",
+          "risk": "High",
+          "status": "Open",
+          "pageNo": 2
         },
         {
-          "num": 3,
-          "title": "Financial Disclosures",
-          "clauses": [
-            {
-              "id": "C3.1",
-              "text": "Listed entities shall disclose financial results periodically.",
-              "obligations": [
-                "Ensure quarterly and annual financial disclosures",
-                "Ensure audit or limited review compliance",
-                "Ensure transparency in financial reporting"
-              ],
-              "actionables": [
-                "Prepare financial statements",
-                "Obtain auditor review",
-                "Submit results to stock exchange"
-              ],
-              "department": "Finance",
-              "risk": "High",
-              "status": "Open",
-              "pageNo": 14
-            },
-            {
-              "id": "C3.2",
-              "text": "Listed entities shall disclose related party transactions.",
-              "obligations": [
-                "Ensure disclosure of related party transactions",
-                "Ensure approval of audit committee",
-                "Ensure arm’s length compliance"
-              ],
-              "actionables": [
-                "Identify related party transactions",
-                "Obtain approvals",
-                "Disclose in prescribed format"
-              ],
-              "department": "Finance",
-              "risk": "High",
-              "status": "Open",
-              "pageNo": 18
-            }
-          ]
-        },
-        {
-          "num": 4,
-          "title": "Annual Disclosures",
-          "clauses": [
-            {
-              "id": "C4.1",
-              "text": "Listed entities shall submit annual secretarial compliance report.",
-              "obligations": [
-                "Ensure annual secretarial audit",
-                "Ensure compliance certification",
-                "Ensure submission within timelines"
-              ],
-              "actionables": [
-                "Appoint practicing company secretary",
-                "Conduct audit",
-                "Submit report"
-              ],
-              "department": "Secretarial",
-              "risk": "Medium",
-              "status": "Open",
-              "pageNo": 22
-            }
-          ]
-        },
-        {
-          "num": 5,
-          "title": "Event-Based Disclosures",
-          "clauses": [
-            {
-              "id": "C5.1",
-              "text": "Listed entities shall disclose material events to stock exchanges.",
-              "obligations": [
-                "Ensure timely disclosure of material events",
-                "Ensure accuracy of disclosures",
-                "Ensure compliance with regulation 30"
-              ],
-              "actionables": [
-                "Identify material events",
-                "Prepare disclosure",
-                "Submit to exchange promptly"
-              ],
-              "department": "Compliance",
-              "risk": "High",
-              "status": "Open",
-              "pageNo": 26
-            }
-          ]
-        }
-      ],
-
-      "amendments": [
-        {
-          "date": "2023-07-11",
-          "version": "1.0",
-          "description": "Initial master circular issued consolidating LODR provisions."
-        },
-        {
-          "date": "2024-11-11",
-          "version": "2.0",
-          "description": "Updated master circular including amendments up to September 30, 2024."
+          "id": "4.1.2",
+          "text": "Trustees shall ensure system-level checks to prevent fraud including front running.",
+          "obligations": [
+            "Ensure systems prevent fraudulent transactions"
+          ],
+          "actionables": [
+            "Implement fraud detection systems",
+            "Review alerts periodically"
+          ],
+          "department": "Risk",
+          "risk": "High",
+          "status": "Open",
+          "pageNo": 2
         }
       ]
+    }
+  ],
+
+  "annexures": [
+    {
+      "id": "Annexure 1",
+      "title": "Unit Holder Protection Committee",
+      "clauses": [
+        {
+          "id": "1(a)",
+          "text": "Chairperson of the Committee shall be an independent director.",
+          "obligations": [
+            "Ensure UHPC Chairperson is independent"
+          ],
+          "actionables": [
+            "Verify independence criteria",
+            "Document board approval"
+          ],
+          "department": "Compliance",
+          "risk": "Medium",
+          "status": "Open",
+          "pageNo": 6
+        },
+        {
+          "id": "2(a)",
+          "text": "At least four meetings shall be held in a financial year.",
+          "obligations": [
+            "Ensure minimum four UHPC meetings annually"
+          ],
+          "actionables": [
+            "Schedule quarterly meetings",
+            "Track meeting completion"
+          ],
+          "department": "Compliance",
+          "risk": "Medium",
+          "status": "Open",
+          "pageNo": 6
+        },
+        {
+          "id": "4.1(a)",
+          "text": "Review of unit holder complaints and grievances periodically.",
+          "obligations": [
+            "Ensure periodic review of complaints"
+          ],
+          "actionables": [
+            "Track complaint ageing",
+            "Perform root cause analysis"
+          ],
+          "department": "Compliance",
+          "risk": "High",
+          "status": "Open",
+          "pageNo": 6
+        },
+        {
+          "id": "4.3(a)",
+          "text": "Ensure compliance with applicable laws for complaints and disclosures.",
+          "obligations": [
+            "Ensure regulatory compliance in grievance handling"
+          ],
+          "actionables": [
+            "Implement compliance checks",
+            "Audit complaint processes"
+          ],
+          "department": "Compliance",
+          "risk": "High",
+          "status": "Open",
+          "pageNo": 7
+        }
+      ]
+    }
+  ],
+
+  "amendments": []
+},
+//HDFC Doc 2
+{
+  "id": "SEBI-MF-2023-160",
+  "title": "Nomination for Mutual Fund Unit Holders – Extension of timelines",
+  "regulator": "SEBI",
+  "issuedDate": "2023-09-27",
+  "effectiveDate": "2024-01-01",
+  "type": "Circular",
+  "status": "Active",
+  "docUrl": "./2023-09-27 - Nomination for Mutual Fund Unit Holders – Extension of timelines.pdf",
+  "departments": ["Compliance", "Operations"],
+  "risk": "High",
+  "complianceScore": 0,
+  "summary": "SEBI extended the timeline for nomination compliance for mutual fund unit holders and mandated periodic communication to non-compliant investors.",
+  
+  "chapters": [
+    {
+      "num": 1,
+      "title": "Nomination Compliance and Timeline Extension",
+      "clauses": [
+        {
+          "id": "Para 2",
+          "text": "Freezing of folios for non-compliance with nomination requirement shall be effective from January 01, 2024 instead of September 30, 2023.",
+          "obligations": [
+            "Ensure enforcement of folio freezing only from January 01, 2024",
+            "Align systems with revised compliance timeline"
+          ],
+          "actionables": [
+            "Update system logic to reflect new deadline",
+            "Communicate revised deadline internally",
+            "Ensure no premature freezing before January 01, 2024"
+          ],
+          "department": "Operations",
+          "risk": "High",
+          "status": "Open",
+          "pageNo": 1
+        },
+        {
+          "id": "Para 3",
+          "text": "AMCs and RTAs shall encourage unit holders to complete nomination or opt out by sending fortnightly communications via email and SMS.",
+          "obligations": [
+            "Ensure periodic communication to non-compliant unit holders",
+            "Provide guidance for nomination or opting out"
+          ],
+          "actionables": [
+            "Identify non-compliant unit holders",
+            "Send fortnightly emails and SMS",
+            "Include clear guidance in communication",
+            "Track communication delivery and response"
+          ],
+          "department": "Compliance",
+          "risk": "High",
+          "status": "Open",
+          "pageNo": 1
+        },
+        {
+          "id": "Para 4",
+          "text": "All other provisions of earlier SEBI circulars on nomination shall remain unchanged.",
+          "obligations": [
+            "Ensure compliance with previous nomination circular provisions"
+          ],
+          "actionables": [
+            "Refer and align with earlier SEBI circulars",
+            "Validate existing processes remain compliant"
+          ],
+          "department": "Compliance",
+          "risk": "Medium",
+          "status": "Open",
+          "pageNo": 1
+        }
+      ]
+    }
+  ],
+
+  "annexures": [],
+
+  "amendments": [
+    {
+      "date": "2022-06-15",
+      "version": "1.0",
+      "description": "Initial nomination requirement introduced."
     },
+    {
+      "date": "2022-07-29",
+      "version": "1.1",
+      "description": "Further clarification on nomination requirements."
+    },
+    {
+      "date": "2023-03-28",
+      "version": "1.2",
+      "description": "Additional guidance on nomination compliance."
+    }
+  ]
+},
+{
+  "id": "SEBI-2023-193",
+  "title": "Extension of timelines for providing choice of nomination in eligible demat accounts and mutual fund folios",
+  "regulator": "SEBI",
+  "issuedDate": "2023-12-27",
+  "effectiveDate": "2023-12-27",
+  "type": "Circular",
+  "status": "Active",
+  "docUrl": "./2023-12-27 Extension of timelines for providing choice of nomination in eligible demat accounts and mutual fund folios.pdf",
+  "departments": ["Compliance", "Operations", "Legal"],
+  "risk": "High",
+  "complianceScore": 0,
+  "summary": "SEBI extended the deadline for submission of nomination for demat accounts and mutual fund folios and prescribed implementation, communication and compliance monitoring requirements.",
+  
+  "chapters": [
+    {
+      "num": 1,
+      "title": "Nomination Timeline Extension and Compliance Requirements",
+      "clauses": [
+        {
+          "id": "Para 2",
+          "text": "Deadline for submission of choice of nomination extended to June 30, 2024.",
+          "obligations": [
+            "Ensure compliance with revised nomination deadline",
+            "Align systems with extended timeline"
+          ],
+          "actionables": [
+            "Update system deadline to June 30, 2024",
+            "Communicate revised deadline internally",
+            "Ensure no enforcement before revised date"
+          ],
+          "department": "Operations",
+          "risk": "High",
+          "status": "Open",
+          "pageNo": 1
+        },
+        {
+          "id": "Para 3",
+          "text": "Entities shall encourage account holders to complete nomination by sending fortnightly email and SMS communication.",
+          "obligations": [
+            "Ensure periodic communication to non-compliant holders",
+            "Provide guidance for nomination or opting out"
+          ],
+          "actionables": [
+            "Identify non-compliant account holders",
+            "Send fortnightly emails and SMS",
+            "Include guidance for nomination process",
+            "Track communication effectiveness"
+          ],
+          "department": "Compliance",
+          "risk": "High",
+          "status": "Open",
+          "pageNo": 1
+        },
+        {
+          "id": "Para 4(a)",
+          "text": "Entities shall take necessary steps to implement provisions including amendments to bye-laws, rules and operational instructions.",
+          "obligations": [
+            "Ensure implementation of circular provisions",
+            "Amend internal rules and operational frameworks"
+          ],
+          "actionables": [
+            "Review existing rules and policies",
+            "Amend bye-laws and operational instructions",
+            "Document changes"
+          ],
+          "department": "Legal",
+          "risk": "High",
+          "status": "Open",
+          "pageNo": 2
+        },
+        {
+          "id": "Para 4(b)",
+          "text": "Entities shall bring provisions of this circular to the notice of their constituents and disseminate it on their websites.",
+          "obligations": [
+            "Ensure communication of circular to stakeholders"
+          ],
+          "actionables": [
+            "Publish circular on website",
+            "Notify stakeholders and clients",
+            "Maintain communication records"
+          ],
+          "department": "Compliance",
+          "risk": "Medium",
+          "status": "Open",
+          "pageNo": 2
+        },
+        {
+          "id": "Para 4(c)",
+          "text": "Entities shall communicate to SEBI the status of implementation.",
+          "obligations": [
+            "Report implementation status to SEBI"
+          ],
+          "actionables": [
+            "Prepare implementation status report",
+            "Submit report to SEBI within timeline"
+          ],
+          "department": "Compliance",
+          "risk": "High",
+          "status": "Open",
+          "pageNo": 2
+        },
+        {
+          "id": "Para 4(d)",
+          "text": "Entities shall monitor compliance of this circular.",
+          "obligations": [
+            "Ensure ongoing monitoring of compliance"
+          ],
+          "actionables": [
+            "Set up compliance monitoring mechanism",
+            "Track adherence periodically",
+            "Escalate non-compliance"
+          ],
+          "department": "Risk",
+          "risk": "High",
+          "status": "Open",
+          "pageNo": 2
+        },
+        {
+          "id": "Para 5",
+          "text": "All other provisions of earlier SEBI master circulars shall remain unchanged.",
+          "obligations": [
+            "Ensure continued compliance with existing master circular provisions"
+          ],
+          "actionables": [
+            "Refer relevant SEBI master circulars",
+            "Validate current processes against existing requirements"
+          ],
+          "department": "Compliance",
+          "risk": "Medium",
+          "status": "Open",
+          "pageNo": 2
+        }
+      ]
+    }
+  ],
+
+  "annexures": [],
+
+  "amendments": [
+    {
+      "date": "2023-09-26",
+      "version": "1.0",
+      "description": "Initial extension of nomination deadline to December 31, 2023."
+    },
+    {
+      "date": "2023-09-27",
+      "version": "1.1",
+      "description": "Extension of nomination timeline for mutual fund folios."
+    }
+  ]
+},
     {
       id: 'CIRC-2024-003',
       title: 'Data Localisation and Cloud Policy',
