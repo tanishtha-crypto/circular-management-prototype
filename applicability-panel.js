@@ -10,34 +10,42 @@ function buildApplicabilityPanel() {
   return `
   <div class="app-wrap">
 
-    <!-- NO CIRCULAR SELECTED STATE -->
-    <div id="app-no-circ" class="app-empty-state" style="display:none;">
-      <div class="app-empty-icon">🗂️</div>
-      <div class="app-empty-title">No Circular Selected</div>
-      <div class="app-empty-sub">Please go to the Overview tab to select a circular first.</div>
-      <button class="app-empty-btn" onclick="document.querySelector('[data-tab=\\'overview\\']').click()">
-        ← Go to Overview
-      </button>
+    <!-- CIRCULAR SELECTOR (always visible, pre-filled if coming from overview) -->
+    <div class="sh-card" id="app-circ-selector-card">
+      <div class="sh-card-head">
+        <div class="sh-dot" id="app-sel-dot">1</div>
+        <div style="flex:1;min-width:0;">
+          <div class="sh-card-title">Select Circular</div>
+          <div class="sh-card-sub">Search and confirm a circular to analyse applicability</div>
+        </div>
+      </div>
+      <div class="sh-card-body" style="overflow:visible;">
+        <div class="app-sel-row">
+          <div class="app-sel-search-wrap">
+            <span class="app-sel-icon">⌕</span>
+            <input class="app-sel-input" id="app-sel-input" type="text"
+              placeholder="Search by ID, title, regulator…" autocomplete="off"/>
+            <div class="app-sel-dropdown" id="app-sel-dropdown" style="display:none;"></div>
+          </div>
+          <button class="app-sel-confirm-btn" id="app-sel-confirm-btn" disabled>Confirm →</button>
+        </div>
+        <!-- confirmed strip -->
+        <div class="app-sel-confirmed" id="app-sel-confirmed" style="display:none;">
+          <div class="app-sel-conf-left">
+            <span class="app-sel-conf-id" id="app-sel-conf-id"></span>
+            <span class="app-sel-conf-sep">·</span>
+            <span class="app-sel-conf-name" id="app-sel-conf-name"></span>
+          </div>
+          <button class="app-sel-change-btn" id="app-sel-change-btn">⇄ Change</button>
+        </div>
+      </div>
     </div>
 
     <!-- MAIN CONTENT (shown when circular selected) -->
     <div id="app-main">
 
-      <!-- CIRCULAR CONTEXT STRIP -->
-      <div class="app-circ-strip" id="app-circ-strip">
-        <div class="app-cs-left">
-          <span class="app-cs-id" id="app-cs-id">—</span>
-          <span class="app-cs-sep">·</span>
-          <span class="app-cs-name" id="app-cs-name">—</span>
-        </div>
-        <div class="app-cs-right">
-          <span class="app-cs-reg"  id="app-cs-reg"  style="display:none;"></span>
-          <span class="app-cs-risk" id="app-cs-risk" style="display:none;"></span>
-          <button class="app-cs-change" onclick="document.querySelector('[data-tab=\\'overview\\']').click()">
-            ← Change Circular
-          </button>
-        </div>
-      </div>
+      
+    
 
       <!-- ANALYSIS CARD -->
       <div class="sh-card" style="margin-top:5px;">
@@ -150,22 +158,98 @@ function initApplicabilityListeners() {
   injectSharedCSS();
   injectAppCSS();
 
-  const circId = AI_LIFECYCLE_STATE.selectedCircularId;
+  const mainEl = document.getElementById('app-main');
+  if (mainEl) mainEl.style.display = 'block';
 
-  const noCircEl = document.getElementById('app-no-circ');
-  const mainEl   = document.getElementById('app-main');
-  if (!circId) {
-    if (noCircEl) noCircEl.style.display = 'flex';
-    if (mainEl)   mainEl.style.display   = 'none';
-    return;
+  /* ── CIRCULAR SELECTOR ── */
+  const selInput    = document.getElementById('app-sel-input');
+  const selDropdown = document.getElementById('app-sel-dropdown');
+  const selConfirm  = document.getElementById('app-sel-confirm-btn');
+  const selConfirmed= document.getElementById('app-sel-confirmed');
+  const selChange   = document.getElementById('app-sel-change-btn');
+  const selDot      = document.getElementById('app-sel-dot');
+  let _selCirc      = null;
+
+  /* pre-fill if coming from overview */
+  const preId = AI_LIFECYCLE_STATE.selectedCircularId;
+  if (preId) {
+    const preCirc = (CMS_DATA?.circulars || []).find(c => c.id === preId);
+    if (preCirc) _appConfirmCircular(preCirc);
   }
 
-  if (noCircEl) noCircEl.style.display = 'none';
-  if (mainEl)   mainEl.style.display   = 'block';
+  if (selInput) {
+    selInput.addEventListener('input', () => {
+      const q = selInput.value.trim().toLowerCase();
+      if (!q) { selDropdown.style.display = 'none'; return; }
+      const matches = (CMS_DATA?.circulars || [])
+        .filter(c =>
+          c.id.toLowerCase().includes(q) ||
+          c.title.toLowerCase().includes(q) ||
+          (c.regulator || '').toLowerCase().includes(q)
+        ).slice(0, 8);
+      if (!matches.length) { selDropdown.style.display = 'none'; return; }
+      selDropdown.innerHTML = matches.map(c => `
+        <div class="app-sel-dd-item" data-id="${c.id}">
+          <div class="app-sel-dd-meta">
+            <span class="app-sel-dd-id">${c.id}</span>
+            <span class="app-sel-dd-reg">${c.regulator || ''}</span>
+            ${c.risk ? `<span class="app-sel-dd-risk app-risk-${c.risk.toLowerCase()}">${c.risk}</span>` : ''}
+          </div>
+          <div class="app-sel-dd-title">${c.title}</div>
+        </div>`).join('');
+      selDropdown.style.display = 'block';
+      selDropdown.querySelectorAll('.app-sel-dd-item').forEach(item => {
+        item.addEventListener('click', () => {
+          const circ = (CMS_DATA?.circulars || []).find(c => c.id === item.dataset.id);
+          if (circ) {
+            selInput.value = `${circ.id} – ${circ.title}`;
+            selDropdown.style.display = 'none';
+            _selCirc = circ;
+            selConfirm.disabled = false;
+          }
+        });
+      });
+    });
+    document.addEventListener('click', e => {
+      if (!selInput.contains(e.target) && !selDropdown?.contains(e.target))
+        selDropdown.style.display = 'none';
+    });
+  }
 
-  _appFillStrip(circId);
+  selConfirm?.addEventListener('click', () => {
+    if (_selCirc) _appConfirmCircular(_selCirc);
+  });
 
-  document.getElementById('app-btn-run')?.addEventListener('click', _appRunAnalysis);
+  selChange?.addEventListener('click', () => {
+    /* reset selector */
+    _selCirc = null;
+    AI_LIFECYCLE_STATE.selectedCircularId = null;
+    if (selInput)     selInput.value = '';
+    if (selConfirm)   selConfirm.disabled = true;
+    if (selConfirmed) selConfirmed.style.display = 'none';
+    if (selInput)     selInput.closest('.app-sel-row').style.display = 'flex';
+    if (selDot)       { selDot.classList.remove('done'); selDot.textContent = '1'; }
+    /* clear results */
+    const out = document.getElementById('app-output');
+    if (out) out.innerHTML = '';
+    document.getElementById('app-next-wrapper').style.display = 'none';
+    const dot = document.getElementById('app-s1');
+    if (dot) { dot.classList.remove('done'); dot.textContent = '1'; }
+  });
+
+  function _appConfirmCircular(circ) {
+    _selCirc = circ;
+    AI_LIFECYCLE_STATE.selectedCircularId = circ.id;
+    /* show confirmed strip, hide search row */
+    if (selInput) selInput.closest('.app-sel-row').style.display = 'none';
+    document.getElementById('app-sel-conf-id').textContent   = circ.id;
+    document.getElementById('app-sel-conf-name').textContent = circ.title;
+    if (selConfirmed) selConfirmed.style.display = 'flex';
+    if (selDot) { selDot.classList.add('done'); selDot.textContent = '✓'; }
+    _appFillStrip(circ.id);
+  }
+
+  document.getElementById('app-btn-run')?.addEventListener('click', _appRunAnalysis);a
 
   document.getElementById('app-btn-regen')?.addEventListener('click', () => {
     const out = document.getElementById('app-output');
@@ -273,10 +357,15 @@ function _appRunAnalysis(extraCtx) {
             <span class="app-sec-sub">Entity types this circular is issued for</span>
           </div>
           <div class="app-sec-actions">
-            <button class="app-tbl-btn app-tbl-btn-edit" id="app-ent-edit-btn" onclick="_appToggleEntityEdit()">✎ &nbsp;Edit</button>
-            <button class="app-tbl-btn app-tbl-btn-hist" onclick="_appOpenVerModal('entities')">🕑 &nbsp;History</button>
-            <button class="app-tbl-btn app-tbl-btn-ctx"  onclick="_appOpenCtxModal()">✦ &nbsp;Regenerate with AI Context</button>
-          </div>
+            <div class="app-dots-wrap">
+              <button class="app-dots-btn" id="app-ent-dots-btn">⋮</button>
+              <div class="app-dots-menu" id="app-ent-dots-menu" style="display:none;">
+                <div class="app-dots-item" id="app-ent-mi-edit">✏️&nbsp; Edit</div>
+                <div class="app-dots-item" id="app-ent-mi-history">🕑&nbsp; History</div>
+                <div class="app-dots-item" id="app-ent-mi-regen">✦&nbsp; Regen with AI Context</div>
+              </div>
+            </div>
+</div>
         </div>
         <div class="app-table-wrap">
           <table class="app-table" id="app-ent-table">
@@ -312,9 +401,14 @@ function _appRunAnalysis(extraCtx) {
               ${noC   > 0 ? `<span class="app-pill app-pill-no">${noC} Not Met</span>`   : ''}
               ${naC   > 0 ? `<span class="app-pill app-pill-na">${naC} N/A</span>`        : ''}
             </div>
-            <button class="app-tbl-btn app-tbl-btn-edit" id="app-param-edit-btn" onclick="_appToggleParamEdit()">✎ &nbsp;Edit</button>
-            <button class="app-tbl-btn app-tbl-btn-hist" onclick="_appOpenVerModal('params')">🕑 &nbsp;History</button>
-            <button class="app-tbl-btn app-tbl-btn-ctx"  onclick="_appOpenCtxModal()">✦ &nbsp;Regenerate with AI Context</button>
+           <div class="app-dots-wrap">
+            <button class="app-dots-btn" id="app-param-dots-btn">⋮</button>
+            <div class="app-dots-menu" id="app-param-dots-menu" style="display:none;">
+              <div class="app-dots-item" id="app-param-mi-edit">✏️&nbsp; Edit</div>
+              <div class="app-dots-item" id="app-param-mi-history">🕑&nbsp; History</div>
+              <div class="app-dots-item" id="app-param-mi-regen">✦&nbsp; Regen with AI Context</div>
+            </div>
+            </div>
           </div>
         </div>
         <div class="app-table-wrap">
@@ -355,7 +449,7 @@ function _appRunAnalysis(extraCtx) {
     }
     const dot = document.getElementById('app-s1');
     if (dot) { dot.classList.add('done'); dot.textContent = '✓'; }
-
+    _appWireDotsMenus();
   }, 1800);
 }
 
@@ -412,6 +506,58 @@ function _appParamRow(p, i) {
   </tr>`;
 }
 
+function _appWireDotsMenus() {
+  /* ENTITIES dots */
+  document.getElementById('app-ent-dots-btn')?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const menu = document.getElementById('app-ent-dots-menu');
+    const pm   = document.getElementById('app-param-dots-menu');
+    if (pm)   pm.style.display = 'none';
+    if (menu) menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
+  });
+  document.getElementById('app-ent-mi-edit')?.addEventListener('click', () => {
+    document.getElementById('app-ent-dots-menu').style.display = 'none';
+    _appToggleEntityEdit();
+  });
+  document.getElementById('app-ent-mi-history')?.addEventListener('click', () => {
+    document.getElementById('app-ent-dots-menu').style.display = 'none';
+    _appOpenVerModal('entities');
+  });
+  document.getElementById('app-ent-mi-regen')?.addEventListener('click', () => {
+    document.getElementById('app-ent-dots-menu').style.display = 'none';
+    _appOpenCtxModal();
+  });
+
+  /* PARAMS dots */
+  document.getElementById('app-param-dots-btn')?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const menu = document.getElementById('app-param-dots-menu');
+    const em   = document.getElementById('app-ent-dots-menu');
+    if (em)   em.style.display = 'none';
+    if (menu) menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
+  });
+  document.getElementById('app-param-mi-edit')?.addEventListener('click', () => {
+    document.getElementById('app-param-dots-menu').style.display = 'none';
+    _appToggleParamEdit();
+  });
+  document.getElementById('app-param-mi-history')?.addEventListener('click', () => {
+    document.getElementById('app-param-dots-menu').style.display = 'none';
+    _appOpenVerModal('params');
+  });
+  document.getElementById('app-param-mi-regen')?.addEventListener('click', () => {
+    document.getElementById('app-param-dots-menu').style.display = 'none';
+    _appOpenCtxModal();
+  });
+
+  /* close both on outside click */
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest('.app-dots-wrap')) {
+      document.getElementById('app-ent-dots-menu') && (document.getElementById('app-ent-dots-menu').style.display = 'none');
+      document.getElementById('app-param-dots-menu') && (document.getElementById('app-param-dots-menu').style.display = 'none');
+    }
+  });
+}
+
 /* ─────────────────────────────────────────────────────────
    ENTITY EDIT
 ───────────────────────────────────────────────────────── */
@@ -420,14 +566,11 @@ let _appEntSnapshot   = null;
 
 function _appToggleEntityEdit() {
   _appEntEditMode = !_appEntEditMode;
-  const btn    = document.getElementById('app-ent-edit-btn');
-  const bar    = document.getElementById('app-ent-edit-bar');
+  const bar      = document.getElementById('app-ent-edit-bar');
   const editCols = document.querySelectorAll('#app-ent-table .app-th-edit-only');
 
   if (_appEntEditMode) {
     _appEntSnapshot = (window._APP_ENT_DATA || []).map(e => ({ ...e }));
-    btn.innerHTML  = '✕ &nbsp;Cancel Edit';
-    btn.classList.add('app-tbl-btn-active');
     bar.style.display = 'flex';
     editCols.forEach(c => c.style.display = '');
     document.querySelectorAll('#app-ent-tbody td.app-th-edit-only').forEach(c => c.style.display = '');
@@ -438,9 +581,6 @@ function _appToggleEntityEdit() {
 
 function _appCancelEntityEdit() {
   _appEntEditMode = false;
-  const btn = document.getElementById('app-ent-edit-btn');
-  btn.innerHTML = '✎ &nbsp;Edit';
-  btn.classList.remove('app-tbl-btn-active');
   document.getElementById('app-ent-edit-bar').style.display = 'none';
 
   /* restore snapshot */
@@ -459,9 +599,6 @@ function _appCancelEntityEdit() {
 
 function _appSaveEntityEdit() {
   _appEntEditMode = false;
-  const btn = document.getElementById('app-ent-edit-btn');
-  btn.innerHTML = '✎ &nbsp;Edit';
-  btn.classList.remove('app-tbl-btn-active');
   document.getElementById('app-ent-edit-bar').style.display = 'none';
   document.querySelectorAll('#app-ent-table .app-th-edit-only').forEach(c => c.style.display = 'none');
   document.querySelectorAll('#app-ent-tbody td.app-th-edit-only').forEach(c => c.style.display = 'none');
@@ -496,18 +633,14 @@ let _appParamSnapshot = null;
 
 function _appToggleParamEdit() {
   _appParamEditMode = !_appParamEditMode;
-  const btn  = document.getElementById('app-param-edit-btn');
-  const bar  = document.getElementById('app-param-edit-bar');
+  const bar      = document.getElementById('app-param-edit-bar');
   const editCols = document.querySelectorAll('#app-param-table .app-th-edit-only');
 
   if (_appParamEditMode) {
     _appParamSnapshot = (window._APP_PARAM_DATA || []).map(p => ({ ...p }));
-    btn.innerHTML = '✕ &nbsp;Cancel Edit';
-    btn.classList.add('app-tbl-btn-active');
     bar.style.display = 'flex';
     editCols.forEach(c => c.style.display = '');
     document.querySelectorAll('#app-param-tbody td.app-th-edit-only').forEach(c => c.style.display = '');
-    /* make text cells editable */
     document.querySelectorAll('.app-editable-cell').forEach(cell => {
       cell.contentEditable = 'true';
       cell.classList.add('app-cell-editing');
@@ -516,12 +649,8 @@ function _appToggleParamEdit() {
     _appCancelParamEdit();
   }
 }
-
 function _appCancelParamEdit() {
   _appParamEditMode = false;
-  const btn = document.getElementById('app-param-edit-btn');
-  btn.innerHTML = '✎ &nbsp;Edit';
-  btn.classList.remove('app-tbl-btn-active');
   document.getElementById('app-param-edit-bar').style.display = 'none';
   document.querySelectorAll('#app-param-table .app-th-edit-only').forEach(c => c.style.display = 'none');
   document.querySelectorAll('#app-param-tbody td.app-th-edit-only').forEach(c => c.style.display = 'none');
@@ -545,7 +674,6 @@ function _appCancelParamEdit() {
 }
 
 function _appSaveParamEdit() {
-  /* flush edited text back to data */
   (window._APP_PARAM_DATA || []).forEach((p, i) => {
     const nameEl   = document.getElementById(`app-p-name-${i}`);
     const threshEl = document.getElementById(`app-p-thresh-${i}`);
@@ -554,9 +682,6 @@ function _appSaveParamEdit() {
   });
 
   _appParamEditMode = false;
-  const btn = document.getElementById('app-param-edit-btn');
-  btn.innerHTML = '✎ &nbsp;Edit';
-  btn.classList.remove('app-tbl-btn-active');
   document.getElementById('app-param-edit-bar').style.display = 'none';
   document.querySelectorAll('#app-param-table .app-th-edit-only').forEach(c => c.style.display = 'none');
   document.querySelectorAll('#app-param-tbody td.app-th-edit-only').forEach(c => c.style.display = 'none');
@@ -606,8 +731,41 @@ document.addEventListener('click', () => {
    AI CONTEXT MODAL
 ───────────────────────────────────────────────────────── */
 window._appOpenCtxModal = function () {
-  document.getElementById('app-ctx-modal').classList.add('app-modal-open');
-  document.getElementById('app-ctx-input').focus();
+  let modal = document.getElementById('app-ctx-modal');
+
+  if (!modal) {
+    modal = document.createElement('div');
+    modal.id = 'app-ctx-modal';
+    modal.className = 'app-modal-overlay';
+    modal.innerHTML = `
+      <div class="app-modal-box" onclick="event.stopPropagation()">
+        <div class="app-modal-header">
+          <div class="app-modal-title">✦ Regenerate with AI Context</div>
+          <button class="app-modal-close" onclick="_appCloseCtxModal()">✕</button>
+        </div>
+        <div class="app-modal-body">
+          <p class="app-modal-desc">Add extra context or instructions for the AI to incorporate during regeneration.</p>
+          <div class="app-ctx-chips" id="app-ctx-chips">
+            <span class="app-chip" onclick="_appToggleChip(this,'Focus on risk thresholds')">Risk Thresholds</span>
+            <span class="app-chip" onclick="_appToggleChip(this,'Include provisioning norms')">Provisioning Norms</span>
+            <span class="app-chip" onclick="_appToggleChip(this,'Highlight SEBI overlaps')">SEBI Overlaps</span>
+            <span class="app-chip" onclick="_appToggleChip(this,'Consider recent amendments')">Recent Amendments</span>
+            <span class="app-chip" onclick="_appToggleChip(this,'Emphasise capital adequacy')">Capital Adequacy</span>
+            <span class="app-chip" onclick="_appToggleChip(this,'Include FDI norms')">FDI Norms</span>
+          </div>
+          <textarea class="app-ctx-textarea" id="app-ctx-input" placeholder="e.g. We have recently crossed ₹500 Cr AUM…"></textarea>
+          <div class="app-modal-footer">
+            <button class="app-modal-btn-cancel" onclick="_appCloseCtxModal()">Cancel</button>
+            <button class="app-modal-btn-go" onclick="_appRunWithContext()">✦ &nbsp;Regenerate with Context</button>
+          </div>
+        </div>
+      </div>`;
+    modal.addEventListener('click', (e) => { if (e.target === modal) modal.remove(); });
+    document.body.appendChild(modal);
+  }
+
+  modal.classList.add('app-modal-open');
+  document.getElementById('app-ctx-input')?.focus();
 };
 window._appCloseCtxModal = function (e) {
   if (e && e.target !== document.getElementById('app-ctx-modal')) return;
@@ -641,9 +799,31 @@ window._appRunWithContext = function () {
    VERSION HISTORY MODAL
 ───────────────────────────────────────────────────────── */
 window._appOpenVerModal = function (type) {
-  const modal  = document.getElementById('app-ver-modal');
-  const label  = document.getElementById('app-ver-label');
-  const list   = document.getElementById('app-ver-list');
+  let modal  = document.getElementById('app-ver-modal');
+  let label, list;
+
+  /* modal may not exist when called from overview popup — create inline */
+  if (!modal) {
+    modal = document.createElement('div');
+    modal.id = 'app-ver-modal';
+    modal.className = 'app-modal-overlay';
+    modal.innerHTML = `
+      <div class="app-modal-box app-ver-box" onclick="event.stopPropagation()">
+        <div class="app-modal-header">
+          <div class="app-modal-title">🕑 &nbsp;Version History</div>
+          <button class="app-modal-close" onclick="_appCloseVerModal()">✕</button>
+        </div>
+        <div class="app-modal-body">
+          <div class="app-ver-subtitle" id="app-ver-label"></div>
+          <div id="app-ver-list" class="app-ver-list"></div>
+        </div>
+      </div>`;
+    modal.addEventListener('click', (e) => { if (e.target === modal) modal.remove(); });
+    document.body.appendChild(modal);
+  }
+
+  label = document.getElementById('app-ver-label');
+  list  = document.getElementById('app-ver-list');
   const history = _APP_HISTORY[type] || [];
 
   label.textContent = type === 'entities' ? 'Changes to Applicable Entities table' : 'Changes to Applicability Parameters table';
@@ -674,8 +854,10 @@ window._appOpenVerModal = function (type) {
 };
 
 window._appCloseVerModal = function (e) {
-  if (e && e.target !== document.getElementById('app-ver-modal')) return;
-  document.getElementById('app-ver-modal').classList.remove('app-modal-open');
+  const modal = document.getElementById('app-ver-modal');
+  if (!modal) return;
+  if (e && e.target !== modal) return;
+  modal.classList.remove('app-modal-open');
 };
 
 window._appRestoreVersion = function (type, idx) {
@@ -712,6 +894,27 @@ window._appRestoreVersion = function (type, idx) {
 function _appStatusLabel(s) {
   return s === 'yes' ? 'Yes' : s === 'no' ? 'No' : s === 'na' ? 'N/A' : 'Partial';
 }
+
+/* ── DOTS MENU HELPERS ── */
+window._appToggleDotsMenu = function(e, menuId) {
+  e.stopPropagation();
+  document.querySelectorAll('.app-dots-menu').forEach(m => {
+    if (m.id !== menuId) m.style.display = 'none';
+  });
+  const menu = document.getElementById(menuId);
+  if (menu) menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
+};
+
+window._appCloseDots = function(menuId) {
+  const menu = document.getElementById(menuId);
+  if (menu) menu.style.display = 'none';
+};
+
+document.addEventListener('click', (e) => {
+  if (!e.target.closest('.app-dots-wrap')) {
+    document.querySelectorAll('.app-dots-menu').forEach(m => m.style.display = 'none');
+  }
+});
 
 /* ─────────────────────────────────────────────────────────
    DERIVE ENTITIES
@@ -852,6 +1055,47 @@ function injectAppCSS() {
   .app-cs-change   { padding:4px 10px;background:#fff;border:1px solid #dde0e6;border-radius:6px;font-size:11px;font-weight:600;color:#4a5068;cursor:pointer;transition:all 0.12s; }
   .app-cs-change:hover { background:#f5f6f8;color:#1a1a2e; }
 
+
+
+  /* ── CIRCULAR SELECTOR ── */
+.app-sel-row        { display:flex;align-items:center;gap:8px;flex-wrap:wrap; }
+.app-sel-search-wrap{ position:relative;flex:1 1 280px;min-width:220px; }
+.app-sel-icon       { position:absolute;left:10px;top:50%;transform:translateY(-50%);
+  color:#9499aa;font-size:15px;pointer-events:none;z-index:1; }
+.app-sel-input      { width:100%;padding:9px 12px 9px 30px;background:#f5f6f8;
+  border:1.5px solid #dde0e6;border-radius:8px;font-family:'DM Sans',sans-serif;
+  font-size:13px;color:#1a1a2e;outline:none;box-sizing:border-box;transition:border-color 0.14s; }
+.app-sel-input:focus{ border-color:#1a1a2e;background:#fff; }
+.app-sel-input::placeholder { color:#9499aa; }
+.app-sel-dropdown   { position:absolute;top:calc(100% + 4px);left:0;right:0;background:#fff;
+  border:1.5px solid #dde0e6;border-radius:10px;z-index:9999;max-height:240px;
+  overflow-y:auto;box-shadow:0 8px 24px rgba(26,26,46,0.12); }
+.app-sel-dd-item    { padding:9px 13px;cursor:pointer;border-bottom:1px solid #f0f1f4;transition:background 0.1s; }
+.app-sel-dd-item:last-child { border-bottom:none; }
+.app-sel-dd-item:hover { background:#f5f6f8; }
+.app-sel-dd-meta    { display:flex;align-items:center;gap:7px;margin-bottom:3px; }
+.app-sel-dd-id      { font-family:'DM Mono',monospace;font-size:11px;font-weight:700;color:#1a1a2e; }
+.app-sel-dd-reg     { font-size:11px;color:#9499aa; }
+.app-sel-dd-risk    { font-size:10px;font-weight:700;padding:1px 6px;border-radius:8px; }
+.app-sel-dd-title   { font-size:12px;color:#4a5068;line-height:1.4; }
+.app-sel-confirm-btn{ padding:9px 18px;background:#1a1a2e;border:none;border-radius:8px;
+  font-family:'DM Sans',sans-serif;font-size:13px;font-weight:700;color:#fff;
+  cursor:pointer;white-space:nowrap;flex-shrink:0;transition:background 0.14s,opacity 0.14s; }
+.app-sel-confirm-btn:disabled { background:#c4c8d4;cursor:not-allowed;opacity:0.65; }
+.app-sel-confirm-btn:not(:disabled):hover { background:#2d2d4e; }
+.app-sel-confirmed  { display:flex;align-items:center;justify-content:space-between;
+  margin-top:10px;padding:9px 13px;background:#f0fdf4;border:1.5px solid #86efac;
+  border-radius:8px;flex-wrap:wrap;gap:8px; }
+.app-sel-conf-left  { display:flex;align-items:center;gap:7px;min-width:0;flex-wrap:wrap; }
+.app-sel-conf-id    { font-family:'DM Mono',monospace;font-size:12px;font-weight:700;color:#15803d; }
+.app-sel-conf-sep   { color:#86efac; }
+.app-sel-conf-name  { font-size:12px;color:#166534;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:380px; }
+.app-sel-change-btn { padding:4px 11px;background:#fff;border:1.5px solid #86efac;border-radius:6px;
+  font-size:11px;font-weight:600;color:#15803d;cursor:pointer;transition:all 0.12s;flex-shrink:0; }
+.app-sel-change-btn:hover { background:#dcfce7; }
+
+
+
   /* scope controls */
   .ap-header-controls { display:flex;align-items:center;gap:6px;flex-shrink:0; }
   .app-scope-field { flex:1;min-width:160px; }
@@ -970,7 +1214,7 @@ function injectAppCSS() {
   .app-btn-next:hover { background:#2d2d4e; }
 
   /* ── MODAL SHARED ── */
-  .app-modal-overlay  { position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:2000;display:none;align-items:center;justify-content:center;padding:20px; }
+  .app-modal-overlay  { position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:10000;display:none;align-items:center;justify-content:center;padding:20px; }
   .app-modal-overlay.app-modal-open { display:flex; }
   .app-modal-box      { background:#fff;border-radius:14px;width:100%;max-width:540px;box-shadow:0 24px 60px rgba(0,0,0,0.22);overflow:hidden;animation:appModalIn 0.22s ease; }
   .app-ver-box        { max-width:600px;max-height:80vh;display:flex;flex-direction:column; }

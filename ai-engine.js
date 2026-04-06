@@ -24,12 +24,7 @@ function buildAIEngineShell(activeTab) {
   ];
   return `
   <div class="fade-in">
-    <div class="ai-tab-bar">
-      ${tabs.map(t => `
-        <button class="ai-tab ${activeTab === t.id ? 'active' : ''}" data-tab="${t.id}">
-          <span class="ai-tab-icon">${t.icon}</span>
-          <span class="ai-tab-label">${t.label}</span>
-        </button>`).join('')}
+    
     </div>
     <div class="ai-panel ${activeTab==='overview'      ?'active':''}" id="panel-overview"></div>
     <div class="ai-panel ${activeTab==='applicability' ?'active':''}" id="panel-applicability"></div>

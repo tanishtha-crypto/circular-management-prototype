@@ -10,22 +10,42 @@ function buildSummaryPanel() {
   return `
   <div class="sum-wrap">
 
-    <!-- EMPTY STATE -->
-    <div id="sum-no-circ" class="sum-empty" style="display:none;">
-      <div class="sum-empty-icon">📄</div>
-      <div class="sum-empty-title">No Circular Selected</div>
-      <div class="sum-empty-sub">Go to Overview first and confirm a circular before generating the executive summary.</div>
-      <button class="sum-empty-cta" onclick="document.querySelector('[data-tab=\\'overview\\']')?.click()">← Go to Overview</button>
+    <!-- CIRCULAR SELECTOR -->
+    <div class="sh-card" id="sum-circ-selector-card">
+      <div class="sh-card-head">
+        <div class="sh-dot" id="sum-sel-dot">1</div>
+        <div style="flex:1;min-width:0;">
+          <div class="sh-card-title">Select Circular</div>
+          <div class="sh-card-sub">Search and confirm a circular to generate executive summary</div>
+        </div>
+      </div>
+      <div class="sh-card-body" style="overflow:visible;">
+        <div class="sum-sel-row">
+          <div class="sum-sel-search-wrap">
+            <span class="sum-sel-icon">⌕</span>
+            <input class="sum-sel-input" id="sum-sel-input" type="text"
+              placeholder="Search by ID, title, regulator…" autocomplete="off"/>
+            <div class="sum-sel-dropdown" id="sum-sel-dropdown" style="display:none;"></div>
+          </div>
+          <button class="sum-sel-confirm-btn" id="sum-sel-confirm-btn" disabled>Confirm →</button>
+        </div>
+        <div class="sum-sel-confirmed" id="sum-sel-confirmed" style="display:none;">
+          <div class="sum-sel-conf-left">
+            <span class="sum-sel-conf-id" id="sum-sel-conf-id"></span>
+            <span class="sum-sel-conf-sep">·</span>
+            <span class="sum-sel-conf-name" id="sum-sel-conf-name"></span>
+          </div>
+          <button class="sum-sel-change-btn" id="sum-sel-change-btn">⇄ Change</button>
+        </div>
+      </div>
     </div>
 
     <!-- MAIN -->
-    <div id="sum-main" >
-
-      <!-- CONTEXT STRIP -->
-     
+    <div id="sum-main" style="display:none;">
 
       <!-- CONTROLS — one row -->
-      <div class="sum-controls-bar">
+      <div class="sum-controls-bar" style="position:relative;">
+
         <div class="sum-ctrl-group">
           <label class="sum-ctrl-label">Target Audience</label>
           <select class="sum-ctrl-select" id="sum-audience">
@@ -49,11 +69,6 @@ function buildSummaryPanel() {
       <!-- DOCUMENT OUTPUT -->
       <div id="sum-output"></div>
 
-      <!-- FOOTER -->
-      <div class="sum-footer" id="sum-footer" style="display:none;">
-        <button class="sum-foot-btn sum-foot-save" id="sum-btn-save">🔖 &nbsp;Save to My Library</button>
-        <button class="sum-foot-btn sum-foot-next" id="sum-btn-next">Next → Clause Generation</button>
-      </div>
 
     </div>
   </div>`;
@@ -64,22 +79,103 @@ function initSummaryListeners() {
   injectSharedCSS();
   injectSumCSS();
 
-  const circId = AI_LIFECYCLE_STATE.selectedCircularId;
-  const circ   = circId ? (CMS_DATA?.circulars||[]).find(x => x.id === circId) : null;
+  const selInput    = document.getElementById('sum-sel-input');
+  const selDropdown = document.getElementById('sum-sel-dropdown');
+  const selConfirm  = document.getElementById('sum-sel-confirm-btn');
+  const selConfirmed= document.getElementById('sum-sel-confirmed');
+  const selChange   = document.getElementById('sum-sel-change-btn');
+  const selDot      = document.getElementById('sum-sel-dot');
+  const mainEl      = document.getElementById('sum-main');
+  let _selCirc      = null;
 
-  if (!circ) {
-    document.getElementById('sum-no-circ').style.display = 'flex';
-    document.getElementById('sum-main').style.display    = 'none';
-    return;
+  /* pre-fill if coming from overview */
+  const preId = AI_LIFECYCLE_STATE.selectedCircularId;
+  if (preId) {
+    const preCirc = (CMS_DATA?.circulars || []).find(c => c.id === preId);
+    if (preCirc) _sumConfirmCircular(preCirc);
   }
 
-  document.getElementById('sum-no-circ').style.display = 'none';
-  document.getElementById('sum-main').style.display    = 'flex';
-  document.getElementById('sum-main').style.flexDirection    = 'column';
-  document.getElementById('sum-main').style.gap    = '10px';
-  _sumFillStrip(circ);
+  /* search input */
+  if (selInput) {
+    selInput.addEventListener('input', () => {
+      const q = selInput.value.trim().toLowerCase();
+      if (!q) { selDropdown.style.display = 'none'; return; }
+      const matches = (CMS_DATA?.circulars || [])
+        .filter(c =>
+          c.id.toLowerCase().includes(q) ||
+          c.title.toLowerCase().includes(q) ||
+          (c.regulator || '').toLowerCase().includes(q)
+        ).slice(0, 8);
+      if (!matches.length) { selDropdown.style.display = 'none'; return; }
+      selDropdown.innerHTML = matches.map(c => `
+        <div class="sum-sel-dd-item" data-id="${c.id}">
+          <div class="sum-sel-dd-meta">
+            <span class="sum-sel-dd-id">${c.id}</span>
+            <span class="sum-sel-dd-reg">${c.regulator || ''}</span>
+            ${c.risk ? `<span class="sum-sel-dd-risk sum-srisk-${c.risk.toLowerCase()}">${c.risk}</span>` : ''}
+          </div>
+          <div class="sum-sel-dd-title">${c.title}</div>
+        </div>`).join('');
+      selDropdown.style.display = 'block';
+      selDropdown.querySelectorAll('.sum-sel-dd-item').forEach(item => {
+        item.addEventListener('click', () => {
+          const circ = (CMS_DATA?.circulars || []).find(c => c.id === item.dataset.id);
+          if (circ) {
+            selInput.value = `${circ.id} – ${circ.title}`;
+            selDropdown.style.display = 'none';
+            _selCirc = circ;
+            selConfirm.disabled = false;
+          }
+        });
+      });
+    });
+    document.addEventListener('click', e => {
+      if (!selInput.contains(e.target) && !selDropdown?.contains(e.target))
+        selDropdown.style.display = 'none';
+    });
+  }
 
-  document.getElementById('btn-gen-summary')?.addEventListener('click', () => _sumRun(circ));
+  selConfirm?.addEventListener('click', () => {
+    if (_selCirc) _sumConfirmCircular(_selCirc);
+  });
+
+  selChange?.addEventListener('click', () => {
+    _selCirc = null;
+    AI_LIFECYCLE_STATE.selectedCircularId = null;
+    if (selInput)     selInput.value = '';
+    if (selConfirm)   selConfirm.disabled = true;
+    if (selConfirmed) selConfirmed.style.display = 'none';
+    if (selInput)     selInput.closest('.sum-sel-row').style.display = 'flex';
+    if (selDot)       { selDot.classList.remove('done'); selDot.textContent = '1'; }
+    if (mainEl)       mainEl.style.display = 'none';
+    const out = document.getElementById('sum-output');
+    if (out) out.innerHTML = '';
+  });
+
+  function _sumConfirmCircular(circ) {
+    _selCirc = circ;
+    AI_LIFECYCLE_STATE.selectedCircularId = circ.id;
+    if (selInput) selInput.closest('.sum-sel-row').style.display = 'none';
+    document.getElementById('sum-sel-conf-id').textContent   = circ.id;
+    document.getElementById('sum-sel-conf-name').textContent = circ.title;
+    if (selConfirmed) selConfirmed.style.display = 'flex';
+    if (selDot) { selDot.classList.add('done'); selDot.textContent = '✓'; }
+    if (mainEl) {
+      mainEl.style.display        = 'flex';
+      mainEl.style.flexDirection  = 'column';
+      mainEl.style.gap            = '10px';
+    }
+    _sumFillStrip(circ);
+
+    /* wire generate button with confirmed circ */
+    const genBtn = document.getElementById('btn-gen-summary');
+    genBtn?.removeEventListener('click', genBtn._handler);
+    genBtn._handler = () => {
+      _sumRun(circ);
+      genBtn.innerHTML = '◈ &nbsp;Regenerate Executive Summary';
+    };
+    genBtn?.addEventListener('click', genBtn._handler);
+  }
 
   document.getElementById('sum-btn-save')?.addEventListener('click', function() {
     this.innerHTML = '✓ &nbsp;Saved';
@@ -92,7 +188,6 @@ function initSummaryListeners() {
     document.querySelector('[data-tab="clause"]')?.click();
   });
 }
-
 /* ================================================================ GENERATE */
 function _sumRun(circ) {
   const btn = document.getElementById('btn-gen-summary');
@@ -119,6 +214,7 @@ function _sumRun(circ) {
     requestAnimationFrame(()=>requestAnimationFrame(()=>{ footer.style.opacity='1'; }));
 
     btn.disabled = false; btn.style.opacity = '1';
+btn.innerHTML = '◈ &nbsp;Regenerate Executive Summary';
   }, 1700);
 }
 
@@ -147,12 +243,7 @@ function _sumBuildDoc(circ, data, org, aud, dep, date) {
           <span class="sum-dh-sep">·</span>
           <span class="sum-dh-date">${date}</span>
         </div>
-        <div class="sum-dh-actions">
-          <button class="sum-dh-btn" id="sum-expand-all">⊞ Expand All</button>
-          <button class="sum-dh-btn" onclick="_sumOpenDoc()">🖨 Print</button>
-          <button class="sum-dh-btn" id="sum-regen-btn">↺ Regenerate</button>
-           <button class="sum-strip-change" onclick="document.querySelector('[data-tab=\\'overview\\']')?.click()">← Change Circular</button>
-        </div>
+        <button class="sum-dh-btn" onclick="_sumOpenDoc()">🖨 Print</button>
       </div>
 
       <!-- circular title -->
@@ -178,7 +269,7 @@ function _sumBuildDoc(circ, data, org, aud, dep, date) {
 
     <!-- ── ACCORDION SECTIONS ── -->
     <div class="sum-accordion" id="sum-accordion">
-      ${sections.map((sec, i) => _sumRenderAccordion(sec, i === 0)).join('')}
+      ${sections.map((sec) => _sumRenderAccordion(sec, false)).join('')}
     </div>
 
   </div>`;
@@ -246,21 +337,9 @@ function _sumOpenDoc() {
 /* ================================================================ BIND EVENTS */
 function _sumBindDocEvents(circ) {
   /* regen whole doc */
-  document.getElementById('sum-regen-btn')?.addEventListener('click', () => _sumRun(circ));
 
   /* expand all */
-  let allExpanded = false;
-  document.getElementById('sum-expand-all')?.addEventListener('click', function() {
-    allExpanded = !allExpanded;
-    document.querySelectorAll('.sum-acc-item').forEach(item => {
-      const body  = item.querySelector('.sum-acc-body');
-      const arrow = item.querySelector('.sum-acc-arrow');
-      if (body)  body.style.display  = allExpanded ? 'block' : 'none';
-      if (arrow) arrow.textContent   = allExpanded ? '▲' : '▼';
-      item.classList.toggle('sum-acc-open', allExpanded);
-    });
-    this.textContent = allExpanded ? '⊟ Collapse All' : '⊞ Expand All';
-  });
+
 
   /* accordion toggles */
   document.querySelectorAll('.sum-acc-trigger').forEach(btn => {
@@ -710,6 +789,48 @@ function injectSumCSS() {
 .sum-acc-badge-low     { background:#dcfce7;color:#15803d; }
 .sum-acc-badge-neutral { background:#f0f1f4;color:#4a5068; }
 .sum-acc-arrow  { font-size:9px;color:#9499aa; }
+
+
+
+/* ── CIRCULAR SELECTOR ── */
+.sum-sel-row         { display:flex;align-items:center;gap:8px;flex-wrap:wrap; }
+.sum-sel-search-wrap { position:relative;flex:1 1 280px;min-width:220px; }
+.sum-sel-icon        { position:absolute;left:10px;top:50%;transform:translateY(-50%);
+  color:#9499aa;font-size:15px;pointer-events:none;z-index:1; }
+.sum-sel-input       { width:100%;padding:9px 12px 9px 30px;background:#f5f6f8;
+  border:1.5px solid #dde0e6;border-radius:8px;font-family:'DM Sans',sans-serif;
+  font-size:13px;color:#1a1a2e;outline:none;box-sizing:border-box;transition:border-color 0.14s; }
+.sum-sel-input:focus { border-color:#1a1a2e;background:#fff; }
+.sum-sel-input::placeholder { color:#9499aa; }
+.sum-sel-dropdown    { position:absolute;top:calc(100% + 4px);left:0;right:0;background:#fff;
+  border:1.5px solid #dde0e6;border-radius:10px;z-index:9999;max-height:240px;
+  overflow-y:auto;box-shadow:0 8px 24px rgba(26,26,46,0.12); }
+.sum-sel-dd-item     { padding:9px 13px;cursor:pointer;border-bottom:1px solid #f0f1f4;transition:background 0.1s; }
+.sum-sel-dd-item:last-child { border-bottom:none; }
+.sum-sel-dd-item:hover { background:#f5f6f8; }
+.sum-sel-dd-meta     { display:flex;align-items:center;gap:7px;margin-bottom:3px; }
+.sum-sel-dd-id       { font-family:'DM Mono',monospace;font-size:11px;font-weight:700;color:#1a1a2e; }
+.sum-sel-dd-reg      { font-size:11px;color:#9499aa; }
+.sum-sel-dd-risk     { font-size:10px;font-weight:700;padding:1px 6px;border-radius:8px; }
+.sum-sel-dd-title    { font-size:12px;color:#4a5068;line-height:1.4; }
+.sum-sel-confirm-btn { padding:9px 18px;background:#1a1a2e;border:none;border-radius:8px;
+  font-family:'DM Sans',sans-serif;font-size:13px;font-weight:700;color:#fff;
+  cursor:pointer;white-space:nowrap;flex-shrink:0;transition:background 0.14s,opacity 0.14s; }
+.sum-sel-confirm-btn:disabled { background:#c4c8d4;cursor:not-allowed;opacity:0.65; }
+.sum-sel-confirm-btn:not(:disabled):hover { background:#2d2d4e; }
+.sum-sel-confirmed   { display:flex;align-items:center;justify-content:space-between;
+  margin-top:10px;padding:9px 13px;background:#f0fdf4;border:1.5px solid #86efac;
+  border-radius:8px;flex-wrap:wrap;gap:8px; }
+.sum-sel-conf-left   { display:flex;align-items:center;gap:7px;min-width:0;flex-wrap:wrap; }
+.sum-sel-conf-id     { font-family:'DM Mono',monospace;font-size:12px;font-weight:700;color:#15803d; }
+.sum-sel-conf-sep    { color:#86efac; }
+.sum-sel-conf-name   { font-size:12px;color:#166534;overflow:hidden;text-overflow:ellipsis;
+  white-space:nowrap;max-width:380px; }
+.sum-sel-change-btn  { padding:4px 11px;background:#fff;border:1.5px solid #86efac;border-radius:6px;
+  font-size:11px;font-weight:600;color:#15803d;cursor:pointer;transition:all 0.12s;flex-shrink:0; }
+.sum-sel-change-btn:hover { background:#dcfce7; }
+
+
 
 /* accordion body */
 .sum-acc-body   { border-top:1px solid #eef0f3; }
