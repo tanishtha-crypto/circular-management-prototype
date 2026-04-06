@@ -23,6 +23,7 @@ function buildOverviewPanel() {
 
         <!-- MODE A: EXISTING — search + confirm -->
         <div id="ov-mode-existing-panel">
+          <div style="font-size:11px;font-weight:700;letter-spacing:0.06em;color:#9499aa;text-transform:uppercase;margin-bottom:6px;">Select Circular</div>
           <div class="ov-inline-row">
             <div class="ov-search-wrap">
               <span class="ov-search-icon">⌕</span>
@@ -830,20 +831,26 @@ function _ovUpdateApplicBadge(circ) {
   const label = document.getElementById('ov-applic-label');
   if (!badge || !icon || !label) return;
 
-  /* mock: treat circ.applicable field, fallback to status Active = applicable */
-  const isApplicable = circ.applicable !== undefined
-    ? !!circ.applicable
-    : (circ.status || '').toLowerCase() === 'active';
+  /* Compute verdict the same way the popup does */
+  const et     = (typeof ORG_PROFILE !== 'undefined' ? ORG_PROFILE.entityType : '') || 'NBFC';
+  const params = typeof _appDeriveParams === 'function' ? _appDeriveParams(et, circ) : [];
+  const yesC   = params.filter(p => p.status === 'yes').length;
+  const partC  = params.filter(p => p.status === 'partial').length;
+  const noC    = params.filter(p => p.status === 'no').length;
 
-  badge.className = 'ov-applic-badge ' + (isApplicable ? 'ov-applic-yes' : 'ov-applic-no');
-  icon.textContent = isApplicable ? '✓' : '✗';
-  label.textContent = isApplicable ? 'Applicable ⓘ' : 'Not Applicable';
+  let vClass = 'ov-applic-yes', vIcon = '✓', vLabel = 'Applicable ⓘ';
+  if (params.length && noC >= params.length / 2) {
+    vClass = 'ov-applic-no';    vIcon = '✗';  vLabel = 'Not Applicable ⓘ';
+  } else if (params.length && partC >= 2) {
+    vClass = 'ov-applic-partial'; vIcon = '⚠'; vLabel = 'Partially Applicable ⓘ';
+  }
+
+  badge.className   = 'ov-applic-badge ' + vClass;
+  icon.textContent  = vIcon;
+  label.textContent = vLabel;
   badge.style.display = 'inline-flex';
 
-  badge.onclick = () => {
-    if (isApplicable) _ovOpenApplicabilityPopup(circ);
-    else showToast('This circular is not applicable.', 'warning');
-  };
+  badge.onclick = () => _ovOpenApplicabilityPopup(circ);
 }
 
 function _ovOpenApplicabilityPopup(circ) {
@@ -923,6 +930,26 @@ function _ovOpenApplicabilityPopup(circ) {
       vLabel  = 'Partially Applicable';
       vIcon   = '⚠️';
       vReason = `This circular is <strong>partially applicable</strong>. ${partC} parameter${partC > 1 ? 's' : ''} require further legal review.`;
+    }
+
+    /* Sync the badge label/style to the popup's verdict without changing onclick */
+    const _badge = document.getElementById('ov-applic-badge');
+    const _icon  = document.getElementById('ov-applic-icon');
+    const _lbl   = document.getElementById('ov-applic-label');
+    if (_badge && _icon && _lbl) {
+      if (vClass === 'app-v-yes') {
+        _badge.className = 'ov-applic-badge ov-applic-yes';
+        _icon.textContent = '✓';
+        _lbl.textContent  = 'Applicable ⓘ';
+      } else if (vClass === 'app-v-no') {
+        _badge.className = 'ov-applic-badge ov-applic-no';
+        _icon.textContent = '✗';
+        _lbl.textContent  = 'Not Applicable ⓘ';
+      } else {
+        _badge.className = 'ov-applic-badge ov-applic-partial';
+        _icon.textContent = '⚠';
+        _lbl.textContent  = 'Partially Applicable ⓘ';
+      }
     }
 
     popBody.innerHTML = `

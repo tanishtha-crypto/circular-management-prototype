@@ -457,6 +457,8 @@ function _appRunAnalysis(extraCtx) {
    ROW BUILDERS
 ───────────────────────────────────────────────────────── */
 function _appEntityRow(e, i) {
+  const statusClass = e.applicable === 'yes' ? 'app-s-yes' : e.applicable === 'no' ? 'app-s-no' : e.applicable === 'na' ? 'app-s-na' : 'app-s-part';
+  const statusLabel = e.applicable === 'yes' ? '✓ Yes' : e.applicable === 'no' ? '✗ No' : e.applicable === 'na' ? '— N/A' : '~ Partial';
   return `
   <tr id="app-ent-row-${i}" data-match="${e.match}">
     <td>
@@ -464,14 +466,16 @@ function _appEntityRow(e, i) {
       ${e.sub ? `<div class="app-ent-sub">${e.sub}</div>` : ''}
     </td>
     <td>
-    <div style="display:flex;gap:4px;">
-  <button onclick="_appSetEntityStatus(${i},'yes',this)"   class="app-status-pill ${e.applicable==='yes'  ?'app-pill-yes':''}">Yes</button>
-  <button onclick="_appSetEntityStatus(${i},'no',this)"    class="app-status-pill ${e.applicable==='no'   ?'app-pill-no' :''}">No</button>
-  <button onclick="_appSetEntityStatus(${i},'partial',this)" class="app-status-pill ${e.applicable==='partial'?'app-pill-part':''}">Partial</button>
-  <button onclick="_appSetEntityStatus(${i},'na',this)"    class="app-status-pill ${e.applicable==='na'   ?'app-pill-na' :''}">N/A</button>
-</div>
+      <span class="app-status ${statusClass}" id="app-ent-badge-${i}">${statusLabel}</span>
     </td>
-    <td class="app-th-edit-only" style="display:none;"></td>
+    <td class="app-th-edit-only" style="display:none;text-align:center;">
+      <select class="app-inline-select" onchange="_appChangeEntityStatus(${i}, this.value)">
+        <option value="yes"     ${e.applicable === 'yes' ? 'selected' : ''}>✓ Yes</option>
+        <option value="no"      ${e.applicable === 'no'  ? 'selected' : ''}>✗ No</option>
+        <option value="partial" ${e.applicable === 'partial' ? 'selected' : ''}>~ Partial</option>
+        <option value="na"      ${e.applicable === 'na'  ? 'selected' : ''}>— N/A</option>
+      </select>
+    </td>
   </tr>`;
 }
 
@@ -926,9 +930,9 @@ function _appDeriveEntities(entityType, circ) {
 
   if (circ?.id === 'RBI-HF-2024-001') {
     return [
-      { name: 'Scheduled Commercial Banks (excluding Regional Rural Banks)', sub: null, match: et === 'Bank' },
-      { name: 'Housing Finance Companies', sub: 'In aligned contexts where applicable via NHB/RBI guidance', match: et === 'HFC' },
-      { name: 'Banks engaged in housing finance lending activities', sub: null, match: et === 'Bank' },
+      { name: 'Scheduled Commercial Banks (excluding Regional Rural Banks)', sub: null, match: et === 'Bank', applicable: 'no' },
+      { name: 'Housing Finance Companies', sub: 'In aligned contexts where applicable via NHB/RBI guidance', match: et === 'HFC', applicable: 'yes' },
+      { name: 'Banks engaged in housing finance lending activities', sub: null, match: et === 'Bank', applicable: 'no' },
     ];
   }
 
@@ -1264,20 +1268,17 @@ function injectAppCSS() {
   .spinner         { width:28px;height:28px;border:3px solid #eef0f3;border-top-color:#1a1a2e;border-radius:50%;animation:spin 0.7s linear infinite; }
   @keyframes spin  { to { transform:rotate(360deg); } }
 
-  window._appSetEntityStatus = function(idx, status, btn) {
-  if (!window._APP_ENT_DATA?.[idx]) return;
-  window._APP_ENT_DATA[idx].applicable = status;
-  const allBtns = btn.closest('div').querySelectorAll('.app-status-pill');
-  const statuses = ['yes','no','partial','na'];
-  allBtns.forEach((b, i) => {
-    b.classList.remove('app-pill-yes','app-pill-no','app-pill-part','app-pill-na');
-    if (statuses[i] === status) {
-      const map = {yes:'app-pill-yes',no:'app-pill-no',partial:'app-pill-part',na:'app-pill-na'};
-      b.classList.add(map[statuses[i]]);
-    }
-  });
-};
-
   `;
   document.head.appendChild(s);
 }
+
+window._appChangeEntityStatus = function(idx, status) {
+  if (!window._APP_ENT_DATA || !window._APP_ENT_DATA[idx]) return;
+  window._APP_ENT_DATA[idx].applicable = status;
+  var badge = document.getElementById('app-ent-badge-' + idx);
+  if (!badge) return;
+  var classMap = {yes:'app-s-yes', no:'app-s-no', partial:'app-s-part', na:'app-s-na'};
+  var labelMap = {yes:'✓ Yes', no:'✗ No', partial:'~ Partial', na:'— N/A'};
+  badge.className   = 'app-status ' + (classMap[status] || 'app-s-part');
+  badge.textContent = labelMap[status] || status;
+};

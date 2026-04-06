@@ -44,16 +44,8 @@ function buildSummaryPanel(opts = {}) {
     <!-- MAIN -->
     <div id="sum-main" style="display:none;">
 
-      <!-- CONTROLS — one row -->
-      <div class="sum-controls-bar" style="position:relative;">
-
-        <div class="sum-ctrl-group">
-          <label class="sum-ctrl-label">Target Audience</label>
-          <select class="sum-ctrl-select" id="sum-audience">
-            <option>Board / Executive Management</option>
-            <!-- CONTROLS — one row -->
-      <div class="sum-controls-bar" style="position:relative;">
-
+      <!-- CONTROLS — one row (hidden in popup mode) -->
+      <div class="sum-controls-bar" id="sum-controls-bar" style="position:relative;${isPopup ? 'display:none;' : ''}">
         <div class="sum-ctrl-group">
           <label class="sum-ctrl-label">Target Audience</label>
           <select class="sum-ctrl-select" id="sum-audience">
@@ -72,25 +64,10 @@ function buildSummaryPanel(opts = {}) {
           </select>
         </div>
         <button class="sum-ctrl-btn" id="btn-gen-summary">◈ &nbsp;Generate Executive Summary</button>
-      </div><option>Compliance Team</option>
-            <option>Department Heads</option>
-            <option>External Auditors</option>
-          </select>
-        </div>
-        <div class="sum-ctrl-group">
-          <label class="sum-ctrl-label">Summary Depth</label>
-          <select class="sum-ctrl-select" id="sum-depth">
-            <option value="brief">Brief — 1 page</option>
-            <option value="standard" selected>Standard — 2–3 pages</option>
-            <option value="detailed">Detailed — Full analysis</option>
-          </select>
-        </div>
-        <button class="sum-ctrl-btn" id="btn-gen-summary">◈ &nbsp;Generate Executive Summary</button>
       </div>
 
       <!-- DOCUMENT OUTPUT -->
       <div id="sum-output"></div>
-
 
     </div>
   </div>`;
