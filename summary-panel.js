@@ -4,14 +4,15 @@
  */
 
 /* ================================================================ BUILD */
-function buildSummaryPanel() {
+function buildSummaryPanel(opts = {}) {
+  const isPopup = !!opts.popupMode;
   injectSharedCSS();
   injectSumCSS();
   return `
   <div class="sum-wrap">
 
     <!-- CIRCULAR SELECTOR -->
-    <div class="sh-card" id="sum-circ-selector-card">
+    ${!isPopup ? `<div class="sh-card" id="sum-circ-selector-card">
       <div class="sh-card-head">
         <div class="sh-dot" id="sum-sel-dot">1</div>
         <div style="flex:1;min-width:0;">
@@ -38,7 +39,7 @@ function buildSummaryPanel() {
           <button class="sum-sel-change-btn" id="sum-sel-change-btn">⇄ Change</button>
         </div>
       </div>
-    </div>
+    </div>` : ''}
 
     <!-- MAIN -->
     <div id="sum-main" style="display:none;">
@@ -50,7 +51,28 @@ function buildSummaryPanel() {
           <label class="sum-ctrl-label">Target Audience</label>
           <select class="sum-ctrl-select" id="sum-audience">
             <option>Board / Executive Management</option>
+            <!-- CONTROLS — one row -->
+      <div class="sum-controls-bar" style="position:relative;">
+
+        <div class="sum-ctrl-group">
+          <label class="sum-ctrl-label">Target Audience</label>
+          <select class="sum-ctrl-select" id="sum-audience">
+            <option>Board / Executive Management</option>
             <option>Compliance Team</option>
+            <option>Department Heads</option>
+            <option>External Auditors</option>
+          </select>
+        </div>
+        <div class="sum-ctrl-group">
+          <label class="sum-ctrl-label">Summary Depth</label>
+          <select class="sum-ctrl-select" id="sum-depth">
+            <option value="brief">Brief — 1 page</option>
+            <option value="standard" selected>Standard — 2–3 pages</option>
+            <option value="detailed">Detailed — Full analysis</option>
+          </select>
+        </div>
+        <button class="sum-ctrl-btn" id="btn-gen-summary">◈ &nbsp;Generate Executive Summary</button>
+      </div><option>Compliance Team</option>
             <option>Department Heads</option>
             <option>External Auditors</option>
           </select>
@@ -75,7 +97,8 @@ function buildSummaryPanel() {
 }
 
 /* ================================================================ INIT */
-function initSummaryListeners() {
+function initSummaryListeners(opts = {}) {
+  const isPopup = !!opts.popupMode;
   injectSharedCSS();
   injectSumCSS();
 
@@ -86,6 +109,11 @@ function initSummaryListeners() {
   const selChange   = document.getElementById('sum-sel-change-btn');
   const selDot      = document.getElementById('sum-sel-dot');
   const mainEl      = document.getElementById('sum-main');
+  if (isPopup && mainEl) {
+    mainEl.style.display       = 'flex';
+    mainEl.style.flexDirection = 'column';
+    mainEl.style.gap           = '10px';
+  }
   let _selCirc      = null;
 
   /* pre-fill if coming from overview */
@@ -155,17 +183,21 @@ function initSummaryListeners() {
   function _sumConfirmCircular(circ) {
     _selCirc = circ;
     AI_LIFECYCLE_STATE.selectedCircularId = circ.id;
-    if (selInput) selInput.closest('.sum-sel-row').style.display = 'none';
-    document.getElementById('sum-sel-conf-id').textContent   = circ.id;
-    document.getElementById('sum-sel-conf-name').textContent = circ.title;
-    if (selConfirmed) selConfirmed.style.display = 'flex';
-    if (selDot) { selDot.classList.add('done'); selDot.textContent = '✓'; }
+    if (!isPopup) {
+      if (selInput) selInput.closest('.sum-sel-row').style.display = 'none';
+      const confId = document.getElementById('sum-sel-conf-id');
+      const confName = document.getElementById('sum-sel-conf-name');
+      if (confId)   confId.textContent   = circ.id;
+      if (confName) confName.textContent = circ.title;
+      if (selConfirmed) selConfirmed.style.display = 'flex';
+      if (selDot) { selDot.classList.add('done'); selDot.textContent = '✓'; }
+      _sumFillStrip(circ);
+    }
     if (mainEl) {
       mainEl.style.display        = 'flex';
       mainEl.style.flexDirection  = 'column';
       mainEl.style.gap            = '10px';
     }
-    _sumFillStrip(circ);
 
     /* wire generate button with confirmed circ */
     const genBtn = document.getElementById('btn-gen-summary');
@@ -175,6 +207,9 @@ function initSummaryListeners() {
       genBtn.innerHTML = '◈ &nbsp;Regenerate Executive Summary';
     };
     genBtn?.addEventListener('click', genBtn._handler);
+
+    /* in popup mode auto-fire immediately */
+    if (isPopup) _sumRun(circ);
   }
 
   document.getElementById('sum-btn-save')?.addEventListener('click', function() {
@@ -202,6 +237,7 @@ function _sumRun(circ) {
     const org  = typeof ORG_PROFILE !== 'undefined' ? ORG_PROFILE : { entityType:'NBFC', name:'Your Organisation' };
     const aud  = document.getElementById('sum-audience')?.value || 'Board / Executive Management';
     const dep  = document.getElementById('sum-depth')?.value    || 'standard';
+    // above already has fallbacks so popup mode works fine without the selects
     const date = new Date().toLocaleDateString('en-IN',{day:'numeric',month:'long',year:'numeric'});
 
     out.innerHTML = _sumBuildDoc(circ, data, org, aud, dep, date);
@@ -535,6 +571,7 @@ function _sumSections(circ, data, org) {
 
 /* ================================================================ HELPERS */
 function _sumFillStrip(c) {
+  if (!c) return;
   const $ = id => document.getElementById(id);
   if ($('sum-strip-id'))   $('sum-strip-id').textContent   = c.id;
   if ($('sum-strip-name')) $('sum-strip-name').textContent = c.title;
