@@ -10,22 +10,15 @@ function buildOverviewPanel() {
   injectOverviewCSS();
   return `
   <div class="ov-wrap">
-
-    <!-- CARD 1: SELECT CIRCULAR -->
+  <!-- CARD 1: SELECT CIRCULAR -->
     <div class="sh-card" id="ov-card1">
-      <div class="sh-card-head">
-        <div class="sh-dot" id="ov-s1">1</div>
-        <div style="flex:1;min-width:0;">
-          <div class="sh-card-title">Select Circular</div>
-          <div class="ov-sub-row">
-            <span class="sh-card-sub">Choose from the repository or upload a new circular</span>
-            <div class="ov-mode-toggle">
-              <button class="ov-mode-btn active" data-mode="existing">🗂 Existing</button>
-              <button class="ov-mode-btn"        data-mode="new">➕ New</button>
-            </div>
-          </div>
+      <div style="display:flex;justify-content:flex-end;margin-bottom:8px;position:absolute;top:-52px;right:0;">
+        <div class="ov-mode-toggle">
+          <button class="ov-mode-btn active" data-mode="existing">🗂 Existing</button>
+          <button class="ov-mode-btn" data-mode="new">➕ New</button>
         </div>
       </div>
+      
       <div class="sh-card-body">
 
         <!-- MODE A: EXISTING — search + confirm -->
@@ -34,10 +27,10 @@ function buildOverviewPanel() {
             <div class="ov-search-wrap">
               <span class="ov-search-icon">⌕</span>
               <input class="ov-search-input" id="ov-search-input" type="text"
-                placeholder="Search by ID, title, regulator…" autocomplete="off"/>
+                placeholder="🔍  Search circulars by ID, title or regulator…" autocomplete="off"/>
               <div class="ov-dropdown" id="ov-dropdown" style="display:none;"></div>
             </div>
-            <button class="ov-confirm-btn" id="ov-confirm-btn" disabled>Confirm →</button>
+            <button class="ov-confirm-btn" id="ov-confirm-btn" disabled>Pull Details →</button>
           </div>
         </div>
 
@@ -53,7 +46,7 @@ function buildOverviewPanel() {
               <span>📧</span><span>From Email</span>
               <span class="ov-soon-badge">Soon</span>
             </button>
-            <button class="ov-confirm-btn" id="ov-confirm-new-btn" disabled>Confirm →</button>
+            <button class="ov-confirm-btn" id="ov-confirm-new-btn" disabled>Extract Details →</button>
           </div>
         </div>
 
@@ -535,7 +528,10 @@ function _ovOpenExecSummaryPopup(circ) {
         <button class="ov-applic-popup-back" onclick="this.closest('.ov-execsum-popup-overlay').remove()">←</button>
         <div>
           <div class="ov-applic-popup-title">Executive Summary</div>
-          <div class="ov-applic-popup-sub">${circ.id} — ${circ.title}</div>
+          <div class="ov-applic-popup-sub" style="display:flex;align-items:center;gap:6px;">
+            <span id="ov-execsum-circ-label">${circ.id} — ${circ.title}</span>
+            <button onclick="_ovOpenCircularSwitcher('execsum',this)" style="background:none;border:none;cursor:pointer;font-size:11px;color:#9499aa;padding:0;line-height:1;" title="Change circular">✏️</button>
+          </div>
         </div>
         <div style= "
     justify-items: end;
@@ -544,12 +540,20 @@ function _ovOpenExecSummaryPopup(circ) {
     gap: 5px;
 ">
         <button class="ov-popup-save-btn" id="ov-execsum-save-btn">🔖 Save to My Library</button>
+        <div class="ov-dots-wrap">
+          <button class="ov-dots-btn" id="ov-execsum-dots-btn">⋮</button>
+          <div class="ov-dots-menu" id="ov-execsum-dots-menu" style="display:none;">
+            <div class="ov-dots-item" id="ov-execsum-mi-regen">↺&nbsp; Regenerate</div>
+            <div class="ov-dots-item" id="ov-execsum-mi-depth">📊&nbsp; Summary Depth</div>
+            <div class="ov-dots-item" id="ov-execsum-mi-audience">👥&nbsp; Target Audience</div>
+            <div class="ov-dots-item" id="ov-execsum-mi-print">🖨&nbsp; Print</div>
+          </div>
+        </div>
         <button class="ov-applic-popup-close" onclick="this.closest('.ov-execsum-popup-overlay').remove()">✕</button>
         </div>
        
       </div>
       <div class="ov-applic-popup-body" id="ov-execsum-popup-body">
-        <div class="ai-loading"><div class="spinner"></div><div class="ai-loading-text">Loading Executive Summary…</div></div>
       </div>
     </div>`;
   document.body.appendChild(overlay);
@@ -563,14 +567,97 @@ function _ovOpenExecSummaryPopup(circ) {
   });
   overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });
 
-  setTimeout(() => {
-    const popBody = document.getElementById('ov-execsum-popup-body');
-    if (!popBody) return;
+  /* wire exec summary dots */
+  document.getElementById('ov-execsum-dots-btn')?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const m = document.getElementById('ov-execsum-dots-menu');
+    if (m) m.style.display = m.style.display === 'none' ? 'block' : 'none';
+  });
+  document.addEventListener('click', function _closeExecDots(e) {
+    if (!e.target.closest('#ov-execsum-dots-btn') && !e.target.closest('#ov-execsum-dots-menu')) {
+      const m = document.getElementById('ov-execsum-dots-menu');
+      if (m) m.style.display = 'none';
+    }
+  });
+
+  document.getElementById('ov-execsum-mi-regen')?.addEventListener('click', () => {
+    document.getElementById('ov-execsum-dots-menu').style.display = 'none';
+    const pb = document.getElementById('ov-execsum-popup-body');
+    if (pb) { pb.style.opacity = '0.4'; }
+    setTimeout(() => {
+      const pb2 = document.getElementById('ov-execsum-popup-body');
+      if (pb2) {
+        pb2.innerHTML = typeof buildSummaryPanel === 'function' ? buildSummaryPanel() : '';
+        pb2.style.opacity = '1';
+        if (typeof initSummaryListeners === 'function') initSummaryListeners();
+      }
+      showToast('Summary regenerated.', 'success');
+    }, 800);
+  });
+
+  document.getElementById('ov-execsum-mi-depth')?.addEventListener('click', () => {
+    document.getElementById('ov-execsum-dots-menu').style.display = 'none';
+    _ovShowDepthModal();
+  });
+
+  document.getElementById('ov-execsum-mi-audience')?.addEventListener('click', () => {
+    document.getElementById('ov-execsum-dots-menu').style.display = 'none';
+    _ovShowAudienceModal();
+  });
+
+  document.getElementById('ov-execsum-mi-print')?.addEventListener('click', () => {
+    document.getElementById('ov-execsum-dots-menu').style.display = 'none';
+    window.print();
+  });
+
+  /* immediately render summary */
+  const popBody = document.getElementById('ov-execsum-popup-body');
+  if (popBody) {
     popBody.innerHTML = typeof buildSummaryPanel === 'function'
-      ? buildSummaryPanel()
+      ? buildSummaryPanel({ popupMode: true })
       : '<div style="padding:16px;color:#9499aa;font-size:13px;">Not available.</div>';
-    if (typeof initSummaryListeners === 'function') initSummaryListeners();
-  }, 400);
+    if (typeof initSummaryListeners === 'function') setTimeout(() => initSummaryListeners({ popupMode: true }), 50);
+  }
+}
+
+function _ovShowDepthModal() {
+  const existing = document.getElementById('ov-depth-modal');
+  if (existing) { existing.remove(); return; }
+  const el = document.createElement('div');
+  el.id = 'ov-depth-modal';
+  el.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#fff;border:1.5px solid #dde0e6;border-radius:12px;padding:20px;width:280px;z-index:10001;box-shadow:0 12px 32px rgba(26,26,46,0.16);';
+  el.innerHTML = `
+    <div style="font-size:13px;font-weight:700;color:#1a1a2e;margin-bottom:12px;">Summary Depth</div>
+    ${['Brief — 1 paragraph','Standard — 3–5 paragraphs','Detailed — Full breakdown'].map((opt,i) => `
+      <label style="display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:7px;cursor:pointer;font-size:12px;font-weight:600;color:#4a5068;transition:background 0.1s;" onmouseover="this.style.background='#f5f6f8'" onmouseout="this.style.background=''">
+        <input type="radio" name="ov-depth" value="${i}" ${i===1?'checked':''} style="accent-color:#1a1a2e;"/>
+        ${opt}
+      </label>`).join('')}
+    <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:14px;">
+      <button onclick="document.getElementById('ov-depth-modal').remove()" style="padding:6px 14px;background:#f5f6f8;border:1px solid #dde0e6;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;">Cancel</button>
+      <button onclick="document.getElementById('ov-depth-modal').remove();showToast('Depth updated.','success');" style="padding:6px 14px;background:#1a1a2e;color:#fff;border:none;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;">Apply</button>
+    </div>`;
+  document.body.appendChild(el);
+}
+
+function _ovShowAudienceModal() {
+  const existing = document.getElementById('ov-audience-modal');
+  if (existing) { existing.remove(); return; }
+  const el = document.createElement('div');
+  el.id = 'ov-audience-modal';
+  el.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#fff;border:1.5px solid #dde0e6;border-radius:12px;padding:20px;width:280px;z-index:10001;box-shadow:0 12px 32px rgba(26,26,46,0.16);';
+  el.innerHTML = `
+    <div style="font-size:13px;font-weight:700;color:#1a1a2e;margin-bottom:12px;">Target Audience</div>
+    ${['Legal & Compliance','Risk Management','Board / CXO','Operations Team'].map((opt,i) => `
+      <label style="display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:7px;cursor:pointer;font-size:12px;font-weight:600;color:#4a5068;transition:background 0.1s;" onmouseover="this.style.background='#f5f6f8'" onmouseout="this.style.background=''">
+        <input type="radio" name="ov-audience" value="${i}" ${i===0?'checked':''} style="accent-color:#1a1a2e;"/>
+        ${opt}
+      </label>`).join('')}
+    <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:14px;">
+      <button onclick="document.getElementById('ov-audience-modal').remove()" style="padding:6px 14px;background:#f5f6f8;border:1px solid #dde0e6;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;">Cancel</button>
+      <button onclick="document.getElementById('ov-audience-modal').remove();showToast('Audience updated.','success');" style="padding:6px 14px;background:#1a1a2e;color:#fff;border:none;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;">Apply</button>
+    </div>`;
+  document.body.appendChild(el);
 }
 
 
@@ -771,7 +858,10 @@ function _ovOpenApplicabilityPopup(circ) {
         <button class="ov-applic-popup-back" onclick="this.closest('.ov-applic-popup-overlay').remove()">←</button>
         <div style="flex:1;min-width:0;">
           <div class="ov-applic-popup-title">Applicability Analysis</div>
-          <div class="ov-applic-popup-sub">${circ.id} — ${circ.title}</div>
+          <div class="ov-applic-popup-sub" style="display:flex;align-items:center;gap:6px;">
+            <span id="ov-applic-circ-label">${circ.id} — ${circ.title}</span>
+            <button onclick="_ovOpenCircularSwitcher('applic',this)" style="background:none;border:none;cursor:pointer;font-size:11px;color:#9499aa;padding:0;line-height:1;" title="Change circular">✏️</button>
+          </div>
         </div>
         <button class="ov-popup-save-btn" id="ov-popup-save-btn">🔖 Save to My Library</button>
         <button class="ov-applic-popup-close" onclick="this.closest('.ov-applic-popup-overlay').remove()">✕</button>
@@ -992,6 +1082,69 @@ function _ovWireApplicPopupDots() {
   });
 }
 
+
+function _ovOpenCircularSwitcher(context, triggerEl) {
+  document.querySelector('.ov-switcher-popup')?.remove();
+  const popup = document.createElement('div');
+  popup.className = 'ov-switcher-popup';
+  popup.innerHTML = `
+    <div class="ov-switcher-inner">
+      <div class="ov-switcher-title">Switch Circular</div>
+      <div class="ov-search-wrap" style="min-width:0;flex:1;">
+        <span class="ov-search-icon">⌕</span>
+        <input class="ov-search-input" id="ov-switcher-input" type="text"
+          placeholder="Search by ID or title…" autocomplete="off" style="font-size:12px;"/>
+        <div class="ov-dropdown" id="ov-switcher-dropdown" style="display:none;"></div>
+      </div>
+    </div>`;
+  document.body.appendChild(popup);
+
+  /* position anchored to trigger button */
+  if (triggerEl) {
+    const r = triggerEl.getBoundingClientRect();
+    popup.style.top  = (r.bottom + 6) + 'px';
+    popup.style.left = Math.max(8, r.left - 260) + 'px';
+  }
+
+  const inp = document.getElementById('ov-switcher-input');
+  const dd  = document.getElementById('ov-switcher-dropdown');
+  inp?.focus();
+
+  inp?.addEventListener('input', () => {
+    const q = inp.value.trim().toLowerCase();
+    if (!q) { dd.style.display = 'none'; return; }
+    const matches = (CMS_DATA?.circulars || []).filter(c =>
+      c.id.toLowerCase().includes(q) || c.title.toLowerCase().includes(q)
+    ).slice(0, 6);
+    if (!matches.length) { dd.style.display = 'none'; return; }
+    dd.innerHTML = matches.map(c => `
+      <div class="ov-dd-item" data-id="${c.id}">
+        <div class="ov-dd-meta"><span class="ov-dd-id">${c.id}</span><span class="ov-dd-reg">${c.regulator||''}</span></div>
+        <div class="ov-dd-title">${c.title}</div>
+      </div>`).join('');
+    dd.style.display = 'block';
+    dd.querySelectorAll('.ov-dd-item').forEach(item => {
+      item.addEventListener('click', () => {
+        const circ = CMS_DATA.circulars.find(c => c.id === item.dataset.id);
+        if (!circ) return;
+        AI_LIFECYCLE_STATE.selectedCircularId = circ.id;
+        if (context === 'applic') {
+          document.getElementById('ov-applic-circ-label').textContent = `${circ.id} — ${circ.title}`;
+          _ovOpenApplicabilityPopup(circ);
+        } else {
+          document.getElementById('ov-execsum-circ-label').textContent = `${circ.id} — ${circ.title}`;
+          _ovOpenExecSummaryPopup(circ);
+        }
+        popup.remove();
+      });
+    });
+  });
+
+  document.addEventListener('click', function _sw(e) {
+    if (!popup.contains(e.target)) { popup.remove(); document.removeEventListener('click', _sw); }
+  }, true);
+}
+
 /* ================================================================ UTILS */
 function _ovReveal(id, cb) {
   const el = document.getElementById(id);
@@ -1130,7 +1283,7 @@ function injectOverviewCSS() {
   .ov-search-input:focus { border-color:#1a1a2e;background:#fff; }
   .ov-search-input::placeholder { color:#9499aa; }
   #ov-card1 .sh-card-body { overflow:visible !important; }
-  #ov-card1               { overflow:visible !important; }
+  #ov-card1               { overflow:visible !important; position:relative; margin-bottom:}
 
 
 .ov-saved-toggle { padding:4px 10px;background:#fff;border:1.5px solid #dde0e6;border-radius:8px;
@@ -1338,6 +1491,14 @@ function injectOverviewCSS() {
   .ov-next-btn { padding:10px 22px;background:#1a1a2e;color:#fff;border:none;border-radius:8px;
     font-family:'DM Sans',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:background 0.14s; }
   .ov-next-btn:hover { background:#2d2d4e; }
+
+  .ov-switcher-popup { position:fixed;background:#fff;border:1.5px solid #dde0e6;
+    border-radius:12px;padding:14px;width:300px;z-index:10000;
+    box-shadow:0 8px 28px rgba(26,26,46,0.16); }
+  .ov-switcher-inner { display:flex;flex-direction:column;gap:8px; }
+  .ov-switcher-title { font-size:11px;font-weight:700;color:#9499aa;text-transform:uppercase;
+    letter-spacing:.06em;margin-bottom:2px; }
+
   `;
   document.head.appendChild(s);
 }

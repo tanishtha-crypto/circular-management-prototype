@@ -464,13 +464,14 @@ function _appEntityRow(e, i) {
       ${e.sub ? `<div class="app-ent-sub">${e.sub}</div>` : ''}
     </td>
     <td>
-      <span class="app-status ${e.match ? 'app-s-yes' : 'app-s-no'}" id="app-ent-badge-${i}">
-        ${e.match ? '✓ Yes' : '✗ No'}
-      </span>
+    <div style="display:flex;gap:4px;">
+  <button onclick="_appSetEntityStatus(${i},'yes',this)"   class="app-status-pill ${e.applicable==='yes'  ?'app-pill-yes':''}">Yes</button>
+  <button onclick="_appSetEntityStatus(${i},'no',this)"    class="app-status-pill ${e.applicable==='no'   ?'app-pill-no' :''}">No</button>
+  <button onclick="_appSetEntityStatus(${i},'partial',this)" class="app-status-pill ${e.applicable==='partial'?'app-pill-part':''}">Partial</button>
+  <button onclick="_appSetEntityStatus(${i},'na',this)"    class="app-status-pill ${e.applicable==='na'   ?'app-pill-na' :''}">N/A</button>
+</div>
     </td>
-    <td class="app-th-edit-only" style="display:none;">
-      <button class="app-toggle-btn" onclick="_appToggleEntity(${i})">Toggle</button>
-    </td>
+    <td class="app-th-edit-only" style="display:none;"></td>
   </tr>`;
 }
 
@@ -1175,9 +1176,14 @@ function injectAppCSS() {
   .app-s-part      { background:#fef9c3;color:#b45309; }
   .app-s-na        { background:#f1f5f9;color:#64748b; }
 
-  /* toggle btn (entity) */
-  .app-toggle-btn  { padding:3px 10px;background:#eff6ff;border:1.5px solid #bfdbfe;border-radius:6px;font-size:11px;font-weight:700;color:#2563eb;cursor:pointer;transition:all 0.12s; }
-  .app-toggle-btn:hover { background:#dbeafe; }
+  /* entity status pills */
+  .app-status-pill { padding:3px 9px;border-radius:6px;font-size:10px;font-weight:700;
+    border:1.5px solid #dde0e6;background:#f5f6f8;color:#4a5068;cursor:pointer;transition:all 0.12s; }
+  .app-status-pill:hover { border-color:#9499aa;color:#1a1a2e; }
+  .app-status-pill.app-pill-yes  { background:#dcfce7;border-color:#86efac;color:#15803d; }
+  .app-status-pill.app-pill-no   { background:#fee2e2;border-color:#fca5a5;color:#b91c1c; }
+  .app-status-pill.app-pill-part { background:#fef9c3;border-color:#fcd34d;color:#b45309; }
+  .app-status-pill.app-pill-na   { background:#f1f5f9;border-color:#cbd5e1;color:#64748b; }
 
   /* inline status select (param) */
   .app-inline-select { padding:3px 6px;background:#f0f1f4;border:1.5px solid #dde0e6;border-radius:6px;font-family:'DM Sans',sans-serif;font-size:11px;color:#1a1a2e;cursor:pointer;outline:none; }
@@ -1257,6 +1263,21 @@ function injectAppCSS() {
   .ai-loading-text { font-size:13px;color:#9499aa;font-family:'DM Sans',sans-serif; }
   .spinner         { width:28px;height:28px;border:3px solid #eef0f3;border-top-color:#1a1a2e;border-radius:50%;animation:spin 0.7s linear infinite; }
   @keyframes spin  { to { transform:rotate(360deg); } }
+
+  window._appSetEntityStatus = function(idx, status, btn) {
+  if (!window._APP_ENT_DATA?.[idx]) return;
+  window._APP_ENT_DATA[idx].applicable = status;
+  const allBtns = btn.closest('div').querySelectorAll('.app-status-pill');
+  const statuses = ['yes','no','partial','na'];
+  allBtns.forEach((b, i) => {
+    b.classList.remove('app-pill-yes','app-pill-no','app-pill-part','app-pill-na');
+    if (statuses[i] === status) {
+      const map = {yes:'app-pill-yes',no:'app-pill-no',partial:'app-pill-part',na:'app-pill-na'};
+      b.classList.add(map[statuses[i]]);
+    }
+  });
+};
+
   `;
   document.head.appendChild(s);
 }
