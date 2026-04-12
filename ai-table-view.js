@@ -10,18 +10,23 @@ window._mlShowTableView = function () {
       '<div class="ml-tbl-toolbar">' +
         '<span class="ml-tbl-count" id="ml-action-count"></span>' +
         '<div style="display:flex;gap:8px;align-items:center;">' +
-                  '<button class="dr-tool-btn" id="ml-toolbar-add-btn" style="background:#3b82f6;color:white;border-color:#3b82f6;font-weight:600;">+ Add Action</button>' +
-          '<button class="dr-tool-btn" id="ml-dl-template-btn">&#x1F4E5; Download Template</button>' +
-
-          '<label class="dr-tool-btn" style="cursor:pointer;">&#x1F4E4; Upload Excel<input type="file" accept=".xlsx,.xls,.csv" style="display:none;" id="ml-excel-upload"/></label>' +
+                  '<div class="ml-row-kebab-wrap" id="ml-toolbar-kebab-wrap">' +
+            '<button class="ml-row-kebab-btn" id="ml-toolbar-kebab-btn" style="width:32px;height:32px;font-size:18px;">&#x22EE;</button>' +
+            '<div class="ml-row-kebab-menu" id="ml-toolbar-kebab-menu" style="display:none;right:0;top:calc(100% + 4px);">' +
+              '<button class="ml-rkm-item" id="ml-toolbar-add-obl-btn">+ Add Obligation</button>' +
+              '<button class="ml-rkm-item" id="ml-toolbar-add-btn">+ Add Action</button>' +
+              '<button class="ml-rkm-item" id="ml-dl-template-btn">&#x1F4E5; Export / Download</button>' +
+              '<label class="ml-rkm-item" style="cursor:pointer;">&#x1F4E4; Import Excel<input type="file" accept=".xlsx,.xls,.csv" style="display:none;" id="ml-excel-upload"/></label>' +
+            '</div>' +
+          '</div>' +
         '</div>' +
       '</div>' +
       '<div class="table-wrapper">' +
         '<table>' +
           '<thead><tr>' +
-            '<th>Action ID</th>' +
-            '<th>Action</th>' +
+            '<th>Obl ID</th>' +
             '<th>Obligation</th>' +
+            '<th>Action</th>' +
             '<th>Department(s)</th>' +
             '<th>Assigned To</th>' +
             '<th>Assignment Status</th>' +
@@ -35,17 +40,32 @@ window._mlShowTableView = function () {
   _mlRenderTable(_mlGetFilteredCircs());
   _mlBindFilterBar();
 
+  /* toolbar kebab toggle */
+  var tkBtn  = document.getElementById('ml-toolbar-kebab-btn');
+  var tkMenu = document.getElementById('ml-toolbar-kebab-menu');
+  if (tkBtn && tkMenu) {
+    tkBtn.addEventListener('click', function(e) {
+      e.stopPropagation();
+      tkMenu.style.display = tkMenu.style.display === 'none' ? 'block' : 'none';
+    });
+    document.addEventListener('click', function() { tkMenu.style.display = 'none'; });
+  }
+
   var dlBtn = document.getElementById('ml-dl-template-btn');
   if (dlBtn) dlBtn.addEventListener('click', function() {
-    var csv = 'Action ID,Action,Department(s),Assigned To,Status,Tags\n';
-    csv += 'RBI-2024-01:1.1:A1,Sample action text,Compliance,John Doe,Pending,\n';
-    var blob = new Blob([csv], {type:'text/csv'});
-    var a = document.createElement('a'); a.href = URL.createObjectURL(blob);
-    a.download = 'action-items-template.csv'; a.click();
+    tkMenu.style.display = 'none';
+    _mlOpenExportPopup();
+  });
+
+  var addOblBtn = document.getElementById('ml-toolbar-add-obl-btn');
+  if (addOblBtn) addOblBtn.addEventListener('click', function() {
+    tkMenu.style.display = 'none';
+    _mlOpenAddObligationPopup();
   });
 
   var addBtn = document.getElementById('ml-toolbar-add-btn');
   if (addBtn) addBtn.addEventListener('click', function() {
+    tkMenu.style.display = 'none';
     _mlOpenAddActionPopup('', '');
   });
 
@@ -168,15 +188,14 @@ window._mlRenderTable= function(circs) {
     var sc = statusColors[item.status] || '#f3f4f6;color:#6b7280';
     return '<tr class="ml-action-row" data-idx="' + idx + '" style="cursor:pointer;">' +
       '<td style="position:relative;">' +
-      '<span class="ml-obl-id ml-clickable-id" style="cursor:pointer;" title="View details">' + item.actionId + '</span>' +
-      
-'</td>' +
-    '<td style="max-width:280px;font-size:12px;color:var(--dr-t1);">' + (item.action||'').substring(0,80) + ((item.action||'').length>80?'…':'') + '</td>' +
-'<td style="max-width:220px;padding:8px;">' +
-  '<div style="font-size:11px;color:#374151;line-height:1.45;" title="' + item.obligationName.replace(/"/g,'&quot;') + '">' +
-    item.obligationName.substring(0, 60) + (item.obligationName.length > 60 ? '..' : '') +
-  '</div>' +
-'</td>' +
+      '<span class="ml-obl-id ml-clickable-oblid" data-oblid="' + item.obligationId + '" style="cursor:pointer;font-family:monospace;font-size:11px;font-weight:700;color:#7c3aed;background:#f5f3ff;border:1px solid #e9d5ff;padding:2px 7px;border-radius:4px;" title="View obligation details">' + item.obligationId + '</span>' +
+      '</td>' +
+      '<td style="max-width:220px;padding:8px;">' +
+        '<div style="font-size:11px;color:#374151;line-height:1.45;" title="' + item.obligationName.replace(/"/g,'&quot;') + '">' +
+          item.obligationName.substring(0, 60) + (item.obligationName.length > 60 ? '..' : '') +
+        '</div>' +
+      '</td>' +
+      '<td style="max-width:280px;font-size:12px;color:var(--dr-t1);cursor:pointer;" class="ml-clickable-action" data-idx="' + idx + '">' + (item.action||'').substring(0,80) + ((item.action||'').length>80?'…':'') + '</td>' +
 '<td class="ml-inline-dept" data-idx="' + idx + '" style="cursor:pointer;padding:6px 8px;border-radius:4px;transition:background 0.2s;" title="Click to assign departments">' +
   (item.department
   ? item.department.split(',').map(function(d){ return '<span style="background:#e0f2fe;color:#0369a1;padding:2px 6px;border-radius:3px;font-size:11px;font-weight:600;display:inline-block;margin:1px;">' + d.trim() + '</span>'; }).join('')
@@ -194,14 +213,19 @@ window._mlRenderTable= function(circs) {
 
   window._mlActionItems = items;
 
-  tbody.querySelectorAll('.ml-action-row').forEach(function(row) {
-    // no full-row click
-  });
-  tbody.querySelectorAll('.ml-clickable-id').forEach(function(el) {
+  tbody.querySelectorAll('.ml-clickable-oblid').forEach(function(el) {
     el.addEventListener('click', function(e) {
       e.stopPropagation();
-     var idx = parseInt(el.closest('tr').dataset.idx);
-_mlOpenDetailPopup(window._mlActionItems[idx], idx);
+      var idx = parseInt(el.closest('tr').dataset.idx);
+      _mlOpenOblDetailPopup(window._mlActionItems[idx], idx);
+    });
+  });
+
+  tbody.querySelectorAll('.ml-clickable-action').forEach(function(el) {
+    el.addEventListener('click', function(e) {
+      e.stopPropagation();
+      var idx = parseInt(el.dataset.idx);
+      _mlOpenDetailPopup(window._mlActionItems[idx], idx);
     });
   });
 
@@ -370,6 +394,267 @@ var overlay = document.createElement('div');
     });
   }
 }
+
+/* ── EXPORT POPUP ── */
+window._mlOpenExportPopup = function() {
+  var ex = document.getElementById('ml-export-modal'); if (ex) ex.remove();
+  var overlay = document.createElement('div');
+  overlay.className = 'dr-modal-overlay'; overlay.id = 'ml-export-modal';
+  overlay.innerHTML =
+    '<div class="dr-modal" style="max-width:420px;">' +
+      '<div class="dr-modal-head"><div class="dr-modal-head-left"><div class="dr-modal-eyebrow">Export / Import</div><div class="dr-modal-subject">Action Items Data</div></div><button class="dr-modal-close" onclick="document.getElementById(\'ml-export-modal\').remove()">&#x2715;</button></div>' +
+      '<div class="dr-modal-body" style="padding:20px;display:flex;flex-direction:column;gap:12px;">' +
+        '<button class="dr-btn dr-btn-sec" style="width:100%;justify-content:flex-start;gap:10px;padding:12px 16px;" onclick="_mlDownloadTemplate()">&#x1F4E5; Download Template CSV</button>' +
+        '<button class="dr-btn dr-btn-sec" style="width:100%;justify-content:flex-start;gap:10px;padding:12px 16px;" onclick="_mlExportCurrentData()">&#x1F4CA; Export Current Data</button>' +
+        '<label class="dr-btn dr-btn-sec" style="width:100%;justify-content:flex-start;gap:10px;padding:12px 16px;cursor:pointer;">&#x1F4E4; Upload Excel<input type="file" accept=".xlsx,.xls,.csv" style="display:none;" onchange="showToast(\'Excel uploaded. Processing...\',\'success\');document.getElementById(\'ml-export-modal\').remove();"/></label>' +
+      '</div>' +
+    '</div>';
+  document.body.appendChild(overlay);
+  overlay.addEventListener('click', function(e){ if(e.target===overlay) overlay.remove(); });
+};
+window._mlDownloadTemplate = function() {
+  var csv = 'Obl ID,Obligation Name,Action ID,Action,Department,Assigned To,Status,Due Date\n';
+  csv += 'OBL-001,Sample obligation,ACT-001,Sample action,Compliance,John Doe,Assigned,2025-03-31\n';
+  var blob = new Blob([csv],{type:'text/csv'});
+  var a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'action-items-template.csv'; a.click();
+  document.getElementById('ml-export-modal').remove();
+};
+window._mlExportCurrentData = function() {
+  var items = window._mlActionItems || [];
+  var csv = 'Obl ID,Obligation Name,Action ID,Action,Department,Assigned To,Status,Due Date\n';
+  items.forEach(function(i){ csv += [i.obligationId,'"'+i.obligationName+'"',i.actionId,'"'+i.action+'"',i.department,i.assignedTo,i.status,i.dueDate].join(',') + '\n'; });
+  var blob = new Blob([csv],{type:'text/csv'});
+  var a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'action-items-export.csv'; a.click();
+  document.getElementById('ml-export-modal').remove();
+};
+
+/* ── ADD OBLIGATION POPUP ── */
+window._mlOpenAddObligationPopup = function() {
+  var ex = document.getElementById('ml-add-obl-modal'); if (ex) ex.remove();
+  var allDepts = ['Compliance','Risk','Legal','IT','Operations','HR','Finance','Credit'];
+  var freqOptions = ['Monthly','Quarterly','Annually','Ad-hoc','As per Regulation'];
+  var overlay = document.createElement('div');
+  overlay.className = 'dr-modal-overlay'; overlay.id = 'ml-add-obl-modal';
+  overlay.innerHTML =
+    '<div class="dr-modal" style="max-width:560px;">' +
+      '<div class="dr-modal-head"><div class="dr-modal-head-left"><div class="dr-modal-eyebrow">Add Obligation</div><div class="dr-modal-subject">New Obligation Entry</div></div><button class="dr-modal-close" onclick="document.getElementById(\'ml-add-obl-modal\').remove()">&#x2715;</button></div>' +
+      '<div class="dr-modal-body" style="padding:20px;display:flex;flex-direction:column;gap:14px;">' +
+        '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">' +
+          '<div><label style="font-size:10px;font-weight:700;color:#6b7280;text-transform:uppercase;display:block;margin-bottom:5px;">Obligation ID</label><input type="text" id="ml-new-obl-id" placeholder="OBL-XXX" style="width:100%;padding:9px 10px;border:1px solid #e5e7eb;border-radius:6px;font-size:13px;"/></div>' +
+          '<div><label style="font-size:10px;font-weight:700;color:#6b7280;text-transform:uppercase;display:block;margin-bottom:5px;">Circular</label><select id="ml-new-obl-circ" style="width:100%;padding:9px 10px;border:1px solid #e5e7eb;border-radius:6px;font-size:13px;background:white;">' + (CMS_DATA.circulars||[]).map(function(c){ return '<option value="'+c.id+'">'+c.id+'</option>'; }).join('') + '</select></div>' +
+        '</div>' +
+        '<div><label style="font-size:10px;font-weight:700;color:#6b7280;text-transform:uppercase;display:block;margin-bottom:5px;">Obligation Name <span style="color:#ef4444;">*</span></label><textarea id="ml-new-obl-name" placeholder="Describe the obligation…" style="width:100%;padding:9px 10px;border:1px solid #e5e7eb;border-radius:6px;font-size:13px;min-height:70px;font-family:inherit;resize:vertical;"></textarea></div>' +
+        '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">' +
+          '<div><label style="font-size:10px;font-weight:700;color:#6b7280;text-transform:uppercase;display:block;margin-bottom:5px;">Clause ID</label><input type="text" id="ml-new-obl-clauseid" placeholder="e.g. 1.1" style="width:100%;padding:9px 10px;border:1px solid #e5e7eb;border-radius:6px;font-size:13px;"/></div>' +
+          '<div><label style="font-size:10px;font-weight:700;color:#6b7280;text-transform:uppercase;display:block;margin-bottom:5px;">Department</label><select id="ml-new-obl-dept" style="width:100%;padding:9px 10px;border:1px solid #e5e7eb;border-radius:6px;font-size:13px;background:white;"><option value="">Select</option>' + allDepts.map(function(d){ return '<option>'+d+'</option>'; }).join('') + '</select></div>' +
+          '<div><label style="font-size:10px;font-weight:700;color:#6b7280;text-transform:uppercase;display:block;margin-bottom:5px;">Frequency</label><select id="ml-new-obl-freq" style="width:100%;padding:9px 10px;border:1px solid #e5e7eb;border-radius:6px;font-size:13px;background:white;">' + freqOptions.map(function(f){ return '<option>'+f+'</option>'; }).join('') + '</select></div>' +
+          '<div><label style="font-size:10px;font-weight:700;color:#6b7280;text-transform:uppercase;display:block;margin-bottom:5px;">Due Date</label><input type="date" id="ml-new-obl-due" style="width:100%;padding:9px 10px;border:1px solid #e5e7eb;border-radius:6px;font-size:13px;"/></div>' +
+          '<div><label style="font-size:10px;font-weight:700;color:#6b7280;text-transform:uppercase;display:block;margin-bottom:5px;">Section</label><input type="text" id="ml-new-obl-section" placeholder="e.g. Section 12" style="width:100%;padding:9px 10px;border:1px solid #e5e7eb;border-radius:6px;font-size:13px;"/></div>' +
+          '<div><label style="font-size:10px;font-weight:700;color:#6b7280;text-transform:uppercase;display:block;margin-bottom:5px;">Sub-Section</label><input type="text" id="ml-new-obl-subsec" placeholder="e.g. Clause (a)" style="width:100%;padding:9px 10px;border:1px solid #e5e7eb;border-radius:6px;font-size:13px;"/></div>' +
+        '</div>' +
+      '</div>' +
+      '<div class="dr-modal-foot"><button class="dr-btn dr-btn-ghost" onclick="document.getElementById(\'ml-add-obl-modal\').remove()">Cancel</button><button class="dr-btn dr-btn-pri" onclick="_mlSaveNewObligation()">Save Obligation</button></div>' +
+    '</div>';
+  document.body.appendChild(overlay);
+  overlay.addEventListener('click', function(e){ if(e.target===overlay) overlay.remove(); });
+};
+window._mlSaveNewObligation = function() {
+  var name = document.getElementById('ml-new-obl-name').value.trim();
+  if (!name) { showToast('Obligation name is required.','error'); return; }
+  var id = document.getElementById('ml-new-obl-id').value.trim() || ('OBL-' + (Date.now()+'').slice(-4));
+  showToast('Obligation ' + id + ' added.','success');
+  document.getElementById('ml-add-obl-modal').remove();
+};
+
+/* ── OBLIGATION DETAIL POPUP ── */
+window._mlOpenOblDetailPopup = function(item, idx) {
+  var ex = document.getElementById('ml-obl-detail-modal'); if (ex) ex.remove();
+  var overlay = document.createElement('div');
+  overlay.className = 'dr-modal-overlay'; overlay.id = 'ml-obl-detail-modal';
+  var circular = (CMS_DATA.circulars||[]).find(function(c){ return c.id === item.circId; }) || {};
+
+  /* actions belonging to this obligation */
+  var relatedActions = (window._mlActionItems||[]).filter(function(a){ return a.obligationId === item.obligationId; });
+
+  var statusColors = {'Open':'#fef3c7;color:#b45309','In Progress':'#e0f2fe;color:#0369a1','Complete':'#dcfce7;color:#15803d','Assigned':'#ede9fe;color:#5b5fcf','Pending':'#fef3c7;color:#b45309','Compliant':'#dcfce7;color:#15803d','Unassigned':'#f3f4f6;color:#6b7280','Overdue':'#fee2e2;color:#991b1b','NA':'#f3f4f6;color:#6b7280'};
+
+  overlay.innerHTML =
+    '<div class="dr-modal" style="max-width:700px;">' +
+      /* ── HEADER ── */
+      '<div class="dr-modal-head">' +
+        '<div class="dr-modal-head-left">' +
+          '<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">' +
+            '<span style="font-family:monospace;font-size:12px;font-weight:800;color:#7c3aed;background:#f5f3ff;border:1px solid #e9d5ff;padding:3px 9px;border-radius:5px;">' + item.obligationId + '</span>' +
+          '</div>' +
+          '<div style="font-size:13px;font-weight:600;color:#1f2937;max-width:450px;line-height:1.4;">' + item.obligationName + '</div>' +
+        '</div>' +
+        '<div style="display:flex;align-items:center;gap:8px;">' +
+          '<div class="ml-row-kebab-wrap">' +
+            '<button class="ml-row-kebab-btn" id="ml-obl-kebab-btn">&#x22EE;</button>' +
+            '<div class="ml-row-kebab-menu" id="ml-obl-kebab-menu" style="display:none;">' +
+              '<button class="ml-rkm-item" onclick="document.getElementById(\'ml-obl-kebab-menu\').style.display=\'none\';_mlEnableOblEdit()">&#x270E; Edit</button>' +
+              '<button class="ml-rkm-item" onclick="document.getElementById(\'ml-obl-kebab-menu\').style.display=\'none\';_mlOpenMappedClausesPopup(\'' + item.obligationId + '\')">&#x21C4; Mapped Obligations</button>' +
+              '<button class="ml-rkm-item" onclick="document.getElementById(\'ml-obl-kebab-menu\').style.display=\'none\';document.getElementById(\'ml-obl-detail-modal\').remove();_mlOpenAddActionPopup(\'' + item.obligationId + '\',\'\')">+ Add Action</button>' +
+            '</div>' +
+          '</div>' +
+          '<button class="dr-modal-close" onclick="document.getElementById(\'ml-obl-detail-modal\').remove()">&#x2715;</button>' +
+        '</div>' +
+      '</div>' +
+
+      /* ── BODY ── */
+      '<div class="dr-modal-body" style="padding:0;max-height:72vh;overflow-y:auto;">' +
+
+        /* meta grid */
+        '<div style="padding:14px 20px;border-bottom:1px solid #e5e7eb;background:#fff;">' +
+          '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;" id="ml-obl-meta-grid">' +
+            _mlOblField('Due Date',        item.dueDate || '—',                    'ml-obl-f-due') +
+            _mlOblField('Effective Date',  circular.effectiveDate || '—',          'ml-obl-f-eff') +
+            _mlOblField('Frequency',       item.frequency || 'Monthly',             'ml-obl-f-freq') +
+            _mlOblField('Section',         circular.section || 'Section 12',        'ml-obl-f-sec') +
+            _mlOblField('Sub-Section',     circular.subSection || 'Clause (a)',     'ml-obl-f-subsec') +
+            _mlOblField('Department',      item.department || '—',                  'ml-obl-f-dept') +
+            _mlOblField('Status',          item.status || '—',                      'ml-obl-f-status') +
+            _mlOblField('Assigned To',     item.assignedTo || '—',                  'ml-obl-f-assignee') +
+          '</div>' +
+        '</div>' +
+
+        /* ACTION ITEMS accordion */
+        '<div style="border-bottom:1px solid #e5e7eb;">' +
+          '<div style="padding:12px 20px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;background:#f9fafb;" onclick="var el=document.getElementById(\'ml-obl-actions-body\');el.style.display=el.style.display===\'none\'?\'block\':\'none\';this.querySelector(\'.ml-acc-arrow\').textContent=el.style.display===\'none\'?\'▶\':\'▼\';">' +
+            '<span style="font-weight:700;color:#374151;font-size:12px;display:flex;align-items:center;gap:8px;"><span class="ml-acc-arrow">▼</span> Action Items <span style="background:#e0f2fe;color:#0369a1;padding:1px 8px;border-radius:10px;font-size:10px;font-weight:700;">' + relatedActions.length + '</span></span>' +
+          '</div>' +
+          '<div id="ml-obl-actions-body" style="display:block;">' +
+            (relatedActions.length ? (
+              '<table style="width:100%;border-collapse:collapse;font-size:12px;">' +
+                '<thead><tr style="background:#f3f4f6;border-bottom:2px solid #e5e7eb;">' +
+                  '<th style="padding:9px 12px;text-align:left;font-weight:700;color:#374151;">Action ID</th>' +
+                  '<th style="padding:9px 12px;text-align:left;font-weight:700;color:#374151;">Action</th>' +
+                  '<th style="padding:9px 12px;text-align:left;font-weight:700;color:#374151;">Dept</th>' +
+                  '<th style="padding:9px 12px;text-align:left;font-weight:700;color:#374151;">Status</th>' +
+                '</tr></thead>' +
+                '<tbody>' +
+                relatedActions.map(function(a, ai) {
+                  var sc = statusColors[a.status] || '#f3f4f6;color:#6b7280';
+                  return '<tr style="border-bottom:1px solid #f3f4f6;">' +
+                    '<td style="padding:9px 12px;"><span class="ml-obl-action-link" data-idx="' + window._mlActionItems.indexOf(a) + '" style="font-family:monospace;font-size:11px;font-weight:700;color:#3b82f6;cursor:pointer;text-decoration:underline;">' + a.actionId + '</span></td>' +
+                    '<td style="padding:9px 12px;font-size:11px;color:#374151;max-width:220px;">' + (a.action||'').substring(0,60) + (a.action.length>60?'…':'') + '</td>' +
+                    '<td style="padding:9px 12px;font-size:11px;color:#6b7280;">' + (a.department||'—') + '</td>' +
+                    '<td style="padding:9px 12px;"><span style="padding:3px 9px;border-radius:10px;font-size:10px;font-weight:700;background:' + sc + ';">' + a.status + '</span></td>' +
+                  '</tr>';
+                }).join('') +
+                '</tbody></table>'
+            ) : '<div style="padding:16px 20px;font-size:12px;color:#9ca3af;font-style:italic;">No action items linked to this obligation.</div>') +
+          '</div>' +
+        '</div>' +
+
+        /* EXTRACTED CLAUSE DESCRIPTION accordion */
+        '<div style="border-bottom:1px solid #e5e7eb;">' +
+          '<div style="padding:12px 20px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;background:#f9fafb;" onclick="var el=document.getElementById(\'ml-obl-clause-body\');el.style.display=el.style.display===\'none\'?\'block\':\'none\';this.querySelector(\'.ml-acc-arrow\').textContent=el.style.display===\'none\'?\'▶\':\'▼\';">' +
+            '<span style="font-weight:700;color:#374151;font-size:12px;display:flex;align-items:center;gap:8px;"><span class="ml-acc-arrow">▶</span> Extracted Clause Description</span>' +
+          '</div>' +
+          '<div id="ml-obl-clause-body" style="display:none;padding:16px 20px;">' +
+            '<div style="background:#f3f4f6;border:1px solid #e5e7eb;border-radius:6px;padding:14px;">' +
+              '<div style="font-size:10px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;">Clause Text</div>' +
+              '<div style="font-size:13px;color:#1f2937;line-height:1.7;">The entity shall ensure compliance with all reporting requirements as specified under the relevant circular, including timely submission of returns and maintenance of records as directed by the regulatory authority.</div>' +
+            '</div>' +
+          '</div>' +
+        '</div>' +
+
+        /* REGULATORY DETAILS accordion */
+        '<div>' +
+          '<div style="padding:12px 20px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;background:#f9fafb;" onclick="var el=document.getElementById(\'ml-obl-reg-body\');el.style.display=el.style.display===\'none\'?\'block\':\'none\';this.querySelector(\'.ml-acc-arrow\').textContent=el.style.display===\'none\'?\'▶\':\'▼\';">' +
+            '<span style="font-weight:700;color:#374151;font-size:12px;display:flex;align-items:center;gap:8px;"><span class="ml-acc-arrow">▼</span> Regulatory Details</span>' +
+          '</div>' +
+          '<div id="ml-obl-reg-body" style="display:block;padding:16px 20px;">' +
+            '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">' +
+              _mlOblField('Act Name',        circular.actName || 'Banking Regulation Act, 1949', '') +
+              _mlOblField('Legislative Area', circular.legislativeArea || 'Financial Services', '') +
+              _mlOblField('Sub-Section',     circular.subSection || 'Section 35A', '') +
+              _mlOblField('Regulatory Body', circular.regulator || 'Reserve Bank of India', '') +
+            '</div>' +
+          '</div>' +
+        '</div>' +
+
+      '</div>' +
+      '<div class="dr-modal-foot"><span class="dr-modal-foot-note">Circular: ' + ((circular.title||'').substring(0,50)) + '</span><button class="dr-btn dr-btn-pri" onclick="document.getElementById(\'ml-obl-detail-modal\').remove()">Close</button></div>' +
+    '</div>';
+
+  document.body.appendChild(overlay);
+  overlay.addEventListener('click', function(e){ if(e.target===overlay) overlay.remove(); });
+
+  /* kebab toggle */
+  var kb = document.getElementById('ml-obl-kebab-btn');
+  var km = document.getElementById('ml-obl-kebab-menu');
+  if (kb && km) {
+    kb.addEventListener('click', function(e){ e.stopPropagation(); km.style.display = km.style.display==='none'?'block':'none'; });
+    document.addEventListener('click', function(){ km.style.display='none'; });
+  }
+
+  /* action ID links inside table → open action detail popup */
+  overlay.querySelectorAll('.ml-obl-action-link').forEach(function(el){
+    el.addEventListener('click', function(e){
+      e.stopPropagation();
+      var ai = parseInt(el.dataset.idx);
+      if (!isNaN(ai)) _mlOpenDetailPopup(window._mlActionItems[ai], ai);
+    });
+  });
+};
+
+/* helper field for obl popup */
+window._mlOblField = function(label, value, id) {
+  return '<div style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:6px;padding:10px 12px;"' + (id ? ' id="'+id+'"' : '') + '>' +
+    '<div style="font-size:10px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px;">' + label + '</div>' +
+    '<div class="ml-obl-field-val" style="font-size:12px;font-weight:600;color:#1f2937;">' + value + '</div>' +
+  '</div>';
+};
+
+/* enable edit mode for obl popup */
+window._mlEnableOblEdit = function() {
+  var grid = document.getElementById('ml-obl-meta-grid');
+  if (!grid) return;
+  grid.querySelectorAll('.ml-obl-field-val').forEach(function(el){
+    el.contentEditable = 'true';
+    el.style.outline = '1.5px dashed #bfdbfe';
+    el.style.borderRadius = '3px';
+    el.style.padding = '2px 4px';
+    el.style.background = '#fff';
+  });
+  showToast('Fields are now editable. Click outside a field when done.','info');
+};
+
+/* mapped clauses popup (for obl detail kebab) */
+window._mlOpenMappedClausesPopup = function(oblId) {
+  var ex = document.getElementById('ml-mapped-clauses-modal'); if(ex) ex.remove();
+  var mockClauses = [
+    { clauseId:'1.1', clauseText:'The entity shall maintain a Board-approved compliance policy covering all aspects of this circular, reviewed annually.', dept:'Compliance', status:'Assigned' },
+    { clauseId:'2.3', clauseText:'All LTV calculations must exclude stamp duty and registration charges from the property valuation.', dept:'Risk', status:'Pending' },
+  ];
+  var overlay = document.createElement('div');
+  overlay.className = 'dr-modal-overlay'; overlay.id = 'ml-mapped-clauses-modal';
+  overlay.innerHTML =
+    '<div class="dr-modal" style="max-width:680px;">' +
+      '<div class="dr-modal-head"><div class="dr-modal-head-left"><div class="dr-modal-eyebrow">Mapped Obligations</div><div class="dr-modal-subject">Obligation: ' + oblId + '</div></div><button class="dr-modal-close" onclick="document.getElementById(\'ml-mapped-clauses-modal\').remove()">&#x2715;</button></div>' +
+      '<div class="dr-modal-body" style="padding:0;">' +
+        '<table style="width:100%;border-collapse:collapse;font-size:12px;">' +
+          '<thead><tr style="background:#f3f4f6;border-bottom:2px solid #e5e7eb;"><th style="padding:10px 14px;text-align:left;font-weight:700;color:#374151;">Clause ID</th><th style="padding:10px 14px;text-align:left;font-weight:700;color:#374151;">Clause Text</th><th style="padding:10px 14px;text-align:left;font-weight:700;color:#374151;">Dept</th><th style="padding:10px 14px;text-align:left;font-weight:700;color:#374151;">Status</th><th style="padding:10px 14px;"></th></tr></thead>' +
+          '<tbody>' +
+            mockClauses.map(function(c){
+              return '<tr style="border-bottom:1px solid #f3f4f6;">' +
+                '<td style="padding:10px 14px;font-family:monospace;font-size:11px;font-weight:700;color:#7c3aed;">' + c.clauseId + '</td>' +
+                '<td style="padding:10px 14px;font-size:11px;color:#374151;max-width:260px;line-height:1.45;">' + c.clauseText.substring(0,80) + (c.clauseText.length>80?'…':'') + '</td>' +
+                '<td style="padding:10px 14px;"><span style="background:#e0f2fe;color:#0369a1;padding:2px 8px;border-radius:4px;font-size:10px;font-weight:600;">' + c.dept + '</span></td>' +
+                '<td style="padding:10px 14px;font-size:11px;color:#6b7280;">' + c.status + '</td>' +
+                '<td style="padding:10px 14px;"><button onclick="this.closest(\'tr\').style.opacity=\'0.4\';showToast(\'Unmapped.\',\'success\')" style="padding:3px 9px;background:#fee2e2;border:1px solid #fca5a5;border-radius:4px;color:#dc2626;font-size:11px;font-weight:600;cursor:pointer;">Unmap</button></td>' +
+              '</tr>';
+            }).join('') +
+          '</tbody>' +
+        '</table>' +
+      '</div>' +
+      '<div class="dr-modal-foot"><button class="dr-btn dr-btn-pri" onclick="document.getElementById(\'ml-mapped-clauses-modal\').remove()">Close</button></div>' +
+    '</div>';
+  document.body.appendChild(overlay);
+  overlay.addEventListener('click', function(e){ if(e.target===overlay) overlay.remove(); });
+};
 
 window._mlDetailField = function(label, value) {
   return '<div style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:6px;padding:10px 12px;min-height:60px;">' +

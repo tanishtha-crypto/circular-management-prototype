@@ -63,6 +63,56 @@ window._mlRenderChapterView = function (circs) {
       '</div>' +
     '</div>';
 
+  /* inject nav styles */
+  if (!document.getElementById('ml-ch-nav-css')) {
+    var s = document.createElement('style'); s.id = 'ml-ch-nav-css';
+    s.textContent = `
+      .ml-ch-nav-chapter { border-bottom: 1px solid var(--cl-border-lt); }
+      .ml-ch-nav-ch-btn { width:100%;display:flex;align-items:center;gap:8px;padding:10px 12px;background:none;border:none;cursor:pointer;font-family:inherit;text-align:left;transition:background .1s; }
+      .ml-ch-nav-ch-btn:hover { background: var(--cl-hover); }
+      .ml-ch-nav-active { background: var(--cl-blue-lt) !important; }
+      .ml-ch-nav-arrow { font-size:9px;color:var(--cl-t3);transition:transform .18s;flex-shrink:0; }
+      .ml-ch-body { padding-bottom:4px;border-left:2px solid var(--cl-border-lt);margin-left:20px; }
+      .ml-ch-sec-btn { width:100%;display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 10px 8px 10px;background:none;border:none;border-left:2.5px solid transparent;cursor:pointer;font-family:inherit;text-align:left;transition:all .1s;margin-left:-2px; }
+      .ml-ch-sec-btn:hover { background:var(--cl-hover); }
+      .ml-ch-sec-active { background:var(--cl-blue-lt)!important;border-left-color:var(--cl-blue)!important; }
+      .ml-ch-viewall-btn { display:block;width:100%;padding:6px 10px;background:none;border:none;font-family:inherit;font-size:11px;font-weight:700;color:var(--cl-blue);text-align:left;cursor:pointer;transition:background .1s; }
+      .ml-ch-viewall-btn:hover { background:var(--cl-blue-lt); }
+      .ml-cl-row { display:flex;align-items:center;gap:8px;background:#fff;border:1px solid var(--cl-border);border-radius:10px;padding:11px 14px;cursor:pointer;transition:all .14s;margin-bottom:4px; }
+      .ml-cl-row:hover { border-color:var(--cl-blue-mid);box-shadow:0 1px 6px rgba(13,127,165,.08); }
+      .ml-cl-row.expanded { border-color:var(--cl-blue);border-bottom-left-radius:0;border-bottom-right-radius:0;background:var(--cl-blue-lt);margin-bottom:0; }
+      .ml-cl-info-icon { flex-shrink:0;width:18px;height:18px;background:#fef9c3;color:#b45309;border:1px solid #fcd34d;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;line-height:1; }
+      .ml-cl-id-chip { font-family:monospace;font-size:10px;font-weight:700;color:#fff;background:var(--cl-blue);padding:2px 8px;border-radius:4px;flex-shrink:0;white-space:nowrap; }
+      .ml-cl-text { flex:1;font-size:12.5px;color:var(--cl-t2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0; }
+      .ml-cl-right { display:flex;align-items:center;gap:6px;flex-shrink:0; }
+      .ml-cl-obl-pill { font-size:9px;font-weight:600;color:var(--cl-blue);background:var(--cl-blue-lt);border:1px solid var(--cl-blue-mid);padding:2px 10px;border-radius:10px;white-space:nowrap; }
+      .ml-cl-eye-btn { width:22px;height:22px;border-radius:50%;background:none;border:1px solid var(--cl-border);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--cl-t3);transition:all .12s; }
+      .ml-cl-eye-btn:hover { background:var(--cl-blue-lt);border-color:var(--cl-blue);color:var(--cl-blue); }
+      .ml-cl-inline-expand { background:#fff;border:1px solid var(--cl-blue);border-top:none;border-radius:0 0 10px 10px;margin-bottom:6px;overflow:hidden; }
+      .ml-cl-expand-header { display:flex;align-items:center;justify-content:space-between;padding:8px 14px;background:var(--cl-nav-bg);border-bottom:1px solid var(--cl-border-lt); }
+      .ml-cl-obl-item { border-bottom:1px solid var(--cl-border-lt); }
+      .ml-cl-obl-header { display:flex;align-items:center;gap:8px;padding:10px 14px;cursor:pointer;transition:background .1s; }
+      .ml-cl-obl-header:hover { background:var(--cl-hover); }
+      .ml-cl-obl-num { width:22px;height:22px;background:var(--cl-purple);color:#fff;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0; }
+      .ml-cl-obl-preview { flex:1;font-size:12px;font-weight:500;color:var(--cl-t1);overflow:hidden;text-overflow:ellipsis;white-space:nowrap; }
+      .ml-cl-obl-body { display:none;border-top:1px solid var(--cl-border-lt);background:#fafbfd; }
+      .ml-cl-obl-body.open { display:block; }
+      .ml-cl-act-row { display:flex;align-items:center;gap:8px;padding:8px 14px;border-bottom:1px solid var(--cl-border-lt); }
+      .ml-cl-act-num { width:20px;height:20px;background:var(--cl-purple);color:#fff;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;flex-shrink:0; }
+      .ml-cl-act-text { flex:1;font-size:12px;color:var(--cl-t1);overflow:hidden;text-overflow:ellipsis;white-space:nowrap; }
+      .ml-cl-status-badge { font-size:9px;font-weight:700;padding:2px 7px;border-radius:10px;border:1px solid;white-space:nowrap; }
+      .ml-cl-dept-badge { font-size:9px;font-weight:600;padding:2px 7px;border-radius:10px;background:var(--cl-blue-lt);border:1px solid var(--cl-blue-mid);color:var(--cl-blue);white-space:nowrap;cursor:pointer; }
+      .ml-cl-assignee-badge { font-size:9px;font-weight:600;padding:2px 7px;border-radius:10px;background:#f0fdf4;border:1px solid #6ee7b7;color:#15803d;white-space:nowrap;cursor:pointer; }
+      .ml-ws-dots-wrap { position:relative; }
+      .ml-ws-dots-btn { width:28px;height:28px;border-radius:6px;border:1px solid var(--cl-border);background:#fff;cursor:pointer;font-size:16px;display:inline-flex;align-items:center;justify-content:center;color:var(--cl-t2); }
+      .ml-ws-dots-menu { display:none;position:absolute;right:0;top:calc(100% + 4px);background:#fff;border:1px solid var(--cl-border);border-radius:8px;box-shadow:0 4px 16px rgba(0,0,0,.12);min-width:160px;z-index:500;overflow:hidden; }
+      .ml-ws-dots-wrap.open .ml-ws-dots-menu { display:block; }
+      .ml-ws-dots-item { display:block;width:100%;padding:9px 14px;background:none;border:none;text-align:left;font-family:inherit;font-size:12px;font-weight:600;color:var(--cl-t2);cursor:pointer;transition:background .1s; }
+      .ml-ws-dots-item:hover { background:var(--cl-hover);color:var(--cl-t1); }
+    `;
+    document.head.appendChild(s);
+  }
+
   _mlChBuildTree(activeCirc);
 
   /* circular switcher */
@@ -82,21 +132,27 @@ window._mlRenderChapterView = function (circs) {
 }
 
 window._mlChNavCollapse = function() {
-  var nav = document.getElementById('ml-ch-nav');
-  var btn = document.getElementById('ml-ch-expand-btn');
+  var nav   = document.getElementById('ml-ch-nav');
+  var btn   = document.getElementById('ml-ch-expand-btn');
   var split = document.getElementById('ml-ch-split');
   if (!nav) return;
-  nav.style.display = 'none';
+  nav.classList.add('cl-nav-collapsed');
+  nav.style.width = '0';
+  nav.style.overflow = 'hidden';
+  nav.style.borderRight = 'none';
   if (btn) btn.style.display = 'flex';
   if (split) split.style.gridTemplateColumns = '0px 1fr';
 }
 
 window._mlChNavExpand = function() {
-  var nav = document.getElementById('ml-ch-nav');
-  var btn = document.getElementById('ml-ch-expand-btn');
+  var nav   = document.getElementById('ml-ch-nav');
+  var btn   = document.getElementById('ml-ch-expand-btn');
   var split = document.getElementById('ml-ch-split');
   if (!nav) return;
-  nav.style.display = 'block';
+  nav.classList.remove('cl-nav-collapsed');
+  nav.style.width = '';
+  nav.style.overflow = '';
+  nav.style.borderRight = '';
   if (btn) btn.style.display = 'none';
   if (split) split.style.gridTemplateColumns = '248px 1fr';
 }
@@ -111,127 +167,332 @@ function _mlChBuildTree(circ) {
   var total = chapters.reduce(function(s,ch){ return s + (ch.clauses||[]).length; }, 0);
   if (countEl) countEl.textContent = total + ' clauses';
 
-  tree.innerHTML = '<div class="cl-nav-sec-group">' +
-    chapters.map(function(ch, ci) {
-      return '<button class="cl-nav-sec-btn cl-nav-sec-btn-titled" id="ml-ch-nav-btn-' + ci + '" onclick="_mlChSelectChapter(' + ci + ')">' +
-        '<div class="cl-nav-sec-info">' +
-          '<div class="cl-nav-sec-top-row">' +
-            '<span class="cl-nav-ch-num">Ch ' + (ci+1) + '</span>' +
-            '<span class="cl-nav-sec-count">' + (ch.clauses||[]).length + '</span>' +
+  var hasAnySections = chapters.some(function(ch){ return ch.sections && ch.sections.length; });
+
+  tree.innerHTML = chapters.map(function(ch, ci) {
+    var isActive = (window._mlChActiveChapterIdx === ci);
+    var sections = ch.sections && ch.sections.length ? ch.sections : null;
+
+    /* section buttons */
+    var sectionsHtml = '';
+    if (sections) {
+      sectionsHtml = sections.map(function(sec, si) {
+        var secCount = sec.clauses ? sec.clauses.length : (ch.clauses||[]).length;
+        return '<button class="ml-ch-sec-btn" id="ml-ch-sec-btn-' + ci + '-' + si + '" onclick="_mlChSelectSection(' + ci + ',' + si + ')">' +
+          '<div style="display:flex;flex-direction:column;gap:1px;">' +
+            '<span style="font-size:9px;font-weight:800;color:var(--cl-blue);text-transform:uppercase;letter-spacing:.06em;">Section ' + (si+1) + '</span>' +
+            '<span style="font-size:11px;font-weight:600;color:var(--cl-t1);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:170px;">' + (sec.text||sec.title||'Section '+(si+1)).substring(0,40) + '</span>' +
           '</div>' +
-          '<span class="cl-nav-sec-title-label">' + (ch.title||'').substring(0,48) + ((ch.title||'').length>48?'…':'') + '</span>' +
+          '<span style="font-size:10px;color:var(--cl-t3);background:#e8ebf1;padding:1px 6px;border-radius:8px;flex-shrink:0;">' + secCount + '</span>' +
+        '</button>';
+      }).join('');
+      /* "View all" link */
+      sectionsHtml += '<button class="ml-ch-viewall-btn" onclick="_mlChSelectChapter(' + ci + ')">View all ' + (ch.clauses||[]).length + ' clauses →</button>';
+    } else {
+      /* no sections — single "view all" entry */
+      sectionsHtml = '<button class="ml-ch-viewall-btn" onclick="_mlChSelectChapter(' + ci + ')">View all ' + (ch.clauses||[]).length + ' clauses →</button>';
+    }
+
+    return '<div class="ml-ch-nav-chapter" id="ml-ch-chapter-' + ci + '">' +
+      '<button class="ml-ch-nav-ch-btn" id="ml-ch-nav-btn-' + ci + '" onclick="_mlChToggleChapter(' + ci + ')">' +
+        '<span class="ml-ch-nav-arrow" id="ml-ch-arr-' + ci + '">▶</span>' +
+        '<div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:1px;">' +
+          '<span style="font-size:9px;font-weight:800;color:var(--cl-blue);text-transform:uppercase;letter-spacing:.06em;">Chapter ' + (ci+1) + '</span>' +
+          '<span style="font-size:11.5px;font-weight:600;color:var(--cl-t1);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + (ch.title||'').substring(0,38) + '</span>' +
         '</div>' +
-      '</button>';
-    }).join('') +
-  '</div>';
+        '<span style="font-size:10px;color:var(--cl-t3);background:#e8ebf1;padding:1px 6px;border-radius:8px;flex-shrink:0;">' + (ch.clauses||[]).length + '</span>' +
+      '</button>' +
+      '<div class="ml-ch-body" id="ml-ch-body-' + ci + '" style="display:none;">' +
+        sectionsHtml +
+      '</div>' +
+    '</div>';
+  }).join('');
 
   /* store chapters on window for click handler */
   window._mlChActiveChapters = chapters;
   window._mlChActiveCirc = circ;
+  window._mlChActiveChapterIdx = null;
+
+  /* auto-collapse nav if circular has no sections — show all clauses on right immediately */
+  var hasAnySections = chapters.some(function(ch){ return ch.sections && ch.sections.length; });
+  if (!hasAnySections) {
+    setTimeout(function() {
+      _mlChNavCollapse();
+      /* load all clauses from first chapter or flat list */
+      var allClauses = [];
+      chapters.forEach(function(ch){ (ch.clauses||[]).forEach(function(cl){ allClauses.push(cl); }); });
+      if (allClauses.length && chapters[0]) {
+        _mlChRenderStack(0, {title: circ.title, clauses: allClauses}, allClauses, '', circ.title, 'All Clauses');
+      }
+    }, 50);
+  }
 }
 
-window._mlChSelectChapter = function(ci) {
-  /* highlight */
-  document.querySelectorAll('[id^="ml-ch-nav-btn-"]').forEach(function(b) {
-    b.style.background = '#fff';
-    b.style.borderLeft = document.querySelectorAll('[id^="ml-ch-nav-btn-"]').forEach(function(b) {
-    b.classList.remove('cl-nav-active');
-  });
-  var btn = document.getElementById('ml-ch-nav-btn-' + ci);
-  if (btn) btn.classList.add('cl-nav-active');'none';
-  });
-  var btn = document.getElementById('ml-ch-nav-btn-' + ci);
-  if (btn) { btn.style.background = '#eff6ff'; btn.style.borderLeft = '3px solid #3b82f6'; }
+window._mlChToggleChapter = function(ci) {
+  var body = document.getElementById('ml-ch-body-' + ci);
+  var arr  = document.getElementById('ml-ch-arr-' + ci);
+  var btn  = document.getElementById('ml-ch-nav-btn-' + ci);
+  if (!body) return;
+  var isOpen = body.style.display !== 'none';
+  /* close all */
+  document.querySelectorAll('[id^="ml-ch-body-"]').forEach(function(b){ b.style.display='none'; });
+  document.querySelectorAll('[id^="ml-ch-arr-"]').forEach(function(a){ a.style.transform=''; });
+  document.querySelectorAll('.ml-ch-nav-ch-btn').forEach(function(b){ b.classList.remove('ml-ch-nav-active'); });
+  if (!isOpen) {
+    body.style.display = 'block';
+    if (arr) arr.style.transform = 'rotate(90deg)';
+    if (btn) btn.classList.add('ml-ch-nav-active');
+    window._mlChActiveChapterIdx = ci;
+    /* auto-select first section or view all */
+    var chapters = window._mlChActiveChapters || [];
+    var ch = chapters[ci];
+    if (ch && ch.sections && ch.sections.length) {
+      _mlChSelectSection(ci, 0);
+    } else {
+      _mlChSelectChapter(ci);
+    }
+  } else {
+    window._mlChActiveChapterIdx = null;
+    /* hide right panel */
+    document.getElementById('ml-ch-ws-ph').style.display = 'flex';
+    document.getElementById('ml-ch-ws-main').style.display = 'none';
+  }
+};
 
+window._mlChSelectSection = function(ci, si) {
   var chapters = window._mlChActiveChapters || [];
-  var circ = window._mlChActiveCirc || {};
   var ch = chapters[ci];
   if (!ch) return;
-  var clauses = ch.clauses || [];
+  var sec = ch.sections && ch.sections[si];
+  /* highlight section */
+  document.querySelectorAll('[id^="ml-ch-sec-btn-"]').forEach(function(b){ b.classList.remove('ml-ch-sec-active'); });
+  var secBtn = document.getElementById('ml-ch-sec-btn-' + ci + '-' + si);
+  if (secBtn) secBtn.classList.add('ml-ch-sec-active');
+  /* get clauses for this section */
+  var clauses = [];
+  if (sec && sec.clauses && sec.clauses.length) {
+    if (typeof sec.clauses[0] === 'string') {
+      clauses = sec.clauses.map(function(id){ return (ch.clauses||[]).find(function(c){ return c.id===id; }); }).filter(Boolean);
+    } else {
+      clauses = sec.clauses;
+    }
+  } else {
+    clauses = ch.clauses || [];
+  }
+  var secLabel = sec ? (sec.text || sec.title || ('Section ' + (si+1))) : 'All Clauses';
+  _mlChRenderStack(ci, ch, clauses, 'Chapter ' + (ci+1), ch.title||'', secLabel);
+};
 
+window._mlChSelectChapter = function(ci) {
+  var chapters = window._mlChActiveChapters || [];
+  var ch = chapters[ci];
+  if (!ch) return;
+  _mlChRenderStack(ci, ch, ch.clauses||[], 'Chapter '+(ci+1), ch.title||'', 'All Clauses');
+};
+
+window._mlChRenderStack = function(ci, ch, clauses, chNum, chTitle, secLabel) {
+  window._mlChLastStackArgs = [ci, ch, clauses, chNum, chTitle, secLabel];
   document.getElementById('ml-ch-ws-ph').style.display = 'none';
   var main = document.getElementById('ml-ch-ws-main');
   main.style.display = 'block';
 
   main.innerHTML =
-    '<div class="cl-stack-wrap">' +
-    '<div class="cl-stack-header">' +
-      '<div class="cl-stack-header-left">' +
-        '<span class="cl-stack-ch-num">Chapter ' + (ci+1) + '</span>' +
-        (ch.title ? '<span class="cl-stack-ch-title">' + ch.title + '</span>' : '') +
-      '</div>' +
-      '<span class="cl-stack-count">' + clauses.length + ' clause' + (clauses.length!==1?'s':'') + '</span>' +
-    '</div>' +
-    '<div class="cl-stack-list">' +
-    /* clause list */
-    (clauses.length ? clauses.map(function(cl, cli) {
-      var actions = (cl.actionable||'').split(';').map(function(a){return a.trim();}).filter(Boolean);
-      var obligs = cl.obligation ? [cl.obligation] : [];
-      var riskCls = cl.risk === 'High' ? 'background:#fee2e2;color:#b91c1c;' : cl.risk === 'Medium' ? 'background:#fef3c7;color:#b45309;' : 'background:#dcfce7;color:#15803d;';
-      return '<div class="cl-clause-row" id="ml-cl-row-' + ci + '-' + cli + '" onclick="_mlChToggleClause(' + ci + ',' + cli + ')">' +
-          '<span class="cl-row-arrow" id="ml-cl-arr-' + ci + '-' + cli + '">▶</span>' +
-          '<span class="cl-row-id">' + cl.id + '</span>' +
-          '<span class="cl-row-title-text">' + (cl.text||cl.obligation||'').substring(0,90) + ((cl.text||'').length>90?'…':'') + '</span>' +
-          '<div class="cl-row-right">' +
-            (obligs.length ? '<span class="cl-row-pill">' + obligs.length + ' Obl</span>' : '') +
-            (actions.length ? '<span class="cl-row-pill">' + actions.length + ' Act</span>' : '') +
-            (cl.risk ? '<span class="cl-row-pill" style="background:' + (cl.risk==='High'?'#fee2e2;color:#b91c1c':cl.risk==='Medium'?'#fef3c7;color:#b45309':'#dcfce7;color:#15803d') + ';">' + cl.risk + '</span>' : '') +
+    '<div style="padding:16px 20px;">' +
+      /* RIGHT PANEL HEADER */
+      '<div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:14px;padding-bottom:12px;border-bottom:1px solid var(--cl-border-lt);">' +
+        '<div>' +
+          '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">' +
+            '<span style="font-size:10px;font-weight:800;color:#fff;background:var(--cl-blue);padding:2px 9px;border-radius:4px;letter-spacing:.04em;">' + chNum + '</span>' +
+            '<span style="font-size:13px;font-weight:700;color:var(--cl-t1);">' + chTitle + '</span>' +
+            (secLabel && secLabel !== 'All Clauses' ? '<span style="font-size:12px;color:var(--cl-t3);">·</span><span style="font-size:12px;color:var(--cl-t2);">' + secLabel + '</span>' : '') +
+          '</div>' +
+          (secLabel && secLabel !== 'All Clauses' ? '<div style="font-size:11px;color:var(--cl-t3);margin-top:3px;">' + secLabel + '</div>' : '') +
+        '</div>' +
+        '<div style="display:flex;align-items:center;gap:8px;">' +
+          '<span style="font-size:11px;color:var(--cl-t3);background:var(--cl-hover);border:1px solid var(--cl-border);padding:3px 10px;border-radius:10px;">' + clauses.length + ' clause' + (clauses.length!==1?'s':'') + '</span>' +
+          '<div class="ml-ws-dots-wrap" id="ml-ws-dots-' + ci + '">' +
+            '<button class="ml-ws-dots-btn" onclick="event.stopPropagation();document.getElementById(\'ml-ws-dots-' + ci + '\').classList.toggle(\'open\')">⋮</button>' +
+            '<div class="ml-ws-dots-menu">' +
+              '<button class="ml-ws-dots-item" onclick="document.getElementById(\'ml-ws-dots-' + ci + '\').classList.remove(\'open\');_mlOpenAddObligationPopup()">+ Add Obligation</button>' +
+              '<button class="ml-ws-dots-item" onclick="document.getElementById(\'ml-ws-dots-' + ci + '\').classList.remove(\'open\');_mlOpenAddActionPopup(\'\',\'\')">+ Add Action</button>' +
+              '<button class="ml-ws-dots-item" onclick="document.getElementById(\'ml-ws-dots-' + ci + '\').classList.remove(\'open\');_mlOpenExportPopup()">Export / Import</button>' +
+            '</div>' +
           '</div>' +
         '</div>' +
-        '<div class="cl-inline-expand" id="ml-cl-body-' + ci + '-' + cli + '" style="display:none;">' +
-          '<div class="cl-expand-wrap">' +
-            /* clause full text */'<div class="cl-expand-wrap">' +
-          '<div class="cl-expand-tabrow" style="display:flex;">' +
-            '<div class="cl-expand-tabs-left">' +
-              '<button class="cl-etab active" onclick="_mlChTab(this,0,\'' + ci + '\',\'' + cli + '\')">Text</button>' +
-              '<button class="cl-etab" onclick="_mlChTab(this,1,\'' + ci + '\',\'' + cli + '\')">Obligations</button>' +
-            '</div>' +
-            '<div class="cl-expand-tabs-right">' +
-              (cl.risk ? '<span class="cl-wc-badge cl-wc-risk-' + (cl.risk||'').toLowerCase() + '">' + cl.risk + '</span>' : '') +
-              (cl.department ? '<span class="cl-wc-badge cl-wc-dept">' + cl.department + '</span>' : '') +
+      '</div>' +
+      /* CLAUSE LIST */
+      '<div id="ml-ch-clause-list">' +
+        (clauses.length ? clauses.map(function(cl, cli) {
+          var obligs = cl.obligation ? (Array.isArray(cl.obligation) ? cl.obligation : [cl.obligation]) : (Array.isArray(cl.obligations) ? cl.obligations : []);
+          var actions = (cl.actionable||'').split(';').map(function(a){return a.trim();}).filter(Boolean);
+          var totalActs = actions.length || (window._mlActionItems||[]).filter(function(a){ return a.clauseId === cl.id; }).length;
+          var oblCount = obligs.length || 1;
+          /* 30 words of text */
+          var words = (cl.text||cl.obligation||'').split(' ');
+          var shortText = words.slice(0,30).join(' ') + (words.length > 30 ? '…' : '');
+          return '<div class="ml-cl-row" id="ml-cl-row-' + ci + '-' + cli + '" onclick="_mlChToggleClause2(' + ci + ',' + cli + ')">' +
+            '<span style="font-size:11px;color:var(--cl-t3);transition:transform .2s;flex-shrink:0;" id="ml-cl-arr2-' + ci + '-' + cli + '">▶</span>' +
+            '<span class="ml-cl-info-icon">ⓘ</span>' +
+            '<span class="ml-cl-id-chip">' + cl.id + '</span>' +
+            '<span class="ml-cl-text">' + shortText + '</span>' +
+            '<div class="ml-cl-right">' +
+              '<span class="ml-cl-obl-pill">' + oblCount + ' Obligation' + (oblCount>1?'s':'') + '</span>' +
+              (totalActs ? '<span style="font-size:9px;font-weight:600;color:var(--cl-t2);background:var(--cl-hover);border:1px solid var(--cl-border);padding:2px 8px;border-radius:10px;">' + totalActs + ' Actions</span>' : '') +
+              '<button class="ml-cl-eye-btn" onclick="event.stopPropagation();_mlOpenOblDetailPopupForClause(\'' + cl.id + '\',' + ci + ',' + cli + ')" title="View details">' +
+                '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>' +
+              '</button>' +
             '</div>' +
           '</div>' +
-          '<div id="ml-cl-panels-' + ci + '-' + cli + '">' +
-            '<div class="cl-expand-panel" data-panel="0" style="">' +
-              (cl.text ? '<div class="cl-text-panel"><div class="cl-tp-text">' + cl.text + '</div></div>' : '') +
-            '</div>' +
-            '<div class="cl-expand-panel" data-panel="1" style="display:none;">' +
-            (cl.text ? '<div class="cl-text-panel"><div class="cl-tp-text">' + cl.text + '</div></div>' : '') +
-            /* obligations */
-            (obligs.length ?
-              '<div class="cl-oblig-list" style="padding:12px 16px;">' +
-                '<div class="cl-actions-title">Obligations</div>' +
-                obligs.map(function(ob, oi) {
-                  return '<div class="cl-oblig-item" style="margin-bottom:6px;">' +
-                    '<div class="cl-oblig-header" style="cursor:default;">' +
-                      '<span class="cl-oblig-num">O' + (oi+1) + '</span>' +
-                      '<span class="cl-oblig-preview">' + (typeof ob==='string'?ob:ob.text||'') + '</span>' +
-                    '</div>' +
-                  '</div>';
-                }).join('') +
-              '</div>' : '') +
-            /* actions */
-            (actions.length ?
-              '<div class="cl-actions-wrap" style="padding:0 16px 12px;">' +
-                '<div class="cl-actions-title">Actions <span class="cl-actions-badge">' + actions.length + '</span></div>' +
-                '<div class="cl-actions-list">' +
-                  actions.map(function(act, ai) {
-                    return '<div class="cl-action-item">' +
-                      '<div class="cl-action-main-row">' +
-                        '<span class="cl-action-num">' + (ai+1) + '</span>' +
-                        '<span class="cl-action-text">' + act + '</span>' +
-                        '<span class="cl-row-status-pill">' + (cl.status||'Pending') + '</span>' +
-                      '</div>' +
-                    '</div>';
-                  }).join('') +
-                '</div>' +
-              '</div>' : '') +
+          '<div class="ml-cl-expand-header">' +
+            '<span style="font-size:10px;font-weight:800;color:var(--cl-t3);text-transform:uppercase;letter-spacing:.08em;">Obligations</span>' +
+            '<span style="font-size:10px;color:var(--cl-t3);">' + obligs.length + ' obligation' + (obligs.length!==1?'s':'') + '</span>' +
           '</div>' +
-          '</div>' +
-        '</div>';
-    }).join('') : '<div class="cl-stack-empty">No clauses in this chapter.</div>') +
-    '</div>' +
+          _mlChBuildOblAccordions(cl, ci, cli, obligs) +
+          '</div>';
+        }).join('') : '<div style="padding:24px;text-align:center;font-size:13px;color:var(--cl-t3);">No clauses in this section.</div>') +
+      '</div>' +
     '</div>';
+
+  /* close dots on outside click */
+  document.addEventListener('click', function(){ document.querySelectorAll('.ml-ws-dots-wrap.open').forEach(function(w){w.classList.remove('open');}); });
+};
+
+/* build obligation list for a clause row
+   ob = obligation text (e.g. "Trustees shall ensure fairness…")
+   actions under each ob come from window._mlActionItems filtered by obligationId
+*/
+function _mlChBuildOblAccordions(cl, ci, cli, obligs) {
+  if (!obligs.length) obligs = [cl.obligation || cl.text || ''];
+
+  return obligs.map(function(ob, oi) {
+    var obText = typeof ob === 'string' ? ob : (ob.text || ob.name || '');
+    var obId   = (typeof ob === 'object' && ob.id) ? ob.id : ('OBL-' + cl.id + '-' + (oi+1));
+    var uid    = ci + '-' + cli + '-' + oi;
+
+    var obStatus = (window._mlOblStatuses && window._mlOblStatuses[uid]) || '';
+    var obDepts  = (window._mlOblDepts    && window._mlOblDepts[uid])    || [];
+    var obAssign = (window._mlOblAssign   && window._mlOblAssign[uid])   || '';
+    if (typeof obDepts === 'string') obDepts = obDepts ? obDepts.split(',').map(function(d){return d.trim();}) : [];
+
+    /* get real action items from table view data matching this obligation */
+    var actItems = (window._mlActionItems||[]).filter(function(a){
+      return a.obligationId === obId;
+    });
+    /* fallback: split actionable string on clause */
+    if (!actItems.length) {
+      var rawActs = (cl.actionable||'').split(';').map(function(a){return a.trim();}).filter(Boolean);
+      actItems = rawActs.map(function(a, ai){
+        return {
+          actionId: 'ACT-' + cl.id + '-' + (oi+1) + '-' + (ai+1),
+          action: a,
+          obligationId: obId,
+          department: obDepts.join(', '),
+          assignedTo: obAssign,
+          status: obStatus,
+          dueDate: '', frequency: 'Monthly', tags: []
+        };
+      });
+    }
+
+    /* dept display on obl header — show dept if all actions share same, else "N depts" */
+    var allActDeptArr = actItems.map(function(a, ai){
+      var d = window._mlActDepts && window._mlActDepts[uid+'-'+ai];
+      if (d) return Array.isArray(d) ? d : [d];
+      return obDepts;
+    });
+    var flatDepts = [];
+    allActDeptArr.forEach(function(arr){ arr.forEach(function(d){ if(flatDepts.indexOf(d)<0) flatDepts.push(d); }); });
+    var deptDisplay = obDepts.length ? obDepts.join(', ')
+      : flatDepts.length === 1 ? flatDepts[0]
+      : flatDepts.length > 1  ? flatDepts.length + ' depts'
+      : '';
+
+    var statusStyle = obStatus === 'Assigned'
+      ? 'background:#dcfce7;color:#15803d;border-color:#6ee7b7;'
+      : obStatus === 'Unassigned'
+      ? 'background:#fef3c7;color:#b45309;border-color:#fcd34d;'
+      : 'background:#f3f4f6;color:#6b7280;border-color:#d1d5db;';
+
+    return (
+      '<div class="ml-cl-obl-item" id="ml-cl-obl-' + uid + '">' +
+
+        /* ── OBLIGATION HEADER ── */
+        '<div class="ml-cl-obl-header" style="cursor:default;">' +
+          '<span class="ml-cl-obl-num">O' + (oi+1) + '</span>' +
+          '<span class="ml-cl-obl-preview">' + obText.substring(0,70) + (obText.length>70?'…':'') + '</span>' +
+          '<div style="display:flex;align-items:center;gap:5px;flex-shrink:0;">' +
+
+            /* action count */
+            (actItems.length
+              ? '<span style="font-size:9px;font-weight:600;color:var(--cl-blue);background:var(--cl-blue-lt);border:1px solid var(--cl-blue-mid);padding:2px 9px;border-radius:10px;white-space:nowrap;">'
+                + actItems.length + ' Action' + (actItems.length>1?'s':'') + '</span>'
+              : '') +
+
+            /* dept badge (multi-select) */
+            '<span class="ml-cl-dept-badge" onclick="event.stopPropagation();_mlChOblDeptPicker(\'' + uid + '\')" style="cursor:pointer;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'
+              + (deptDisplay || '+ Dept') +
+            '</span>' +
+
+            /* assignee badge */
+            (obAssign
+              ? '<span class="ml-cl-assignee-badge" onclick="event.stopPropagation();_mlChOblAssigneePicker(\'' + uid + '\')">' + obAssign + '</span>'
+              : '<span class="ml-cl-assignee-badge" onclick="event.stopPropagation();_mlChOblAssigneePicker(\'' + uid + '\')" style="background:var(--cl-hover);border-color:var(--cl-border);color:var(--cl-t3);">Assign</span>') +
+
+            /* status */
+            (obStatus ? '<span class="ml-cl-status-badge" style="' + statusStyle + '">' + obStatus + '</span>' : '') +
+
+            /* eye → obligation detail popup */
+            '<button class="ml-cl-eye-btn" onclick="event.stopPropagation();_mlChOpenOblPopup(\'' + uid + '\',\'' + obId + '\',' + JSON.stringify(obText) + ',\'' + obAssign + '\',\'' + obStatus + '\')" title="View obligation">' +
+              '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>' +
+            '</button>' +
+
+          '</div>' +
+        '</div>' +
+
+        /* ── ACTION ROWS ── */
+        '<div style="border-top:1px solid var(--cl-border-lt);background:#fafbfd;">' +
+          (actItems.length ? actItems.map(function(actItem, ai) {
+            var actUid    = uid + '-' + ai;
+            var actDepts  = (window._mlActDepts  && window._mlActDepts[actUid])  || obDepts;
+            if (typeof actDepts === 'string') actDepts = actDepts ? actDepts.split(',').map(function(d){return d.trim();}) : [];
+            if (!Array.isArray(actDepts)) actDepts = [];
+            var actAssign = (window._mlActAssign    && window._mlActAssign[actUid])    || obAssign;
+            var actStatus = (window._mlActStatuses  && window._mlActStatuses[actUid])  || obStatus;
+            var actDeptDisplay = actDepts.length === 1 ? actDepts[0]
+              : actDepts.length > 1 ? actDepts.length + ' depts' : '';
+            var aStatusStyle = actStatus === 'Assigned'
+              ? 'background:#dcfce7;color:#15803d;border-color:#6ee7b7;'
+              : actStatus === 'Unassigned'
+              ? 'background:#fef3c7;color:#b45309;border-color:#fcd34d;'
+              : 'background:#f3f4f6;color:#6b7280;border-color:#d1d5db;';
+
+            return '<div class="ml-cl-act-row" id="ml-cl-act-' + actUid + '">' +
+              /* real Action ID chip */
+              '<span style="font-family:monospace;font-size:10px;font-weight:700;color:#fff;background:var(--cl-blue);padding:2px 7px;border-radius:4px;flex-shrink:0;white-space:nowrap;">' + actItem.actionId + '</span>' +
+              /* action text */
+              '<span class="ml-cl-act-text">' + (actItem.action||'').substring(0,60) + ((actItem.action||'').length>60?'…':'') + '</span>' +
+              '<div style="display:flex;align-items:center;gap:5px;flex-shrink:0;">' +
+                /* dept multi-select */
+                '<span class="ml-cl-dept-badge" onclick="event.stopPropagation();_mlChActDeptPicker(\'' + actUid + '\')" style="cursor:pointer;">' + (actDeptDisplay || '+ Dept') + '</span>' +
+                /* assignee */
+                (actAssign
+                  ? '<span class="ml-cl-assignee-badge" onclick="event.stopPropagation();_mlChActAssigneePicker(\'' + actUid + '\')">' + actAssign + '</span>'
+                  : '<span class="ml-cl-assignee-badge" onclick="event.stopPropagation();_mlChActAssigneePicker(\'' + actUid + '\')" style="background:var(--cl-hover);border-color:var(--cl-border);color:var(--cl-t3);">Assign</span>') +
+                /* status */
+                (actStatus ? '<span class="ml-cl-status-badge" style="' + aStatusStyle + '">' + actStatus + '</span>' : '') +
+                /* eye → action detail popup (same as table view) */
+                '<button class="ml-cl-eye-btn" onclick="event.stopPropagation();_mlChOpenActionDetail(\'' + actUid + '\',' + JSON.stringify(actItem) + ')" title="View action">' +
+                  '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>' +
+                '</button>' +
+              '</div>' +
+            '</div>';
+          }).join('')
+          : '<div style="padding:10px 14px;font-size:11px;color:var(--cl-t3);font-style:italic;">No actions defined.</div>') +
+        '</div>' +
+
+      '</div>'
+    );
+  }).join('');
 }
 
 
@@ -316,22 +577,199 @@ function _drPanelClauses(flow, circId) {
 }
 
 
-window._mlChToggleClause = function(ci, cli) {
-  var row = document.getElementById('ml-cl-row-' + ci + '-' + cli);
-  var body = document.getElementById('ml-cl-body-' + ci + '-' + cli);
-  var arr = document.getElementById('ml-cl-arr-' + ci + '-' + cli);
-  if (!row || !body) return;
-  var isOpen = row.classList.contains('cl-row-expanded');
-  /* close all */
-  document.querySelectorAll('.cl-clause-row').forEach(function(r){ r.classList.remove('cl-row-expanded'); });
-  document.querySelectorAll('.cl-inline-expand').forEach(function(e){ e.style.display='none'; });
-  document.querySelectorAll('.cl-row-arrow').forEach(function(a){ a.classList.remove('open'); });
+window._mlChToggleClause = function(ci, cli) { /* legacy — unused */ };
+
+window._mlChToggleClause2 = function(ci, cli) {
+  var row    = document.getElementById('ml-cl-row-' + ci + '-' + cli);
+  var expand = document.getElementById('ml-cl-expand2-' + ci + '-' + cli);
+  var arr    = document.getElementById('ml-cl-arr2-' + ci + '-' + cli);
+  if (!row || !expand) return;
+  var isOpen = row.classList.contains('expanded');
+  document.querySelectorAll('.ml-cl-row').forEach(function(r){ r.classList.remove('expanded'); });
+  document.querySelectorAll('[id^="ml-cl-expand2-"]').forEach(function(e){ e.style.display='none'; });
+  document.querySelectorAll('[id^="ml-cl-arr2-"]').forEach(function(a){ a.style.transform=''; });
   if (!isOpen) {
-    row.classList.add('cl-row-expanded');
-    body.style.display = 'block';
-    if (arr) arr.classList.add('open');
+    row.classList.add('expanded');
+    expand.style.display = 'block';
+    if (arr) arr.style.transform = 'rotate(90deg)';
   }
-}
+};
+
+window._mlChToggleObl = function(uid) {
+  var body = document.getElementById('ml-cl-obl-body-' + uid);
+  var arr  = document.getElementById('ml-cl-obl-arr-' + uid);
+  if (!body) return;
+  var isOpen = body.classList.contains('open');
+  body.classList.toggle('open', !isOpen);
+  if (arr) arr.style.transform = isOpen ? '' : 'rotate(180deg)';
+};
+
+/* state stores */
+window._mlOblStatuses = window._mlOblStatuses || {};
+window._mlOblDepts    = window._mlOblDepts    || {};
+window._mlOblAssign   = window._mlOblAssign   || {};
+window._mlActStatuses = window._mlActStatuses || {};
+window._mlActDepts    = window._mlActDepts    || {};
+window._mlActAssign   = window._mlActAssign   || {};
+
+/* dept picker for obligation */
+window._mlChOblDeptPicker = function(uid) {
+  var allDepts = ['Compliance','Risk','Legal','IT','Operations','HR','Finance','Credit','Procurement'];
+  var current  = window._mlOblDepts[uid] || [];
+  if (typeof current === 'string') current = current ? current.split(',').map(function(d){return d.trim();}) : [];
+  var ex = document.getElementById('ml-obl-dept-modal'); if(ex) ex.remove();
+  var overlay = document.createElement('div');
+  overlay.className = 'dr-modal-overlay'; overlay.id = 'ml-obl-dept-modal';
+  overlay.innerHTML =
+    '<div class="dr-modal" style="max-width:400px;">' +
+      '<div class="dr-modal-head"><div class="dr-modal-head-left"><div class="dr-modal-eyebrow">Select Departments</div><div class="dr-modal-subject">Obligation · cascades to actions</div></div><button class="dr-modal-close" onclick="document.getElementById(\'ml-obl-dept-modal\').remove()">✕</button></div>' +
+      '<div class="dr-modal-body" style="padding:16px;display:flex;flex-direction:column;gap:6px;">' +
+        allDepts.map(function(d){
+          var checked = current.indexOf(d) >= 0;
+          return '<label style="display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid #e5e7eb;border-radius:6px;background:#f9fafb;cursor:pointer;">' +
+            '<input type="checkbox" value="' + d + '"' + (checked?' checked':'') + ' style="width:16px;height:16px;accent-color:#3b82f6;"/>' +
+            '<span style="font-size:13px;font-weight:500;color:#374151;">' + d + '</span>' +
+          '</label>';
+        }).join('') +
+      '</div>' +
+      '<div class="dr-modal-foot">' +
+        '<button class="dr-btn dr-btn-ghost" onclick="document.getElementById(\'ml-obl-dept-modal\').remove()">Cancel</button>' +
+        '<button class="dr-btn dr-btn-pri" onclick="_mlChSaveOblDepts(\'' + uid + '\')">Save</button>' +
+      '</div>' +
+    '</div>';
+  document.body.appendChild(overlay);
+  overlay.addEventListener('click', function(e){ if(e.target===overlay) overlay.remove(); });
+};
+window._mlChSaveOblDepts = function(uid) {
+  var checked = document.querySelectorAll('#ml-obl-dept-modal input[type="checkbox"]:checked');
+  var depts   = Array.from(checked).map(function(cb){ return cb.value; });
+  window._mlOblDepts[uid] = depts;
+  /* cascade to children actions */
+  Object.keys(window._mlActDepts).forEach(function(k){ if(k.startsWith(uid+'-')) window._mlActDepts[k] = depts; });
+  /* also set for any actions not yet in store */
+  document.getElementById('ml-obl-dept-modal').remove();
+  _mlChReRenderStack();
+  showToast('Departments saved and cascaded to actions.','success');
+};
+
+/* assignee picker for obligation */
+window._mlChOblAssigneePicker = function(uid) {
+  var assignees = typeof _mlGetUniqueAssignees === 'function' ? _mlGetUniqueAssignees() : ['John Doe','Jane Smith','Raj Kumar','Priya Nair'];
+  var ex = document.getElementById('ml-obl-assign-modal'); if(ex) ex.remove();
+  var overlay = document.createElement('div');
+  overlay.className = 'dr-modal-overlay'; overlay.id = 'ml-obl-assign-modal';
+  overlay.innerHTML = '<div class="dr-modal" style="max-width:380px;"><div class="dr-modal-head"><div class="dr-modal-head-left"><div class="dr-modal-eyebrow">Assign To</div></div><button class="dr-modal-close" onclick="document.getElementById(\'ml-obl-assign-modal\').remove()">✕</button></div><div class="dr-modal-body" style="padding:16px;display:flex;flex-direction:column;gap:6px;">' +
+    assignees.map(function(a){ return '<button onclick="_mlChSetOblAssign(\'' + uid + '\',\'' + a + '\')" style="padding:10px 14px;text-align:left;border:1px solid #e5e7eb;border-radius:6px;background:#f9fafb;cursor:pointer;font-size:13px;font-weight:500;">' + a + '</button>'; }).join('') +
+    '</div></div>';
+  document.body.appendChild(overlay);
+  overlay.addEventListener('click', function(e){ if(e.target===overlay) overlay.remove(); });
+};
+window._mlChSetOblAssign = function(uid, person) {
+  window._mlOblAssign[uid] = person;
+  /* cascade to children */
+  Object.keys(window._mlActAssign).forEach(function(k){ if(k.startsWith(uid+'-') && !window._mlActAssign[k]) window._mlActAssign[k] = person; });
+  document.getElementById('ml-obl-assign-modal').remove();
+  _mlChReRenderStack();
+  showToast('Assigned to ' + person + ' (cascaded to actions).','success');
+};
+
+/* dept/assignee pickers for action level */
+window._mlChActDeptPicker = function(actUid) {
+  var allDepts = ['Compliance','Risk','Legal','IT','Operations','HR','Finance','Credit'];
+  var ex = document.getElementById('ml-act-dept-modal'); if(ex) ex.remove();
+  var overlay = document.createElement('div');
+  overlay.className = 'dr-modal-overlay'; overlay.id = 'ml-act-dept-modal';
+  overlay.innerHTML = '<div class="dr-modal" style="max-width:380px;"><div class="dr-modal-head"><div class="dr-modal-head-left"><div class="dr-modal-eyebrow">Select Department</div></div><button class="dr-modal-close" onclick="document.getElementById(\'ml-act-dept-modal\').remove()">✕</button></div><div class="dr-modal-body" style="padding:16px;display:flex;flex-direction:column;gap:6px;">' +
+    allDepts.map(function(d){ return '<button onclick="_mlChSetActDept(\'' + actUid + '\',\'' + d + '\')" style="padding:10px 14px;text-align:left;border:1px solid #e5e7eb;border-radius:6px;background:#f9fafb;cursor:pointer;font-size:13px;font-weight:500;">' + d + '</button>'; }).join('') +
+    '</div></div>';
+  document.body.appendChild(overlay);
+  overlay.addEventListener('click', function(e){ if(e.target===overlay) overlay.remove(); });
+};
+window._mlChSetActDept = function(actUid, dept) {
+  window._mlActDepts[actUid] = dept;
+  document.getElementById('ml-act-dept-modal').remove();
+  _mlChReRenderStack();
+  showToast('Action department set to ' + dept + '.','success');
+};
+window._mlChActAssigneePicker = function(actUid) {
+  var assignees = typeof _mlGetUniqueAssignees === 'function' ? _mlGetUniqueAssignees() : ['John Doe','Jane Smith','Raj Kumar','Priya Nair'];
+  var ex = document.getElementById('ml-act-assign-modal'); if(ex) ex.remove();
+  var overlay = document.createElement('div');
+  overlay.className = 'dr-modal-overlay'; overlay.id = 'ml-act-assign-modal';
+  overlay.innerHTML = '<div class="dr-modal" style="max-width:380px;"><div class="dr-modal-head"><div class="dr-modal-head-left"><div class="dr-modal-eyebrow">Assign To</div></div><button class="dr-modal-close" onclick="document.getElementById(\'ml-act-assign-modal\').remove()">✕</button></div><div class="dr-modal-body" style="padding:16px;display:flex;flex-direction:column;gap:6px;">' +
+    assignees.map(function(a){ return '<button onclick="_mlChSetActAssign(\'' + actUid + '\',\'' + a + '\')" style="padding:10px 14px;text-align:left;border:1px solid #e5e7eb;border-radius:6px;background:#f9fafb;cursor:pointer;font-size:13px;font-weight:500;">' + a + '</button>'; }).join('') +
+    '</div></div>';
+  document.body.appendChild(overlay);
+  overlay.addEventListener('click', function(e){ if(e.target===overlay) overlay.remove(); });
+};
+window._mlChSetActAssign = function(actUid, person) {
+  window._mlActAssign[actUid] = person;
+  document.getElementById('ml-act-assign-modal').remove();
+  _mlChReRenderStack();
+  showToast('Action assigned to ' + person + '.','success');
+};
+
+/* re-render current stack without changing chapter/section */
+window._mlChReRenderStack = function() {
+  if (window._mlChLastStackArgs) {
+    _mlChRenderStack.apply(null, window._mlChLastStackArgs);
+  }
+};
+
+v
+
+/* open action detail popup from chapter view — same popup as table view */
+window._mlChOpenActionDetail = function(actUid, actItem) {
+  /* actItem is the full action object from _mlActionItems or fallback mock */
+  if (typeof actItem === 'string') {
+    /* legacy string call — build mock */
+    actItem = {
+      actionId: actUid, action: actItem,
+      obligationId: '—', obligationName: actItem,
+      circId: (window._mlChActiveCirc && window._mlChActiveCirc.id) || '',
+      department: '', assignedTo: '', status: 'Pending',
+      dueDate: '', frequency: 'Monthly', tags: []
+    };
+  }
+  /* merge any locally set dept/assign/status overrides */
+  var actDepts  = window._mlActDepts     && window._mlActDepts[actUid];
+  var actAssign = window._mlActAssign    && window._mlActAssign[actUid];
+  var actStatus = window._mlActStatuses  && window._mlActStatuses[actUid];
+  if (actDepts)  actItem.department  = Array.isArray(actDepts) ? actDepts.join(', ') : actDepts;
+  if (actAssign) actItem.assignedTo  = actAssign;
+  if (actStatus) actItem.status      = actStatus;
+
+  /* ensure it is in _mlActionItems so the popup can find it */
+  window._mlActionItems = window._mlActionItems || [];
+  var existing = window._mlActionItems.findIndex(function(a){ return a.actionId === actItem.actionId; });
+  if (existing >= 0) {
+    window._mlActionItems[existing] = actItem;
+  } else {
+    window._mlActionItems.push(actItem);
+    existing = window._mlActionItems.length - 1;
+  }
+
+  if (typeof _mlOpenDetailPopup === 'function') {
+    _mlOpenDetailPopup(actItem, existing);
+  }
+};
+
+/* open obl detail popup from clause eye btn in chapter view */
+window._mlOpenOblDetailPopupForClause = function(clauseId, ci, cli) {
+  var chapters = window._mlChActiveChapters || [];
+  var ch = chapters[ci];
+  var cl = ch && (ch.clauses||[])[cli];
+  if (!cl) return;
+  var oblText = typeof cl.obligation === 'string' ? cl.obligation : (cl.text||'');
+  var mockItem = {
+    obligationId: 'OBL-' + cl.id,
+    obligationName: oblText,
+    circId: (window._mlChActiveCirc && window._mlChActiveCirc.id) || '',
+    dueDate: '', frequency: 'Monthly',
+    department: '', status: '', assignedTo: ''
+  };
+  if (typeof _mlOpenOblDetailPopup === 'function') _mlOpenOblDetailPopup(mockItem, 0);
+};
 
 /* ────────────────────────────────────────────
    LEFT NAV — clause-panel-v2 structure
