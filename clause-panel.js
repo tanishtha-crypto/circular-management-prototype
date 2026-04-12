@@ -33,46 +33,74 @@ function buildClausePanel() {
       <button class="cl-empty-cta" onclick="document.querySelector('[data-tab=\\'overview\\']')?.click()">← Go to Overview</button>
     </div>
     <div id="cl-main" style="display:none;">
-     <div class="cl-topbar">
+     <div class="cl-filter-card">
 
-        <!-- ROW 1: circular identity -->
-        <div class="cl-topbar-row1">
+        <!-- ROW 1: Circular selector + Generate -->
+        <div class="cl-fc-row1">
           <button class="cl-back-btn" id="cl-back-btn">← Overview</button>
-          <span class="cl-circ-id-chip" id="cl-circ-id-chip">—</span>
-          <span class="cl-circ-name-chip" id="cl-circ-name-chip">—</span>
-          <button class="cl-circ-edit-btn" id="cl-circ-edit-btn" title="Switch circular">✏️</button>
-          <!-- inline switcher — hidden until pen clicked -->
-          <div class="cl-circ-switcher-wrap" id="cl-circ-switcher-wrap" style="display:none;">
-            <div class="cl-sw-search-wrap">
-              <span class="cl-sw-icon">⌕</span>
-              <input class="cl-sw-input" id="cl-sw-input" type="text" placeholder="Search circulars…" autocomplete="off"/>
-              <div class="cl-sw-dropdown" id="cl-sw-dropdown" style="display:none;"></div>
-              
+
+          <div class="cl-fc-field cl-fc-field-circ">
+            <span class="cl-fc-label">Circular</span>
+            <div class="cl-circ-sel-wrap" id="cl-circ-switcher-wrap">
+              <button class="cl-circ-sel-btn" id="cl-circ-edit-btn">
+                <span class="cl-circ-id-chip" id="cl-circ-id-chip">—</span>
+                <span class="cl-circ-name-chip" id="cl-circ-name-chip">—</span>
+                <span class="cl-csel-arr">▾</span>
+              </button>
+              <div class="cl-sw-dropdown" id="cl-sw-dropdown" style="display:none;">
+                <div class="cl-sw-search-wrap">
+                  <span class="cl-sw-icon">⌕</span>
+                  <input class="cl-sw-input" id="cl-sw-input" type="text" placeholder="Search circulars…" autocomplete="off"/>
+                </div>
+              </div>
             </div>
           </div>
-        </div>
 
-        <!-- ROW 2: filters + level + generate -->
-        <div class="cl-topbar-row2">
-         
-          <select class="cl-filter-select" id="cl-adv-freq" onchange="_clApplyAdvFilters()">
-            <option value="">All Frequency</option>
-            <option value="Monthly">Monthly</option>
-            <option value="Quarterly">Quarterly</option>
-            <option value="Half-Yearly">Half-Yearly</option>
-            <option value="Annual">Annual</option>
-            <option value="Ongoing">Ongoing</option>
-            <option value="One-time">One-time</option>
-          </select>
-          <input class="cl-filter-date" type="date" id="cl-adv-from" title="From Date" onchange="_clApplyAdvFilters()"/>
-          <input class="cl-filter-date" type="date" id="cl-adv-to" title="To Date" onchange="_clApplyAdvFilters()"/>
-          <div style="margin-left:auto;display:flex;align-items:center;gap:8px;">
+          <div style="margin-left:auto;display:flex;align-items:center;gap:8px;flex-shrink:0;">
             <div class="cl-level-toggle">
               <button class="cl-lvl-btn active" data-level="2">L2</button>
               <button class="cl-lvl-btn" data-level="3">L3</button>
             </div>
             <button class="cl-topbar-btn cl-btn-generate" id="cl-btn-generate">◈ Generate</button>
           </div>
+        </div>
+
+        <!-- ROW 2: Filters -->
+        <div class="cl-fc-row2">
+          <div class="cl-fc-field">
+            <span class="cl-fc-label">Status</span>
+            <select class="cl-fc-sel" id="cl-adv-status" onchange="_clApplyAdvFilters()">
+              <option value="">All Statuses</option>
+              <option value="Accepted">Accepted</option>
+              <option value="Under Review">Under Review</option>
+              <option value="Rejected">Rejected</option>
+            </select>
+          </div>
+          <div class="cl-fc-field">
+            <span class="cl-fc-label">Frequency</span>
+            <select class="cl-fc-sel" id="cl-adv-freq" onchange="_clApplyAdvFilters()">
+              <option value="">All Frequency</option>
+              <option value="Monthly">Monthly</option>
+              <option value="Quarterly">Quarterly</option>
+              <option value="Half-Yearly">Half-Yearly</option>
+              <option value="Annual">Annual</option>
+              <option value="Ongoing">Ongoing</option>
+              <option value="One-time">One-time</option>
+            </select>
+          </div>
+          <div class="cl-fc-field">
+            <span class="cl-fc-label">From Date</span>
+            <input class="cl-fc-date" type="date" id="cl-adv-from" onchange="_clApplyAdvFilters()"/>
+          </div>
+          <div class="cl-fc-field">
+            <span class="cl-fc-label">To Date</span>
+            <input class="cl-fc-date" type="date" id="cl-adv-to" onchange="_clApplyAdvFilters()"/>
+          </div>
+          <div class="cl-fc-field cl-fc-field-search">
+            <span class="cl-fc-label">Search</span>
+            <input class="cl-fc-search-inp" id="cl-adv-search" placeholder="Search clauses, obligations…" oninput="_clApplyAdvFilters()"/>
+          </div>
+          <button class="cl-fc-clear-btn" onclick="_clClearAdvFilters()">✕ Clear</button>
         </div>
 
       </div>
@@ -247,6 +275,17 @@ function _clRunGenerate(circ) {
   setTimeout(() => {
     document.getElementById('cl-split').style.display = 'grid';
     _clBuildTree(circ);
+    /* auto-collapse nav if circular has no chapters (flat/notification type) */
+    const hasChapters = !!(circ.chapters?.length || circ.annexures?.length);
+    if (!hasChapters) {
+      clNavCollapse();
+      /* auto-load all flat clauses into workspace */
+      if (circ.clauses?.length) {
+        window._CL_ACTIVE_SECTION_CLAUSES = circ.clauses;
+        window._CL_ACTIVE_LABELS = { chLabel: '', secLabel: 'All Clauses', chTitle: circ.title };
+        _clRenderStack(circ.clauses, window._CL_ACTIVE_LABELS);
+      }
+    }
     const f = document.getElementById('cl-footer');
     f.style.display = 'flex'; f.style.opacity = '0'; f.style.transition = 'opacity .3s';
     requestAnimationFrame(() => requestAnimationFrame(() => { f.style.opacity = '1'; }));
@@ -503,15 +542,7 @@ function _clRenderStack(allClauses, labels) {
       </div>
       <div style="display:flex;align-items:center;gap:6px;flex-shrink:0;">
       <span class="cl-stack-count">${filtered.length} clause${filtered.length !== 1 ? 's' : ''}</span>
-      ${(() => {
-        const acc = filtered.filter(c => (window._CL_CLAUSE_STATUS?.[c.id]||'') === 'Accepted').length;
-        const rev = filtered.filter(c => (window._CL_CLAUSE_STATUS?.[c.id]||'') === 'Under Review').length;
-        const rej = filtered.filter(c => (window._CL_CLAUSE_STATUS?.[c.id]||'') === 'Rejected').length;
-        return `
-          ${acc ? `<span class="cl-nav-stat-badge cl-nav-stat-acc">✓ ${acc}</span>` : ''}
-          ${rev ? `<span class="cl-nav-stat-badge cl-nav-stat-rev">⟳ ${rev}</span>` : ''}
-          ${rej ? `<span class="cl-nav-stat-badge cl-nav-stat-rej">✗ ${rej}</span>` : ''}`;
-      })()}
+     
     </div>
     </div>
 
@@ -1237,6 +1268,7 @@ function _clBuildOblPanel(cl, level) {
     return '<div class="cl-oblig-empty">No obligations found.</div>';
 
   return `<div class="cl-oblig-list">
+  <span class="cl-actions-title">Obligations</span>
     ${obligs.map((ob, oi) => {
       const m = _clObligMeta(oi);
       const uid = `${cl.id}-${oi}`;
@@ -1244,6 +1276,7 @@ function _clBuildOblPanel(cl, level) {
       const previewText = ob.text.substring(0, 80) + (ob.text.length > 80 ? '…' : '');
       return `
       <div class="cl-oblig-item" id="cl-oblig-${uid}">
+       
 
         <!-- HEADER: one single row — num | text preview | status | eye icon | expand -->
         <div class="cl-oblig-header">
@@ -2081,6 +2114,44 @@ function injectClauseCSS() {
 .ai-loading-text{font-size:13px;color:#9499aa;font-family:var(--cl-font);}
 .spinner{width:28px;height:28px;border:3px solid #eef0f3;border-top-color:#1a1a2e;border-radius:50%;animation:cl-spin .7s linear infinite;}
 @keyframes cl-spin{to{transform:rotate(360deg)}}
+
+/* ── FILTER CARD ── */
+.cl-filter-card{background:var(--cl-card);border:1px solid var(--cl-border);border-radius:var(--cl-r-md);box-shadow:var(--cl-sh);padding:12px 16px;display:flex;flex-direction:column;gap:10px;}
+
+/* Row 1 */
+.cl-fc-row1{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.cl-fc-field-circ{flex:1;min-width:220px;}
+.cl-fc-label{display:block;font-size:9px;font-weight:700;color:var(--cl-t3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:4px;}
+
+/* Circular selector button */
+.cl-circ-sel-wrap{position:relative;}
+.cl-circ-sel-btn{display:flex;align-items:center;gap:7px;padding:7px 11px;background:var(--cl-nav-bg);border:1.5px solid var(--cl-border);border-radius:var(--cl-r-sm);cursor:pointer;font-family:inherit;width:100%;transition:border-color .13s;}
+.cl-circ-sel-btn:hover{border-color:var(--cl-blue);}
+.cl-circ-sel-btn .cl-circ-id-chip{font-family:var(--cl-mono);font-size:11px;font-weight:700;color:var(--cl-blue);background:var(--cl-blue-lt);border:1px solid var(--cl-blue-mid);padding:2px 7px;border-radius:4px;flex-shrink:0;white-space:nowrap;}
+.cl-circ-sel-btn .cl-circ-name-chip{font-size:12px;color:var(--cl-t2);flex:1;text-align:left;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.cl-csel-arr{font-size:11px;color:var(--cl-t3);flex-shrink:0;}
+.cl-sw-dropdown{position:absolute;top:calc(100% + 4px);left:0;min-width:100%;background:#fff;border:1.5px solid var(--cl-border);border-radius:var(--cl-r-md);z-index:9999;box-shadow:0 8px 24px rgba(26,26,46,.14);overflow:hidden;}
+.cl-sw-search-wrap{display:flex;align-items:center;gap:6px;padding:8px 10px;border-bottom:1px solid var(--cl-border-lt);}
+.cl-sw-icon{color:var(--cl-t3);font-size:14px;flex-shrink:0;}
+.cl-sw-input{flex:1;border:none;outline:none;font-family:inherit;font-size:12px;color:var(--cl-t1);background:transparent;}
+.cl-sw-dd-item{padding:8px 12px;cursor:pointer;border-bottom:1px solid var(--cl-border-lt);transition:background .1s;}
+.cl-sw-dd-item:last-child{border-bottom:none;}
+.cl-sw-dd-item:hover{background:var(--cl-hover);}
+.cl-sw-dd-id{font-family:var(--cl-mono);font-size:10px;font-weight:700;color:var(--cl-blue);display:block;}
+.cl-sw-dd-title{font-size:11px;color:var(--cl-t2);display:block;margin-top:1px;}
+
+/* Row 2 */
+.cl-fc-row2{display:flex;align-items:flex-end;gap:10px;flex-wrap:wrap;padding-top:10px;border-top:1px solid var(--cl-border-lt);}
+.cl-fc-field{display:flex;flex-direction:column;gap:4px;flex:1;min-width:120px;}
+.cl-fc-field-search{flex:2;min-width:200px;}
+.cl-fc-sel{padding:7px 10px;background:var(--cl-nav-bg);border:1.5px solid var(--cl-border);border-radius:var(--cl-r-sm);font-family:inherit;font-size:12px;color:var(--cl-t1);outline:none;cursor:pointer;width:100%;transition:border-color .13s;}
+.cl-fc-sel:focus{border-color:var(--cl-blue);background:#fff;}
+.cl-fc-date{padding:7px 10px;background:var(--cl-nav-bg);border:1.5px solid var(--cl-border);border-radius:var(--cl-r-sm);font-family:inherit;font-size:12px;color:var(--cl-t1);outline:none;width:100%;transition:border-color .13s;cursor:pointer;}
+.cl-fc-date:focus{border-color:var(--cl-blue);background:#fff;}
+.cl-fc-search-inp{padding:7px 11px;background:var(--cl-nav-bg);border:1.5px solid var(--cl-border);border-radius:var(--cl-r-sm);font-family:inherit;font-size:12px;color:var(--cl-t1);outline:none;width:100%;transition:border-color .13s;}
+.cl-fc-search-inp:focus{border-color:var(--cl-blue);background:#fff;}
+.cl-fc-clear-btn{padding:7px 14px;background:#fff;border:1.5px solid var(--cl-border);border-radius:var(--cl-r-sm);font-family:inherit;font-size:11px;font-weight:700;color:var(--cl-t3);cursor:pointer;white-space:nowrap;align-self:flex-end;transition:all .13s;}
+.cl-fc-clear-btn:hover{border-color:var(--cl-red);color:var(--cl-red);}
   `;
   document.head.appendChild(s);
 }

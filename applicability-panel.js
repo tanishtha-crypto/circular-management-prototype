@@ -1,3 +1,6 @@
+
+
+
 /**
  * applicability-panel.js  —  Panel 1: Applicability Analysis (v2)
  * NEW: Edit toggles (Table 1 & 2), N/A status, Version History modal,
@@ -249,7 +252,7 @@ function initApplicabilityListeners() {
     _appFillStrip(circ.id);
   }
 
-  document.getElementById('app-btn-run')?.addEventListener('click', _appRunAnalysis);a
+  document.getElementById('app-btn-run')?.addEventListener('click', _appRunAnalysis);
 
   document.getElementById('app-btn-regen')?.addEventListener('click', () => {
     const out = document.getElementById('app-output');
@@ -362,7 +365,7 @@ function _appRunAnalysis(extraCtx) {
               <div class="app-dots-menu" id="app-ent-dots-menu" style="display:none;">
                 <div class="app-dots-item" id="app-ent-mi-edit">✏️&nbsp; Edit</div>
                 <div class="app-dots-item" id="app-ent-mi-history">🕑&nbsp; History</div>
-                <div class="app-dots-item" id="app-ent-mi-regen">✦&nbsp; Regen with AI Context</div>
+                <div class="app-dots-item" id="app-ent-mi-regen">✦&nbsp; Regenerate with AI Context</div>
               </div>
             </div>
 </div>
@@ -406,12 +409,12 @@ function _appRunAnalysis(extraCtx) {
             <div class="app-dots-menu" id="app-param-dots-menu" style="display:none;">
               <div class="app-dots-item" id="app-param-mi-edit">✏️&nbsp; Edit</div>
               <div class="app-dots-item" id="app-param-mi-history">🕑&nbsp; History</div>
-              <div class="app-dots-item" id="app-param-mi-regen">✦&nbsp; Regen with AI Context</div>
+              <div class="app-dots-item" id="app-param-mi-regen">✦&nbsp; Regenerate with AI Context</div>
             </div>
             </div>
           </div>
         </div>
-        <div class="app-table-wrap">
+       <div class="app-table-wrap">
           <table class="app-table" id="app-param-table">
             <thead><tr>
               <th>Requirement</th>
@@ -432,6 +435,7 @@ function _appRunAnalysis(extraCtx) {
           <button class="app-edit-bar-save"   onclick="_appSaveParamEdit()">Save Changes</button>
         </div>
       </div>
+    </div>
 
     </div>`;
 
@@ -457,24 +461,38 @@ function _appRunAnalysis(extraCtx) {
    ROW BUILDERS
 ───────────────────────────────────────────────────────── */
 function _appEntityRow(e, i) {
-  const statusClass = e.applicable === 'yes' ? 'app-s-yes' : e.applicable === 'no' ? 'app-s-no' : e.applicable === 'na' ? 'app-s-na' : 'app-s-part';
-  const statusLabel = e.applicable === 'yes' ? '✓ Yes' : e.applicable === 'no' ? '✗ No' : e.applicable === 'na' ? '— N/A' : '~ Partial';
   return `
-  <tr id="app-ent-row-${i}" data-match="${e.match}">
+  <tr id="app-ent-row-${i}" data-match="${e.applicable}">
     <td>
-      <div class="app-ent-name">${e.name}</div>
+      <span class="app-ent-name app-editable-cell" id="app-e-name-${i}"
+        contenteditable="false"
+        onblur="if(window._APP_ENT_DATA&&window._APP_ENT_DATA[${i}])window._APP_ENT_DATA[${i}].name=this.textContent.trim()">
+        ${e.name}
+      </span>
       ${e.sub ? `<div class="app-ent-sub">${e.sub}</div>` : ''}
     </td>
     <td>
-      <span class="app-status ${statusClass}" id="app-ent-badge-${i}">${statusLabel}</span>
-    </td>
+  <span class="app-status ${
+    e.applicable === 'yes' ? 'app-s-yes' :
+    e.applicable === 'no'  ? 'app-s-no'  :
+    e.applicable === 'na'  ? 'app-s-na'  : 'app-s-part'
+  } app-ent-badge" id="app-ent-badge-${i}">
+    ${e.applicable === 'yes' ? '✓ Yes' : e.applicable === 'no' ? '✗ No' : e.applicable === 'na' ? '— N/A' : '~ Partial'}
+  </span>
+  <select class="ov-applic-select app-ent-select" id="app-ent-select-${i}"
+    style="display:none;"
+    onchange="_appChangeEntityStatus(${i}, this.value)">
+    <option value="yes"     ${e.applicable === 'yes'     ? 'selected' : ''}>✓ Yes</option>
+    <option value="no"      ${e.applicable === 'no'      ? 'selected' : ''}>✕ No</option>
+    <option value="partial" ${e.applicable === 'partial' ? 'selected' : ''}>~ Partial</option>
+    <option value="na"      ${e.applicable === 'na'      ? 'selected' : ''}>— N/A</option>
+  </select>
+</td>
     <td class="app-th-edit-only" style="display:none;text-align:center;">
-      <select class="app-inline-select" onchange="_appChangeEntityStatus(${i}, this.value)">
-        <option value="yes"     ${e.applicable === 'yes' ? 'selected' : ''}>✓ Yes</option>
-        <option value="no"      ${e.applicable === 'no'  ? 'selected' : ''}>✗ No</option>
-        <option value="partial" ${e.applicable === 'partial' ? 'selected' : ''}>~ Partial</option>
-        <option value="na"      ${e.applicable === 'na'  ? 'selected' : ''}>— N/A</option>
-      </select>
+      <div style="display:flex;flex-direction:row;align-items:center;justify-content:center;gap:4px;">
+        <button class="app-row-action-btn" onclick="_appAddEntityRow(${i})">＋</button>
+        <button class="app-row-action-btn app-row-remove-btn" onclick="_appRemoveEntityRow(${i})">✕</button>
+      </div>
     </td>
   </tr>`;
 }
@@ -490,25 +508,129 @@ function _appParamRow(p, i) {
     <td style="font-size:12px;color:#4a5068;">
       <span class="app-editable-cell" id="app-p-thresh-${i}" data-field="threshold" data-idx="${i}">${p.threshold}</span>
     </td>
-    <td>
-      <span class="app-status ${statusClass}" id="app-param-badge-${i}">${statusLabel}</span>
+   <td>
+      <span class="app-status ${
+        p.status === 'yes' ? 'app-s-yes' :
+        p.status === 'no'  ? 'app-s-no'  :
+        p.status === 'na'  ? 'app-s-na'  : 'app-s-part'
+      } app-param-badge" id="app-param-badge-${i}">
+        ${p.status === 'yes' ? '✓ Yes' : p.status === 'no' ? '✗ No' : p.status === 'na' ? '— N/A' : '~ Partial'}
+      </span>
+      <select class="ov-applic-select app-param-select" id="app-param-select-${i}"
+        style="display:none;"
+        onchange="_appChangeParamStatus(${i}, this.value)">
+        <option value="yes"     ${p.status === 'yes'     ? 'selected' : ''}>✓ Yes</option>
+        <option value="no"      ${p.status === 'no'      ? 'selected' : ''}>✕ No</option>
+        <option value="partial" ${p.status === 'partial' ? 'selected' : ''}>~ Partial</option>
+        <option value="na"      ${p.status === 'na'      ? 'selected' : ''}>— N/A</option>
+      </select>
     </td>
     <td style="text-align:center;position:relative;">
       <button class="app-reason-btn" onclick="_appToggleTip(event,'app-tip-${i}')">?</button>
       <div class="app-tooltip" id="app-tip-${i}">
         <div class="app-tt-arrow"></div>
-        <div class="app-tt-text">${p.reason}</div>
+        <div class="app-tt-text" id="app-tip-text-${i}">${p.reason}</div>
+        <div class="app-tt-edit" id="app-tip-edit-${i}" style="display:none;margin-top:8px;">
+          <textarea class="app-tip-textarea" id="app-tip-ta-${i}" placeholder="Add your reason…">${p.reason}</textarea>
+          <button class="app-tip-save-btn" onclick="_appSaveReason(${i})">Save</button>
+        </div>
+        <button class="app-tip-edit-btn" id="app-tip-editbtn-${i}" onclick="_appToggleReasonEdit(${i})">✏️ Edit reason</button>
       </div>
     </td>
     <td class="app-th-edit-only" style="display:none;text-align:center;">
-      <select class="app-inline-select" onchange="_appChangeParamStatus(${i}, this.value)">
-        <option value="yes"     ${p.status === 'yes'     ? 'selected' : ''}>✓ Yes</option>
-        <option value="partial" ${p.status === 'partial' ? 'selected' : ''}>~ Partial</option>
-        <option value="no"      ${p.status === 'no'      ? 'selected' : ''}>✗ No</option>
-        <option value="na"      ${p.status === 'na'      ? 'selected' : ''}>— N/A</option>
-      </select>
+      <div style="display:flex;flex-direction:row;align-items:center;justify-content:center;gap:4px;">
+        <button class="app-row-action-btn" onclick="_appAddParamRow(${i})">＋</button>
+        <button class="app-row-action-btn app-row-remove-btn" onclick="_appRemoveParamRow(${i})">✕</button>
+      </div>
     </td>
   </tr>`;
+}
+
+
+window._appToggleReasonEdit = function(i) {
+  const editDiv  = document.getElementById(`app-tip-edit-${i}`);
+  const textDiv  = document.getElementById(`app-tip-text-${i}`);
+  const editBtn  = document.getElementById(`app-tip-editbtn-${i}`);
+  const isEditing = editDiv.style.display !== 'none';
+  editDiv.style.display  = isEditing ? 'none' : 'block';
+  textDiv.style.display  = isEditing ? 'block' : 'none';
+  editBtn.textContent    = isEditing ? '✏️ Edit reason' : '✕ Cancel';
+};
+
+window._appSaveReason = function(i) {
+  const ta  = document.getElementById(`app-tip-ta-${i}`);
+  const txt = document.getElementById(`app-tip-text-${i}`);
+  if (!ta || !txt) return;
+  const val = ta.value.trim();
+  if (window._APP_PARAM_DATA?.[i]) window._APP_PARAM_DATA[i].reason = val;
+  txt.textContent = val;
+  /* close edit mode */
+  document.getElementById(`app-tip-edit-${i}`).style.display  = 'none';
+  txt.style.display = 'block';
+  document.getElementById(`app-tip-editbtn-${i}`).textContent = '✏️ Edit reason';
+  showToast('✓ Reason updated.', 'success');
+};
+
+function _appAddEntityRow(afterIdx) {
+  window._APP_ENT_DATA.splice(afterIdx + 1, 0, {
+    name:       '',
+    applicable: 'na',
+    sub:        null
+  });
+  _appRefreshEntityTable();
+}
+
+
+function _appRemoveEntityRow(idx) {
+  if (window._APP_ENT_DATA.length <= 1) return;
+  window._APP_ENT_DATA.splice(idx, 1);
+  _appRefreshEntityTable();
+}
+function _appRefreshEntityTable() {
+  const tbody = document.getElementById('app-ent-tbody');
+  if (!tbody) return;
+  tbody.innerHTML = window._APP_ENT_DATA.map((e, i) => _appEntityRow(e, i)).join('');
+  if (_appEntEditMode) {
+    document.querySelectorAll('#app-ent-tbody td.app-th-edit-only').forEach(c => c.style.display = '');
+    document.querySelectorAll('#app-ent-tbody .app-editable-cell').forEach(cell => {
+      cell.contentEditable = 'true';
+      cell.classList.add('app-cell-editing');
+    });
+    document.querySelectorAll('.app-ent-badge').forEach(b => b.style.display = 'none');
+    document.querySelectorAll('.app-ent-select').forEach(s => s.style.display = 'inline-block');
+  }
+}
+
+// Same pattern for params:
+function _appAddParamRow(afterIdx) {
+  window._APP_PARAM_DATA.splice(afterIdx + 1, 0, {
+    name:      '',
+    threshold: '',
+    status:    'na',
+    reason:    'Manually added row.'
+  });
+  _appRefreshParamTable();
+}
+
+
+function _appRemoveParamRow(idx) {
+  if (window._APP_PARAM_DATA.length <= 1) return;
+  window._APP_PARAM_DATA.splice(idx, 1);
+  _appRefreshParamTable();
+}
+function _appRefreshParamTable() {
+  const tbody = document.getElementById('app-param-tbody');
+  if (!tbody) return;
+  tbody.innerHTML = window._APP_PARAM_DATA.map((p, i) => _appParamRow(p, i)).join('');
+  if (_appParamEditMode) {
+    document.querySelectorAll('#app-param-tbody td.app-th-edit-only').forEach(c => c.style.display = '');
+    document.querySelectorAll('.app-editable-cell').forEach(cell => {
+      cell.contentEditable = 'true';
+      cell.classList.add('app-cell-editing');
+    });
+    document.querySelectorAll('.app-param-badge').forEach(b => b.style.display = 'none');
+    document.querySelectorAll('.app-param-select').forEach(s => s.style.display = 'inline-block');
+  }
 }
 
 function _appWireDotsMenus() {
@@ -531,6 +653,9 @@ function _appWireDotsMenus() {
   document.getElementById('app-ent-mi-regen')?.addEventListener('click', () => {
     document.getElementById('app-ent-dots-menu').style.display = 'none';
     _appOpenCtxModal();
+    /* ensure modal is visible */
+    const m = document.getElementById('app-ctx-modal');
+    if (m) m.classList.add('app-modal-open');
   });
 
   /* PARAMS dots */
@@ -552,6 +677,8 @@ function _appWireDotsMenus() {
   document.getElementById('app-param-mi-regen')?.addEventListener('click', () => {
     document.getElementById('app-param-dots-menu').style.display = 'none';
     _appOpenCtxModal();
+    const m = document.getElementById('app-ctx-modal');
+    if (m) m.classList.add('app-modal-open');
   });
 
   /* close both on outside click */
@@ -579,6 +706,13 @@ function _appToggleEntityEdit() {
     bar.style.display = 'flex';
     editCols.forEach(c => c.style.display = '');
     document.querySelectorAll('#app-ent-tbody td.app-th-edit-only').forEach(c => c.style.display = '');
+    // Show dropdowns, hide badges
+    document.querySelectorAll('.app-ent-badge').forEach(b => b.style.display = 'none');
+    document.querySelectorAll('.app-ent-select').forEach(s => s.style.display = 'inline-block');
+    document.querySelectorAll('#app-ent-tbody .app-editable-cell').forEach(cell => {
+      cell.contentEditable = 'true';
+      cell.classList.add('app-cell-editing');
+    });
   } else {
     _appCancelEntityEdit();
   }
@@ -598,8 +732,14 @@ function _appCancelEntityEdit() {
       if (badge) { badge.className = `app-status ${e.match ? 'app-s-yes' : 'app-s-no'}`; badge.textContent = e.match ? '✓ Yes' : '✗ No'; }
     });
   }
+  document.querySelectorAll('#app-ent-tbody .app-editable-cell').forEach(cell => {
+      cell.contentEditable = 'false';
+      cell.classList.remove('app-cell-editing');
+    });
   document.querySelectorAll('#app-ent-table .app-th-edit-only').forEach(c => c.style.display = 'none');
   document.querySelectorAll('#app-ent-tbody td.app-th-edit-only').forEach(c => c.style.display = 'none');
+  document.querySelectorAll('.app-ent-badge').forEach(b => b.style.display = '');
+  document.querySelectorAll('.app-ent-select').forEach(s => s.style.display = 'none');
 }
 
 function _appSaveEntityEdit() {
@@ -607,7 +747,12 @@ function _appSaveEntityEdit() {
   document.getElementById('app-ent-edit-bar').style.display = 'none';
   document.querySelectorAll('#app-ent-table .app-th-edit-only').forEach(c => c.style.display = 'none');
   document.querySelectorAll('#app-ent-tbody td.app-th-edit-only').forEach(c => c.style.display = 'none');
-
+document.querySelectorAll('#app-ent-tbody .app-editable-cell').forEach(cell => {
+      cell.contentEditable = 'false';
+      cell.classList.remove('app-cell-editing');
+    });
+  document.querySelectorAll('.app-ent-badge').forEach(b => b.style.display = '');
+  document.querySelectorAll('.app-ent-select').forEach(s => s.style.display = 'none');
   /* push to history */
   const snapshot = (window._APP_ENT_DATA || []).map(e => ({ ...e }));
   _APP_HISTORY.entities.push({
@@ -650,6 +795,8 @@ function _appToggleParamEdit() {
       cell.contentEditable = 'true';
       cell.classList.add('app-cell-editing');
     });
+    document.querySelectorAll('.app-param-badge').forEach(b => b.style.display = 'none');
+    document.querySelectorAll('.app-param-select').forEach(s => s.style.display = 'inline-block');
   } else {
     _appCancelParamEdit();
   }
@@ -676,6 +823,8 @@ function _appCancelParamEdit() {
     cell.contentEditable = 'false';
     cell.classList.remove('app-cell-editing');
   });
+  document.querySelectorAll('.app-param-badge').forEach(b => b.style.display = '');
+  document.querySelectorAll('.app-param-select').forEach(s => s.style.display = 'none');
 }
 
 function _appSaveParamEdit() {
@@ -695,6 +844,8 @@ function _appSaveParamEdit() {
     cell.classList.remove('app-cell-editing');
   });
 
+  document.querySelectorAll('.app-param-badge').forEach(b => b.style.display = '');
+  document.querySelectorAll('.app-param-select').forEach(s => s.style.display = 'none');
   const snapshot = (window._APP_PARAM_DATA || []).map(p => ({ ...p }));
   _APP_HISTORY.params.push({ ts: new Date(), label: 'Manual edit', snapshot });
   showToast('✓ Parameters updated.', 'success');
@@ -716,7 +867,7 @@ function _appSetParamBadge(badge, status) {
     na:      ['app-s-na',   '— N/A'],
   };
   const [cls, label] = map[status] || map.na;
-  badge.className   = `app-status ${cls}`;
+  badge.className   = `app-status app-param-badge ${cls}`;
   badge.textContent = label;
 }
 
@@ -1060,7 +1211,14 @@ function injectAppCSS() {
   .app-cs-change   { padding:4px 10px;background:#fff;border:1px solid #dde0e6;border-radius:6px;font-size:11px;font-weight:600;color:#4a5068;cursor:pointer;transition:all 0.12s; }
   .app-cs-change:hover { background:#f5f6f8;color:#1a1a2e; }
 
+.ov-acc-trigger { cursor:pointer; user-select:none; }
+.ov-acc-trigger:hover { background:#f5f6f8; }
+.ov-acc-arrow { font-size:11px; color:#9499aa; margin-right:8px; transition:transform 0.2s; flex-shrink:0; }
 
+.ov-applic-select { padding:3px 7px; border:1.5px solid #dde0e6; border-radius:6px;
+  font-family:'DM Sans',sans-serif; font-size:11px; font-weight:600;
+  background:#fff; color:#1a1a2e; cursor:pointer; outline:none; }
+.ov-applic-select:focus { border-color:#1a1a2e; }
 
   /* ── CIRCULAR SELECTOR ── */
 .app-sel-row        { display:flex;align-items:center;gap:8px;flex-wrap:wrap; }
@@ -1212,6 +1370,16 @@ function injectAppCSS() {
   .app-tt-arrow    { position:absolute;top:-5px;right:9px;width:10px;height:10px;background:#1a1a2e;transform:rotate(45deg);border-radius:2px; }
   .app-tt-text     { position:relative;z-index:1; }
 
+  .app-tip-textarea { width:100%;min-height:60px;padding:6px 8px;background:#2a2a3e;
+  border:1px solid #4a4a6a;border-radius:6px;color:#fff;font-family:'DM Sans',sans-serif;
+  font-size:11px;line-height:1.5;resize:vertical;outline:none;box-sizing:border-box;margin-bottom:6px; }
+.app-tip-save-btn { padding:4px 12px;background:#6366f1;border:none;border-radius:5px;
+  color:#fff;font-size:11px;font-weight:700;cursor:pointer;width:100%; }
+.app-tip-save-btn:hover { background:#4f46e5; }
+.app-tip-edit-btn { display:block;margin-top:8px;background:none;border:none;
+  color:#a5b4fc;font-size:10px;font-weight:600;cursor:pointer;padding:0;text-align:left; }
+.app-tip-edit-btn:hover { color:#fff; }
+
   /* footer */
   .app-footer      { display:flex;gap:10px;align-items:center;padding-top:2px;flex-wrap:wrap; }
   .app-footer-btn  { padding:10px 18px;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:all 0.14s;display:inline-flex;align-items:center;gap:7px;border:1.5px solid; }
@@ -1262,6 +1430,14 @@ function injectAppCSS() {
   .app-ver-restore    { align-self:flex-start;padding:4px 12px;background:#fff;border:1.5px solid #dde0e6;border-radius:6px;font-size:11px;font-weight:600;color:#4a5068;cursor:pointer;transition:all 0.12s; }
   .app-ver-restore:hover { background:#1a1a2e;color:#fff;border-color:#1a1a2e; }
 
+
+  .app-row-action-btn { width:24px;height:24px;border-radius:5px;border:1.5px solid #dde0e6;
+  background:#fff;font-size:13px;line-height:1;cursor:pointer;color:#4a5068;
+  display:inline-flex;align-items:center;justify-content:center;
+  transition:all 0.12s;margin:0 2px; }
+.app-row-action-btn:hover { background:#f5f6f8;border-color:#9499aa;color:#1a1a2e; }
+.app-row-remove-btn:hover { background:#fee2e2;border-color:#fca5a5;color:#b91c1c; }
+
   /* loading */
   .ai-loading      { display:flex;flex-direction:column;align-items:center;gap:14px;padding:40px 20px; }
   .ai-loading-text { font-size:13px;color:#9499aa;font-family:'DM Sans',sans-serif; }
@@ -1279,6 +1455,11 @@ window._appChangeEntityStatus = function(idx, status) {
   if (!badge) return;
   var classMap = {yes:'app-s-yes', no:'app-s-no', partial:'app-s-part', na:'app-s-na'};
   var labelMap = {yes:'✓ Yes', no:'✗ No', partial:'~ Partial', na:'— N/A'};
-  badge.className   = 'app-status ' + (classMap[status] || 'app-s-part');
+  badge.className   = 'app-status app-ent-badge ' + (classMap[status] || 'app-s-part');
   badge.textContent = labelMap[status] || status;
+};
+
+window._appUpdateStatus = function(type, idx, val) {
+  if (type === 'entity') _appChangeEntityStatus(idx, val);
+  else _appChangeParamStatus(idx, val);
 };

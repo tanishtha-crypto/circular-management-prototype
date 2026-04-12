@@ -28,7 +28,7 @@ function buildOverviewPanel() {
             <div class="ov-search-wrap">
               <span class="ov-search-icon">⌕</span>
               <input class="ov-search-input" id="ov-search-input" type="text"
-                placeholder="🔍  Search circulars by ID, title or regulator…" autocomplete="off"/>
+                placeholder="Search circulars by ID, title or regulator…" autocomplete="off"/>
               <div class="ov-dropdown" id="ov-dropdown" style="display:none;"></div>
             </div>
             <button class="ov-confirm-btn" id="ov-confirm-btn" disabled>Pull Details →</button>
@@ -69,7 +69,7 @@ function buildOverviewPanel() {
     <!-- APPLICABILITY BADGE -->
     <button class="ov-saved-toggle"
      id="ov-saved-toggle" data-saved="false">
-  🔖 Save
+  🔖 Save 
 </button>
     <div class="ov-applic-badge" id="ov-applic-badge" style="display:none;" title="Click to view Applicability">
       <span id="ov-applic-icon">—</span>
@@ -371,16 +371,7 @@ document.getElementById('ov-btn-next')?.addEventListener('click', () => {
       const circId = AI_LIFECYCLE_STATE.selectedCircularId;
       const circ   = circId ? (CMS_DATA?.circulars || []).find(c => c.id === circId) : null;
       if (!circ) { showToast('No circular selected.', 'warning'); return; }
-      const body = document.getElementById('ov-details-body');
-      if (body) {
-        body.style.opacity = '0.4';
-        body.innerHTML = `<div class="ai-loading"><div class="spinner"></div><div class="ai-loading-text">Regenerating overview…</div></div>`;
-      }
-      setTimeout(() => {
-        _ovRenderDetails(circ, 'existing');
-        if (body) body.style.opacity = '1';
-        showToast('Overview regenerated.', 'success');
-      }, 900);
+      _ovOpenRegenWithContextModal(circ);
     }
 
     /* EXECUTIVE SUMMARY */
@@ -583,17 +574,12 @@ function _ovOpenExecSummaryPopup(circ) {
 
   document.getElementById('ov-execsum-mi-regen')?.addEventListener('click', () => {
     document.getElementById('ov-execsum-dots-menu').style.display = 'none';
-    const pb = document.getElementById('ov-execsum-popup-body');
-    if (pb) { pb.style.opacity = '0.4'; }
-    setTimeout(() => {
-      const pb2 = document.getElementById('ov-execsum-popup-body');
-      if (pb2) {
-        pb2.innerHTML = typeof buildSummaryPanel === 'function' ? buildSummaryPanel() : '';
-        pb2.style.opacity = '1';
-        if (typeof initSummaryListeners === 'function') initSummaryListeners();
-      }
-      showToast('Summary regenerated.', 'success');
-    }, 800);
+    const circId = AI_LIFECYCLE_STATE.selectedCircularId;
+    const circ   = circId ? (CMS_DATA?.circulars || []).find(c => c.id === circId) : null;
+    if (!circ) { showToast('No circular selected.', 'warning'); return; }
+    if (typeof window._sumOpenRegenCtxModal === 'function') {
+      window._sumOpenRegenCtxModal(circ);
+    }
   });
 
   document.getElementById('ov-execsum-mi-depth')?.addEventListener('click', () => {
@@ -838,11 +824,11 @@ function _ovUpdateApplicBadge(circ) {
   const partC  = params.filter(p => p.status === 'partial').length;
   const noC    = params.filter(p => p.status === 'no').length;
 
-  let vClass = 'ov-applic-yes', vIcon = '✓', vLabel = 'Applicable ⓘ';
+  let vClass = 'ov-applic-yes', vIcon = '✓', vLabel = 'Applicable 💡';
   if (params.length && noC >= params.length / 2) {
-    vClass = 'ov-applic-no';    vIcon = '✗';  vLabel = 'Not Applicable ⓘ';
+    vClass = 'ov-applic-no';    vIcon = '✗';  vLabel = 'Not Applicable ▶️';
   } else if (params.length && partC >= 2) {
-    vClass = 'ov-applic-partial'; vIcon = '⚠'; vLabel = 'Partially Applicable ⓘ';
+    vClass = 'ov-applic-partial'; vIcon = '⚠'; vLabel = 'Partially Applicable 💡';
   }
 
   badge.className   = 'ov-applic-badge ' + vClass;
@@ -922,7 +908,7 @@ function _ovOpenApplicabilityPopup(circ) {
     let vReason = `This circular is <strong>directly applicable</strong> to your organisation. ${yesC} of ${params.length} parameters match your entity profile (${et}).`;
     if (noC >= params.length / 2) {
       vClass  = 'app-v-no';
-      vLabel  = 'Not Applicable';
+      vLabel  = 'Not Applicable ▶';
       vIcon   = '🚫';
       vReason = `This circular is <strong>not applicable</strong> to your organisation. The regulatory scope does not match your entity profile.`;
     } else if (partC >= 2) {
@@ -944,7 +930,7 @@ function _ovOpenApplicabilityPopup(circ) {
       } else if (vClass === 'app-v-no') {
         _badge.className = 'ov-applic-badge ov-applic-no';
         _icon.textContent = '✗';
-        _lbl.textContent  = 'Not Applicable ⓘ';
+        _lbl.textContent  = 'Not Applicable ▶️';
       } else {
         _badge.className = 'ov-applic-badge ov-applic-partial';
         _icon.textContent = '⚠';
@@ -983,7 +969,7 @@ function _ovOpenApplicabilityPopup(circ) {
             </div>
           </div>
         </div>
-        <div class="app-table-wrap">
+       <div class="app-table-wrap">
           <table class="app-table" id="app-ent-table">
             <thead><tr>
               <th style="width:55%">Entity Type</th>
@@ -1044,7 +1030,7 @@ function _ovOpenApplicabilityPopup(circ) {
           <span class="app-edit-bar-info">✎ Edit mode — click cells to edit values</span>
           <button class="app-edit-bar-cancel" onclick="_appCancelParamEdit()">Cancel</button>
           <button class="app-edit-bar-save"   onclick="_appSaveParamEdit()">Save Changes</button>
-        </div>
+       </div>
       </div>
 
     </div>`;
@@ -1105,6 +1091,34 @@ function _ovWireApplicPopupDots() {
     if (!e.target.closest('.app-dots-wrap')) {
       document.getElementById('ov-ent-dots-menu')?.style && (document.getElementById('ov-ent-dots-menu').style.display = 'none');
       document.getElementById('ov-param-dots-menu')?.style && (document.getElementById('ov-param-dots-menu').style.display = 'none');
+    }
+  });
+}
+
+function _ovToggleAccordion(which) {
+  const sections = ['ent', 'param'];
+  sections.forEach(sec => {
+    const body  = document.getElementById(`ov-acc-${sec}-body`);
+    const arrow = document.getElementById(`ov-acc-${sec}-arrow`);
+    const editBar = document.getElementById(`app-${sec === 'ent' ? 'ent' : 'param'}-edit-bar`);
+    if (!body) return;
+
+    if (sec === which) {
+      // If edit mode is active, never collapse
+      const inEditMode = editBar && editBar.style.display !== 'none';
+      if (inEditMode) return;
+
+      const isOpen = body.style.display !== 'none';
+      body.style.display = isOpen ? 'none' : 'block';
+      if (arrow) arrow.textContent = isOpen ? '▶' : '▼';
+    } else {
+      // Collapse others only if they're not in edit mode
+      const otherEditBar = document.getElementById(`app-${sec === 'ent' ? 'ent' : 'param'}-edit-bar`);
+      const otherInEdit  = otherEditBar && otherEditBar.style.display !== 'none';
+      if (!otherInEdit) {
+        body.style.display = 'none';
+        if (arrow) arrow.textContent = '▶';
+      }
     }
   });
 }
@@ -1233,6 +1247,68 @@ function showExtractionFailureModal() {
   `;
   document.body.appendChild(modal);
 }
+
+/* ── REGEN WITH CONTEXT MODAL ── */
+function _ovOpenRegenWithContextModal(circ) {
+  document.querySelector('.ov-regen-ctx-overlay')?.remove();
+  const overlay = document.createElement('div');
+  overlay.className = 'ov-regen-ctx-overlay';
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.45);display:flex;align-items:center;justify-content:center;z-index:10001;padding:20px;';
+  overlay.innerHTML = `
+    <div class="ov-regen-ctx-box">
+      <div class="ov-regen-ctx-head">
+        <div class="ov-regen-ctx-title">✦ Regenerate with AI Context</div>
+        <button onclick="this.closest('.ov-regen-ctx-overlay').remove()" class="ov-regen-ctx-close">✕</button>
+      </div>
+      <div class="ov-regen-ctx-body">
+        <p class="ov-regen-ctx-desc">Add any extra context or instructions you want the AI to incorporate when regenerating this circular's overview.</p>
+        <div class="ov-regen-ctx-chips">
+          <span class="ov-ctx-chip" onclick="_ovToggleCtxChip(this,'Focus on compliance deadlines')">Compliance Deadlines</span>
+          <span class="ov-ctx-chip" onclick="_ovToggleCtxChip(this,'Highlight risk factors')">Risk Factors</span>
+          <span class="ov-ctx-chip" onclick="_ovToggleCtxChip(this,'Summarise key obligations')">Key Obligations</span>
+          <span class="ov-ctx-chip" onclick="_ovToggleCtxChip(this,'Include recent amendments')">Recent Amendments</span>
+          <span class="ov-ctx-chip" onclick="_ovToggleCtxChip(this,'Focus on entity applicability')">Entity Applicability</span>
+        </div>
+        <textarea class="ov-regen-ctx-textarea" id="ov-regen-ctx-input"
+          placeholder="e.g. We are an NBFC with AUM above ₹500 Cr — please tailor the overview accordingly…"></textarea>
+        <div class="ov-regen-ctx-footer">
+          <button onclick="this.closest('.ov-regen-ctx-overlay').remove()" class="ov-regen-ctx-cancel">Cancel</button>
+          <button onclick="_ovRunRegenWithContext('${circ.id}')" class="ov-regen-ctx-go">✦ &nbsp;Regenerate</button>
+        </div>
+      </div>
+    </div>`;
+  overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });
+  document.body.appendChild(overlay);
+  document.getElementById('ov-regen-ctx-input')?.focus();
+}
+
+window._ovToggleCtxChip = function(el, text) {
+  el.classList.toggle('ov-ctx-chip-active');
+  const ta = document.getElementById('ov-regen-ctx-input');
+  if (!ta) return;
+  if (el.classList.contains('ov-ctx-chip-active')) {
+    ta.value = (ta.value ? ta.value + '\n' : '') + text;
+  } else {
+    ta.value = ta.value.replace(text, '').replace(/\n+/g, '\n').trim();
+  }
+};
+
+window._ovRunRegenWithContext = function(circId) {
+  const ctx  = document.getElementById('ov-regen-ctx-input')?.value.trim();
+  document.querySelector('.ov-regen-ctx-overlay')?.remove();
+  const circ = (CMS_DATA?.circulars || []).find(c => c.id === circId);
+  if (!circ) return;
+  const body = document.getElementById('ov-details-body');
+  if (body) {
+    body.style.opacity = '0.4';
+    body.innerHTML = `<div class="ai-loading"><div class="spinner"></div><div class="ai-loading-text">Regenerating with context…</div></div>`;
+  }
+  setTimeout(() => {
+    _ovRenderDetails(circ, 'existing');
+    if (body) body.style.opacity = '1';
+    showToast(ctx ? '✦ Regenerated with your context.' : 'Overview regenerated.', 'success');
+  }, 1200);
+};
 
 /* ================================================================ CSS */
 function injectOverviewCSS() {
@@ -1525,6 +1601,35 @@ function injectOverviewCSS() {
   .ov-switcher-inner { display:flex;flex-direction:column;gap:8px; }
   .ov-switcher-title { font-size:11px;font-weight:700;color:#9499aa;text-transform:uppercase;
     letter-spacing:.06em;margin-bottom:2px; }
+
+  /* ── REGEN WITH CONTEXT MODAL ── */
+  .ov-regen-ctx-box { background:#fff;border-radius:14px;width:100%;max-width:500px;
+    box-shadow:0 24px 60px rgba(0,0,0,0.22);overflow:hidden; }
+  .ov-regen-ctx-head { display:flex;align-items:center;justify-content:space-between;
+    padding:16px 20px;border-bottom:1px solid #dde0e6;background:#f5f6f8; }
+  .ov-regen-ctx-title { font-size:14px;font-weight:700;color:#1a1a2e; }
+  .ov-regen-ctx-close { width:28px;height:28px;border-radius:50%;background:#e2e5eb;border:none;
+    font-size:13px;color:#4a5068;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.12s; }
+  .ov-regen-ctx-close:hover { background:#1a1a2e;color:#fff; }
+  .ov-regen-ctx-body { padding:20px; }
+  .ov-regen-ctx-desc { font-size:13px;color:#4a5068;margin:0 0 14px;line-height:1.6; }
+  .ov-regen-ctx-chips { display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px; }
+  .ov-ctx-chip { padding:5px 12px;background:#f5f6f8;border:1.5px solid #dde0e6;border-radius:20px;
+    font-size:11px;font-weight:600;color:#4a5068;cursor:pointer;transition:all 0.13s;user-select:none; }
+  .ov-ctx-chip:hover { border-color:#a5b4fc;color:#4f46e5;background:#eef2ff; }
+  .ov-ctx-chip-active { background:#1a1a2e;color:#fff;border-color:#1a1a2e; }
+  .ov-regen-ctx-textarea { width:100%;min-height:100px;padding:10px 12px;background:#f0f1f4;
+    border:1.5px solid #dde0e6;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:13px;
+    color:#1a1a2e;line-height:1.6;resize:vertical;outline:none;box-sizing:border-box; }
+  .ov-regen-ctx-textarea:focus { border-color:#1a1a2e;background:#fff; }
+  .ov-regen-ctx-footer { display:flex;justify-content:flex-end;gap:10px;margin-top:16px;
+    padding-top:14px;border-top:1px solid #f0f1f4; }
+  .ov-regen-ctx-cancel { padding:9px 18px;background:#fff;border:1.5px solid #dde0e6;
+    border-radius:8px;font-size:13px;font-weight:600;color:#4a5068;cursor:pointer; }
+  .ov-regen-ctx-cancel:hover { background:#f5f6f8; }
+  .ov-regen-ctx-go { padding:9px 18px;background:#1a1a2e;border:none;border-radius:8px;
+    font-size:13px;font-weight:700;color:#fff;cursor:pointer;font-family:'DM Sans',sans-serif; }
+  .ov-regen-ctx-go:hover { background:#2d2d4e; }
 
   `;
   document.head.appendChild(s);

@@ -69,6 +69,12 @@ function buildSummaryPanel(opts = {}) {
       <!-- DOCUMENT OUTPUT -->
       <div id="sum-output"></div>
 
+      <!-- FOOTER -->
+      <div id="sum-footer" class="sum-footer" style="display:none;">
+        <button class="sum-foot-btn sum-foot-save" id="sum-btn-save">💾 &nbsp;Save Summary</button>
+        <button class="sum-foot-btn sum-foot-next" id="sum-btn-next">Next: Clause Analysis →</button>
+      </div>
+
     </div>
   </div>`;
 }
@@ -78,6 +84,7 @@ function initSummaryListeners(opts = {}) {
   const isPopup = !!opts.popupMode;
   injectSharedCSS();
   injectSumCSS();
+  injectAppCSS();
 
   const selInput    = document.getElementById('sum-sel-input');
   const selDropdown = document.getElementById('sum-sel-dropdown');
@@ -204,7 +211,7 @@ function initSummaryListeners(opts = {}) {
 function _sumRun(circ) {
   const btn = document.getElementById('btn-gen-summary');
   const out = document.getElementById('sum-output');
-  btn.disabled = true; btn.style.opacity = '0.65';
+  if (btn) { btn.disabled = true; btn.style.opacity = '0.65'; }
   out.innerHTML = `<div class="sum-loading">${loadingHTML('Building executive summary document…')}</div>`;
 
   setTimeout(() => {
@@ -226,16 +233,19 @@ function _sumRun(circ) {
     footer.style.transition = 'opacity 0.3s';
     requestAnimationFrame(()=>requestAnimationFrame(()=>{ footer.style.opacity='1'; }));
 
-    btn.disabled = false; btn.style.opacity = '1';
-btn.innerHTML = '◈ &nbsp;Regenerate Executive Summary';
+    if (btn) { btn.disabled = false; btn.style.opacity = '1'; btn.innerHTML = '◈ &nbsp;Regenerate Executive Summary'; }
   }, 1700);
 }
 
 /* ================================================================ BUILD DOCUMENT */
 function _sumBuildDoc(circ, data, org, aud, dep, date) {
   const depLabel = {brief:'Brief',standard:'Standard',detailed:'Detailed'}[dep]||'Standard';
-  const sections = _sumSections(circ, data, org);
   const purpose  = data.summary ||
+    `This directive issued by <strong>${circ.regulator||'the regulator'}</strong> introduces a
+    revised compliance framework for regulated financial entities. All entities within the defined
+    scope must achieve full compliance by the prescribed deadline. Non-compliance exposes entities
+    to supervisory action, regulatory penalties, and reputational risk.`;
+  const sections = _sumSections(circ, data, org, purpose);
     `This directive issued by <strong>${circ.regulator||'the regulator'}</strong> introduces a
     revised compliance framework for regulated financial entities. All entities within the defined
     scope must achieve full compliance by the prescribed deadline. Non-compliance exposes entities
@@ -247,35 +257,31 @@ function _sumBuildDoc(circ, data, org, aud, dep, date) {
     <!-- ── DOCUMENT HEADER ── -->
     <div class="sum-doc-header">
 
-      <!-- top bar: title + actions -->
-      <div class="sum-dh-topbar">
-        <div class="sum-dh-eyebrow">
-          <span class="sum-dh-label">Executive Summary</span>
-          <span class="sum-dh-sep">·</span>
-          <span class="sum-dh-aud">${aud}</span>
-          <span class="sum-dh-sep">·</span>
-          <span class="sum-dh-date">${date}</span>
+      <!-- colored hero strip -->
+      <div class="sum-dh-hero">
+        <div class="sum-dh-hero-top">
+          <div class="sum-dh-eyebrow">
+            <span class="sum-dh-label">Executive Summary</span>
+            <span class="sum-dh-sep">·</span>
+            <span class="sum-dh-aud">${aud}</span>
+            <span class="sum-dh-sep">·</span>
+            <span class="sum-dh-date">${date}</span>
+          </div>
+          
         </div>
-        <button class="sum-dh-btn" onclick="_sumOpenDoc()">🖨 Print</button>
-      </div>
 
-      <!-- circular title -->
-      <div class="sum-dh-title">${circ.title}</div>
+        <!-- title -->
+        <div class="sum-dh-title">${circ.title}</div>
 
-      <!-- meta pills row -->
-      <div class="sum-dh-meta">
-        <span class="sum-dh-pill sum-dh-pill-reg">${circ.regulator||'N/A'}</span>
-        <span class="sum-dh-pill">${circ.id}</span>
-        <span class="sum-dh-pill">Issued: ${circ.date||circ.issuedDate||'—'}</span>
-        <span class="sum-dh-pill">Effective: ${circ.effectiveDate||'Immediate'}</span>
-        <span class="sum-dh-pill sum-dh-pill-deadline">⚠ Comply by: ${circ.deadline||'As specified'}</span>
-        <span class="sum-dh-pill sum-dh-pill-risk-${(circ.risk||'medium').toLowerCase()}">${circ.risk||'Medium'} Risk</span>
-      </div>
-
-      <!-- purpose & background -->
-      <div class="sum-dh-purpose">
-        <div class="sum-dh-purpose-label">Purpose &amp; Background</div>
-        <p class="sum-dh-purpose-text">${purpose}</p>
+        <!-- badge row -->
+        <div class="sum-dh-meta">
+          <span class="sum-dh-pill sum-dh-pill-reg">${circ.regulator||'N/A'}</span>
+          <span class="sum-dh-pill">${circ.id}</span>
+          <span class="sum-dh-pill">Issued: ${circ.date||circ.issuedDate||'—'}</span>
+          <span class="sum-dh-pill">Effective: ${circ.effectiveDate||'Immediate'}</span>
+          <span class="sum-dh-pill sum-dh-pill-deadline">⚠ Comply by: ${circ.deadline||'As specified'}</span>
+          <span class="sum-dh-pill sum-dh-pill-risk-${(circ.risk||'medium').toLowerCase()}">${circ.risk||'Medium'} Risk</span>
+        </div>
       </div>
 
     </div>
@@ -354,6 +360,36 @@ function _sumBindDocEvents(circ) {
   /* expand all */
 
 
+  /* ── HEADER 3-DOTS ── */
+  const dhDotsBtn  = document.getElementById('sum-dh-dots-btn');
+  const dhDotsMenu = document.getElementById('sum-dh-dots-menu');
+
+  dhDotsBtn?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    if (dhDotsMenu) dhDotsMenu.style.display = dhDotsMenu.style.display === 'none' ? 'block' : 'none';
+  });
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest('.sum-dh-dots-wrap')) {
+      if (dhDotsMenu) dhDotsMenu.style.display = 'none';
+    }
+  });document.getElementById('sum-dh-mi-regen')?.addEventListener('click', () => {
+    if (dhDotsMenu) dhDotsMenu.style.display = 'none';
+    _sumOpenRegenCtxModal(circ);
+  });
+  v
+  document.getElementById('sum-dh-mi-depth')?.addEventListener('click', () => {
+    if (dhDotsMenu) dhDotsMenu.style.display = 'none';
+    _ovShowDepthModal?.() || showToast('Depth setting coming soon.', 'info');
+  });
+  document.getElementById('sum-dh-mi-audience')?.addEventListener('click', () => {
+    if (dhDotsMenu) dhDotsMenu.style.display = 'none';
+    _ovShowAudienceModal?.() || showToast('Audience setting coming soon.', 'info');
+  });
+  document.getElementById('sum-dh-mi-print')?.addEventListener('click', () => {
+    if (dhDotsMenu) dhDotsMenu.style.display = 'none';
+    _sumOpenDoc();
+  });
+
   /* accordion toggles */
   document.querySelectorAll('.sum-acc-trigger').forEach(btn => {
     btn.addEventListener('click', () => {
@@ -421,10 +457,19 @@ function _sumBindDocEvents(circ) {
 }
 
 /* ================================================================ SECTIONS */
-function _sumSections(circ, data, org) {
+function _sumSections(circ, data, org, purpose) {
   const risk = (circ.risk||'Medium').toLowerCase();
 
   return [
+    /* 0 — Purpose & Background */
+    {
+      id:'purpose', num:'00', icon:'📋',
+      title:'Purpose & Background',
+      sub:'Why this circular was issued',
+      badge:null,
+      html:`<p class="sum-para">${purpose}</p>`,
+    },
+
     /* 1 — Key Updates */
     {
       id:'key-updates', num:'01', icon:'🔄',
@@ -566,6 +611,99 @@ function _sumFillStrip(c) {
   }
 }
 
+/* ── SUMMARY REGEN WITH CONTEXT MODAL ── */
+window._sumOpenRegenCtxModal = function(circ) {
+  let modal = document.getElementById('sum-ctx-modal');
+  if (!modal) {
+    modal = document.createElement('div');
+    modal.id = 'sum-ctx-modal';
+    modal.className = 'app-modal-overlay';
+    modal.innerHTML = `
+      <div class="app-modal-box" onclick="event.stopPropagation()">
+        <div class="app-modal-header">
+          <div class="app-modal-title">✦ Regenerate with AI Context</div>
+          <button class="app-modal-close" onclick="document.getElementById('sum-ctx-modal').classList.remove('app-modal-open')">✕</button>
+        </div>
+        <div class="app-modal-body">
+          <p class="app-modal-desc">Add any extra context, specific details, or instructions you want the AI to incorporate during regeneration.</p>
+          <div class="app-ctx-chips" id="sum-ctx-chips">
+            <span class="app-chip" onclick="_sumToggleChip(this,'Focus on board-level obligations')">Board Obligations</span>
+            <span class="app-chip" onclick="_sumToggleChip(this,'Highlight compliance deadlines')">Deadlines</span>
+            <span class="app-chip" onclick="_sumToggleChip(this,'Include technology requirements')">Tech Requirements</span>
+            <span class="app-chip" onclick="_sumToggleChip(this,'Summarise key risks only')">Key Risks Only</span>
+            <span class="app-chip" onclick="_sumToggleChip(this,'Include recent amendments')">Recent Amendments</span>
+          </div>
+          <textarea class="app-ctx-textarea" id="sum-ctx-input" placeholder="e.g. We are a mid-size NBFC. Focus on operational actions and timeline…"></textarea>
+          <div class="app-modal-footer">
+            <button class="app-modal-btn-cancel" onclick="document.getElementById('sum-ctx-modal').classList.remove('app-modal-open')">Cancel</button>
+            <button class="app-modal-btn-go" id="sum-ctx-go-btn">✦ &nbsp;Regenerate with Context</button>
+          </div>
+        </div>
+      </div>`;
+    modal.addEventListener('click', e => { if (e.target === modal) modal.classList.remove('app-modal-open'); });
+    document.body.appendChild(modal);
+  }
+  document.getElementById('sum-ctx-go-btn').onclick = () => window._sumRunRegenWithCtx(circ.id);
+  modal.classList.add('app-modal-open');
+  document.getElementById('sum-ctx-input')?.focus();
+};
+
+window._sumToggleChip = function(el, text) {
+  el.classList.toggle('app-chip-active');
+  const ta = document.getElementById('sum-ctx-input');
+  if (!ta) return;
+  if (el.classList.contains('app-chip-active')) {
+    ta.value = ta.value ? ta.value.trimEnd() + '\n' + text : text;
+  } else {
+    ta.value = ta.value.replace(text, '').replace(/\n+/g, '\n').trim();
+  }
+};
+
+window._sumCloseCtxModal = function() {
+  const modal = document.getElementById('sum-ctx-modal');
+  if (modal) modal.classList.remove('app-modal-open');
+};
+
+window._sumToggleChip = function(el, text) {
+  el.classList.toggle('app-chip-active');
+  const ta = document.getElementById('sum-ctx-input');
+  if (!ta) return;
+  if (el.classList.contains('app-chip-active')) {
+    ta.value = ta.value ? ta.value.trimEnd() + '\n' + text : text;
+  } else {
+    ta.value = ta.value.replace(text, '').replace(/\n+/g, '\n').trim();
+  }
+};
+window._sumRunRegenWithCtx = function(circId) {
+  const ctx = document.getElementById('sum-ctx-input')?.value.trim();
+  document.getElementById('sum-ctx-modal')?.classList.remove('app-modal-open');
+  document.querySelectorAll('#sum-ctx-chips .app-chip').forEach(c => c.classList.remove('app-chip-active'));
+  if (document.getElementById('sum-ctx-input')) document.getElementById('sum-ctx-input').value = '';
+  if (document.getElementById('sum-ctx-input')) document.getElementById('sum-ctx-input').value = '';
+  const circ = (CMS_DATA?.circulars || []).find(c => c.id === circId);
+  if (!circ) return;
+  const out = document.getElementById('sum-output');
+  if (out) {
+    out.style.opacity = '0.4';
+    out.innerHTML = `<div class="sum-loading">${loadingHTML('Regenerating with your context…')}</div>`;
+  }
+  setTimeout(() => {
+    _sumRun(circ);
+    showToast(ctx ? `✦ Summary regenerated with your context.` : '✦ Summary regenerated.', 'success');
+  }, 1400);
+};
+
+window._ovToggleCtxChip = function(el, text) {
+  const active = el.classList.toggle('ov-ctx-chip--active');
+  const ta = document.getElementById('ov-regen-ctx-input');
+  if (!ta) return;
+  if (active) {
+    ta.value = ta.value ? ta.value.trimEnd() + '\n' + text : text;
+  } else {
+    ta.value = ta.value.replace(text, '').replace(/\n+/g, '\n').trim();
+  }
+};
+
 /* ================================================================ CSS */
 function injectSumCSS() {
   if (document.getElementById('sum-css')) return;
@@ -691,7 +829,45 @@ function injectSumCSS() {
   body { font-family:'Times New Roman', serif !important; }
 }
 
+.ov-ctx-chip { cursor:pointer;padding:4px 10px;border-radius:20px;background:#f0f1f4;
+  border:1.5px solid #dde0e6;font-size:12px;font-weight:600;color:#4a5068;
+  transition:all 0.13s;display:inline-block; }
+.ov-ctx-chip--active { background:#eef2ff;border-color:#6366f1;color:#4338ca; }
+
 .sum-wrap  { display:flex;flex-direction:column;gap:12px;font-family:'DM Sans',sans-serif; }
+
+/* ── DOCUMENT HEADER HERO ── */
+.sum-dh-hero { background:linear-gradient(135deg,#1a1a2e 0%,#2d2d5e 100%);
+  padding:12px;border-radius:0; }
+.sum-dh-hero-top { display:flex;align-items:center;justify-content:space-between;
+  gap:12px;margin-bottom:12px;flex-wrap:wrap; }
+.sum-dh-hero .sum-dh-label { color:#a5b4fc; }
+.sum-dh-hero .sum-dh-sep   { color:#4a4a6a; }
+.sum-dh-hero .sum-dh-aud   { color:#c4c8d4; }
+.sum-dh-hero .sum-dh-date  { color:#9499aa; }
+.sum-dh-hero .sum-dh-title { color:#fff;font-size:20px;margin-bottom:14px; }
+.sum-dh-hero .sum-dh-pill  { background:rgba(255,255,255,0.1);border-color:rgba(255,255,255,0.15);color:#e2e8f0; }
+.sum-dh-hero .sum-dh-pill-reg { background:rgba(99,102,241,0.3);border-color:#6366f1;color:#a5b4fc; }
+.sum-dh-hero .sum-dh-pill-deadline { background:rgba(251,191,36,0.2);border-color:#fbbf24;color:#fde68a; }
+.sum-dh-hero .sum-dh-pill-risk-high   { background:rgba(239,68,68,0.2);border-color:#ef4444;color:#fca5a5; }
+.sum-dh-hero .sum-dh-pill-risk-medium { background:rgba(245,158,11,0.2);border-color:#f59e0b;color:#fde68a; }
+.sum-dh-hero .sum-dh-pill-risk-low    { background:rgba(34,197,94,0.2);border-color:#22c55e;color:#86efac; }
+.sum-dh-hero .sum-dh-btn { background:rgba(255,255,255,0.1);border-color:rgba(255,255,255,0.2);color:#e2e8f0; }
+.sum-dh-hero .sum-dh-btn:hover { background:rgba(255,255,255,0.2); }
+
+/* header 3-dots */
+.sum-dh-dots-wrap { position:relative; }
+.sum-dh-dots-btn  { width:30px;height:30px;border-radius:6px;background:rgba(255,255,255,0.1);
+  border:1px solid rgba(255,255,255,0.2);font-size:18px;color:#e2e8f0;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;transition:all 0.13s; }
+.sum-dh-dots-btn:hover { background:rgba(255,255,255,0.2); }
+.sum-dh-dots-menu { position:absolute;top:calc(100% + 5px);right:0;background:#fff;
+  border:1.5px solid #dde0e6;border-radius:10px;min-width:210px;z-index:9999;
+  box-shadow:0 8px 24px rgba(26,26,46,0.16);overflow:hidden; }
+.sum-dh-dots-item { padding:9px 14px;font-size:12px;font-weight:600;color:#4a5068;
+  cursor:pointer;transition:background 0.1s;display:flex;align-items:center;gap:8px; }
+.sum-dh-dots-item:hover { background:#f5f6f8;color:#1a1a2e; }
+.sum-dh-dots-item + .sum-dh-dots-item { border-top:1px solid #f0f1f4; }
 
 /* empty */
 .sum-empty       { display:flex;flex-direction:column;align-items:center;justify-content:center;
@@ -739,7 +915,7 @@ function injectSumCSS() {
   box-shadow:0 2px 20px rgba(0,0,0,0.07); }
 
 /* ── DOCUMENT HEADER ── */
-.sum-doc-header   { padding:22px 28px 0;border-bottom:2px solid #eef0f3; }
+.sum-doc-header   { ;border-bottom:2px solid #eef0f3; }
 
 .sum-dh-topbar    { display:flex;align-items:center;justify-content:space-between;
   gap:12px;margin-bottom:10px;flex-wrap:wrap; }

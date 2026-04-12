@@ -45,7 +45,7 @@ const CMS_DATA = {
               ],
               "department": "Credit",
               "risk": "High",
-              "status": "Open",
+              "status": "Assigned",
               "pageNo": 4
             },
             {
@@ -63,7 +63,7 @@ const CMS_DATA = {
               ],
               "department": "Risk",
               "risk": "High",
-              "status": "In Progress"
+              "status": "Assigned"
             },
             {
               "id": "C2.3",
@@ -82,7 +82,7 @@ const CMS_DATA = {
               ],
               "department": "Operations",
               "risk": "Medium",
-              "status": "Open"
+              "status": "Unassigned"
             }
           ],
           "sections": [
@@ -117,7 +117,7 @@ const CMS_DATA = {
               ],
               "department": "Risk",
               "risk": "High",
-              "status": "Open"
+              "status": "Unassigned"
             },
             {
               "id": "C3.2",
@@ -134,7 +134,7 @@ const CMS_DATA = {
               ],
               "department": "Risk",
               "risk": "High",
-              "status": "In Progress"
+              "status": "Unassigned"
             }
           ]
         },
@@ -157,7 +157,7 @@ const CMS_DATA = {
               ],
               "department": "Operations",
               "risk": "High",
-              "status": "Open"
+              "status": "Assigned"
             },
             {
               "id": "C4.2",
@@ -174,7 +174,7 @@ const CMS_DATA = {
               ],
               "department": "Compliance",
               "risk": "Medium",
-              "status": "In Progress"
+              "status": "Assigned"
             }
           ]
         },
@@ -197,7 +197,7 @@ const CMS_DATA = {
               ],
               "department": "Finance",
               "risk": "Medium",
-              "status": "Open"
+              "status": "Assigned"
             },
             {
               "id": "C5.2",
@@ -214,7 +214,7 @@ const CMS_DATA = {
               ],
               "department": "Legal",
               "risk": "Medium",
-              "status": "Open"
+              "status": "Assigned"
             },
             {
               "id": "C5.3",
@@ -233,7 +233,7 @@ const CMS_DATA = {
               ],
               "department": "Compliance",
               "risk": "High",
-              "status": "In Progress"
+              "status": "Assigned"
             }
           ]
         }
@@ -284,7 +284,7 @@ const CMS_DATA = {
           ],
           "department": "Compliance",
           "risk": "High",
-          "status": "Open",
+          "status": "Assigned",
           "pageNo": 2
         },
         {
@@ -299,7 +299,7 @@ const CMS_DATA = {
           ],
           "department": "Risk",
           "risk": "High",
-          "status": "Open",
+          "status": "Assigned",
           "pageNo": 2
         }
       ]
@@ -323,7 +323,7 @@ const CMS_DATA = {
           ],
           "department": "Compliance",
           "risk": "Medium",
-          "status": "Open",
+          "status": "Assigned",
           "pageNo": 6
         },
         {
@@ -338,7 +338,7 @@ const CMS_DATA = {
           ],
           "department": "Compliance",
           "risk": "Medium",
-          "status": "Open",
+          "status": "Assigned",
           "pageNo": 6
         },
         {
@@ -353,7 +353,7 @@ const CMS_DATA = {
           ],
           "department": "Compliance",
           "risk": "High",
-          "status": "Open",
+          "status": "Assigned",
           "pageNo": 6
         },
         {
@@ -368,7 +368,7 @@ const CMS_DATA = {
           ],
           "department": "Compliance",
           "risk": "High",
-          "status": "Open",
+          "status": "Assigned",
           "pageNo": 7
         }
       ]
@@ -412,7 +412,7 @@ const CMS_DATA = {
           ],
           "department": "Operations",
           "risk": "High",
-          "status": "Open",
+          "status": "Assigned",
           "pageNo": 1
         },
         {
@@ -430,7 +430,7 @@ const CMS_DATA = {
           ],
           "department": "Compliance",
           "risk": "High",
-          "status": "Open",
+          "status": "Assigned",
           "pageNo": 1
         },
         {
@@ -445,7 +445,7 @@ const CMS_DATA = {
           ],
           "department": "Compliance",
           "risk": "Medium",
-          "status": "Open",
+          "status": "Assigned",
           "pageNo": 1
         }
       ]
@@ -487,7 +487,7 @@ const CMS_DATA = {
           "actionables": "Define eligible housing loan categories in policy.",
           "department": "Credit",
           "risk": "High",
-          "status": "Open"
+          "status": "Assigned"
         },
         {
           "id": "C2.2",
@@ -496,7 +496,7 @@ const CMS_DATA = {
           "actionables": "Implement due diligence checks including approvals and sanctioned plans.",
           "department": "Risk",
           "risk": "High",
-          "status": "In Progress"
+          "status": "Assigned"
         },
         {
           "id": "C2.3",
@@ -505,7 +505,7 @@ const CMS_DATA = {
           "actionables": "Update loan documentation checklist.",
           "department": "Operations",
           "risk": "Medium",
-          "status": "Open"
+          "status": "Assigned"
         }
       ],
       "sections": [
@@ -532,7 +532,7 @@ const CMS_DATA = {
           "actionables": "Configure systems to enforce LTV thresholds.",
           "department": "Risk",
           "risk": "High",
-          "status": "Open"
+          "status": "Assigned"
         },
         {
           "id": "C3.2",
@@ -541,7 +541,7 @@ const CMS_DATA = {
           "actionables": "Draft and approve exposure policy at Board level.",
           "department": "Risk",
           "risk": "High",
-          "status": "In Progress"
+          "status": "Assigned"
         }
       ]
     },
@@ -556,7 +556,7 @@ const CMS_DATA = {
           "actionables": "Implement stage-wise disbursement controls.",
           "department": "Operations",
           "risk": "High",
-          "status": "Open"
+          "status": "Assigned"
         },
         {
           "id": "C4.2",
@@ -565,7 +565,7 @@ const CMS_DATA = {
           "actionables": "Update product disclosures and customer communication.",
           "department": "Compliance",
           "risk": "Medium",
-          "status": "In Progress"
+          "status": "Assigned"
         }
       ]
     },
@@ -580,7 +580,7 @@ const CMS_DATA = {
           "actionables": "Align loan systems with RBI directions.",
           "department": "Finance",
           "risk": "Medium",
-          "status": "Open"
+          "status": "Assigned"
         },
         {
           "id": "C5.2",
@@ -589,7 +589,7 @@ const CMS_DATA = {
           "actionables": "Include disclosure clauses in loan agreements.",
           "department": "Legal",
           "risk": "Medium",
-          "status": "Open"
+          "status": "Assigned"
         },
         {
           "id": "C5.3",
@@ -598,7 +598,7 @@ const CMS_DATA = {
           "actionables": "Update fair lending policy as per RBI circulars.",
           "department": "Compliance",
           "risk": "High",
-          "status": "In Progress"
+          "status": "Assigned"
         }
       ]
     }
@@ -643,7 +643,7 @@ const CMS_DATA = {
           "actionables": "Implement due diligence framework.",
           "department": "Compliance",
           "risk": "High",
-          "status": "Open"
+          "status": "Assigned"
         }
       ]
     },
@@ -658,7 +658,7 @@ const CMS_DATA = {
           "actionables": "Apply SFA standards before QIB benefits.",
           "department": "Risk",
           "risk": "High",
-          "status": "Open"
+          "status": "Assigned"
         }
       ]
     },
@@ -673,7 +673,7 @@ const CMS_DATA = {
           "actionables": "Perform due diligence before SR investments.",
           "department": "Compliance",
           "risk": "High",
-          "status": "Open"
+          "status": "Assigned"
         }
       ]
     },
@@ -688,7 +688,7 @@ const CMS_DATA = {
           "actionables": "Identify RBI-regulated exposure.",
           "department": "Risk",
           "risk": "High",
-          "status": "Open"
+          "status": "Assigned"
         },
         {
           "id": "C4.2",
@@ -697,7 +697,7 @@ const CMS_DATA = {
           "actionables": "Block non-permissible investments.",
           "department": "Compliance",
           "risk": "High",
-          "status": "Open"
+          "status": "Assigned"
         }
       ]
     },
@@ -712,7 +712,7 @@ const CMS_DATA = {
           "actionables": "Implement investment approval checks.",
           "department": "Operations",
           "risk": "High",
-          "status": "Open"
+          "status": "Assigned"
         }
       ]
     },
@@ -727,7 +727,7 @@ const CMS_DATA = {
           "actionables": "Conduct retrospective due diligence.",
           "department": "Compliance",
           "risk": "High",
-          "status": "Open"
+          "status": "Assigned"
         },
         {
           "id": "C6.2",
@@ -736,7 +736,7 @@ const CMS_DATA = {
           "actionables": "Submit Annexure I report.",
           "department": "Operations",
           "risk": "High",
-          "status": "Open"
+          "status": "Assigned"
         }
       ]
     },
@@ -751,7 +751,7 @@ const CMS_DATA = {
           "actionables": "Apply enhanced due diligence.",
           "department": "Risk",
           "risk": "High",
-          "status": "Open"
+          "status": "Assigned"
         },
         {
           "id": "C7.2",
@@ -760,7 +760,7 @@ const CMS_DATA = {
           "actionables": "Submit investment details within 30 days.",
           "department": "Operations",
           "risk": "Medium",
-          "status": "Open"
+          "status": "Assigned"
         }
       ]
     },
@@ -775,7 +775,7 @@ const CMS_DATA = {
           "actionables": "Coordinate with custodian.",
           "department": "Operations",
           "risk": "Medium",
-          "status": "Open"
+          "status": "Assigned"
         }
       ]
     },
@@ -790,7 +790,7 @@ const CMS_DATA = {
           "actionables": "Update CTR framework.",
           "department": "Compliance",
           "risk": "Medium",
-          "status": "Open"
+          "status": "Assigned"
         }
       ]
     }
@@ -850,7 +850,7 @@ const CMS_DATA = {
           ],
           "department": "Operations",
           "risk": "High",
-          "status": "Open",
+          "status": "Assigned",
           "pageNo": 1
         },
         {
@@ -868,7 +868,7 @@ const CMS_DATA = {
           ],
           "department": "Compliance",
           "risk": "High",
-          "status": "Open",
+          "status": "Assigned",
           "pageNo": 1
         },
         {
@@ -885,7 +885,7 @@ const CMS_DATA = {
           ],
           "department": "Legal",
           "risk": "High",
-          "status": "Open",
+          "status": "Assigned",
           "pageNo": 2
         },
         {
@@ -901,7 +901,7 @@ const CMS_DATA = {
           ],
           "department": "Compliance",
           "risk": "Medium",
-          "status": "Open",
+          "status": "Assigned",
           "pageNo": 2
         },
         {
@@ -916,7 +916,7 @@ const CMS_DATA = {
           ],
           "department": "Compliance",
           "risk": "High",
-          "status": "Open",
+          "status": "Assigned",
           "pageNo": 2
         },
         {
@@ -932,7 +932,7 @@ const CMS_DATA = {
           ],
           "department": "Risk",
           "risk": "High",
-          "status": "Open",
+          "status": "Assigned",
           "pageNo": 2
         },
         {
@@ -947,7 +947,7 @@ const CMS_DATA = {
           ],
           "department": "Compliance",
           "risk": "Medium",
-          "status": "Open",
+          "status": "Assigned",
           "pageNo": 2
         }
       ]
@@ -990,7 +990,7 @@ const CMS_DATA = {
               id: 'C1.1', text: 'Sensitive personal data of Indian citizens must be stored in India.',
               obligations: 'Ensure all sensitive personal data is stored on servers located within Indian territory.',
               actionables: 'Audit existing cloud storage; migrate non-compliant data; update vendor contracts.',
-              department: 'IT', risk: 'High', status: 'Complete'
+              department: 'IT', risk: 'High', status: 'Assigned'
             }
           ]
         }
@@ -1018,7 +1018,7 @@ const CMS_DATA = {
               id: 'C1.1', text: 'Carbon emissions (Scope 1, 2, and 3) must be disclosed annually.',
               obligations: 'Measure and disclose Scope 1, 2, and 3 carbon emissions in annual report.',
               actionables: 'Engage sustainability consultant; implement GHG accounting; train ESG team.',
-              department: 'Operations', risk: 'Medium', status: 'Open'
+              department: 'Operations', risk: 'Medium', status: 'Assigned'
             }
           ]
         }
@@ -1046,7 +1046,7 @@ const CMS_DATA = {
               id: 'C1.1', text: 'BCP must be tested bi-annually with documented results.',
               obligations: 'Conduct and document BCP tests every 6 months.',
               actionables: 'Schedule BCP drills; prepare test reports; submit to Risk Committee.',
-              department: 'Operations', risk: 'Medium', status: 'Complete'
+              department: 'Operations', risk: 'Medium', status: 'Assigned'
             }
           ]
         }
@@ -1076,7 +1076,7 @@ const CMS_DATA = {
               id: 'C1.1', text: 'All critical vendors must be subject to enhanced due diligence prior to onboarding.',
               obligations: 'Conduct EDD including financial, reputational, and compliance checks for critical vendors.',
               actionabless: 'Create vendor classification matrix; develop EDD checklist; assign procurement owners.',
-              department: 'Procurement', risk: 'High', status: 'Open'
+              department: 'Procurement', risk: 'High', status: 'Assigned'
             }
           ]
         }
@@ -1107,7 +1107,7 @@ const CMS_DATA = {
               text: 'This Master Circular consolidates all instructions issued by RBI on housing finance up to March 31, 2024.',
               obligation: 'Ensure all housing finance operations comply with consolidated RBI guidelines.',
               actionables: 'Review all existing housing loan policies against this Master Circular; identify gaps.',
-              department: 'Compliance', risk: 'High', status: 'Open'
+              department: 'Compliance', risk: 'High', status: 'Assigned'
             }
           ]
         },
@@ -1119,21 +1119,21 @@ const CMS_DATA = {
               text: 'Banks may grant loans to individuals for purchase / construction of a new house or flat, purchase of an old house or flat, extension, repair, renovation and alteration of an existing house or flat.',
               obligation: 'Define and document eligible purposes for housing loans in loan policy.',
               actionables: 'Update loan origination policy to enumerate eligible purposes; circulate to credit teams.',
-              department: 'Finance', risk: 'High', status: 'Open'
+              department: 'Finance', risk: 'High', status: 'Assigned'
             },
             {
               id: 'HF-C2B.1',
               text: 'Loans extended to individuals for acquisition of land (site only) are not classified as housing loans and should not be included under the housing loan portfolio.',
               obligation: 'Segregate land-only loans from housing loan portfolio in MIS and reporting.',
               actionables: 'Audit existing portfolio; recategorise any land-only loans; update system classification.',
-              department: 'Finance', risk: 'Medium', status: 'Open'
+              department: 'Finance', risk: 'Medium', status: 'Assigned'
             },
             {
               id: 'HF-C2C.1',
               text: 'Loan-to-Value (LTV) ratio shall not exceed 90% for loans up to INR 30 lakhs, 80% for loans between INR 30–75 lakhs, and 75% for loans above INR 75 lakhs.',
               obligation: 'Enforce LTV ratio limits at origination and monitor at portfolio level.',
               actionables: 'Configure LTV validation in loan origination system; run portfolio-level LTV compliance report.',
-              department: 'Risk', risk: 'High', status: 'Open'
+              department: 'Risk', risk: 'High', status: 'Assigned'
             }
           ]
         },
@@ -1145,7 +1145,7 @@ const CMS_DATA = {
               text: 'Risk weights for capital adequacy purposes shall be applied based on LTV ratio slabs: ≤80% LTV → 35%; >80% and ≤90% LTV → 50% (loans up to INR 30 lakh only).',
               obligation: 'Apply correct risk weights in capital adequacy calculation for housing loan portfolio.',
               actionables: 'Update CBS/risk engine with revised risk weight slabs; validate CRAR computation.',
-              department: 'Risk', risk: 'High', status: 'Open'
+              department: 'Risk', risk: 'High', status: 'Assigned'
             }
           ]
         },
@@ -1157,7 +1157,7 @@ const CMS_DATA = {
               text: 'Housing loans to individuals up to INR 35 lakh in metropolitan centres and INR 25 lakh in other centres qualify as priority sector lending, subject to overall cost of dwelling not exceeding INR 45 lakh and INR 30 lakh respectively.',
               obligation: 'Classify eligible housing loans under Priority Sector and report under PSL returns.',
               actionables: 'Update PSL classification rules in CBS; verify eligibility thresholds; reconcile PSL reports.',
-              department: 'Compliance', risk: 'High', status: 'Open'
+              department: 'Compliance', risk: 'High', status: 'Assigned'
             }
           ]
         },
@@ -1169,7 +1169,7 @@ const CMS_DATA = {
               text: 'Banks are free to decide interest rates on housing loans subject to the directive that rates shall be linked to an external benchmark rate (Repo Rate) with reset at least once every three months.',
               obligation: 'Ensure all floating-rate housing loans are linked to Repo Rate or other approved external benchmark.',
               actionables: 'Audit housing loan portfolio for legacy MCLR-linked loans; initiate migration plan; update product documentation.',
-              department: 'Finance', risk: 'Medium', status: 'In Progress'
+              department: 'Finance', risk: 'Medium', status: 'Assigned'
             }
           ]
         },
@@ -1181,7 +1181,7 @@ const CMS_DATA = {
               text: 'Repayment period for housing loans shall generally not exceed 30 years. EMI shall not exceed 50% of net monthly income of the borrower at sanction.',
               obligation: 'Cap repayment tenor at 30 years and EMI at 50% of borrower net income at sanction.',
               actionables: 'Configure tenor cap and income-based EMI ceiling in loan origination system; update underwriting standards.',
-              department: 'Operations', risk: 'Medium', status: 'Open'
+              department: 'Operations', risk: 'Medium', status: 'Assigned'
             }
           ]
         },
@@ -1193,7 +1193,7 @@ const CMS_DATA = {
               text: 'Banks must provide a Key Fact Statement (KFS) to all housing loan borrowers before loan sanction, clearly disclosing annualised interest rate, fees, charges, and all-in cost.',
               obligation: 'Issue KFS to every housing loan applicant prior to sanction.',
               actionables: 'Design KFS template per RBI format; integrate into loan sanction workflow; train branch staff.',
-              department: 'Compliance', risk: 'High', status: 'Open'
+              department: 'Compliance', risk: 'High', status: 'Assigned'
             }
           ]
         },
@@ -1205,7 +1205,7 @@ const CMS_DATA = {
               text: 'Banks availing refinance from National Housing Bank must submit quarterly utilisation certificates and annual compliance reports within 30 days of end of each quarter/year.',
               obligation: 'Submit NHB refinance utilisation certificates quarterly and annual compliance reports.',
               actionables: 'Set up calendar reminders; assign report owner in Operations; draft template for utilisation certificate.',
-              department: 'Operations', risk: 'Medium', status: 'Open'
+              department: 'Operations', risk: 'Medium', status: 'Assigned'
             }
           ]
         },
@@ -1217,7 +1217,7 @@ const CMS_DATA = {
               text: 'Banks shall not levy foreclosure charges or prepayment penalties on floating rate housing loans taken by individual borrowers.',
               obligation: 'Remove foreclosure charges / prepayment penalties for floating-rate individual housing loans.',
               actionables: 'Audit existing loan agreements for non-compliant clauses; update standard loan agreements; notify existing borrowers.',
-              department: 'Legal', risk: 'High', status: 'Open'
+              department: 'Legal', risk: 'High', status: 'Assigned'
             }
           ]
         },
@@ -1229,7 +1229,7 @@ const CMS_DATA = {
               text: 'Banks must have in place a board-approved housing finance policy covering credit appraisal standards, LTV norms, valuation guidelines, and concentration risk limits for the housing loan portfolio.',
               obligation: 'Maintain a board-approved housing finance policy reviewed annually.',
               actionables: 'Review and update existing policy; table before Board for approval; document in policy register.',
-              department: 'Risk', risk: 'High', status: 'Open'
+              department: 'Risk', risk: 'High', status: 'Assigned'
             }
           ]
         },
@@ -1241,7 +1241,7 @@ const CMS_DATA = {
               text: 'Banks shall submit half-yearly returns on housing loan portfolio to RBI within 21 days of the close of the relevant half-year.',
               obligation: 'File half-yearly housing loan portfolio return with RBI within 21 days of close of half-year.',
               actionables: 'Assign report preparer in Compliance; schedule preparatory data collection 30 days prior; validate with Finance.',
-              department: 'Compliance', risk: 'High', status: 'Open'
+              department: 'Compliance', risk: 'High', status: 'Assigned'
             }
           ]
         },
@@ -1253,7 +1253,7 @@ const CMS_DATA = {
               text: 'Banks shall ensure that housing loans are not extended for speculative purchases. Loans to builders for construction finance shall not be classified as housing loans for priority sector purposes.',
               obligation: 'Separate and correctly classify builder/construction finance from individual housing loans.',
               actionables: 'Review and update credit policy; identify any mis-classified builder loans in portfolio; correct MIS categorisation.',
-              department: 'Legal', risk: 'Medium', status: 'Open'
+              department: 'Legal', risk: 'Medium', status: 'Assigned'
             }
           ]
         }
@@ -1279,7 +1279,7 @@ const CMS_DATA = {
       dueDate: '2024-06-15',
       priority: 'High',
       risk: 'High',
-      status: 'In Progress',
+      status: 'Assigned',
       assignee: 'Ravi Sharma'
     },
     {
@@ -1292,7 +1292,7 @@ const CMS_DATA = {
       dueDate: '2024-05-30',
       priority: 'High',
       risk: 'High',
-      status: 'Complete',
+      status: 'Assigned',
       assignee: 'Priya Nair'
     },
     {
@@ -1305,7 +1305,7 @@ const CMS_DATA = {
       dueDate: '2024-06-30',
       priority: 'High',
       risk: 'High',
-      status: 'Open',
+      status: 'Assigned',
       assignee: 'Anand Krishnan'
     },
     {
@@ -1318,7 +1318,7 @@ const CMS_DATA = {
       dueDate: '2024-05-15',
       priority: 'Critical',
       risk: 'High',
-      status: 'Overdue',
+      status: 'Assigned',
       assignee: 'Vikram Singh'
     },
     {
@@ -1331,7 +1331,7 @@ const CMS_DATA = {
       dueDate: '2024-07-15',
       priority: 'High',
       risk: 'High',
-      status: 'In Progress',
+      status: 'Assigned',
       assignee: 'Meera Pillai'
     },
     {
@@ -1344,7 +1344,7 @@ const CMS_DATA = {
       dueDate: '2024-08-01',
       priority: 'High',
       risk: 'High',
-      status: 'Open',
+      status: 'Assigned',
       assignee: 'Karthik Reddy'
     },
     {
@@ -1357,7 +1357,7 @@ const CMS_DATA = {
       dueDate: '2024-09-30',
       priority: 'Medium',
       risk: 'Medium',
-      status: 'Complete',
+      status: 'Assigned',
       assignee: 'Sunita Bhatt'
     },
     {
@@ -1370,7 +1370,7 @@ const CMS_DATA = {
       dueDate: '2024-10-31',
       priority: 'Medium',
       risk: 'Medium',
-      status: 'Open',
+      status: 'Assigned',
       assignee: 'Deepak Mehta'
     },
     {
@@ -1383,7 +1383,7 @@ const CMS_DATA = {
       dueDate: '2024-07-31',
       priority: 'High',
       risk: 'High',
-      status: 'Open',
+      status: 'Assigned',
       assignee: 'Pooja Agarwal'
     },
     {
@@ -1396,7 +1396,7 @@ const CMS_DATA = {
       dueDate: '2024-06-30',
       priority: 'Medium',
       risk: 'Medium',
-      status: 'In Progress',
+      status: 'Assigned',
       assignee: 'Anand Krishnan'
     },
     {
@@ -1409,7 +1409,7 @@ const CMS_DATA = {
       dueDate: '2024-05-20',
       priority: 'Medium',
       risk: 'Medium',
-      status: 'Overdue',
+      status: 'Assigned',
       assignee: 'Meera Pillai'
     },
     {
@@ -1422,7 +1422,7 @@ const CMS_DATA = {
       dueDate: '2024-09-15',
       priority: 'Low',
       risk: 'Low',
-      status: 'Open',
+      status: 'Assigned',
       assignee: 'Suresh Iyer'
     },
     {
@@ -1435,7 +1435,7 @@ const CMS_DATA = {
       dueDate: '2024-05-15',
       priority: 'High',
       risk: 'High',
-      status: 'Overdue',
+      status: 'Assigned',
       assignee: 'Meera Pillai'
     },
     {
@@ -1448,7 +1448,7 @@ const CMS_DATA = {
       dueDate: '2024-06-30',
       priority: 'High',
       risk: 'High',
-      status: 'Open',
+      status: 'Assigned',
       assignee: 'Ravi Sharma'
     },
     {
@@ -1461,7 +1461,7 @@ const CMS_DATA = {
       dueDate: '2024-07-15',
       priority: 'Medium',
       risk: 'Medium',
-      status: 'Open',
+      status: 'Assigned',
       assignee: 'Anand Krishnan'
     },
     {
@@ -1474,7 +1474,7 @@ const CMS_DATA = {
       dueDate: '2024-06-15',
       priority: 'High',
       risk: 'High',
-      status: 'In Progress',
+      status: 'Assigned',
       assignee: 'Vikram Singh'
     },
     {
@@ -1487,7 +1487,7 @@ const CMS_DATA = {
       dueDate: '2024-06-30',
       priority: 'High',
       risk: 'High',
-      status: 'Open',
+      status: 'Assigned',
       assignee: 'Anand Krishnan'
     },
     {
@@ -1500,7 +1500,7 @@ const CMS_DATA = {
       dueDate: '2024-07-31',
       priority: 'High',
       risk: 'High',
-      status: 'Open',
+      status: 'Assigned',
       assignee: 'Meera Pillai'
     },
     {
@@ -1513,7 +1513,7 @@ const CMS_DATA = {
       dueDate: '2024-08-31',
       priority: 'High',
       risk: 'Medium',
-      status: 'In Progress',
+      status: 'Assigned',
       assignee: 'Priya Nair'
     },
     {
@@ -1526,7 +1526,7 @@ const CMS_DATA = {
       dueDate: '2024-07-15',
       priority: 'Medium',
       risk: 'Medium',
-      status: 'Open',
+      status: 'Assigned',
       assignee: 'Sunita Bhatt'
     },
     {
@@ -1539,7 +1539,7 @@ const CMS_DATA = {
       dueDate: '2024-06-30',
       priority: 'High',
       risk: 'High',
-      status: 'Open',
+      status: 'Assigned',
       assignee: 'Karthik Reddy'
     },
     {
@@ -1552,7 +1552,7 @@ const CMS_DATA = {
       dueDate: '2024-07-31',
       priority: 'Medium',
       risk: 'Medium',
-      status: 'Open',
+      status: 'Assigned',
       assignee: 'Deepak Mehta'
     },
     {
@@ -1565,7 +1565,7 @@ const CMS_DATA = {
       dueDate: '2024-06-15',
       priority: 'High',
       risk: 'High',
-      status: 'Overdue',
+      status: 'Unassigned',
       assignee: 'Suresh Iyer'
     },
     {
@@ -1578,7 +1578,7 @@ const CMS_DATA = {
       dueDate: '2024-08-15',
       priority: 'High',
       risk: 'High',
-      status: 'Open',
+      status: 'Assigned',
       assignee: 'Pooja Agarwal'
     },
     {
@@ -1591,7 +1591,7 @@ const CMS_DATA = {
       dueDate: '2024-07-21',
       priority: 'High',
       risk: 'High',
-      status: 'Open',
+      status: 'Assigned',
       assignee: 'Meera Pillai'
     },
     {
@@ -1604,7 +1604,7 @@ const CMS_DATA = {
       dueDate: '2024-08-31',
       priority: 'Medium',
       risk: 'Medium',
-      status: 'Open',
+      status: 'Unassigned',
       assignee: 'Suresh Iyer'
     }
   ],
@@ -1615,7 +1615,7 @@ const CMS_DATA = {
   notifications: [
     {
       id: 'N1',
-      title: 'Task Overdue: SIEM Implementation',
+      title: 'Task Assigned: SIEM Implementation',
       desc: 'ACT-004 is overdue by 15 days. Immediate action required.',
       time: '2 hours ago',
       type: 'danger'
@@ -1801,7 +1801,7 @@ const CMS_DATA = {
     {
       fileName: 'Risk_Assessment_Report_Q1.pdf',
       score: 94,
-      status: 'Complete',
+      status: 'Assigned',
       reasoning: 'The risk assessment report demonstrates comprehensive coverage of IT assets, vendor systems, and data flows. The assessment was conducted by an independent certified party as required. Minor gap: Scope 3 assets not explicitly enumerated but contextually covered. High confidence of compliance.'
     },
     {
