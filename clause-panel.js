@@ -41,7 +41,7 @@ function buildClausePanel() {
 
           <div class="cl-fc-field cl-fc-field-circ">
             <span class="cl-fc-label">Circular</span>
-            <div class="cl-circ-sel-wrap" id="cl-circ-switcher-wrap">
+            <div class="cl-circ-sel-wrap" id="cl-circ-switcher-wrap" style="display:flex;">
               <button class="cl-circ-sel-btn" id="cl-circ-edit-btn">
                 <span class="cl-circ-id-chip" id="cl-circ-id-chip">—</span>
                 <span class="cl-circ-name-chip" id="cl-circ-name-chip">—</span>
@@ -61,6 +61,10 @@ function buildClausePanel() {
               <button class="cl-lvl-btn active" data-level="2">L2</button>
               <button class="cl-lvl-btn" data-level="3">L3</button>
             </div>
+            <label style="display:inline-flex;align-items:center;gap:6px;padding:7px 13px;background:#fff;border:1.5px solid #e5e7eb;border-radius:6px;font-size:11px;font-weight:700;color:#6b7280;cursor:pointer;white-space:nowrap;" title="Bulk upload Excel">
+              📊 Import Excel
+              <input type="file" accept=".xlsx,.xls,.csv" style="display:none;" onchange="showToast('Excel uploaded. Processing…','success')"/>
+            </label>
             <button class="cl-topbar-btn cl-btn-generate" id="cl-btn-generate">◈ Generate</button>
           </div>
         </div>
@@ -112,6 +116,18 @@ function buildClausePanel() {
             <span class="cl-nav-title">Structure</span>
             <div style="display:flex;align-items:center;gap:6px;">
               <span class="cl-nav-count" id="cl-nav-count">—</span>
+              <div style="position:relative;" id="cl-nav-dots-wrap">
+                <button onclick="event.stopPropagation();document.getElementById('cl-nav-dots-wrap').classList.toggle('open')" style="width:20px;height:20px;border-radius:4px;border:1px solid #e5e7eb;background:#fff;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;color:#6b7280;font-weight:700;line-height:1;" title="Structure options">⋮</button>
+                <div id="cl-nav-dots-menu" style="display:none;position:absolute;right:0;top:calc(100% + 4px);background:#fff;border:1px solid #e5e7eb;border-radius:8px;box-shadow:0 4px 16px rgba(0,0,0,.12);min-width:170px;z-index:600;overflow:hidden;">
+                  <div style="padding:4px 10px;font-size:9px;font-weight:800;color:#9ca3af;text-transform:uppercase;letter-spacing:.06em;">Add</div>
+                  <button onclick="document.getElementById('cl-nav-dots-wrap').classList.remove('open');_clOpenStructureAdd('chapter')" style="display:block;width:100%;padding:9px 14px;background:none;border:none;text-align:left;font-size:12px;font-weight:600;color:#374151;cursor:pointer;">📖 Add Chapter</button>
+                  <button onclick="document.getElementById('cl-nav-dots-wrap').classList.remove('open');_clOpenStructureAdd('section')" style="display:block;width:100%;padding:9px 14px;background:none;border:none;text-align:left;font-size:12px;font-weight:600;color:#374151;cursor:pointer;">§ Add Section</button>
+                  <button onclick="document.getElementById('cl-nav-dots-wrap').classList.remove('open');_clOpenStructureAdd('subsection')" style="display:block;width:100%;padding:9px 14px;background:none;border:none;text-align:left;font-size:12px;font-weight:600;color:#374151;cursor:pointer;">¶ Add Subsection</button>
+                  <div style="border-top:1px solid #f3f4f6;margin:4px 0;"></div>
+                  <div style="padding:4px 10px;font-size:9px;font-weight:800;color:#9ca3af;text-transform:uppercase;letter-spacing:.06em;">Edit</div>
+                  <button onclick="document.getElementById('cl-nav-dots-wrap').classList.remove('open');_clRenameActiveChapter()" style="display:block;width:100%;padding:9px 14px;background:none;border:none;text-align:left;font-size:12px;font-weight:600;color:#374151;cursor:pointer;">✎ Rename Chapter</button>
+                </div>
+              </div>
               <button class="cl-nav-collapse-btn" id="cl-nav-collapse-btn" onclick="clNavCollapse()" title="Collapse panel">‹</button>
             </div>
           </div>
@@ -134,7 +150,7 @@ function buildClausePanel() {
       </div>
 
       <div class="cl-footer" id="cl-footer" style="display:none;">
-        <button class="cl-foot-save" id="cl-foot-save">🔖 &nbsp;Save Clauses</button>
+        <button class="cl-foot-save" id="cl-foot-save">🔖 &nbsp;Save Obligations</button>
       </div>
     </div>
   </div>`;
@@ -267,6 +283,55 @@ window.clNavExpand = function () {
   if (split) split.style.gridTemplateColumns = '248px 1fr';
 };
 
+/* wire nav dots menu */
+document.addEventListener('click', (e) => {
+  const w = document.getElementById('cl-nav-dots-wrap');
+  const m = document.getElementById('cl-nav-dots-menu');
+  if (!w || !m) return;
+
+  /* do not close when clicking inside the dots menu */
+  if (w.contains(e.target)) return;
+
+  w.classList.remove('open');
+  m.style.display = 'none';
+});
+(function _clNavDotsObserver() {
+  const interval = setInterval(() => {
+    const wrap = document.getElementById('cl-nav-dots-wrap');
+    const menu = document.getElementById('cl-nav-dots-menu');
+    if (wrap && menu) {
+      clearInterval(interval);
+      new MutationObserver(() => {
+        menu.style.display = wrap.classList.contains('open') ? 'block' : 'none';
+      }).observe(wrap, {attributes:true, attributeFilter:['class']});
+    }
+  }, 200);
+})();
+
+window._clRenameActiveChapter = function() {
+  var ex = document.getElementById('cl-rename-ch-modal'); if(ex) ex.remove();
+  var overlay = document.createElement('div');
+  overlay.className = 'cl-eye-overlay'; overlay.id = 'cl-rename-ch-modal';
+  overlay.innerHTML = `
+  <div class="cl-eye-box" style="max-width:420px;" onclick="event.stopPropagation()">
+    <div class="cl-eye-head">
+      <div class="cl-eye-head-left"><span class="cl-eye-head-title">Rename Chapter / Section</span></div>
+      <button class="cl-eye-close" onclick="document.getElementById('cl-rename-ch-modal').remove()">✕</button>
+    </div>
+    <div class="cl-eye-body" style="padding:16px;display:flex;flex-direction:column;gap:10px;">
+      <label style="font-size:10px;font-weight:700;color:#6b7280;text-transform:uppercase;">New Name</label>
+      <input id="cl-rename-ch-input" type="text" placeholder="Enter new chapter name…" style="padding:9px 10px;border:1.5px solid #e5e7eb;border-radius:6px;font-size:13px;width:100%;outline:none;" onfocus="this.style.borderColor='#3b82f6'" onblur="this.style.borderColor='#e5e7eb'"/>
+    </div>
+    <div class="cl-eye-foot">
+      <button class="cl-eye-cancel-btn" onclick="document.getElementById('cl-rename-ch-modal').remove()">Cancel</button>
+      <button class="cl-eye-save-btn" style="opacity:1;pointer-events:auto;" onclick="var v=document.getElementById('cl-rename-ch-input')?.value?.trim();if(v){showToast('Chapter renamed to: '+v,'success');document.getElementById('cl-rename-ch-modal').remove();}else{showToast('Name required','error');}">Rename</button>
+    </div>
+  </div>`;
+  document.body.appendChild(overlay);
+  overlay.addEventListener('click', e => { if(e.target===overlay) overlay.remove(); });
+  setTimeout(() => document.getElementById('cl-rename-ch-input')?.focus(), 50);
+};
+
 /* ─────────────────────────────────────── GENERATE */
 function _clRunGenerate(circ) {
   document.getElementById('cl-nav-tree').innerHTML =
@@ -276,14 +341,43 @@ function _clRunGenerate(circ) {
     document.getElementById('cl-split').style.display = 'grid';
     _clBuildTree(circ);
     /* auto-collapse nav if circular has no chapters (flat/notification type) */
+      /* auto-collapse nav for flat circulars and load right workspace */
     const hasChapters = !!(circ.chapters?.length || circ.annexures?.length);
-    if (!hasChapters) {
+    const isCircularType = (circ.type || '').toLowerCase() === 'circular';
+
+    if (!hasChapters || isCircularType) {
       clNavCollapse();
-      /* auto-load all flat clauses into workspace */
-      if (circ.clauses?.length) {
-        window._CL_ACTIVE_SECTION_CLAUSES = circ.clauses;
-        window._CL_ACTIVE_LABELS = { chLabel: '', secLabel: 'All Clauses', chTitle: circ.title };
-        _clRenderStack(circ.clauses, window._CL_ACTIVE_LABELS);
+
+      let allClauses = [];
+
+      /* flat clauses */
+      if (Array.isArray(circ.clauses) && circ.clauses.length) {
+        allClauses = circ.clauses.slice();
+      }
+
+      /* chapter-based clauses */
+      if (!allClauses.length && Array.isArray(circ.chapters)) {
+        circ.chapters.forEach(ch => {
+          (ch.clauses || []).forEach(cl => allClauses.push(cl));
+        });
+      }
+
+      /* annexure-based clauses */
+      if (!allClauses.length && Array.isArray(circ.annexures)) {
+        circ.annexures.forEach(an => {
+          (an.clauses || []).forEach(cl => allClauses.push(cl));
+        });
+      }
+
+      if (allClauses.length) {
+        window._CL_ACTIVE_SECTION_CLAUSES = allClauses;
+        window._CL_ACTIVE_LABELS = {
+          chLabel: '',
+          secLabel: 'All Obligations',
+          chTitle: circ.title
+        };
+        _clRenderStack(allClauses, window._CL_ACTIVE_LABELS);
+        _clRestoreFilters();
       }
     }
     const f = document.getElementById('cl-footer');
@@ -310,7 +404,7 @@ function _clBuildTree(circ) {
   (circ.annexures || []).forEach(an => { total += (an.clauses || []).length; });
   if (!circ.chapters?.length && !circ.annexures?.length)
     total = (circ.clauses || []).length;
-  if (navCount) navCount.textContent = `${total} clauses`;
+  if (navCount) navCount.textContent = `${total} obligations`;
 
   let html = '';
 
@@ -345,7 +439,7 @@ function _clBuildTree(circ) {
       } else {
         inner = `<button class="cl-nav-all-btn"
           onclick="clNavSelectChapter(event,${ci},'${chLabel}','${(ch.title || '').replace(/'/g, "\\'")}')">
-          View all ${(ch.clauses || []).length} clauses →
+          View all obligations →
         </button>`;
       }
       const chClauses = ch.clauses || [];
@@ -511,20 +605,40 @@ window._clSwitchCircular = function (circId) {
 };
 
 function _clRenderStack(allClauses, labels) {
-  const dept    = document.getElementById('cl-filter-dept')?.value   || '';
-  const statusF = document.getElementById('cl-adv-status')?.value    || '';
-  const freq    = document.getElementById('cl-adv-freq')?.value      || '';
-  const fromD   = document.getElementById('cl-adv-from')?.value      || '';
-  const toD     = document.getElementById('cl-adv-to')?.value        || '';
+  const statusF = document.getElementById('cl-adv-status')?.value || '';
+  window._CL_FILTER_STATE = { statusF };
 
-  /* persist filter state so switching sections doesn't reset them */
-  window._CL_FILTER_STATE = { dept, statusF, freq, fromD, toD };
+  /* ── Flatten all clauses into obligation rows ── */
+  const oblRows = [];
+  allClauses.forEach(function(cl) {
+    const obligsRaw = cl.obligations || cl.obligation || null;
+    const obligsArr = Array.isArray(obligsRaw) ? obligsRaw
+      : typeof obligsRaw === 'string' && obligsRaw ? [obligsRaw]
+      : [];
+    const actsRaw = cl.actionables || cl.actionable || [];
+    const actsArr = Array.isArray(actsRaw) ? actsRaw
+      : typeof actsRaw === 'string' ? actsRaw.split(';').map(a => a.trim()).filter(Boolean)
+      : [];
 
-  const filtered = allClauses.filter(cl => {
-    if (dept    && cl.department !== dept) return false;
-    if (statusF && (window._CL_CLAUSE_STATUS?.[cl.id] || '') !== statusF) return false;
-    return true;
+    if (obligsArr.length) {
+      obligsArr.forEach(function(ob, oi) {
+        const obText = typeof ob === 'string' ? ob : (ob.text || ob.name || '');
+        const obId   = (typeof ob === 'object' && ob.id) ? ob.id : ('OBL-' + cl.id + '-' + (oi + 1));
+        const uid    = cl.id + '-' + oi;
+        oblRows.push({ uid, obId, obText, actsArr, cl, oi });
+      });
+    } else {
+      /* clause has no obligations — show clause text as the obligation */
+      const uid = cl.id + '-0';
+      oblRows.push({ uid, obId: 'OBL-' + cl.id, obText: cl.text || cl.id, actsArr, cl, oi: 0 });
+    }
   });
+
+  /* filter by status if set */
+  const filtered = statusF
+    ? oblRows.filter(r => (window._CL_OBL_STATUS?.[r.uid] || '') === statusF)
+    : oblRows;
+
   const ws = document.getElementById('cl-ws-main');
   const ph = document.getElementById('cl-ws-ph');
   ph.style.display = 'none';
@@ -533,38 +647,393 @@ function _clRenderStack(allClauses, labels) {
 
   ws.innerHTML = `
   <div class="cl-stack-wrap">
-    <!-- HEADER: chapter badge + title + count all in ONE aligned row -->
     <div class="cl-stack-header">
       <div class="cl-stack-header-left">
         ${labels.chLabel ? `<span class="cl-stack-ch-num">${labels.chLabel}</span>` : ''}
         ${labels.chTitle ? `<span class="cl-stack-ch-title">${labels.chTitle}</span>` : ''}
-        ${labels.secLabel ? `<span class="cl-stack-sec-sep">·</span><span class="cl-stack-sec-label">${labels.secLabel}</span>` : ''}
+        ${labels.secLabel ? `<span class="cl-stack-sec-sep">·</span><span class="cl-stack-sec-label" onclick="_clOpenAllClausesPopup()" style="cursor:pointer;text-decoration:underline;text-underline-offset:2px;" title="View all obligations">${labels.secLabel}</span>` : ''}
       </div>
       <div style="display:flex;align-items:center;gap:6px;flex-shrink:0;">
-      <span class="cl-stack-count">${filtered.length} clause${filtered.length !== 1 ? 's' : ''}</span>
-     
-    </div>
+        <span class="cl-stack-count">${filtered.length} obligation${filtered.length !== 1 ? 's' : ''}</span>
+        <div style="position:relative;" id="cl-stack-dots-wrap">
+          <button onclick="event.stopPropagation();document.getElementById('cl-stack-dots-wrap').classList.toggle('open')" style="width:28px;height:28px;border-radius:6px;border:1px solid #e5e7eb;background:#fff;cursor:pointer;font-size:16px;display:inline-flex;align-items:center;justify-content:center;color:#6b7280;">⋮</button>
+          <div style="display:none;position:absolute;right:0;top:calc(100% + 4px);background:#fff;border:1px solid #e5e7eb;border-radius:8px;box-shadow:0 4px 16px rgba(0,0,0,.12);min-width:200px;z-index:500;overflow:hidden;" class="cl-sdots-menu">
+            <div style="padding:4px 10px;font-size:9px;font-weight:800;color:#9ca3af;text-transform:uppercase;letter-spacing:.06em;">AI</div>
+            <button onclick="document.getElementById('cl-stack-dots-wrap').classList.remove('open');_clOpenCtxModal('all_obligations','All Obligations')" style="display:flex;align-items:center;gap:9px;width:100%;padding:9px 14px;background:none;border:none;text-align:left;font-size:12px;font-weight:600;color:#7c3aed;cursor:pointer;" onmouseover="this.style.background='#f5f3ff'" onmouseout="this.style.background='none'">✦ Regenerate All Obligations</button>
+            <div style="border-top:1px solid #f3f4f6;margin:4px 0;"></div>
+            <div style="padding:4px 10px;font-size:9px;font-weight:800;color:#9ca3af;text-transform:uppercase;letter-spacing:.06em;">Add</div>
+            <button onclick="document.getElementById('cl-stack-dots-wrap').classList.remove('open');_clAddObligationPopup()" style="display:flex;align-items:center;gap:9px;width:100%;padding:9px 14px;background:none;border:none;text-align:left;font-size:12px;font-weight:600;color:#374151;cursor:pointer;" onmouseover="this.style.background='#f9fafb'" onmouseout="this.style.background='none'">+ Add Obligation</button>
+            <button onclick="document.getElementById('cl-stack-dots-wrap').classList.remove('open');_clAddActionPopup()" style="display:flex;align-items:center;gap:9px;width:100%;padding:9px 14px;background:none;border:none;text-align:left;font-size:12px;font-weight:600;color:#374151;cursor:pointer;" onmouseover="this.style.background='#f9fafb'" onmouseout="this.style.background='none'">+ Add Action</button>
+            <div style="border-top:1px solid #f3f4f6;margin:4px 0;"></div>
+            <div style="padding:4px 10px;font-size:9px;font-weight:800;color:#9ca3af;text-transform:uppercase;letter-spacing:.06em;">Data</div>
+            <button onclick="document.getElementById('cl-stack-dots-wrap').classList.remove('open');_clOpenExportPopup()" style="display:flex;align-items:center;gap:9px;width:100%;padding:9px 14px;background:none;border:none;text-align:left;font-size:12px;font-weight:600;color:#374151;cursor:pointer;" onmouseover="this.style.background='#f9fafb'" onmouseout="this.style.background='none'">⬆ Export</button>
+          </div>
+        </div>
+      </div>
     </div>
 
-    
-
-    <!-- CLAUSE LIST -->
     <div class="cl-stack-list" id="cl-stack-list">
       ${filtered.length
-        ? filtered.map(cl => _clClauseRowHTML(cl)).join('')
-        : `<div class="cl-stack-empty">No clauses found.</div>`
+        ? filtered.map(r => _clOblRowHTML(r)).join('')
+        : '<div class="cl-stack-empty">No obligations found.</div>'
       }
     </div>
   </div>`;
 
-  /* Row click → toggle inline expand */
-  ws.querySelectorAll('.cl-clause-row').forEach(row => {
-    row.addEventListener('click', function () {
-      const cid = this.dataset.cid;
-      _clToggleInlineExpand(cid, allClauses);
+  /* dots menu toggle */
+  document.addEventListener('click', () => {
+    document.getElementById('cl-stack-dots-wrap')?.classList.remove('open');
+  });
+  const sdm = ws.querySelector('.cl-sdots-menu');
+  if (sdm) {
+    const wrap = document.getElementById('cl-stack-dots-wrap');
+    if (wrap) new MutationObserver(() => {
+      sdm.style.display = wrap.classList.contains('open') ? 'block' : 'none';
+    }).observe(wrap, {attributes:true, attributeFilter:['class']});
+  }
+
+  /* obligation row accordion toggle */
+  ws.querySelectorAll('.cl-obl-stack-row').forEach(row => {
+    row.addEventListener('click', function(e) {
+      if (e.target.closest('.cl-row-eye-btn') || e.target.closest('.cl-obl-applic-badge')) return;
+      const uid = this.dataset.uid;
+      _clToggleOblStackRow(uid);
     });
   });
 }
+
+// window._clOpenAllClausesPopup = function() {
+//   var ex = document.getElementById('cl-all-clauses-modal'); if(ex) ex.remove();
+//   const allClauses = window._CL_ACTIVE_SECTION_CLAUSES || [];
+//   var overlay = document.createElement('div');
+//   overlay.className = 'cl-eye-overlay'; overlay.id = 'cl-all-clauses-modal';
+//   overlay.innerHTML = `
+//   <div class="cl-eye-box cl-eye-box-wide" style="max-width:680px;" onclick="event.stopPropagation()">
+//     <div class="cl-eye-head">
+//       <div class="cl-eye-head-left">
+//         <span class="cl-eye-id-chip">${allClauses.length}</span>
+//         <span class="cl-eye-head-title">All Clauses</span>
+//       </div>
+//       <button class="cl-eye-close" onclick="document.getElementById('cl-all-clauses-modal').remove()">✕</button>
+//     </div>
+//     <div class="cl-eye-body" style="padding:0;max-height:65vh;overflow-y:auto;">
+//       <table style="width:100%;border-collapse:collapse;font-size:12px;">
+//         <thead>
+//           <tr style="background:#f3f4f6;border-bottom:2px solid #e5e7eb;position:sticky;top:0;z-index:1;">
+//             <th style="padding:10px 14px;text-align:left;font-weight:700;color:#374151;width:110px;">Obligation ID</th>
+//             <th style="padding:10px 14px;text-align:left;font-weight:700;color:#374151;">Obligation Text</th>
+//             <th style="padding:10px 14px;text-align:left;font-weight:700;color:#374151;width:80px;">Actions</th>
+//             <th style="padding:10px 14px;text-align:left;font-weight:700;color:#374151;width:90px;">Status</th>
+//             <th style="padding:10px 14px;width:40px;"></th>
+//           </tr>
+//         </thead>
+//         <tbody>
+//           ${allClauses.map((cl, idx) => {
+//             const oblsRaw = cl.obligations || cl.obligation || null;
+//             const oblCount = Array.isArray(oblsRaw) ? oblsRaw.length : oblsRaw ? 1 : 0;
+//             const actCount = Array.isArray(cl.actionables) ? cl.actionables.length : 0;
+//             const status = window._CL_CLAUSE_STATUS?.[cl.id] || '';
+//             const statusStyle = status === 'Accepted'
+//               ? 'background:#dcfce7;color:#15803d;border:1px solid #6ee7b7;'
+//               : status === 'Rejected'
+//               ? 'background:#fee2e2;color:#dc2626;border:1px solid #fca5a5;'
+//               : status === 'Under Review'
+//               ? 'background:#fef9c3;color:#b45309;border:1px solid #fcd34d;'
+//               : 'background:#f3f4f6;color:#6b7280;border:1px solid #d1d5db;';
+//             return `
+//             <tr style="border-bottom:1px solid #f3f4f6;${idx % 2 === 1 ? 'background:#fafbff;' : ''}">
+//               <td style="padding:10px 14px;">
+//                 <span style="font-family:monospace;font-size:10px;font-weight:700;color:#fff;background:#7c3aed;padding:2px 8px;border-radius:4px;white-space:nowrap;">${cl.id}</span>
+//               </td>
+//               <td style="padding:10px 14px;font-size:11px;color:#374151;line-height:1.5;max-width:260px;">${(cl.text || '').substring(0, 90)}${(cl.text||'').length > 90 ? '…' : ''}</td>
+              
+//               <td style="padding:10px 14px;text-align:center;">
+//                 ${actCount ? `<span style="font-size:10px;font-weight:700;background:#eff6ff;color:#2563eb;padding:2px 8px;border-radius:10px;">${actCount}</span>` : '<span style="color:#d1d5db;font-size:11px;">—</span>'}
+//               </td>
+//               <td style="padding:10px 14px;">
+//                 <span style="font-size:9px;font-weight:700;padding:2px 8px;border-radius:10px;white-space:nowrap;${statusStyle}">${status || 'Pending'}</span>
+//               </td>
+//               <td style="padding:10px 14px;">
+//                 <button onclick="document.getElementById('cl-all-clauses-modal').remove();clOpenClauseEyeModal('${cl.id}')" style="width:24px;height:24px;border-radius:50%;background:none;border:1px solid #e5e7eb;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#9ca3af;" title="View clause">
+//                   <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+//                 </button>
+//               </td>
+//             </tr>`;
+//           }).join('')}
+//         </tbody>
+//       </table>
+//       ${allClauses.length === 0 ? '<div style="padding:32px;text-align:center;color:#9ca3af;font-size:13px;">No clauses available.</div>' : ''}
+//     </div>
+//     <div class="cl-eye-foot" style="justify-content:space-between;">
+//       <span style="font-size:11px;color:#9ca3af;">${allClauses.reduce((acc, cl) => { const o = cl.obligations || cl.obligation; return acc + (Array.isArray(o) ? o.length : o ? 1 : 1); }, 0)} obligation${allClauses.length !== 1 ? 's' : ''} in this section</span>
+//       <button class="cl-eye-cancel-btn" onclick="document.getElementById('cl-all-clauses-modal').remove()">Close</button>
+//     </div>
+//   </div>`;
+//   document.body.appendChild(overlay);
+//   overlay.addEventListener('click', e => { if(e.target === overlay) overlay.remove(); });
+//   overlay.querySelectorAll('.cl-all-obl-eye-btn').forEach(btn => {
+//     btn.addEventListener('click', () => {
+//       const uid = btn.dataset.uid;
+//       const clauseId = btn.dataset.clauseid;
+//       const oi = parseInt(btn.dataset.oi);
+//       document.getElementById('cl-all-clauses-modal').remove();
+//       setTimeout(() => {
+//         const allClauses = window._CL_ACTIVE_SECTION_CLAUSES || [];
+//         const cl = allClauses.find(c => c.id === clauseId);
+//         if (!cl) { showToast('Clause not found.', 'error'); return; }
+//         clOpenOblEyeModal(uid, clauseId, oi);
+//       }, 50);
+//     });
+//   });
+// };
+
+window._clOpenAllClausesPopup = function() {
+  var ex = document.getElementById('cl-all-clauses-modal'); if(ex) ex.remove();
+  const allClauses = window._CL_ACTIVE_SECTION_CLAUSES || [];
+  const oblRows = [];
+  allClauses.forEach(function(cl) {
+    const obligsRaw = cl.obligations || cl.obligation || null;
+    const obligsArr = Array.isArray(obligsRaw) ? obligsRaw : obligsRaw ? [obligsRaw] : [];
+    const actsRaw = cl.actionables || [];
+    const actsArr = Array.isArray(actsRaw) ? actsRaw : typeof actsRaw === 'string' ? actsRaw.split(';').map(a=>a.trim()).filter(Boolean) : [];
+    if (!obligsArr.length) obligsArr.push(cl.text || cl.id);
+    obligsArr.forEach(function(ob, oi) {
+      const obText = typeof ob === 'string' ? ob : (ob.text || '—');
+      const obId = `OBL-${cl.id}-${oi+1}`;
+      const uid = `${cl.id}-${oi}`;
+      const status = window._CL_OBL_STATUS?.[uid] || '';
+      oblRows.push({ uid, obId, obText, actsArr, cl, oi, status });
+    });
+  });
+
+  var overlay = document.createElement('div');
+  overlay.className = 'cl-eye-overlay'; overlay.id = 'cl-all-clauses-modal';
+  overlay.innerHTML = `
+  <div class="cl-eye-box cl-eye-box-wide" style="max-width:700px;" onclick="event.stopPropagation()">
+    <div class="cl-eye-head">
+      <div class="cl-eye-head-left">
+        <span class="cl-eye-id-chip" style="background:#7c3aed;">${oblRows.length}</span>
+        <span class="cl-eye-head-title">All Obligations</span>
+      </div>
+      <button class="cl-eye-close" onclick="document.getElementById('cl-all-clauses-modal').remove()">✕</button>
+    </div>
+    <div class="cl-eye-body" style="padding:0;max-height:65vh;overflow-y:auto;">
+      <table style="width:100%;border-collapse:collapse;font-size:12px;">
+        <thead>
+          <tr style="background:#f3f4f6;border-bottom:2px solid #e5e7eb;position:sticky;top:0;z-index:1;">
+            <th style="padding:10px 14px;text-align:left;font-weight:700;color:#374151;width:130px;">Obligation ID</th>
+            <th style="padding:10px 14px;text-align:left;font-weight:700;color:#374151;">Obligation Text</th>
+            <th style="padding:10px 14px;text-align:left;font-weight:700;color:#374151;width:80px;">Actions</th>
+            <th style="padding:10px 14px;text-align:left;font-weight:700;color:#374151;width:100px;">Status</th>
+            <th style="padding:10px 14px;width:40px;"></th>
+          </tr>
+        </thead>
+        <tbody>
+          ${oblRows.map((r, idx) => {
+            const statusStyle = r.status === 'Accepted'
+              ? 'background:#dcfce7;color:#15803d;border:1px solid #6ee7b7;'
+              : r.status === 'Rejected'
+              ? 'background:#fee2e2;color:#dc2626;border:1px solid #fca5a5;'
+              : r.status === 'Under Review'
+              ? 'background:#fef9c3;color:#b45309;border:1px solid #fcd34d;'
+              : 'background:#f3f4f6;color:#6b7280;border:1px solid #d1d5db;';
+            return `
+            <tr style="border-bottom:1px solid #f3f4f6;${idx%2===1?'background:#fafbff;':'background:#fff;'}">
+              <td style="padding:10px 14px;">
+                <span style="font-family:monospace;font-size:10px;font-weight:700;color:#fff;background:#7c3aed;padding:2px 8px;border-radius:4px;white-space:nowrap;">${r.obId}</span>
+              </td>
+              <td style="padding:10px 14px;font-size:11px;color:#374151;line-height:1.5;max-width:280px;">${r.obText.substring(0,90)}${r.obText.length>90?'…':''}</td>
+              <td style="padding:10px 14px;text-align:center;">
+                ${r.actsArr.length ? `<span style="font-size:10px;font-weight:700;background:#eff6ff;color:#2563eb;border:1px solid #bfdbfe;padding:2px 8px;border-radius:10px;">${r.actsArr.length}</span>` : '<span style="color:#d1d5db;font-size:11px;">—</span>'}
+              </td>
+              <td style="padding:10px 14px;">
+                <span style="font-size:9px;font-weight:700;padding:2px 8px;border-radius:10px;white-space:nowrap;${statusStyle}">${r.status||'Pending'}</span>
+              </td>
+              <td style="padding:10px 14px;">
+                <button data-uid="${r.uid}" data-clauseid="${r.cl.id}" data-oi="${r.oi}" class="cl-all-obl-eye-btn" style="width:24px;height:24px;border-radius:50%;background:none;border:1px solid #e5e7eb;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#9ca3af;" title="View obligation">
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                </button>
+              </td>
+            </tr>`;
+          }).join('')}
+        </tbody>
+      </table>
+      ${oblRows.length === 0 ? '<div style="padding:32px;text-align:center;color:#9ca3af;font-size:13px;">No obligations found.</div>' : ''}
+    </div>
+    <div class="cl-eye-foot" style="justify-content:space-between;">
+      <span style="font-size:11px;color:#9ca3af;">${oblRows.length} obligation${oblRows.length!==1?'s':''} total</span>
+      <button class="cl-eye-cancel-btn" onclick="document.getElementById('cl-all-clauses-modal').remove()">Close</button>
+    </div>
+  </div>`;
+
+  document.body.appendChild(overlay);
+  overlay.addEventListener('click', e => { if(e.target===overlay) overlay.remove(); });
+
+  overlay.querySelectorAll('.cl-all-obl-eye-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const uid = btn.dataset.uid;
+      const clauseId = btn.dataset.clauseid;
+      const oi = parseInt(btn.dataset.oi);
+      document.getElementById('cl-all-clauses-modal').remove();
+      setTimeout(() => clOpenOblEyeModal(uid, clauseId, oi), 50);
+    });
+  });
+};
+
+/* ── Obligation row HTML for the stack list ── */
+function _clOblRowHTML(r) {
+  const { uid, obId, obText, actsArr, cl, oi } = r;
+  const oblStatus  = window._CL_OBL_STATUS?.[uid] || '';
+  const isApplicable = !window._CL_OBL_APPLICABILITY || window._CL_OBL_APPLICABILITY[uid] !== false;
+  const statusClass = oblStatus === 'Accepted' ? 'cl-status-accepted' : oblStatus === 'Rejected' ? 'cl-status-rejected' : oblStatus === 'Under Review' ? 'cl-status-review' : '';
+
+  /* action rows inside accordion */
+  const actRowsHTML = actsArr.length
+    ? actsArr.map((a, ai) => {
+        const aStatus = window._CL_ACT_STATUS?.[`${uid}-${ai}`] || '';
+        const actUid = `${uid}-${ai}`;
+        const actDept = window._CL_ACT_DEPT?.[actUid] || cl.department || '';
+        const actApplicable = !window._CL_ACT_APPLICABILITY || window._CL_ACT_APPLICABILITY[actUid] !== false;
+        return `
+        <div style="display:flex;align-items:center;gap:8px;padding:9px 14px;border-bottom:1px solid #f0f4ff;background:${ai%2===0?'#fff':'#fafbff'};">
+          <span style="font-family:monospace;font-size:10px;font-weight:700;color:#fff;background:#2563eb;padding:2px 7px;border-radius:4px;flex-shrink:0;white-space:nowrap;">ACT-${cl.id}-${oi+1}-${ai+1}</span>
+          <span style="flex:1;font-size:12px;color:#374151;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0;">${a.substring(0, 65)}${a.length > 65 ? '…' : ''}</span>
+          <div style="display:flex;align-items:center;gap:4px;flex-shrink:0;">
+            <button onclick="event.stopPropagation();_clPickActDept('${actUid}')" style="font-size:9px;font-weight:600;padding:2px 7px;border-radius:10px;background:#eff6ff;border:1px solid #bfdbfe;color:#2563eb;white-space:nowrap;cursor:pointer;">${actDept||'+ Dept'}</button>
+            <span onclick="event.stopPropagation();_clShowActApplicabilityReason('${uid}',${ai},'ACT-${cl.id}-${oi+1}-${ai+1}')" style="font-size:9px;font-weight:700;padding:2px 7px;border-radius:10px;cursor:pointer;white-space:nowrap;${actApplicable?'background:#dcfce7;color:#15803d;border:1px solid #6ee7b7;':'background:#f3f4f6;color:#6b7280;border:1px solid #d1d5db;'}">${actApplicable?'✓':'N/A'}</span>
+            <button onclick="event.stopPropagation();_clCycleActStatus('${actUid}')" style="padding:2px 9px;border-radius:10px;font-size:9px;font-weight:700;cursor:pointer;border:1px solid;white-space:nowrap;${aStatus==='Accepted'?'background:#dcfce7;color:#15803d;border-color:#6ee7b7;':aStatus==='Rejected'?'background:#fee2e2;color:#dc2626;border-color:#fca5a5;':'background:#f3f4f6;color:#6b7280;border-color:#d1d5db;'}">${aStatus||'Status'}</button>
+            <button class="cl-row-eye-btn" onclick="event.stopPropagation();clOpenActionEyeModal('${uid}',${ai},'${cl.id}')" title="View action" style="width:22px;height:22px;border-radius:50%;background:none;border:1px solid #e5e7eb;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#9ca3af;">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            </button>
+          </div>
+        </div>`;
+      }).join('')
+    : '<div style="padding:10px 14px;font-size:11px;color:#9ca3af;font-style:italic;">No action items defined.</div>';
+
+  return `
+  <div style="border:1px solid #e5e7eb;border-radius:10px;margin-bottom:6px;overflow:hidden;" id="cl-obl-stack-card-${uid}">
+
+    <!-- OBLIGATION HEADER ROW -->
+    <div class="cl-obl-stack-row" data-uid="${uid}" style="display:flex;align-items:center;gap:8px;padding:10px 14px;background:#fff;cursor:pointer;transition:background .12s;">
+
+      <!-- left: accordion arrow + expand zone -->
+      <div style="display:flex;align-items:center;gap:8px;flex:1;min-width:0;">
+        <span style="font-size:9px;color:#9ca3af;transition:transform .2s;flex-shrink:0;" id="cl-obl-sarr-${uid}">▶</span>
+        <span style="font-family:monospace;font-size:10px;font-weight:700;color:#fff;background:#7c3aed;padding:2px 8px;border-radius:4px;flex-shrink:0;white-space:nowrap;">${obId}</span>
+        <span style="flex:1;font-size:12px;font-weight:500;color:#1f2937;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0;">${obText.substring(0, 80)}${obText.length > 80 ? '…' : ''}</span>
+      </div>
+
+      <!-- right: badges + eye -->
+      <div style="display:flex;align-items:center;gap:5px;flex-shrink:0;">
+        ${actsArr.length ? `<span style="font-size:9px;font-weight:600;color:#2563eb;background:#eff6ff;border:1px solid #bfdbfe;padding:2px 9px;border-radius:10px;white-space:nowrap;">${actsArr.length} Action${actsArr.length > 1 ? 's' : ''}</span>` : ''}
+        ${cl.department ? `<span style="font-size:9px;font-weight:600;padding:2px 7px;border-radius:10px;background:#eff6ff;border:1px solid #bfdbfe;color:#2563eb;white-space:nowrap;">${cl.department}</span>` : ''}
+        <span class="cl-obl-applic-badge" onclick="event.stopPropagation();_clShowApplicabilityReason('${uid}','${obId}')" style="font-size:9px;font-weight:700;padding:2px 7px;border-radius:10px;cursor:pointer;white-space:nowrap;${isApplicable ? 'background:#eff6ff;color:#1d4ed8;border:1px solid #93c5fd;' : 'background:#f3f4f6;color:#6b7280;border:1px solid #d1d5db;'}">${isApplicable ? '⊕ Applicable' : 'N/A'}</span>
+        <button onclick="event.stopPropagation();_clCycleOblStatus('${uid}','${cl.id}',${oi})" style="padding:2px 9px;border-radius:10px;font-size:9px;font-weight:700;cursor:pointer;border:1px solid;white-space:nowrap;${oblStatus==='Accepted'?'background:#dcfce7;color:#15803d;border-color:#6ee7b7;':oblStatus==='Rejected'?'background:#fee2e2;color:#dc2626;border-color:#fca5a5;':'background:#f3f4f6;color:#6b7280;border-color:#d1d5db;'}">${oblStatus||'Set Status'}</button>
+        <button class="cl-row-eye-btn" onclick="event.stopPropagation();clOpenOblEyeModal('${uid}','${cl.id}',${oi})" title="View obligation" style="width:22px;height:22px;border-radius:50%;background:none;border:1px solid #e5e7eb;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#9ca3af;transition:all .12s;">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+        </button>
+      </div>
+
+    </div>
+
+    <!-- ACTION LIST (accordion body) -->
+    <div id="cl-obl-sbody-${uid}" style="display:none;border-top:1px solid #f3f4f6;background:#fafbfd;">
+      ${actRowsHTML}
+    </div>
+
+  </div>`;
+}
+
+window._clCycleActStatus = function(actUid) {
+  if (!window._CL_ACT_STATUS) window._CL_ACT_STATUS = {};
+  const cur = window._CL_ACT_STATUS[actUid] || '';
+  const next = cur === '' ? 'Accepted' : cur === 'Accepted' ? 'Rejected' : '';
+  window._CL_ACT_STATUS[actUid] = next;
+  showToast(next ? `Action ${next.toLowerCase()}.` : 'Status cleared.', 'success');
+  if (window._CL_ACTIVE_SECTION_CLAUSES?.length) _clRenderStack(window._CL_ACTIVE_SECTION_CLAUSES, window._CL_ACTIVE_LABELS);
+};
+
+window._clPickActDept = function(actUid) {
+  const allDepts = ['Compliance','Risk','Legal','IT','Operations','HR','Finance','Credit','Procurement'];
+  var ex = document.getElementById('cl-act-dept-modal'); if(ex) ex.remove();
+  var overlay = document.createElement('div');
+  overlay.className = 'cl-eye-overlay'; overlay.id = 'cl-act-dept-modal';
+  const current = window._CL_ACT_DEPT?.[actUid] ? window._CL_ACT_DEPT[actUid].split(',').map(d=>d.trim()) : [];
+  overlay.innerHTML = `
+  <div class="cl-eye-box" style="max-width:400px;" onclick="event.stopPropagation()">
+    <div class="cl-eye-head">
+      <div class="cl-eye-head-left"><span class="cl-eye-id-chip">Dept</span><span class="cl-eye-head-title">Select Departments</span></div>
+      <button class="cl-eye-close" onclick="document.getElementById('cl-act-dept-modal').remove()">✕</button>
+    </div>
+    <div class="cl-eye-body" style="padding:16px;display:flex;flex-direction:column;gap:6px;">
+      ${allDepts.map(d => `
+      <label style="display:flex;align-items:center;gap:10px;padding:9px 12px;border:1px solid #e5e7eb;border-radius:6px;background:#f9fafb;cursor:pointer;transition:background .1s;" onmouseover="this.style.background='#eff6ff'" onmouseout="this.style.background='#f9fafb'">
+        <input type="checkbox" value="${d}" ${current.includes(d)?'checked':''} style="width:15px;height:15px;accent-color:#3b82f6;"/>
+        <span style="font-size:13px;font-weight:500;color:#374151;">${d}</span>
+      </label>`).join('')}
+    </div>
+    <div class="cl-eye-foot">
+      <button class="cl-eye-cancel-btn" onclick="document.getElementById('cl-act-dept-modal').remove()">Cancel</button>
+      <button class="cl-eye-save-btn" style="opacity:1;pointer-events:auto;" onclick="
+        var checked=Array.from(document.querySelectorAll('#cl-act-dept-modal input:checked')).map(c=>c.value);
+        if(!window._CL_ACT_DEPT)window._CL_ACT_DEPT={};
+        window._CL_ACT_DEPT['${actUid}']=checked.join(', ');
+        document.getElementById('cl-act-dept-modal').remove();
+        if(window._CL_ACTIVE_SECTION_CLAUSES?.length)_clRenderStack(window._CL_ACTIVE_SECTION_CLAUSES,window._CL_ACTIVE_LABELS);
+        showToast('Departments updated.','success');
+      ">Save</button>
+    </div>
+  </div>`;
+  document.body.appendChild(overlay);
+  overlay.addEventListener('click', e => { if(e.target===overlay) overlay.remove(); });
+};
+
+window._clCycleOblStatus = function(uid, clauseId, oblIdx) {
+  if (!window._CL_OBL_STATUS) window._CL_OBL_STATUS = {};
+  const cur = window._CL_OBL_STATUS[uid] || '';
+  const next = cur === '' ? 'Accepted' : cur === 'Accepted' ? 'Under Review' : cur === 'Under Review' ? 'Rejected' : '';
+  window._CL_OBL_STATUS[uid] = next;
+  if (next === 'Accepted' && window._CL_ACT_STATUS) {
+    const allClauses = window._CL_ACTIVE_SECTION_CLAUSES || [];
+    const cl = allClauses.find(c => c.id === clauseId);
+    if (cl) {if (!window._CL_ACT_STATUS) window._CL_ACT_STATUS = {};
+  if (next === 'Accepted') {
+    const allClauses = window._CL_ACTIVE_SECTION_CLAUSES || [];
+    const cl = allClauses.find(c => c.id === clauseId);
+    if (cl) {
+      const actRaw = cl.actionables || [];
+      const actArr = Array.isArray(actRaw) ? actRaw : typeof actRaw === 'string' ? actRaw.split(';').map(a=>a.trim()).filter(Boolean) : [];
+      const count = actArr.length || 4;
+      for (let i = 0; i < count; i++) window._CL_ACT_STATUS[`${uid}-${i}`] = 'Accepted';
+      showToast(`Obligation accepted — ${count} action${count>1?'s':''} auto-accepted.`, 'success');
+    }
+  }
+      const actRaw = cl.actionables || [];
+      const actArr = Array.isArray(actRaw) ? actRaw : typeof actRaw === 'string' ? actRaw.split(';').map(a=>a.trim()).filter(Boolean) : [];
+      for (let i = 0; i < actArr.length; i++) window._CL_ACT_STATUS[`${uid}-${i}`] = 'Accepted';
+    }
+  }
+  showToast(next ? `Obligation ${next.toLowerCase()}.` : 'Status cleared.', 'success');
+  if (window._CL_ACTIVE_SECTION_CLAUSES?.length) _clRenderStack(window._CL_ACTIVE_SECTION_CLAUSES, window._CL_ACTIVE_LABELS);
+};
+
+/* Toggle obligation stack row accordion */
+window._clToggleOblStackRow = function(uid) {
+  const body = document.getElementById('cl-obl-sbody-' + uid);
+  const arr  = document.getElementById('cl-obl-sarr-' + uid);
+  const card = document.getElementById('cl-obl-stack-card-' + uid);
+  if (!body) return;
+  const isOpen = body.style.display !== 'none';
+  /* close all */
+  document.querySelectorAll('[id^="cl-obl-sbody-"]').forEach(b => { b.style.display = 'none'; });
+  document.querySelectorAll('[id^="cl-obl-sarr-"]').forEach(a => { a.style.transform = ''; });
+  document.querySelectorAll('[id^="cl-obl-stack-card-"]').forEach(c => { c.style.borderColor = '#e5e7eb'; });
+  if (!isOpen) {
+    body.style.display = 'block';
+    if (arr)  arr.style.transform = 'rotate(90deg)';
+    if (card) card.style.borderColor = '#3b82f6';
+  }
+};
 
 /* Clause row: white bg, ID chip + title text left, counts right
    No risk/dept badges inline — those appear inside the expand tabs row */
@@ -699,8 +1168,21 @@ window.clOpenClauseEyeModal = function (clauseId) {
       </div>
     </div>
   </div>`;
-  modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
+  modal.addEventListener('click', e => {
+    const dotsWrapEl = document.getElementById(`cl-obl-dots-${uid}`);
+    if (dotsWrapEl && !dotsWrapEl.contains(e.target)) dotsWrapEl.classList.remove('cl-open');
+    if (e.target === modal) modal.remove();
+  });
   document.body.appendChild(modal);
+
+  /* wire three-dots menu */
+  const dotsWrap = modal.querySelector(`#cl-obl-dots-${uid}`);
+  const dotsMenu = modal.querySelector(`#cl-obl-dots-menu-${uid}`);
+  if (dotsWrap && dotsMenu) {
+    new MutationObserver(() => {
+      dotsMenu.style.display = dotsWrap.classList.contains('cl-open') ? 'block' : 'none';
+    }).observe(dotsWrap, { attributes: true, attributeFilter: ['class'] });
+  }
 };
 
 window.clSaveClauseEye = function (clauseId) {
@@ -756,12 +1238,84 @@ window.clClauseEnableEdit = function (clauseId) {
 window.clOblEnableEdit = function (uid) {
   const modal = document.getElementById('cl-obl-eye-modal');
   if (!modal) return;
-  modal.querySelectorAll('.cl-eye-disabled').forEach(el => { el.disabled = false; el.classList.remove('cl-eye-disabled'); });
+  /* enable all disabled/readonly fields */
+  modal.querySelectorAll('.cl-eye-disabled').forEach(el => {
+    el.disabled = false;
+    el.readOnly = false;
+    el.classList.remove('cl-eye-disabled');
+    el.style.background = '#fff';
+    el.style.borderColor = '#3b82f6';
+    el.style.opacity = '1';
+    el.style.cursor = 'text';
+  });
+  /* also hit inputs/selects that may not have the class but are inside the meta grid */
+  modal.querySelectorAll(`#cl-obl-meta-grid-${uid} input, #cl-obl-meta-grid-${uid} select`).forEach(el => {
+    el.disabled = false;
+    el.readOnly = false;
+    el.style.background = '#fff';
+    el.style.border = '1.5px solid #3b82f6';
+    el.style.opacity = '1';
+    el.style.cursor = 'text';
+  });
+  /* inject edit banner below header */
+  const existingBanner = document.getElementById(`cl-obl-edit-banner-${uid}`);
+  if (!existingBanner) {
+    const head = modal.querySelector('.cl-eye-head');
+    if (head) {
+      const b = document.createElement('div');
+      b.id = `cl-obl-edit-banner-${uid}`;
+      b.style.cssText = 'display:flex;align-items:center;justify-content:space-between;padding:8px 20px;background:#eff6ff;border-bottom:2px solid #bfdbfe;flex-shrink:0;';
+      b.innerHTML = `<span style="font-size:12px;font-weight:600;color:#1d4ed8;">✏️ Edit mode — fields are now editable</span>
+        <button onclick="clOblSaveInline('${uid}')" style="padding:5px 14px;background:#2563eb;color:#fff;border:none;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;">💾 Save Changes</button>`;
+      head.insertAdjacentElement('afterend', b);
+    }
+  } else {
+    existingBanner.style.display = 'flex';
+  }
   const pen = document.getElementById(`cl-obl-pen-${uid}`);
   if (pen) pen.style.display = 'none';
-  const saveBtn = modal.querySelector('.cl-eye-save-btn');
-  if (saveBtn) { saveBtn.style.opacity = '1'; saveBtn.style.pointerEvents = 'auto'; }
-  modal.querySelector('.cl-eye-foot-note') && (modal.querySelector('.cl-eye-foot-note').textContent = 'Fields are now editable.');
+  const note = document.getElementById(`cl-obl-footnote-${uid}`);
+  if (note) note.textContent = '✏️ Fields are now editable. Click Save to apply.';
+};
+
+window.clOblSaveInline = function(uid) {
+  const modal = document.getElementById('cl-obl-eye-modal');
+  if (!modal) return;
+  /* persist due date, freq, section, dept back into clause object */
+  const clauseId = uid.split('-').slice(0, -1).join('-');
+  const cl = (window._CL_ACTIVE_SECTION_CLAUSES || []).find(c => c.id === clauseId);
+  const deptEl = document.getElementById(`cl-of-dept-${uid}`);
+  const riskEl = document.getElementById(`cl-of-risk-${uid}`);
+  if (cl) {
+    if (deptEl) cl.department = deptEl.querySelector('input,div')?.textContent || deptEl.textContent.trim() || cl.department;
+    if (riskEl) cl.risk = riskEl.value || cl.risk;
+  }
+  /* re-disable fields */
+  modal.querySelectorAll('input, select, textarea').forEach(el => {
+    if (!el.closest('.cl-eye-foot') && el.type !== 'checkbox') {
+      el.disabled = true;
+      el.classList.add('cl-eye-disabled');
+      el.style.background = '#f9fafb';
+      el.style.borderColor = '#e5e7eb';
+      el.style.opacity = '0.55';
+      el.style.cursor = 'not-allowed';
+    }
+  });
+  /* keep the status select always active */
+  const statusSel = modal.querySelector(`[onchange*="_clSetOblStatus"]`);
+  if (statusSel) {
+    statusSel.disabled = false;
+    statusSel.classList.remove('cl-eye-disabled');
+    statusSel.style.opacity = '1';
+    statusSel.style.cursor = 'pointer';
+  }
+  const banner = document.getElementById(`cl-obl-edit-banner-${uid}`);
+  if (banner) banner.style.display = 'none';
+  const note = document.getElementById(`cl-obl-footnote-${uid}`);
+  if (note) note.textContent = 'Changes saved to session.';
+  if (window._CL_ACTIVE_SECTION_CLAUSES?.length)
+    _clRenderStack(window._CL_ACTIVE_SECTION_CLAUSES, window._CL_ACTIVE_LABELS);
+  showToast('Obligation details saved.', 'success');
 };
 
 /* ── OBLIGATION EYE MODAL */
@@ -787,6 +1341,10 @@ window.clOpenOblEyeModal = function (uid, clauseId, oblIdx) {
   const m = _clObligMeta(oblIdx);
   const currentStatus = window._CL_OBL_STATUS?.[uid] || '';
   const actList = ob.actions || actionsArray;
+  const oblId = `OBL-${clauseId}-${oblIdx + 1}`;
+  const deptDisplay = cl.department || '—';
+  const isApplicable = !window._CL_OBL_APPLICABILITY || window._CL_OBL_APPLICABILITY[uid] !== false;
+
   const EV = [
     { icon: '📋', name: 'Compliance Policy Document', type: 'Policy', source: 'Internal Repository', needed: 'Board-approved policy covering this compliance area.', status: 'Required' },
     { icon: '🔍', name: 'Internal Audit Report', type: 'Audit Record', source: 'Internal Audit Dept', needed: 'Audit findings confirming controls are operating effectively.', status: 'Required' },
@@ -794,107 +1352,460 @@ window.clOpenOblEyeModal = function (uid, clauseId, oblIdx) {
     { icon: '💻', name: 'System Audit Trail / Access Log', type: 'System Log', source: 'IT Department', needed: 'System-generated logs showing automated controls.', status: 'Recommended' },
     { icon: '🏛️', name: 'Board Resolution / Meeting Minutes', type: 'Board Record', source: 'Company Secretary', needed: 'Board-level approval in formal meeting minutes.', status: 'Required' },
   ];
-  const mapped = actList.map((a, i) => ({ action: a, ev: EV[i % EV.length] }));
 
   let modal = document.getElementById('cl-obl-eye-modal');
   if (modal) modal.remove();
   modal = document.createElement('div');
   modal.id = 'cl-obl-eye-modal';
   modal.className = 'cl-eye-overlay';
+
   modal.innerHTML = `
-  <div class="cl-eye-box cl-eye-box-wide" onclick="event.stopPropagation()">
-    <div class="cl-eye-head">
-      <div class="cl-eye-head-left">
-        <span class="cl-eye-id-chip">${clauseId}</span>
-        <span class="cl-eye-head-title">Obligation ${oblIdx + 1} Details</span>
+  <div class="cl-eye-box cl-eye-box-wide" onclick="event.stopPropagation()" style="max-width:720px;">
+
+    <!-- CARD HEADER -->
+    <div class="cl-eye-head" style="align-items:flex-start;">
+      <div class="cl-eye-head-left" style="flex-direction:column;align-items:flex-start;gap:4px;">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span class="cl-eye-id-chip" style="background:#7c3aed;">${oblId}</span>
+          ${isApplicable
+            ? `<span style="font-size:9px;font-weight:700;padding:2px 8px;border-radius:10px;background:#dcfce7;color:#15803d;border:1px solid #6ee7b7;cursor:pointer;" onclick="_clShowApplicabilityReason('${uid}','${oblId}')">✓ Applicable</span>`
+            : `<span style="font-size:9px;font-weight:700;padding:2px 8px;border-radius:10px;background:#f3f4f6;color:#6b7280;border:1px solid #d1d5db;cursor:pointer;" onclick="_clShowApplicabilityReason('${uid}','${oblId}')">— Not Applicable</span>`
+          }
+        </div>
+        <div style="font-size:13px;font-weight:600;color:#1f2937;max-width:480px;line-height:1.4;">${ob.text}</div>
       </div>
-      <div class="cl-eye-head-right">
-        <button class="cl-eye-regen-btn" onclick="_clOpenCtxModal('oblig_${uid}','Obligation ${oblIdx + 1}')">✦ Regenerate</button>
+      <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;">
+        <!-- three-dots menu -->
+<div style="position:relative;" id="cl-obl-dots-${uid}">
+  <button onclick="event.stopPropagation();document.getElementById('cl-obl-dots-${uid}').classList.toggle('cl-open')" style="width:30px;height:30px;border-radius:8px;border:1px solid #d1d5db;background:#fff;cursor:pointer;font-size:16px;display:inline-flex;align-items:center;justify-content:center;color:#6b7280;">⋮</button>
+  <div id="cl-obl-dots-menu-${uid}" style="display:none;position:absolute;right:0;top:calc(100% + 4px);background:#fff;border:1px solid #e5e7eb;border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.15);min-width:190px;z-index:700;overflow:hidden;">
+            <div style="padding:5px 12px;font-size:9px;font-weight:800;color:#9ca3af;text-transform:uppercase;letter-spacing:.06em;border-bottom:1px solid #f3f4f6;">Actions</div>
+            <button onclick="event.stopPropagation();document.getElementById('cl-obl-dots-${uid}').classList.remove('cl-open');clOblEnableEdit('${uid}')" style="display:flex;align-items:center;gap:9px;width:100%;padding:10px 14px;background:none;border:none;text-align:left;font-size:12px;font-weight:600;color:#374151;cursor:pointer;transition:background .1s;" onmouseover="this.style.background='#f9fafb'" onmouseout="this.style.background='none'">
+              <span style="font-size:14px;">✎</span> Edit Fields
+            </button>
+            <button onclick="event.stopPropagation();document.getElementById('cl-obl-dots-${uid}').classList.remove('cl-open');_clOpenMappedObligations('${oblId}')" style="display:flex;align-items:center;gap:9px;width:100%;padding:10px 14px;background:none;border:none;text-align:left;font-size:12px;font-weight:600;color:#374151;cursor:pointer;transition:background .1s;" onmouseover="this.style.background='#f9fafb'" onmouseout="this.style.background='none'">
+              <span style="font-size:14px;">⇄</span> Mapped Obligations
+            </button>
+           <!--- <button onclick="event.stopPropagation();document.getElementById('cl-obl-dots-${uid}').classList.remove('cl-open');_clOpenMappedActions('${oblId}')" style="display:flex;align-items:center;gap:9px;width:100%;padding:10px 14px;background:none;border:none;text-align:left;font-size:12px;font-weight:600;color:#374151;cursor:pointer;transition:background .1s;" onmouseover="this.style.background='#f9fafb'" onmouseout="this.style.background='none'">
+              <span style="font-size:14px;">⚡</span> Mapped Actions
+            </button> --->
+            <button onclick="event.stopPropagation();document.getElementById('cl-obl-dots-${uid}').classList.remove('cl-open');document.getElementById('cl-obl-eye-modal').remove();_clAddActionPopup()" style="display:flex;align-items:center;gap:9px;width:100%;padding:10px 14px;background:none;border:none;text-align:left;font-size:12px;font-weight:600;color:#374151;cursor:pointer;transition:background .1s;" onmouseover="this.style.background='#f9fafb'" onmouseout="this.style.background='none'">
+              <span style="font-size:14px;">+</span> Add Action
+            </button>
+            <div style="border-top:1px solid #f3f4f6;"></div>
+            <button onclick="event.stopPropagation();document.getElementById('cl-obl-dots-${uid}').classList.remove('cl-open');_clOpenCtxModal('oblig_${uid}','Obligation ${oblIdx + 1}')" style="display:flex;align-items:center;gap:9px;width:100%;padding:10px 14px;background:none;border:none;text-align:left;font-size:12px;font-weight:600;color:#7c3aed;cursor:pointer;transition:background .1s;" onmouseover="this.style.background='#f5f3ff'" onmouseout="this.style.background='none'">
+              <span style="font-size:14px;">✦</span> Regenerate with AI
+            </button>
+            <!--- <button onclick="event.stopPropagation();document.getElementById('cl-obl-dots-${uid}').classList.remove('cl-open');_clToggleOblApplicability('${uid}')" style="display:flex;align-items:center;gap:9px;width:100%;padding:10px 14px;background:none;border:none;text-align:left;font-size:12px;font-weight:600;color:#374151;cursor:pointer;transition:background .1s;" onmouseover="this.style.background='#f9fafb'" onmouseout="this.style.background='none'">
+            //   <span style="font-size:14px;">◎</span> Toggle Applicability
+            // </button> !-->
+          </div>
+        </div>
         <button class="cl-eye-close" onclick="document.getElementById('cl-obl-eye-modal').remove()">✕</button>
       </div>
     </div>
-    <div class="cl-eye-body">
 
-      <!-- Obligation Text -->
-      <div class="cl-eye-section">
-        <div class="cl-eye-sec-label" style="display:flex;align-items:center;justify-content:space-between;">
-          <span>Obligation Text</span>
-          <button class="cl-eye-pen-btn" id="cl-obl-pen-${uid}" onclick="clOblEnableEdit('${uid}')" title="Edit">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-            Edit
-          </button>
+    <!-- CARD BODY -->
+    <div class="cl-eye-body" style="padding:0;max-height:70vh;overflow-y:auto;">
+
+      <!-- OBLIGATION DETAILS -->
+      <div style="border-bottom:1px solid #dbeafe;background:#fafbff;">
+        <div style="padding:12px 20px 0 20px;font-size:10px;font-weight:800;color:#2563eb;text-transform:uppercase;letter-spacing:.08em;display:flex;align-items:center;gap:6px;margin-bottom:10px;">
+          <span style="width:3px;height:14px;background:#2563eb;border-radius:2px;display:inline-block;"></span>
+          Obligation Details
         </div>
-        <textarea class="cl-eye-textarea cl-eye-disabled" id="cl-obl-eye-text-${uid}" rows="3" disabled>${ob.text}</textarea>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;padding:0 20px 14px;" id="cl-obl-meta-grid-${uid}">
+          ${_clOblDetailField('Due Date', m.dueDate, `cl-of-due-${uid}`)}
+          ${_clOblDetailField('Effective Date', '—', `cl-of-eff-${uid}`)}
+          ${_clOblDetailField('Frequency', m.frequency, `cl-of-freq-${uid}`)}
+          ${_clOblDetailField('Section', m.section, `cl-of-sec-${uid}`)}
+          ${_clOblDetailField('Sub-Section', m.subset, `cl-of-sub-${uid}`)}
+          ${_clOblDetailField('Department', deptDisplay, `cl-of-dept-${uid}`, true)}
+          <div style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:6px;padding:10px 12px;">
+            <div style="font-size:10px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px;">Compliance Status</div>
+            <select onchange="_clSetOblStatus('${uid}',this.value)" style="width:100%;padding:7px 10px;border:1.5px solid ${currentStatus==='Accepted'?'#6ee7b7':currentStatus==='Rejected'?'#fca5a5':'#e5e7eb'};border-radius:6px;font-size:12px;font-weight:700;background:${currentStatus==='Accepted'?'#dcfce7':currentStatus==='Rejected'?'#fee2e2':'#fff'};color:${currentStatus==='Accepted'?'#15803d':currentStatus==='Rejected'?'#dc2626':'#6b7280'};cursor:pointer;outline:none;">
+
+              <option value="Accepted" ${currentStatus==='Accepted'?'selected':''}>✓ Accepted</option>
+              <option value="Under Review" ${currentStatus==='Under Review'?'selected':''}>⟳ Under Review</option>
+              <option value="Rejected" ${currentStatus==='Rejected'?'selected':''}>✗ Rejected</option>
+            </select>
+          </div>
+          <div style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:6px;padding:10px 12px;">
+            <div style="font-size:10px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px;">Risk</div>
+            <select id="cl-of-risk-${uid}" class="cl-eye-disabled" disabled style="width:100%;padding:5px 8px;border:1px solid #e5e7eb;border-radius:6px;font-size:12px;background:#fff;">
+              <option value="">— Select —</option>
+              <option ${cl.risk==='High'?'selected':''}>High</option>
+              <option ${cl.risk==='Medium'?'selected':''}>Medium</option>
+              <option ${cl.risk==='Low'?'selected':''}>Low</option>
+            </select>
+          </div>
+          ${cl.pageNo ? `<div style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:6px;padding:10px 12px;display:flex;align-items:center;justify-content:center;"><button onclick="clOpenDocPage(${cl.pageNo})" style="padding:6px 14px;background:#3b82f6;color:#fff;border:none;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;">📄 View Page ${cl.pageNo}</button></div>` : ''}
+        </div>
+      </div><!-- end obligation details -->
+
+      <!-- ACTION ITEMS ACCORDION -->
+      <div style="border-bottom:1px solid #dbeafe;background:#fafbff;">
+        <div style="padding:12px 20px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;" onclick="var el=document.getElementById('cl-obl-acts-body-${uid}');el.style.display=el.style.display==='none'?'block':'none';this.querySelector('.cl-macc-arr').textContent=el.style.display==='none'?'▶':'▼';">
+          <div style="font-size:10px;font-weight:800;color:#2563eb;text-transform:uppercase;letter-spacing:.08em;display:flex;align-items:center;gap:6px;">
+            <span style="width:3px;height:14px;background:#2563eb;border-radius:2px;display:inline-block;"></span>
+            <span class="cl-macc-arr">▼</span> Action Items
+            <span style="background:#e0f2fe;color:#0369a1;padding:1px 8px;border-radius:10px;font-size:10px;font-weight:700;">${actList.length}</span>
+          </div>
+        </div>
+        <div id="cl-obl-acts-body-${uid}" style="display:block;padding:0 20px 14px;">
+          ${actList.length ? `
+          <table style="width:100%;border-collapse:collapse;font-size:12px;">
+            <thead><tr style="background:#f3f4f6;border-bottom:2px solid #e5e7eb;">
+              <th style="padding:8px 12px;text-align:left;font-weight:700;color:#374151;width:110px;">Action ID</th>
+              <th style="padding:8px 12px;text-align:left;font-weight:700;color:#374151;">Action</th>
+              <th style="padding:8px 12px;text-align:left;font-weight:700;color:#374151;width:90px;">Dept</th>
+              <th style="padding:8px 12px;text-align:left;font-weight:700;color:#374151;width:110px;">Status</th>
+            </tr></thead>
+            <tbody>
+              ${actList.map((a, ai) => {
+                const aStatus = window._CL_ACT_STATUS?.[`${uid}-${ai}`] || '';
+                const aOblIdx = uid.split('-').pop();
+                const actId = `ACT-${clauseId}-${parseInt(aOblIdx)+1}-${ai+1}`;
+                const actDeptVal = window._CL_ACT_DEPT?.[`${uid}-${ai}`] || cl.department || '';
+                return `<tr style="border-bottom:1px solid #f3f4f6;">
+                  <td style="padding:9px 12px;">
+                    <button onclick="clOpenActionEyeModal('${uid}',${ai},'${clauseId}')" style="font-family:monospace;font-size:10px;font-weight:700;color:#fff;background:#2563eb;padding:2px 7px;border-radius:4px;border:none;cursor:pointer;white-space:nowrap;">${actId}</button>
+                  </td>
+                  <td style="padding:9px 12px;font-size:11px;color:#374151;max-width:220px;">${a}</td>
+                  <td style="padding:9px 12px;">
+                    <button onclick="event.stopPropagation();_clPickActDept('${uid}-${ai}')" style="font-size:9px;font-weight:600;padding:2px 7px;border-radius:10px;background:#eff6ff;border:1px solid #bfdbfe;color:#2563eb;white-space:nowrap;cursor:pointer;">${actDeptVal||'+ Dept'}</button>
+                  </td>
+                  <td style="padding:9px 12px;">
+                    <div style="display:flex;gap:4px;align-items:center;">
+                      <button onclick="_clSetActStatus('${uid}',${ai},'Accepted',this)" style="padding:2px 8px;border-radius:4px;font-size:10px;font-weight:700;cursor:pointer;border:1px solid ${aStatus==='Accepted'?'#6ee7b7':'#e5e7eb'};background:${aStatus==='Accepted'?'#dcfce7':'#f9fafb'};color:${aStatus==='Accepted'?'#15803d':'#6b7280'};">✓</button>
+                      <button onclick="_clSetActStatus('${uid}',${ai},'Rejected',this)" style="padding:2px 8px;border-radius:4px;font-size:10px;font-weight:700;cursor:pointer;border:1px solid ${aStatus==='Rejected'?'#fca5a5':'#e5e7eb'};background:${aStatus==='Rejected'?'#fee2e2':'#f9fafb'};color:${aStatus==='Rejected'?'#dc2626':'#6b7280'};">✗</button>
+                      ${aStatus ? `<span style="font-size:9px;font-weight:700;padding:2px 7px;border-radius:10px;${aStatus==='Accepted'?'background:#dcfce7;color:#15803d;border:1px solid #6ee7b7;':'background:#fee2e2;color:#dc2626;border:1px solid #fca5a5;'}">${aStatus}</span>` : ''}
+                    </div>
+                  </td>
+                </tr>`;
+              }).join('')}
+            </tbody>
+          </table>` : '<div style="padding:12px 20px;font-size:12px;color:#9ca3af;font-style:italic;">No action items.</div>'}
+        </div>
       </div>
 
-      <!-- Status + Meta fields — disabled by default -->
-      <div class="cl-eye-fields-row">
-        <div class="cl-eye-field">
-          <label class="cl-eye-field-label">Status</label>
-          <select class="cl-eye-select cl-eye-status-select cl-eye-disabled" id="cl-obl-eye-status-${uid}" disabled>
-            <option value="">— Select —</option>
-            <option ${currentStatus === 'Accepted' ? 'selected' : ''}>Accepted</option>
-            <option ${currentStatus === 'Under Review' ? 'selected' : ''}>Under Review</option>
-            <option ${currentStatus === 'Rejected' ? 'selected' : ''}>Rejected</option>
-          </select>
+      <!-- EXTRACTED CLAUSE DESCRIPTION -->
+      <div style="border-bottom:1px solid #bbf7d0;background:#f0fdf4;">
+        <div style="padding:12px 20px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;" onclick="var el=document.getElementById('cl-obl-clause-${uid}');el.style.display=el.style.display==='none'?'block':'none';this.querySelector('.cl-macc-arr').textContent=el.style.display==='none'?'▶':'▼';">
+          <div style="font-size:10px;font-weight:800;color:#15803d;text-transform:uppercase;letter-spacing:.08em;display:flex;align-items:center;gap:6px;">
+            <span style="width:3px;height:14px;background:#22c55e;border-radius:2px;display:inline-block;"></span>
+            <span class="cl-macc-arr">▶</span> Extracted Clause Description
+          </div>
         </div>
-        <div class="cl-eye-field">
-          <label class="cl-eye-field-label">Due Date</label>
-          <input class="cl-eye-input cl-eye-disabled" id="cl-obl-eye-due-${uid}" value="${m.dueDate}" disabled/>
-        </div>
-        <div class="cl-eye-field">
-          <label class="cl-eye-field-label">Section</label>
-          <input class="cl-eye-input cl-eye-disabled" value="${m.section}" disabled/>
-        </div>
-        <div class="cl-eye-field">
-          <label class="cl-eye-field-label">Category</label>
-          <input class="cl-eye-input cl-eye-disabled" value="${m.category}" disabled/>
-        </div>
-        <div class="cl-eye-field">
-          <label class="cl-eye-field-label">Frequency</label>
-          <input class="cl-eye-input cl-eye-disabled" value="${m.frequency}" disabled/>
+        <div id="cl-obl-clause-${uid}" style="display:none;padding:0 20px 14px;">
+          <div style="background:#fff;border:1px solid #bbf7d0;border-radius:8px;padding:12px 14px;">
+            <div style="font-size:10px;font-weight:700;color:#15803d;text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px;">Clause Text</div>
+            <div style="font-size:13px;color:#1f2937;line-height:1.7;">${cl.text || 'The entity shall ensure compliance with all reporting requirements as specified under the relevant circular.'}</div>
+          </div>
         </div>
       </div>
 
-      <!-- Evidence Table -->
-      <div class="cl-eye-section">
-        <div class="cl-eye-sec-label">Evidence Required</div>
-        <table class="cl-ev-table" style="border:1px solid var(--cl-border-lt);border-radius:8px;overflow:hidden;">
-          <thead><tr>
-            <th class="cl-ev-th" style="width:36px;">#</th>
-            <th class="cl-ev-th">Action</th>
-            <th class="cl-ev-th">Evidence Needed</th>
-            <th class="cl-ev-th" style="width:110px;">Status</th>
-          </tr></thead>
-          <tbody>
-            ${mapped.map((m2, i) => `
-            <tr class="cl-ev-tr">
-              <td class="cl-ev-td cl-ev-td-num">${i + 1}</td>
-              <td class="cl-ev-td" style="font-size:12px;">${m2.action}</td>
-              <td class="cl-ev-td">
-                <div class="cl-ev-doc-name">${m2.ev.icon} ${m2.ev.name}</div>
-                <div class="cl-ev-doc-sub">${m2.ev.type} · ${m2.ev.source}</div>
-                <div class="cl-ev-doc-needed">${m2.ev.needed}</div>
-              </td>
-              <td class="cl-ev-td" style="text-align:center;">
-                <span class="cl-ev-badge ${m2.ev.status === 'Required' ? 'cl-ev-badge-req' : 'cl-ev-badge-rec'}">${m2.ev.status}</span>
-              </td>
-            </tr>`).join('')}
-          </tbody>
-        </table>
+      <!-- REGULATORY DETAILS -->
+      <div style="border-bottom:1px solid #e9d5ff;background:#faf5ff;">
+        <div style="padding:12px 20px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;" onclick="var el=document.getElementById('cl-obl-reg-${uid}');el.style.display=el.style.display==='none'?'block':'none';this.querySelector('.cl-macc-arr').textContent=el.style.display==='none'?'▶':'▼';">
+          <div style="font-size:10px;font-weight:800;color:#7c3aed;text-transform:uppercase;letter-spacing:.08em;display:flex;align-items:center;gap:6px;">
+            <span style="width:3px;height:14px;background:#7c3aed;border-radius:2px;display:inline-block;"></span>
+            <span class="cl-macc-arr">▼</span> Regulatory Details
+          </div>
+        </div>
+        <div id="cl-obl-reg-${uid}" style="display:block;padding:0 20px 14px;">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+            ${_clOblDetailField('Regulatory Body', 'RBI', '')}
+            ${_clOblDetailField('Legislative Area', m.category, '')}
+            ${_clOblDetailField('Section', m.section, '')}
+            ${_clOblDetailField('Sub-Section', m.subset, '')}
+          </div>
+        </div>
+      </div>
+
+      <!-- EVIDENCE LIST -->
+      <div style="background:#fffbeb;">
+        <div style="padding:12px 20px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;" onclick="var el=document.getElementById('cl-obl-ev-${uid}');el.style.display=el.style.display==='none'?'block':'none';this.querySelector('.cl-macc-arr').textContent=el.style.display==='none'?'▶':'▼';">
+          <div style="font-size:10px;font-weight:800;color:#b45309;text-transform:uppercase;letter-spacing:.08em;display:flex;align-items:center;gap:6px;">
+            <span style="width:3px;height:14px;background:#f59e0b;border-radius:2px;display:inline-block;"></span>
+            <span class="cl-macc-arr">▶</span> Evidence Required
+          </div>
+          <span style="background:#fef9c3;color:#92400e;padding:2px 9px;border-radius:10px;font-size:9px;font-weight:700;border:1px solid #fde68a;">💡 AI Suggested</span>
+        </div>
+        <div id="cl-obl-ev-${uid}" style="display:none;padding:0 20px 16px;">
+          <table style="width:100%;border-collapse:collapse;font-size:12px;border:1px solid #e5e7eb;border-radius:8px;overflow:hidden;">
+            <thead><tr style="background:#f3f4f6;border-bottom:2px solid #e5e7eb;">
+              <th style="padding:8px 12px;text-align:left;font-weight:700;color:#374151;">Action</th>
+              <th style="padding:8px 12px;text-align:left;font-weight:700;color:#374151;">Evidence Needed</th>
+              <th style="padding:8px 12px;text-align:center;width:110px;font-weight:700;color:#374151;">Status</th>
+            </tr></thead>
+            <tbody>
+              ${actList.map((a, ai) => {
+                const ev = EV[ai % EV.length];
+                return `<tr style="border-bottom:1px solid #f3f4f6;">
+                  <td style="padding:9px 12px;font-size:11px;color:#374151;">${a}</td>
+                  <td style="padding:9px 12px;">
+                    <div style="font-size:12px;font-weight:600;color:#1f2937;">${ev.icon} ${ev.name}</div>
+                    <div style="font-size:11px;color:#6b7280;">${ev.type} · ${ev.source}</div>
+                    <div style="font-size:11px;color:#374151;margin-top:2px;">${ev.needed}</div>
+                  </td>
+                  <td style="padding:9px 12px;text-align:center;"><span style="padding:3px 9px;border-radius:10px;font-size:10px;font-weight:700;${ev.status==='Required'?'background:#fee2e2;color:#dc2626;':'background:#fef3c7;color:#b45309;'}">${ev.status}</span></td>
+                </tr>`;
+              }).join('')}
+            </tbody>
+          </table>
+          <div style="font-size:11px;color:#6b7280;margin-top:8px;">💡 Evidence suggestions are AI-generated based on obligation type and regulatory context.</div>
+        </div>
       </div>
 
     </div>
+
     <div class="cl-eye-foot">
-      <span class="cl-eye-foot-note">Edit obligation details and save to session.</span>
+      <span class="cl-eye-foot-note" id="cl-obl-footnote-${uid}">Click ⋮ Edit to modify fields.</span>
+      <button class="cl-eye-cancel-btn" onclick="document.getElementById('cl-obl-eye-modal').remove()">Close</button>
+    </div>
+  </div>`;
+
+  /* close dots on outside click */
+  modal.addEventListener('click', e => {
+    document.getElementById(`cl-obl-dots-${uid}`)?.classList.remove('open');
+    const menu = document.querySelector(`#cl-obl-dots-${uid} .cl-obl-dots-menu`);
+    if (menu) menu.style.display = 'none';
+    if (e.target === modal) modal.remove();
+  });
+  document.body.appendChild(modal);
+
+  /* wire dots menu display */
+  const dotsWrapObl = document.getElementById(`cl-obl-dots-${uid}`);
+  const dotsMenuObl = document.getElementById(`cl-obl-dots-menu-${uid}`);
+  if (dotsWrapObl && dotsMenuObl) {
+    new MutationObserver(() => {
+      dotsMenuObl.style.display = dotsWrapObl.classList.contains('cl-open') ? 'block' : 'none';
+    }).observe(dotsWrapObl, {attributes:true, attributeFilter:['class']});
+  }
+};
+
+/* Helper: detail field */
+window._clOblDetailField = function(label, value, id, clickable) {
+  return `<div style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:6px;padding:10px 12px;"${id ? ` id="${id}"` : ''}>
+    <div style="font-size:10px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px;">${label}</div>
+    <div style="font-size:12px;font-weight:600;color:#1f2937;">${value}</div>
+  </div>`;
+};
+
+/* Set obligation status with cascade to actions */
+window._clSetOblStatus = function(uid, status) {
+  if (!window._CL_OBL_STATUS) window._CL_OBL_STATUS = {};
+  window._CL_OBL_STATUS[uid] = status;
+  if (status === 'Accepted') {
+    if (!window._CL_ACT_STATUS) window._CL_ACT_STATUS = {};
+    const parts = uid.split('-');
+    const clauseId = parts.slice(0, -1).join('-');
+    const allClauses = window._CL_ACTIVE_SECTION_CLAUSES || [];
+    const cl = allClauses.find(c => c.id === clauseId);
+    if (cl) {
+      const actRaw = cl.actionables || [];
+      const actArr = Array.isArray(actRaw) ? actRaw : typeof actRaw === 'string' ? actRaw.split(';').map(a=>a.trim()).filter(Boolean) : [];
+      const count = actArr.length || 4;
+      for (let i = 0; i < count; i++) window._CL_ACT_STATUS[`${uid}-${i}`] = 'Accepted';
+    }
+  }
+  /* re-open modal to reflect new state */
+  const clauseId2 = uid.split('-').slice(0,-1).join('-');
+  const oblIdx2 = parseInt(uid.split('-').pop());
+  document.getElementById('cl-obl-eye-modal')?.remove();
+  setTimeout(() => clOpenOblEyeModal(uid, clauseId2, oblIdx2), 50);
+  showToast(`Obligation ${status.toLowerCase()}.`, 'success');
+};
+
+/* Set individual action status */
+window._clSetActStatus = function(uid, actIdx, status, btn) {
+  if (!window._CL_ACT_STATUS) window._CL_ACT_STATUS = {};
+  window._CL_ACT_STATUS[`${uid}-${actIdx}`] = status;
+  /* update both buttons in the row */
+  const row = btn.closest('tr');
+  if (row) {
+    const btns = row.querySelectorAll('button');
+    btns.forEach(b => {
+      const isAcc = b.textContent.trim() === '✓';
+      const isRej = b.textContent.trim() === '✗';
+      if (isAcc) {
+        const active = status === 'Accepted';
+        b.style.border = `1px solid ${active ? '#6ee7b7' : '#e5e7eb'}`;
+        b.style.background = active ? '#dcfce7' : '#f9fafb';
+        b.style.color = active ? '#15803d' : '#6b7280';
+      }
+      if (isRej) {
+        const active = status === 'Rejected';
+        b.style.border = `1px solid ${active ? '#fca5a5' : '#e5e7eb'}`;
+        b.style.background = active ? '#fee2e2' : '#f9fafb';
+        b.style.color = active ? '#dc2626' : '#6b7280';
+      }
+    });
+  }
+  showToast(`Action ${status.toLowerCase()}.`, 'success');
+};
+
+/* Applicability toggle */
+window._clToggleOblApplicability = function(uid) {
+  if (!window._CL_OBL_APPLICABILITY) window._CL_OBL_APPLICABILITY = {};
+  window._CL_OBL_APPLICABILITY[uid] = !window._CL_OBL_APPLICABILITY[uid];
+  showToast('Applicability updated.', 'success');
+  /* re-open to reflect */
+  const clauseId = uid.split('-').slice(0,-1).join('-');
+  const oblIdx = parseInt(uid.split('-').pop());
+  document.getElementById('cl-obl-eye-modal')?.remove();
+  setTimeout(() => clOpenOblEyeModal(uid, clauseId, oblIdx), 50);
+};
+
+/* Applicability reason popup */
+window._clShowApplicabilityReason = function(uid, oblId) {
+  var ex = document.getElementById('cl-applic-modal'); if(ex) ex.remove();
+  const isApp = !window._CL_OBL_APPLICABILITY || window._CL_OBL_APPLICABILITY[uid] !== false;
+  var overlay = document.createElement('div');
+  overlay.className = 'cl-eye-overlay'; overlay.id = 'cl-applic-modal';
+  overlay.innerHTML = `
+  <div class="cl-eye-box" style="max-width:480px;" onclick="event.stopPropagation()">
+    <div class="cl-eye-head">
+      <div class="cl-eye-head-left"><span class="cl-eye-id-chip" style="background:#7c3aed;">${oblId}</span><span class="cl-eye-head-title">Applicability</span></div>
+      <button class="cl-eye-close" onclick="document.getElementById('cl-applic-modal').remove()">✕</button>
+    </div>
+    <div class="cl-eye-body" style="padding:20px;display:flex;flex-direction:column;gap:12px;">
+      <div style="display:flex;align-items:center;gap:10px;padding:12px 16px;background:${isApp?'#f0fdf4':'#f9fafb'};border:1px solid ${isApp?'#6ee7b7':'#e5e7eb'};border-radius:8px;">
+        <span style="font-size:18px;">${isApp?'✓':'—'}</span>
+        <div>
+          <div style="font-size:13px;font-weight:700;color:${isApp?'#15803d':'#6b7280'};">${isApp?'Applicable':'Not Applicable'}</div>
+          <div style="font-size:11px;color:#6b7280;margin-top:2px;">${isApp?'This obligation applies to your entity based on the criteria below.':'This obligation has been marked as not applicable.'}</div>
+        </div>
+      </div>
+      ${isApp ? `
+      <div style="font-size:12px;font-weight:700;color:#374151;margin-bottom:4px;">Why is this applicable?</div>
+      <ul style="margin:0;padding:0 0 0 16px;display:flex;flex-direction:column;gap:6px;">
+        <li style="font-size:12px;color:#374151;line-height:1.5;">Your entity type matches the regulated category covered by this circular.</li>
+        <li style="font-size:12px;color:#374151;line-height:1.5;">The obligation falls within the regulatory scope applicable to your licence type.</li>
+        <li style="font-size:12px;color:#374151;line-height:1.5;">The effective date of this obligation is within your current compliance period.</li>
+      </ul>
+      <div style="background:#fffbeb;border:1px solid #fde68a;border-radius:6px;padding:10px 12px;font-size:11px;color:#92400e;">💡 AI-determined based on entity profile, circular scope, and regulatory metadata.</div>` : ''}
       <div style="display:flex;gap:8px;">
-        <button class="cl-eye-cancel-btn" onclick="document.getElementById('cl-obl-eye-modal').remove()">Cancel</button>
-        <button class="cl-eye-save-btn" onclick="clSaveOblEye('${uid}',${oblIdx})" style="opacity:.4;pointer-events:none;">💾 Save</button>
+        <button onclick="_clToggleOblApplicability('${uid}');document.getElementById('cl-applic-modal').remove()" style="flex:1;padding:9px;border:1px solid #e5e7eb;border-radius:6px;background:#f9fafb;font-size:12px;font-weight:600;cursor:pointer;">${isApp?'Mark Not Applicable':'Mark Applicable'}</button>
+        <button class="cl-eye-regen-btn" onclick="document.getElementById('cl-applic-modal').remove();_clOpenCtxModal('applic_${uid}','Applicability')" style="flex:1;padding:9px;">✦ Regenerate with AI</button>
       </div>
     </div>
   </div>`;
-  modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
-  document.body.appendChild(modal);
+  document.body.appendChild(overlay);
+  overlay.addEventListener('click', e => { if(e.target===overlay) overlay.remove(); });
+};
+
+/* Mapped Obligations popup */
+window._clOpenMappedObligations = function(oblId) {
+  var ex = document.getElementById('cl-mapped-obl-modal'); if(ex) ex.remove();
+  const mockMapped = [
+    { clauseId:'CL-2024-01', clauseName:'Quarterly Regulatory Reporting — submission of financial and compliance returns to the designated regulatory authority.', tags:['Reporting','KYC'], status:'Assigned' },
+    { clauseId:'CL-2024-02', clauseName:'KYC Maintenance — periodic update and verification of Know Your Customer records across all active customer accounts.', tags:['KYC','AML'], status:'Assigned' },
+    { clauseId:'CL-2024-03', clauseName:'Risk Assessment Review — conduct structured internal risk assessment covering operational and compliance risks.', tags:['Risk'], status:'Unassigned' },
+  ];
+  var overlay = document.createElement('div');
+  overlay.className = 'cl-eye-overlay'; overlay.id = 'cl-mapped-obl-modal';
+  overlay.innerHTML = `
+  <div class="cl-eye-box cl-eye-box-wide" style="max-width:720px;" onclick="event.stopPropagation()">
+    <div class="cl-eye-head">
+      <div class="cl-eye-head-left">
+        <div style="font-size:9px;font-weight:800;color:#6b7280;text-transform:uppercase;letter-spacing:.06em;">Mapped Clauses</div>
+        <div style="font-size:14px;font-weight:700;color:#1f2937;">${oblId}</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <button class="cl-eye-regen-btn">+ Map More Clauses</button>
+        <button class="cl-eye-close" onclick="document.getElementById('cl-mapped-obl-modal').remove()">✕</button>
+      </div>
+    </div>
+    <div class="cl-eye-body" style="padding:0;">
+      <div style="padding:10px 20px;background:#fffbeb;border-bottom:1px solid #fde68a;font-size:12px;color:#92400e;">⚠ This obligation is mapped to the following clauses.</div>
+      <table style="width:100%;border-collapse:collapse;font-size:12px;">
+        <thead><tr style="background:#f3f4f6;border-bottom:2px solid #e5e7eb;">
+          <th style="padding:10px 14px;text-align:left;font-weight:700;width:32px;"><input type="checkbox" style="accent-color:#3b82f6;"/></th>
+          <th style="padding:10px 14px;text-align:left;font-weight:700;">Clause ID</th>
+          <th style="padding:10px 14px;text-align:left;font-weight:700;">Clause Name</th>
+          <th style="padding:10px 14px;text-align:left;font-weight:700;">Tags</th>
+          <th style="padding:10px 14px;text-align:left;font-weight:700;">Status</th>
+          <th style="padding:10px 14px;text-align:left;font-weight:700;">Action</th>
+        </tr></thead>
+        <tbody>
+          ${mockMapped.map(m => `
+          <tr style="border-bottom:1px solid #f3f4f6;">
+            <td style="padding:10px 14px;"><input type="checkbox" style="accent-color:#3b82f6;"/></td>
+            <td style="padding:10px 14px;font-family:monospace;font-size:11px;font-weight:700;color:#7c3aed;">${m.clauseId}</td>
+            <td style="padding:10px 14px;font-size:11px;color:#374151;max-width:240px;line-height:1.45;">${m.clauseName}</td>
+            <td style="padding:10px 14px;">${m.tags.map(t=>`<span style="background:#e0f2fe;color:#0369a1;padding:2px 6px;border-radius:4px;font-size:10px;font-weight:600;margin-right:3px;">${t}</span>`).join('')}</td>
+            <td style="padding:10px 14px;"><span style="padding:3px 9px;border-radius:10px;font-size:10px;font-weight:700;${m.status==='Assigned'?'background:#dcfce7;color:#15803d;':'background:#fef3c7;color:#b45309;'}">${m.status}</span></td>
+            <td style="padding:10px 14px;"><button onclick="this.closest('tr').style.opacity='0.4';showToast('Unmapped.','success')" style="padding:3px 9px;background:#fee2e2;border:1px solid #fca5a5;border-radius:4px;color:#dc2626;font-size:11px;font-weight:600;cursor:pointer;">Unmap</button></td>
+          </tr>`).join('')}
+        </tbody>
+      </table>
+    </div>
+    <div class="cl-eye-foot" style="justify-content:space-between;">
+      <button style="padding:6px 14px;background:#fee2e2;border:1px solid #fca5a5;border-radius:6px;color:#dc2626;font-size:12px;font-weight:600;cursor:pointer;">Unmap Selected</button>
+      <button class="cl-eye-cancel-btn" onclick="document.getElementById('cl-mapped-obl-modal').remove()">Close</button>
+    </div>
+  </div>`;
+  document.body.appendChild(overlay);
+  overlay.addEventListener('click', e => { if(e.target===overlay) overlay.remove(); });
+};
+
+
+
+
+
+window._clOpenMappedActions = function(oblId) {
+  var ex = document.getElementById('cl-mapped-act-modal'); if(ex) ex.remove();
+  const mockMapped = [
+    { actId:'ACT-001', actName:'Submit quarterly compliance certificate to regulator within prescribed timelines.', dept:'Compliance', status:'Assigned' },
+    { actId:'ACT-002', actName:'Update internal compliance tracking system with obligation completion status.', dept:'Risk', status:'Assigned' },
+    { actId:'ACT-003', actName:'Obtain Board sign-off on compliance report for the reporting period.', dept:'Legal', status:'Unassigned' },
+  ];
+  var overlay = document.createElement('div');
+  overlay.className = 'cl-eye-overlay'; overlay.id = 'cl-mapped-act-modal';
+  overlay.innerHTML = `
+  <div class="cl-eye-box cl-eye-box-wide" style="max-width:720px;" onclick="event.stopPropagation()">
+    <div class="cl-eye-head">
+      <div class="cl-eye-head-left">
+        <div style="font-size:9px;font-weight:800;color:#6b7280;text-transform:uppercase;letter-spacing:.06em;">Mapped Actions</div>
+        <div style="font-size:14px;font-weight:700;color:#1f2937;">${oblId}</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <button class="cl-eye-regen-btn" onclick="_clAddActionPopup()">+ Add Action</button>
+        <button class="cl-eye-close" onclick="document.getElementById('cl-mapped-act-modal').remove()">✕</button>
+      </div>
+    </div>
+    <div class="cl-eye-body" style="padding:0;">
+      <table style="width:100%;border-collapse:collapse;font-size:12px;">
+        <thead><tr style="background:#f3f4f6;border-bottom:2px solid #e5e7eb;">
+          <th style="padding:10px 14px;text-align:left;font-weight:700;width:32px;"><input type="checkbox" style="accent-color:#3b82f6;"/></th>
+          <th style="padding:10px 14px;text-align:left;font-weight:700;">Action ID</th>
+          <th style="padding:10px 14px;text-align:left;font-weight:700;">Action Name</th>
+          <th style="padding:10px 14px;text-align:left;font-weight:700;">Dept</th>
+          <th style="padding:10px 14px;text-align:left;font-weight:700;">Status</th>
+          <th style="padding:10px 14px;text-align:left;font-weight:700;">Action</th>
+        </tr></thead>
+        <tbody>
+          ${mockMapped.map(m => `
+          <tr style="border-bottom:1px solid #f3f4f6;">
+            <td style="padding:10px 14px;"><input type="checkbox" style="accent-color:#3b82f6;"/></td>
+            <td style="padding:10px 14px;font-family:monospace;font-size:11px;font-weight:700;color:#2563eb;">${m.actId}</td>
+            <td style="padding:10px 14px;font-size:11px;color:#374151;max-width:240px;line-height:1.45;">${m.actName}</td>
+            <td style="padding:10px 14px;"><span style="background:#eff6ff;color:#2563eb;padding:2px 7px;border-radius:4px;font-size:10px;font-weight:600;">${m.dept}</span></td>
+            <td style="padding:10px 14px;"><span style="padding:3px 9px;border-radius:10px;font-size:10px;font-weight:700;${m.status==='Assigned'?'background:#dcfce7;color:#15803d;':'background:#fef3c7;color:#b45309;'}">${m.status}</span></td>
+            <td style="padding:10px 14px;"><button onclick="this.closest('tr').style.opacity='0.4';showToast('Unlinked.','success')" style="padding:3px 9px;background:#fee2e2;border:1px solid #fca5a5;border-radius:4px;color:#dc2626;font-size:11px;font-weight:600;cursor:pointer;">Unlink</button></td>
+          </tr>`).join('')}
+        </tbody>
+      </table>
+    </div>
+    <div class="cl-eye-foot" style="justify-content:space-between;">
+      <button style="padding:6px 14px;background:#fee2e2;border:1px solid #fca5a5;border-radius:6px;color:#dc2626;font-size:12px;font-weight:600;cursor:pointer;">Unlink Selected</button>
+      <button class="cl-eye-cancel-btn" onclick="document.getElementById('cl-mapped-act-modal').remove()">Close</button>
+    </div>
+  </div>`;
+  document.body.appendChild(overlay);
+  overlay.addEventListener('click', e => { if(e.target===overlay) overlay.remove(); });
 };
 
 window.clSaveOblEye = function (uid, oblIdx) {
@@ -920,103 +1831,297 @@ window.clOpenActionEyeModal = function (uid, actIdx, clauseId) {
   const actionsRaw = cl?.actionables || [];
   const actionsArray = Array.isArray(actionsRaw) ? actionsRaw
     : typeof actionsRaw === 'string' ? actionsRaw.split(';').map(a => a.trim()).filter(Boolean) : [];
-  const MOCK_ACTS = [
-    'Draft or update the compliance policy', 'Present policy to Board for formal approval',
-    'Distribute updated policy to all departments', 'Schedule annual review and assign policy owner',
-    'Identify all staff roles impacted', 'Design training module covering key requirements'
-  ];
+  const MOCK_ACTS = ['Draft or update the compliance policy','Present policy to Board for formal approval','Distribute updated policy to all departments','Schedule annual review and assign policy owner','Identify all staff roles impacted','Design training module covering key requirements'];
   const acts = actionsArray.length ? actionsArray : MOCK_ACTS;
   const action = acts[actIdx] || acts[0] || '';
   const m = _clObligMeta(actIdx);
   const currentStatus = window._CL_ACT_STATUS?.[`${uid}-${actIdx}`] || '';
+  const actId = `ACT-${clauseId}-${uid.split('-').pop()}-${actIdx+1}`;
+  const isApplicable = !window._CL_ACT_APPLICABILITY || window._CL_ACT_APPLICABILITY[`${uid}-${actIdx}`] !== false;
+  const actDept = window._CL_ACT_DEPT?.[`${uid}-${actIdx}`] || cl?.department || '';
+
+  const EV = [
+    { icon: '📋', name: 'Compliance Policy Document', type: 'Policy', source: 'Internal Repository', needed: 'Board-approved policy covering this compliance area, reviewed and signed off by senior management.', priority: 'Required' },
+    { icon: '🔍', name: 'Internal Audit Report', type: 'Audit Record', source: 'Internal Audit Dept', needed: 'Audit findings confirming that controls are designed adequately and operating effectively.', priority: 'Required' },
+    { icon: '🎓', name: 'Staff Training Completion Record', type: 'Training Record', source: 'HR System', needed: 'Completion records for all relevant staff showing training within the mandated timeline.', priority: 'Required' },
+    { icon: '💻', name: 'System Audit Trail / Access Log', type: 'System Log', source: 'IT Department', needed: 'System-generated logs demonstrating that automated controls are functioning as intended.', priority: 'Recommended' },
+    { icon: '🏛️', name: 'Board Resolution / Meeting Minutes', type: 'Board Record', source: 'Company Secretary', needed: 'Formal board-level approval documented in meeting minutes or a signed resolution.', priority: 'Required' },
+  ];
+  const ev = EV[actIdx % EV.length];
+
+  /* obligation details from parent */
+  const oblsRaw = cl?.obligations || cl?.obligation || null;
+  const oblsArr = Array.isArray(oblsRaw) ? oblsRaw : oblsRaw ? [oblsRaw] : [];
+  const parentOblText = oblsArr[parseInt(uid.split('-').pop())]
+    ? (typeof oblsArr[parseInt(uid.split('-').pop())] === 'string' ? oblsArr[parseInt(uid.split('-').pop())] : oblsArr[parseInt(uid.split('-').pop())]?.text || '')
+    : (oblsArr[0] ? (typeof oblsArr[0] === 'string' ? oblsArr[0] : oblsArr[0]?.text || '') : '');
 
   let modal = document.getElementById('cl-act-eye-modal');
   if (modal) modal.remove();
   modal = document.createElement('div');
   modal.id = 'cl-act-eye-modal';
   modal.className = 'cl-eye-overlay';
+
+  const sectionStyle = (bg, border) => `padding:16px 20px;border-bottom:1px solid ${border};background:${bg};`;
+  const fieldStyle = `background:#fff;border:1px solid #e5e7eb;border-radius:6px;padding:10px 12px;`;
+  const labelStyle = `font-size:10px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:4px;`;
+  const inputStyle = `width:100%;padding:7px 10px;border:1.5px solid #e5e7eb;border-radius:6px;font-size:12px;font-family:inherit;outline:none;color:#1f2937;background:#fff;`;
+
   modal.innerHTML = `
-  <div class="cl-eye-box" onclick="event.stopPropagation()">
-    <div class="cl-eye-head">
-      <div class="cl-eye-head-left">
-        <span class="cl-eye-id-chip">${clauseId}</span>
-        <span class="cl-eye-head-title">Action ${actIdx + 1} Details</span>
+  <div class="cl-eye-box cl-eye-box-wide" style="max-width:700px;max-height:92vh;" onclick="event.stopPropagation()">
+
+    <!-- ── CARD HEADER ── -->
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;padding:16px 20px;border-bottom:2px solid #e0e7ff;background:linear-gradient(135deg,#eff6ff 0%,#f5f3ff 100%);flex-shrink:0;">
+      <div style="display:flex;flex-direction:column;gap:6px;flex:1;min-width:0;">
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+          <span style="font-family:monospace;font-size:11px;font-weight:700;color:#fff;background:#2563eb;padding:3px 10px;border-radius:5px;">${actId}</span>
+          <span onclick="_clShowActApplicabilityReason('${uid}',${actIdx},'${actId}')" style="font-size:9px;font-weight:700;padding:2px 9px;border-radius:10px;cursor:pointer;${isApplicable?'background:#dcfce7;color:#15803d;border:1px solid #6ee7b7;':'background:#f3f4f6;color:#6b7280;border:1px solid #d1d5db;'}">${isApplicable?'✓ Applicable':'— Not Applicable'}</span>
+        </div>
+        <div style="font-size:13px;font-weight:600;color:#1e2433;line-height:1.45;max-width:500px;">${action}</div>
       </div>
-      <div class="cl-eye-head-right">
-        <button class="cl-eye-regen-btn" onclick="_clOpenCtxModal('action_${uid}_${actIdx}','Action ${actIdx + 1}')">✦ Regenerate</button>
+      <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;">
+        <!-- THREE DOTS -->
+        <div style="position:relative;" id="cl-act-dots-${uid}-${actIdx}">
+          <button onclick="event.stopPropagation();document.getElementById('cl-act-dots-${uid}-${actIdx}').classList.toggle('cl-open')" style="width:30px;height:30px;border-radius:8px;border:1px solid #d1d5db;background:#fff;cursor:pointer;font-size:16px;display:inline-flex;align-items:center;justify-content:center;color:#6b7280;">⋮</button>
+          <div id="cl-act-dots-menu-${uid}-${actIdx}" style="display:none;position:absolute;right:0;top:calc(100% + 4px);background:#fff;border:1px solid #e5e7eb;border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.15);min-width:190px;z-index:700;overflow:hidden;">
+            <div style="padding:5px 12px;font-size:9px;font-weight:800;color:#9ca3af;text-transform:uppercase;letter-spacing:.06em;border-bottom:1px solid #f3f4f6;">Options</div>
+            <button onclick="event.stopPropagation();document.getElementById('cl-act-dots-${uid}-${actIdx}').classList.remove('cl-open');clActEnableEdit('${uid}',${actIdx})" style="display:flex;align-items:center;gap:9px;width:100%;padding:10px 14px;background:none;border:none;text-align:left;font-size:12px;font-weight:600;color:#374151;cursor:pointer;" onmouseover="this.style.background='#f9fafb'" onmouseout="this.style.background='none'"><span>✎</span> Edit Fields</button>
+            <button onclick="event.stopPropagation();document.getElementById('cl-act-dots-${uid}-${actIdx}').classList.remove('cl-open');_clOpenCtxModal('action_${uid}_${actIdx}','Action ${actIdx+1}')" style="display:flex;align-items:center;gap:9px;width:100%;padding:10px 14px;background:none;border:none;text-align:left;font-size:12px;font-weight:600;color:#7c3aed;cursor:pointer;" onmouseover="this.style.background='#f5f3ff'" onmouseout="this.style.background='none'"><span>✦</span> Regenerate with AI</button>
+            <button onclick="event.stopPropagation();document.getElementById('cl-act-dots-${uid}-${actIdx}').classList.remove('cl-open');_clToggleActApplicability('${uid}',${actIdx})" style="display:flex;align-items:center;gap:9px;width:100%;padding:10px 14px;background:none;border:none;text-align:left;font-size:12px;font-weight:600;color:#374151;cursor:pointer;" onmouseover="this.style.background='#f9fafb'" onmouseout="this.style.background='none'"><span>◎</span> Toggle Applicability</button>
+          </div>
+        </div>
         <button class="cl-eye-close" onclick="document.getElementById('cl-act-eye-modal').remove()">✕</button>
       </div>
     </div>
-    <div class="cl-eye-body">
 
-      <!-- Action Text — disabled by default, pen enables edit -->
-      <div class="cl-eye-section">
-        <div class="cl-eye-sec-label" style="display:flex;align-items:center;justify-content:space-between;">
-          <span>Action Text</span>
-          <button class="cl-eye-pen-btn" id="cl-act-pen-${uid}-${actIdx}" onclick="clActEnableEdit('${uid}',${actIdx})" title="Edit">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-            Edit
-          </button>
+    <!-- ── SCROLLABLE BODY ── -->
+    <div style="flex:1;overflow-y:auto;max-height:75vh;">
+
+      <!-- ACTION DETAILS SECTION -->
+      <div style="${sectionStyle('#fafbff','#dbeafe')}">
+        <div style="font-size:10px;font-weight:800;color:#2563eb;text-transform:uppercase;letter-spacing:.08em;margin-bottom:12px;display:flex;align-items:center;gap:6px;">
+          <span style="width:3px;height:14px;background:#2563eb;border-radius:2px;display:inline-block;"></span>
+          Action Details
         </div>
-        <textarea class="cl-eye-textarea cl-eye-disabled" id="cl-act-text-${uid}-${actIdx}" rows="3" disabled>${action}</textarea>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:10px;">
+          <div style="${fieldStyle}">
+            <label style="${labelStyle}">Internal Due Date</label>
+            <input id="cl-act-intdue-${uid}-${actIdx}" class="cl-eye-disabled" value="2025-02-12" disabled type="date" style="${inputStyle}background:#f9fafb;"/>
+          </div>
+          <div style="${fieldStyle}">
+            <label style="${labelStyle}">External Due Date</label>
+            <input id="cl-act-extdue-${uid}-${actIdx}" class="cl-eye-disabled" disabled value="2025-03-12" type="date" style="${inputStyle}background:#f9fafb;"/>
+          </div>
+          <div style="${fieldStyle}">
+            <label style="${labelStyle}">Frequency</label>
+            <input id="cl-act-freq-inp-${uid}-${actIdx}" class="cl-eye-disabled" disabled value="${m.frequency}" style="${inputStyle}background:#f9fafb;"/>
+          </div>
+          <div style="${fieldStyle}">
+            <label style="${labelStyle}">Section</label>
+            <input id="cl-act-sec-${uid}-${actIdx}" class="cl-eye-disabled" disabled value="${m.section}" style="${inputStyle}background:#f9fafb;"/>
+          </div>
+          <div style="${fieldStyle}">
+            <label style="${labelStyle}">Department</label>
+            <div style="display:flex;gap:6px;align-items:center;">
+              <input id="cl-act-dept-inp-${uid}-${actIdx}" class="cl-eye-disabled" disabled value="${actDept}" placeholder="Click to select" style="${inputStyle}background:#f9fafb;flex:1;" readonly/>
+              <button onclick="_clPickActDept('${uid}-${actIdx}')" style="padding:5px 9px;background:#eff6ff;border:1px solid #bfdbfe;border-radius:5px;font-size:11px;font-weight:700;color:#2563eb;cursor:pointer;white-space:nowrap;">+ Dept</button>
+            </div>
+          </div>
+          <div style="${fieldStyle}">
+            <label style="${labelStyle}">Compliance Status</label>
+            <select onchange="_clSetActStatusBtn('${uid}',${actIdx},this.value)" style="width:100%;padding:7px 10px;border:1.5px solid ${currentStatus==='Accepted'?'#6ee7b7':currentStatus==='Rejected'?'#fca5a5':'#e5e7eb'};border-radius:6px;font-size:12px;font-weight:700;background:${currentStatus==='Accepted'?'#dcfce7':currentStatus==='Rejected'?'#fee2e2':'#fff'};color:${currentStatus==='Accepted'?'#15803d':currentStatus==='Rejected'?'#dc2626':'#6b7280'};cursor:pointer;outline:none;" id="cl-act-status-sel-${uid}-${actIdx}">
+              <option value="" ${!currentStatus?'selected':''}>— Set Status —</option>
+              <option value="Accepted" ${currentStatus==='Accepted'?'selected':''}>✓ Accepted</option>
+              <option value="Under Review" ${currentStatus==='Under Review'?'selected':''}>⟳ Under Review</option>
+              <option value="Rejected" ${currentStatus==='Rejected'?'selected':''}>✗ Rejected</option>
+            </select>
+          </div>
+        </div>
+       
       </div>
 
-      <!-- Meta fields — all disabled by default -->
-      <div class="cl-eye-fields-row">
-        <div class="cl-eye-field">
-          <label class="cl-eye-field-label">Status</label>
-          <select class="cl-eye-select cl-eye-status-select cl-eye-disabled" id="cl-act-status-${uid}-${actIdx}" disabled>
-            <option value="">— Select —</option>
-            <option ${currentStatus === 'Accepted' ? 'selected' : ''}>Accepted</option>
-            <option ${currentStatus === 'Under Review' ? 'selected' : ''}>Under Review</option>
-            <option ${currentStatus === 'Rejected' ? 'selected' : ''}>Rejected</option>
-          </select>
+      <!-- OBLIGATION DETAILS SECTION — collapsible accordion -->
+      <div style="border-bottom:1px solid #fde68a;background:#fefce8;">
+        <div onclick="var el=document.getElementById('cl-act-obl-body-${uid}-${actIdx}');el.style.display=el.style.display==='none'?'block':'none';this.querySelector('.cl-macc-arr').textContent=el.style.display==='none'?'▶':'▼';" style="cursor:pointer;display:flex;align-items:center;justify-content:space-between;padding:12px 20px;">
+          <div style="font-size:10px;font-weight:800;color:#b45309;text-transform:uppercase;letter-spacing:.08em;display:flex;align-items:center;gap:6px;">
+            <span style="width:3px;height:14px;background:#f59e0b;border-radius:2px;display:inline-block;"></span>
+            <span class="cl-macc-arr">▶</span> Parent Obligation Details
+          </div>
         </div>
-        <div class="cl-eye-field">
-          <label class="cl-eye-field-label">Due Date</label>
-          <input class="cl-eye-input cl-eye-disabled" id="cl-act-due-${uid}-${actIdx}" value="${m.dueDate}" disabled/>
-        </div>
-        <div class="cl-eye-field">
-          <label class="cl-eye-field-label">Section</label>
-          <input class="cl-eye-input cl-eye-disabled" value="${m.section}" disabled/>
-        </div>
-        <div class="cl-eye-field">
-          <label class="cl-eye-field-label">Category</label>
-          <input class="cl-eye-input cl-eye-disabled" value="${m.category}" disabled/>
-        </div>
-        <div class="cl-eye-field">
-          <label class="cl-eye-field-label">Frequency</label>
-          <input class="cl-eye-input cl-eye-disabled" value="${m.frequency}" disabled/>
+        <div id="cl-act-obl-body-${uid}-${actIdx}" style="display:none;padding:0 20px 14px;">
+          <div style="background:#fff;border:1px solid #fde68a;border-radius:8px;padding:12px 14px;">
+            <div style="font-size:11px;font-weight:600;color:#92400e;line-height:1.6;">${parentOblText || 'Obligation details from parent clause.'}</div>
+          </div>
         </div>
       </div>
 
+      <!-- EXTRACTED CLAUSE DESCRIPTION -->
+      <div style="${sectionStyle('#f0fdf4','#bbf7d0')}">
+        <div onclick="var el=document.getElementById('cl-act-clause-body-${uid}-${actIdx}');el.style.display=el.style.display==='none'?'block':'none';this.querySelector('.cl-macc-arr').textContent=el.style.display==='none'?'▶':'▼';" style="cursor:pointer;display:flex;align-items:center;justify-content:space-between;">
+          <div style="font-size:10px;font-weight:800;color:#15803d;text-transform:uppercase;letter-spacing:.08em;display:flex;align-items:center;gap:6px;">
+            <span style="width:3px;height:14px;background:#22c55e;border-radius:2px;display:inline-block;"></span>
+            <span class="cl-macc-arr">▶</span> Extracted Clause Description
+          </div>
+        </div>
+        <div id="cl-act-clause-body-${uid}-${actIdx}" style="display:none;margin-top:12px;">
+          <div style="background:#fff;border:1px solid #bbf7d0;border-radius:8px;padding:12px 14px;">
+            <div style="font-size:10px;font-weight:700;color:#15803d;text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px;">Clause Text</div>
+            <div style="font-size:13px;color:#1f2937;line-height:1.7;">${cl?.text || 'The entity shall ensure compliance with all reporting requirements as specified under the relevant circular.'}</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- REGULATORY DETAILS -->
+      <div style="${sectionStyle('#faf5ff','#e9d5ff')}">
+        <div onclick="var el=document.getElementById('cl-act-reg-body-${uid}-${actIdx}');el.style.display=el.style.display==='none'?'block':'none';this.querySelector('.cl-macc-arr').textContent=el.style.display==='none'?'▶':'▼';" style="cursor:pointer;display:flex;align-items:center;justify-content:space-between;">
+          <div style="font-size:10px;font-weight:800;color:#7c3aed;text-transform:uppercase;letter-spacing:.08em;display:flex;align-items:center;gap:6px;">
+            <span style="width:3px;height:14px;background:#7c3aed;border-radius:2px;display:inline-block;"></span>
+            <span class="cl-macc-arr">▼</span> Regulatory Details
+          </div>
+        </div>
+        <div id="cl-act-reg-body-${uid}-${actIdx}" style="display:block;margin-top:12px;">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+            ${[
+              ['Regulatory Body','RBI'],
+              ['Category', m.category],
+              ['Section', m.section],
+              ['Sub-Section', m.subset],
+            ].map(([l,v]) => `<div style="background:#fff;border:1px solid #e9d5ff;border-radius:6px;padding:9px 12px;">
+              <div style="font-size:9px;font-weight:700;color:#7c3aed;text-transform:uppercase;letter-spacing:.05em;margin-bottom:3px;">${l}</div>
+              <div style="font-size:12px;font-weight:600;color:#1f2937;">${v}</div>
+            </div>`).join('')}
+          </div>
+        </div>
+      </div>
+
+      <!-- EVIDENCE SECTION — collapsed by default -->
+      <div style="border-bottom:1px solid #fde68a;background:#fffbeb;">
+        <div onclick="var el=document.getElementById('cl-act-ev-body-${uid}-${actIdx}');el.style.display=el.style.display==='none'?'block':'none';this.querySelector('.cl-macc-arr').textContent=el.style.display==='none'?'▶':'▼';" style="cursor:pointer;display:flex;align-items:center;justify-content:space-between;padding:12px 20px;">
+          <div style="font-size:10px;font-weight:800;color:#b45309;text-transform:uppercase;letter-spacing:.08em;display:flex;align-items:center;gap:6px;">
+            <span style="width:3px;height:14px;background:#f59e0b;border-radius:2px;display:inline-block;"></span>
+            <span class="cl-macc-arr">▶</span> Evidence Required
+          </div>
+          <span style="background:#fef9c3;color:#92400e;padding:2px 9px;border-radius:10px;font-size:9px;font-weight:700;border:1px solid #fde68a;">💡 AI Suggested</span>
+        </div>
+        <div id="cl-act-ev-body-${uid}-${actIdx}" style="display:none;padding:0 20px 16px;">
+        <div style="background:#fff;border:1px solid #fde68a;border-radius:10px;overflow:hidden;">
+          <div style="display:flex;align-items:flex-start;gap:12px;padding:14px 16px;border-bottom:1px solid #fef9c3;">
+            <span style="font-size:24px;flex-shrink:0;">${ev.icon}</span>
+            <div style="flex:1;">
+              <div style="font-size:13px;font-weight:700;color:#1f2937;margin-bottom:3px;">${ev.name}</div>
+              <div style="font-size:11px;color:#6b7280;margin-bottom:6px;">${ev.type} · ${ev.source}</div>
+              <div style="font-size:12px;color:#374151;line-height:1.6;background:#fffbeb;border:1px solid #fde68a;border-radius:6px;padding:9px 12px;">${ev.needed}</div>
+            </div>
+            <span style="padding:3px 9px;border-radius:10px;font-size:10px;font-weight:700;flex-shrink:0;${ev.priority==='Required'?'background:#fee2e2;color:#dc2626;':'background:#fef3c7;color:#b45309;'}">${ev.priority}</span>
+         </div>
+          <div style="padding:10px 16px;display:flex;align-items:center;justify-content:space-between;">
+            <span style="font-size:11px;color:#9ca3af;">AI-suggested based on action type and regulatory context</span>
+            <button onclick="_clOpenCtxModal('evidence_${uid}_${actIdx}','Evidence for Action ${actIdx+1}')" style="padding:4px 12px;background:#fffbeb;border:1px solid #fde68a;border-radius:6px;font-size:11px;font-weight:700;color:#b45309;cursor:pointer;">✦ Refine with AI</button>
+          </div>
+        </div>
+        </div><!-- close cl-act-ev-body -->
+      </div>
+
+    <div class="cl-eye-foot" style="border-top:2px solid #e5e7eb;">
+      <span style="font-size:11px;color:#9ca3af;" id="cl-act-footnote-${uid}-${actIdx}">Click ⋮ to edit or regenerate.</span>
+      <button class="cl-eye-cancel-btn" onclick="document.getElementById('cl-act-eye-modal').remove()">Close</button>
     </div>
-    <div class="cl-eye-foot">
-      <span class="cl-eye-foot-note" id="cl-act-footnote-${uid}-${actIdx}">Click ✎ Edit to modify fields.</span>
+  </div>`;
+
+  modal.addEventListener('click', e => {
+    const dotsWrap = document.getElementById(`cl-act-dots-${uid}-${actIdx}`);
+    if (dotsWrap && !dotsWrap.contains(e.target)) dotsWrap.classList.remove('cl-open');
+    if (e.target === modal) modal.remove();
+  });
+  document.body.appendChild(modal);
+
+  /* wire three-dots menu */
+  const actDotsWrap = document.getElementById(`cl-act-dots-${uid}-${actIdx}`);
+  const actDotsMenu = document.getElementById(`cl-act-dots-menu-${uid}-${actIdx}`);
+  if (actDotsWrap && actDotsMenu) {
+    new MutationObserver(() => {
+      actDotsMenu.style.display = actDotsWrap.classList.contains('cl-open') ? 'block' : 'none';
+    }).observe(actDotsWrap, {attributes:true, attributeFilter:['class']});
+  }
+  /* close dots on outside click */
+  modal.addEventListener('click', e => {
+    const dw = document.getElementById(`cl-act-dots-${uid}-${actIdx}`);
+    if (dw && !dw.contains(e.target)) dw.classList.remove('cl-open');
+    if (e.target === modal) modal.remove();
+  });
+};
+window._clSetActStatusBtn = function(uid, actIdx, status) {
+  if (!window._CL_ACT_STATUS) window._CL_ACT_STATUS = {};
+  window._CL_ACT_STATUS[`${uid}-${actIdx}`] = status;
+  /* update the select dropdown styling */
+  const sel = document.getElementById(`cl-act-status-sel-${uid}-${actIdx}`);
+  if (sel) {
+    sel.style.borderColor = status==='Accepted'?'#6ee7b7':status==='Rejected'?'#fca5a5':'#e5e7eb';
+    sel.style.background  = status==='Accepted'?'#dcfce7':status==='Rejected'?'#fee2e2':'#fff';
+    sel.style.color       = status==='Accepted'?'#15803d':status==='Rejected'?'#dc2626':'#6b7280';
+  }
+  showToast(status ? `Action ${status.toLowerCase()}.` : 'Status cleared.', 'success');
+  if (window._CL_ACTIVE_SECTION_CLAUSES?.length) _clRenderStack(window._CL_ACTIVE_SECTION_CLAUSES, window._CL_ACTIVE_LABELS);
+};
+
+window._clToggleActApplicability = function(uid, actIdx) {
+  if (!window._CL_ACT_APPLICABILITY) window._CL_ACT_APPLICABILITY = {};
+  const key = `${uid}-${actIdx}`;
+  window._CL_ACT_APPLICABILITY[key] = !window._CL_ACT_APPLICABILITY[key];
+  showToast('Applicability updated.', 'success');
+  const clauseId = uid.split('-').slice(0,-1).join('-');
+  document.getElementById('cl-act-eye-modal')?.remove();
+  setTimeout(() => clOpenActionEyeModal(uid, actIdx, clauseId), 50);
+};
+
+window._clShowActApplicabilityReason = function(uid, actIdx, actId) {
+  const isApp = !window._CL_ACT_APPLICABILITY || window._CL_ACT_APPLICABILITY[`${uid}-${actIdx}`] !== false;
+  var ex = document.getElementById('cl-act-applic-modal'); if(ex) ex.remove();
+  var overlay = document.createElement('div');
+  overlay.className = 'cl-eye-overlay'; overlay.id = 'cl-act-applic-modal';
+  overlay.innerHTML = `
+  <div class="cl-eye-box" style="max-width:440px;" onclick="event.stopPropagation()">
+    <div class="cl-eye-head">
+      <div class="cl-eye-head-left"><span class="cl-eye-id-chip" style="background:#2563eb;">${actId}</span><span class="cl-eye-head-title">Applicability</span></div>
+      <button class="cl-eye-close" onclick="document.getElementById('cl-act-applic-modal').remove()">✕</button>
+    </div>
+    <div class="cl-eye-body" style="padding:20px;display:flex;flex-direction:column;gap:12px;">
+      <div style="display:flex;align-items:center;gap:10px;padding:12px 16px;background:${isApp?'#f0fdf4':'#f9fafb'};border:1px solid ${isApp?'#6ee7b7':'#e5e7eb'};border-radius:8px;">
+        <span style="font-size:18px;">${isApp?'✓':'—'}</span>
+        <div>
+          <div style="font-size:13px;font-weight:700;color:${isApp?'#15803d':'#6b7280'};">${isApp?'Applicable':'Not Applicable'}</div>
+          <div style="font-size:11px;color:#6b7280;margin-top:2px;">${isApp?'This action applies to your entity.':'This action has been marked as not applicable.'}</div>
+        </div>
+      </div>
+      ${isApp ? `
+      <ul style="margin:0;padding:0 0 0 16px;display:flex;flex-direction:column;gap:6px;">
+        <li style="font-size:12px;color:#374151;line-height:1.5;">The parent obligation is applicable to your entity type.</li>
+        <li style="font-size:12px;color:#374151;line-height:1.5;">This action falls within the compliance scope for your licence category.</li>
+        <li style="font-size:12px;color:#374151;line-height:1.5;">No exemption criteria apply for this specific action item.</li>
+      </ul>
+      <div style="background:#fffbeb;border:1px solid #fde68a;border-radius:6px;padding:10px 12px;font-size:11px;color:#92400e;">💡 AI-determined from entity profile and action-level regulatory metadata.</div>` : ''}
       <div style="display:flex;gap:8px;">
-        <button class="cl-eye-cancel-btn" onclick="document.getElementById('cl-act-eye-modal').remove()">Close</button>
-        <button class="cl-eye-save-btn" id="cl-act-save-btn-${uid}-${actIdx}" onclick="clSaveActionEye('${uid}',${actIdx})" style="opacity:.4;pointer-events:none;">💾 Save</button>
+        <button onclick="_clToggleActApplicability('${uid}',${actIdx});document.getElementById('cl-act-applic-modal').remove()" style="flex:1;padding:9px;border:1px solid #e5e7eb;border-radius:6px;background:#f9fafb;font-size:12px;font-weight:600;cursor:pointer;">${isApp?'Mark Not Applicable':'Mark Applicable'}</button>
+        <button class="cl-eye-regen-btn" onclick="document.getElementById('cl-act-applic-modal').remove();_clOpenCtxModal('applic_act_${uid}_${actIdx}','Action Applicability')" style="flex:1;padding:9px;">✦ Regenerate</button>
       </div>
     </div>
   </div>`;
-  modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
-  document.body.appendChild(modal);
+  document.body.appendChild(overlay);
+  overlay.addEventListener('click', e => { if(e.target===overlay) overlay.remove(); });
 };
-
 window.clActEnableEdit = function (uid, actIdx) {
-  /* Enable all fields in the modal */
   const modal = document.getElementById('cl-act-eye-modal');
   if (!modal) return;
   modal.querySelectorAll('.cl-eye-disabled').forEach(el => {
     el.disabled = false;
     el.classList.remove('cl-eye-disabled');
+    el.style.background = '#fff';
+    el.style.border = '1.5px solid #3b82f6';
+    el.style.cursor = 'auto';
   });
-  const pen = document.getElementById(`cl-act-pen-${uid}-${actIdx}`);
-  if (pen) pen.style.display = 'none';
   const note = document.getElementById(`cl-act-footnote-${uid}-${actIdx}`);
-  if (note) note.textContent = 'Fields are now editable.';
-  const saveBtn = document.getElementById(`cl-act-save-btn-${uid}-${actIdx}`);
-  if (saveBtn) { saveBtn.style.opacity = '1'; saveBtn.style.pointerEvents = 'auto'; }
+  if (note) note.textContent = '✏️ Fields are now editable. Changes apply on close.';
+  showToast('Action fields are now editable.', 'info');
 };
 
 window.clSaveActionEye = function (uid, actIdx) {
@@ -1283,6 +2388,10 @@ function _clBuildOblPanel(cl, level) {
           <span class="cl-oblig-num">${level === '2' ? 'A' : 'O'}${oi + 1}</span>
           <span class="cl-oblig-preview" id="cl-oblig-view-${uid}">${previewText}</span>
           <div class="cl-oblig-hdr-icons">
+            ${(window._CL_OBL_APPLICABILITY?.[uid] === false)
+              ? `<span style="font-size:9px;font-weight:700;padding:2px 6px;border-radius:8px;background:#f3f4f6;color:#6b7280;border:1px solid #d1d5db;cursor:pointer;" onclick="event.stopPropagation();_clShowApplicabilityReason('${uid}','OBL-${cl.id}-${oi+1}')">N/A</span>`
+              : `<span style="font-size:9px;font-weight:700;padding:2px 6px;border-radius:8px;background:#eff6ff;color:#1d4ed8;border:1px solid #93c5fd;cursor:pointer;" onclick="event.stopPropagation();_clShowApplicabilityReason('${uid}','OBL-${cl.id}-${oi+1}')">⊕</span>`
+            }
             ${(window._CL_OBL_STATUS?.[uid]) ? `<span class="cl-row-status-pill ${window._CL_OBL_STATUS[uid] === 'Accepted' ? 'cl-status-accepted' : window._CL_OBL_STATUS[uid] === 'Rejected' ? 'cl-status-rejected' : 'cl-status-review'}">${window._CL_OBL_STATUS[uid]}</span>` : ''}
             <button class="cl-oblig-icon-btn cl-obl-eye-btn" onclick="event.stopPropagation();clOpenOblEyeModal('${uid}','${cl.id}',${oi})" title="View obligation details">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
@@ -1456,7 +2565,7 @@ function _clInjectRelFAB() {
       <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
       <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
     </svg>
-    <span class="cl-fab-label">Lineage</span>`;
+   `;
   fab.addEventListener('click', clOpenRelDialog);
   document.body.appendChild(fab);
 
@@ -1572,6 +2681,194 @@ window.clRelToggle = function (key, idx) {
   document.querySelectorAll('.cl-rel-detail').forEach(d => d.classList.remove('open'));
   document.querySelectorAll('.cl-rel-item').forEach(i => i.classList.remove('cl-ri-exp'));
   if (!open) { det.classList.add('open'); item?.classList.add('cl-ri-exp'); }
+};
+
+/* ─────────────────────────────────────── STRUCTURE MENU */
+window._clOpenStructureMenu = function() {
+  var ex = document.getElementById('cl-struct-modal'); if(ex) ex.remove();
+  var overlay = document.createElement('div');
+  overlay.className = 'cl-eye-overlay'; overlay.id = 'cl-struct-modal';
+  overlay.innerHTML = `
+  <div class="cl-eye-box" style="max-width:380px;" onclick="event.stopPropagation()">
+    <div class="cl-eye-head">
+      <div class="cl-eye-head-left"><span class="cl-eye-id-chip">+</span><span class="cl-eye-head-title">Add Structure</span></div>
+      <button class="cl-eye-close" onclick="document.getElementById('cl-struct-modal').remove()">✕</button>
+    </div>
+    <div class="cl-eye-body" style="padding:16px;display:flex;flex-direction:column;gap:8px;">
+      ${[
+        {type:'chapter', label:'📖 Chapter', sub:'A new top-level chapter'},
+        {type:'section', label:'§ Section', sub:'A section within the active chapter'},
+        {type:'subsection', label:'¶ Subsection', sub:'A subsection within the active section'},
+      ].map(opt => `
+        <button onclick="_clOpenStructureAdd('${opt.type}')" style="display:flex;flex-direction:column;align-items:flex-start;gap:2px;padding:12px 14px;border:1px solid #e5e7eb;border-radius:8px;background:#f9fafb;cursor:pointer;text-align:left;width:100%;font-family:inherit;">
+          <span style="font-size:13px;font-weight:600;color:#1f2937;">${opt.label}</span>
+          <span style="font-size:11px;color:#6b7280;">${opt.sub}</span>
+        </button>`).join('')}
+    </div>
+  </div>`;
+  document.body.appendChild(overlay);
+  overlay.addEventListener('click', e => { if(e.target===overlay) overlay.remove(); });
+};
+
+window._clOpenStructureAdd = function(type) {
+  document.getElementById('cl-struct-modal').remove();
+  const labels = {chapter:'Chapter', section:'Section', subsection:'Subsection'};
+  var ex = document.getElementById('cl-struct-add-modal'); if(ex) ex.remove();
+  var overlay = document.createElement('div');
+  overlay.className = 'cl-eye-overlay'; overlay.id = 'cl-struct-add-modal';
+  overlay.innerHTML = `
+  <div class="cl-eye-box" style="max-width:440px;" onclick="event.stopPropagation()">
+    <div class="cl-eye-head">
+      <div class="cl-eye-head-left"><span class="cl-eye-head-title">Add ${labels[type]}</span></div>
+      <button class="cl-eye-close" onclick="document.getElementById('cl-struct-add-modal').remove()">✕</button>
+    </div>
+    <div class="cl-eye-body" style="padding:16px;display:flex;flex-direction:column;gap:10px;">
+      <label style="font-size:10px;font-weight:700;color:#6b7280;text-transform:uppercase;">Title</label>
+      <input id="cl-sadd-title" type="text" placeholder="Enter ${labels[type]} title…" style="padding:8px 10px;border:1px solid #e5e7eb;border-radius:6px;font-size:13px;width:100%;"/>
+    </div>
+    <div class="cl-eye-foot">
+      <button class="cl-eye-cancel-btn" onclick="document.getElementById('cl-struct-add-modal').remove()">Cancel</button>
+      <button class="cl-eye-save-btn" style="opacity:1;pointer-events:auto;" onclick="_clCommitStructureAdd('${type}')">Add ${labels[type]}</button>
+    </div>
+  </div>`;
+  document.body.appendChild(overlay);
+  overlay.addEventListener('click', e => { if(e.target===overlay) overlay.remove(); });
+  setTimeout(() => document.getElementById('cl-sadd-title')?.focus(), 50);
+};
+
+window._clCommitStructureAdd = function(type) {
+  const title = document.getElementById('cl-sadd-title')?.value?.trim();
+  if (!title) { showToast('Title required.','error'); return; }
+  document.getElementById('cl-struct-add-modal').remove();
+  showToast(`${type.charAt(0).toUpperCase()+type.slice(1)} "${title}" added.`, 'success');
+};
+
+/* ── Add Obligation popup ── */
+window._clAddObligationPopup = function() {
+  var ex = document.getElementById('cl-add-obl-modal'); if(ex) ex.remove();
+  const allDepts = ['Compliance','Risk','Legal','IT','Operations','HR','Finance','Credit','Procurement'];
+  const freqOpts = ['Monthly','Quarterly','Annually','Ad-hoc','As per Regulation'];
+  const circ = window._CL_ACTIVE_CIRC;
+  var overlay = document.createElement('div');
+  overlay.className = 'cl-eye-overlay'; overlay.id = 'cl-add-obl-modal';
+  overlay.innerHTML = `
+  <div class="cl-eye-box" style="max-width:560px;" onclick="event.stopPropagation()">
+    <div class="cl-eye-head">
+      <div class="cl-eye-head-left"><span class="cl-eye-id-chip">OBL</span><span class="cl-eye-head-title">Add Obligation</span></div>
+      <button class="cl-eye-close" onclick="document.getElementById('cl-add-obl-modal').remove()">✕</button>
+    </div>
+    <div class="cl-eye-body" style="padding:16px;display:flex;flex-direction:column;gap:10px;max-height:60vh;overflow-y:auto;">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+        <div><label style="font-size:10px;font-weight:700;color:#6b7280;text-transform:uppercase;display:block;margin-bottom:4px;">Obligation ID</label><input id="cl-aob-id" type="text" placeholder="OBL-XXX" style="width:100%;padding:8px 10px;border:1px solid #e5e7eb;border-radius:6px;font-size:12px;"/></div>
+        <div><label style="font-size:10px;font-weight:700;color:#6b7280;text-transform:uppercase;display:block;margin-bottom:4px;">Circular Title</label><input id="cl-aob-circ" type="text" value="${(circ?.title||'').replace(/"/g,'&quot;')}" style="width:100%;padding:8px 10px;border:1px solid #e5e7eb;border-radius:6px;font-size:12px;"/></div>
+        <div><label style="font-size:10px;font-weight:700;color:#6b7280;text-transform:uppercase;display:block;margin-bottom:4px;">Clause ID</label><input id="cl-aob-clauseid" type="text" placeholder="e.g. CL-1.1" style="width:100%;padding:8px 10px;border:1px solid #e5e7eb;border-radius:6px;font-size:12px;"/></div>
+        <div><label style="font-size:10px;font-weight:700;color:#6b7280;text-transform:uppercase;display:block;margin-bottom:4px;">Department</label><select id="cl-aob-dept" style="width:100%;padding:8px 10px;border:1px solid #e5e7eb;border-radius:6px;font-size:12px;background:#fff;"><option value="">— Select —</option>${allDepts.map(d=>`<option>${d}</option>`).join('')}</select></div>
+        <div><label style="font-size:10px;font-weight:700;color:#6b7280;text-transform:uppercase;display:block;margin-bottom:4px;">Section</label><input id="cl-aob-sec" type="text" placeholder="e.g. Section 12" style="width:100%;padding:8px 10px;border:1px solid #e5e7eb;border-radius:6px;font-size:12px;"/></div>
+        <div><label style="font-size:10px;font-weight:700;color:#6b7280;text-transform:uppercase;display:block;margin-bottom:4px;">Sub-Section</label><input id="cl-aob-subsec" type="text" placeholder="e.g. Clause (a)" style="width:100%;padding:8px 10px;border:1px solid #e5e7eb;border-radius:6px;font-size:12px;"/></div>
+        <div><label style="font-size:10px;font-weight:700;color:#6b7280;text-transform:uppercase;display:block;margin-bottom:4px;">Frequency</label><select id="cl-aob-freq" style="width:100%;padding:8px 10px;border:1px solid #e5e7eb;border-radius:6px;font-size:12px;background:#fff;">${freqOpts.map(f=>`<option>${f}</option>`).join('')}</select></div>
+        <div><label style="font-size:10px;font-weight:700;color:#6b7280;text-transform:uppercase;display:block;margin-bottom:4px;">Due Date</label><input id="cl-aob-due" type="date" style="width:100%;padding:8px 10px;border:1px solid #e5e7eb;border-radius:6px;font-size:12px;"/></div>
+      </div>
+      <div><label style="font-size:10px;font-weight:700;color:#6b7280;text-transform:uppercase;display:block;margin-bottom:4px;">Obligation Name <span style="color:#ef4444;">*</span></label><textarea id="cl-aob-text" placeholder="Describe the obligation…" style="width:100%;height:70px;padding:8px 10px;border:1px solid #e5e7eb;border-radius:6px;font-size:12px;font-family:inherit;resize:vertical;"></textarea></div>
+    </div>
+    <div class="cl-eye-foot">
+      <button class="cl-eye-cancel-btn" onclick="document.getElementById('cl-add-obl-modal').remove()">Cancel</button>
+      <button class="cl-eye-save-btn" style="opacity:1;pointer-events:auto;" onclick="_clSaveNewObligation()">Add Obligation</button>
+    </div>
+  </div>`;
+  document.body.appendChild(overlay);
+  overlay.addEventListener('click', e => { if(e.target===overlay) overlay.remove(); });
+  setTimeout(() => document.getElementById('cl-aob-id')?.focus(), 50);
+};
+
+window._clSaveNewObligation = function() {
+  const text = document.getElementById('cl-aob-text')?.value?.trim();
+  if (!text) { showToast('Obligation name is required.','error'); return; }
+  document.getElementById('cl-add-obl-modal').remove();
+  showToast('Obligation added.','success');
+};
+
+/* ── Add Action popup ── */
+window._clAddActionPopup = function() {
+  var ex = document.getElementById('cl-add-act-modal'); if(ex) ex.remove();
+  const allDepts = ['Compliance','Risk','Legal','IT','Operations','HR','Finance','Credit','Procurement'];
+  const freqOpts = ['Monthly','Quarterly','Annually','Ad-hoc','As per Regulation'];
+  const statusOpts = ['Assigned','Unassigned','Not Applicable'];
+  var overlay = document.createElement('div');
+  overlay.className = 'cl-eye-overlay'; overlay.id = 'cl-add-act-modal';
+  overlay.innerHTML = `
+  <div class="cl-eye-box" style="max-width:580px;" onclick="event.stopPropagation()">
+    <div class="cl-eye-head">
+      <div class="cl-eye-head-left"><span class="cl-eye-id-chip">ACT</span><span class="cl-eye-head-title">Add Action</span></div>
+      <button class="cl-eye-close" onclick="document.getElementById('cl-add-act-modal').remove()">✕</button>
+    </div>
+    <div class="cl-eye-body" style="padding:16px;display:flex;flex-direction:column;gap:10px;max-height:60vh;overflow-y:auto;">
+      <div><label style="font-size:10px;font-weight:700;color:#6b7280;text-transform:uppercase;display:block;margin-bottom:4px;">Parent Obligation <span style="color:#ef4444;">*</span></label>
+        <select id="cl-aact-obl" style="width:100%;padding:8px 10px;border:1px solid #e5e7eb;border-radius:6px;font-size:12px;background:#fff;">
+          <option value="">— Select Obligation —</option>
+          ${(window._CL_ACTIVE_SECTION_CLAUSES||[]).flatMap((cl,ci) => {
+            const oblsRaw = cl.obligations||cl.obligation||null;
+            const oblsArr = Array.isArray(oblsRaw)?oblsRaw:oblsRaw?[oblsRaw]:[];
+            return oblsArr.map((ob,oi) => `<option value="${cl.id}-${oi}">${cl.id}-OBL${oi+1}: ${(typeof ob==='string'?ob:(ob.text||'')).substring(0,50)}</option>`);
+          }).join('')}
+        </select>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+        <div><label style="font-size:10px;font-weight:700;color:#6b7280;text-transform:uppercase;display:block;margin-bottom:4px;">Action ID</label><input id="cl-aact-id" type="text" placeholder="ACT-XXX" style="width:100%;padding:8px 10px;border:1px solid #e5e7eb;border-radius:6px;font-size:12px;"/></div>
+        <div><label style="font-size:10px;font-weight:700;color:#6b7280;text-transform:uppercase;display:block;margin-bottom:4px;">Assignment Status</label><select id="cl-aact-status" style="width:100%;padding:8px 10px;border:1px solid #e5e7eb;border-radius:6px;font-size:12px;background:#fff;">${statusOpts.map(s=>`<option>${s}</option>`).join('')}</select></div>
+        <div><label style="font-size:10px;font-weight:700;color:#6b7280;text-transform:uppercase;display:block;margin-bottom:4px;">Frequency</label><select id="cl-aact-freq" style="width:100%;padding:8px 10px;border:1px solid #e5e7eb;border-radius:6px;font-size:12px;background:#fff;">${freqOpts.map(f=>`<option>${f}</option>`).join('')}</select></div>
+        <div><label style="font-size:10px;font-weight:700;color:#6b7280;text-transform:uppercase;display:block;margin-bottom:4px;">Internal Due Date</label><input id="cl-aact-intdue" type="date" value="2025-02-12" style="width:100%;padding:8px 10px;border:1px solid #e5e7eb;border-radius:6px;font-size:12px;"/></div>
+        <div><label style="font-size:10px;font-weight:700;color:#6b7280;text-transform:uppercase;display:block;margin-bottom:4px;">External Due Date</label><input id="cl-aact-extdue" type="date" value="2025-02-12" style="width:100%;padding:8px 10px;border:1px solid #e5e7eb;border-radius:6px;font-size:12px;"/></div>
+      </div>
+      <div><label style="font-size:10px;font-weight:700;color:#6b7280;text-transform:uppercase;display:block;margin-bottom:4px;">Departments</label>
+        <div style="display:flex;flex-wrap:wrap;gap:6px;">${allDepts.map(d=>`<label style="display:flex;align-items:center;gap:5px;padding:5px 10px;border:1px solid #e5e7eb;border-radius:20px;cursor:pointer;font-size:11px;font-weight:500;color:#374151;background:#f9fafb;"><input type="checkbox" value="${d}" style="accent-color:#3b82f6;width:13px;height:13px;"/>${d}</label>`).join('')}</div>
+      </div>
+      <div><label style="font-size:10px;font-weight:700;color:#6b7280;text-transform:uppercase;display:block;margin-bottom:4px;">Tags</label><input id="cl-aact-tags" type="text" placeholder="e.g. Compliance, Reporting (comma-separated)" style="width:100%;padding:8px 10px;border:1px solid #e5e7eb;border-radius:6px;font-size:12px;"/></div>
+      <div><label style="font-size:10px;font-weight:700;color:#6b7280;text-transform:uppercase;display:block;margin-bottom:4px;">Action Name <span style="color:#ef4444;">*</span></label><textarea id="cl-aact-text" placeholder="Describe the action…" style="width:100%;height:70px;padding:8px 10px;border:1px solid #e5e7eb;border-radius:6px;font-size:12px;font-family:inherit;resize:vertical;"></textarea></div>
+    </div>
+    <div class="cl-eye-foot">
+      <button class="cl-eye-cancel-btn" onclick="document.getElementById('cl-add-act-modal').remove()">Cancel</button>
+      <button class="cl-eye-save-btn" style="opacity:1;pointer-events:auto;" onclick="_clSaveNewAction()">Add Action</button>
+    </div>
+  </div>`;
+  document.body.appendChild(overlay);
+  overlay.addEventListener('click', e => { if(e.target===overlay) overlay.remove(); });
+};
+
+window._clSaveNewAction = function() {
+  const text = document.getElementById('cl-aact-text')?.value?.trim();
+  if (!text) { showToast('Action name is required.','error'); return; }
+  document.getElementById('cl-add-act-modal').remove();
+  showToast('Action added.','success');
+};
+
+/* ── Export popup ── */
+window._clOpenExportPopup = function() {
+  var ex = document.getElementById('cl-export-modal'); if(ex) ex.remove();
+  var overlay = document.createElement('div');
+  overlay.className = 'cl-eye-overlay'; overlay.id = 'cl-export-modal';
+  overlay.innerHTML = `
+  <div class="cl-eye-box" style="max-width:420px;" onclick="event.stopPropagation()">
+    <div class="cl-eye-head">
+      <div class="cl-eye-head-left"><span class="cl-eye-head-title">Export / Import</span></div>
+      <button class="cl-eye-close" onclick="document.getElementById('cl-export-modal').remove()">✕</button>
+    </div>
+    <div class="cl-eye-body" style="padding:20px;display:flex;flex-direction:column;gap:12px;">
+      <button class="cl-eye-save-btn" style="opacity:1;pointer-events:auto;width:100%;padding:12px;justify-content:flex-start;gap:10px;" onclick="_clDownloadOblTemplate()">📥 Download Template CSV</button>
+      <button class="cl-eye-save-btn" style="opacity:1;pointer-events:auto;width:100%;padding:12px;justify-content:flex-start;gap:10px;" onclick="_clExportOblData()">📊 Export Current Data</button>
+      <label class="cl-eye-save-btn" style="opacity:1;pointer-events:auto;width:100%;padding:12px;justify-content:flex-start;gap:10px;cursor:pointer;">📤 Upload Excel / CSV<input type="file" accept=".csv,.xlsx,.xls" style="display:none;" onchange="showToast('Uploaded. Processing…','success');document.getElementById('cl-export-modal').remove();"/></label>
+    </div>
+  </div>`;
+  document.body.appendChild(overlay);
+  overlay.addEventListener('click', e => { if(e.target===overlay) overlay.remove(); });
+};
+window._clDownloadOblTemplate = function() {
+  const csv = 'Obligation ID,Obligation Name,Clause ID,Section,Sub-Section,Department,Frequency,Due Date,Action ID,Action Name,Status,Tags\nOBL-001,Ensure compliance,CL-1.1,Section 12,Clause (a),Compliance,Monthly,2025-03-31,ACT-001,Submit certificate,Assigned,Reporting\n';
+  const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([csv],{type:'text/csv'})); a.download='obligations_template.csv'; a.click();
+  document.getElementById('cl-export-modal').remove();
+};
+window._clExportOblData = function() {
+  showToast('Exported current obligations data.','success');
+  document.getElementById('cl-export-modal').remove();
 };
 
 /* ─────────────────────────────────────── EVIDENCE MODAL (unchanged) */
@@ -2033,7 +3330,7 @@ function injectClauseCSS() {
 .cl-eye-head{display:flex;align-items:center;justify-content:space-between;padding:14px 20px;border-bottom:1px solid var(--cl-border-lt);background:var(--cl-nav-bg);flex-shrink:0;}
 .cl-eye-head-left{display:flex;align-items:center;gap:10px;}
 .cl-eye-head-right{display:flex;align-items:center;gap:8px;}
-.cl-eye-id-chip{font-family:var(--cl-mono);font-size:11px;font-weight:700;color:var(--cl-blue);background:var(--cl-blue-lt);border:1px solid var(--cl-blue-mid);padding:2px 9px;border-radius:4px;}
+.cl-eye-id-chip{font-family:var(--cl-mono);font-size:11px;font-weight:700;color:white;background:var(--cl-blue-lt);border:1px solid var(--cl-blue-mid);padding:2px 9px;border-radius:4px;}
 .cl-eye-head-title{font-size:13px;font-weight:700;color:var(--cl-t1);}
 .cl-eye-regen-btn{padding:5px 12px;background:#fff;border:1.5px solid var(--cl-purple);border-radius:20px;font-family:inherit;font-size:11px;font-weight:700;color:var(--cl-purple);cursor:pointer;transition:all .13s;white-space:nowrap;}
 .cl-eye-regen-btn:hover{background:var(--cl-purple-lt);}

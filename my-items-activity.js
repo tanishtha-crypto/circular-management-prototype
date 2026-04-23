@@ -202,6 +202,7 @@ const ACTD_DUMMY = {
 
 /* ── ENTRY POINT ─────────────────────────────────────────────── */
 function renderMyItemsActivity() {
+  actFilters = { status: '', department: '', search: '', from: '', to: '' };
   const area = document.getElementById('content-area');
   if (!area) return;
   area.innerHTML = actBuildHTML();
@@ -221,31 +222,13 @@ function actBuildHTML() {
 
   return `
   <div class="fade-in">
- 
-<<<<<<< Updated upstream
-    <div class="aa-page-head" style="margin-bottom:16px;">
-=======
-    <div class="aa-page-head1" style="margin-bottom:16px;">
->>>>>>> Stashed changes
-      <div class="aa-head-left">
-
-
-        <div class="aa-tab-switch" style="margin-top:10px; display:flex; flex-direction:row-reverse; gap:8px;">
-          <button
-           style="padding:6px 12px; border:1px solid #d1d5db; background:#fff; color:#111827; border-radius:6px; cursor:pointer;"
-            onclick="actSwitchMainTab('activities')">
-            Activities
-          </button>
-          <button
-           style="padding:6px 12px; border:1px solid #111827; background:#111827; color:#fff; border-radius:6px; cursor:pointer;"
-            onclick="actSwitchMainTab('obligations')">
-            Obligations
-          </button>
-        </div>
-      </div>
+    <div style="display:flex;justify-content:flex-end;margin-bottom:10px;gap:8px;">
+      <button style="padding:6px 12px;border:1px solid #d1d5db;background:#fff;color:#111827;border-radius:6px;cursor:pointer;"
+        onclick="actSwitchMainTab('activities')">Actionables</button>
+      <button style="padding:6px 12px;border:1px solid #111827;background:#111827;color:#fff;border-radius:6px;cursor:pointer;"
+        onclick="actSwitchMainTab('obligations')">Obligations</button>
     </div>
 
-    <div class="task-toolbar-wrap">
     <div class="task-toolbar-wrap">
       <div class="tb-row tb-row-filters">
         <input type="text" class="form-control tb-search" id="act-search"
@@ -396,6 +379,33 @@ function actRenderTasks() {
 }
 
 /* ── TABLE ───────────────────────────────────────────────────── */
+function actFmtDueDate(dateStr) {
+  if (!dateStr) return `<span style="color:#94a3b8;font-weight:600;font-size:12px;">N/A</span>`;
+  const due = new Date(dateStr);
+  const now = new Date(); now.setHours(0,0,0,0);
+  const diff = Math.ceil((due - now) / (1000*60*60*24));
+  let color, bg, border;
+  if (diff < 0)       { color='#dc2626'; bg='#fee2e2'; border='#fca5a5'; }
+  else if (diff <= 7) { color='#b45309'; bg='#fef9c3'; border='#fde68a'; }
+  else if (diff <= 30){ color='#0369a1'; bg='#dbeafe'; border='#93c5fd'; }
+  else                { color='#64748b'; bg='#f1f5f9'; border='#e2e8f0'; }
+  const label = due.toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'});
+  return `<span style="background:${bg};color:${color};border:1px solid ${border};padding:2px 9px;border-radius:99px;font-size:11px;font-weight:700;white-space:nowrap;">${label}</span>`;
+}
+
+function actGetActionLabel(a) {
+  const act = typeof ACTD_DUMMY !== 'undefined' && ACTD_DUMMY[a.activityId];
+  const as = act?._actionStatus;
+  if (!as) return `<span style="color:#94a3b8;font-size:12px;">—</span>`;
+  const cfg = {
+    'Send for Clarification': { bg:'#fef9c3', color:'#854d0e', border:'#fde68a' },
+    'Send for Closure':       { bg:'#dcfce7', color:'#166534', border:'#86efac' },
+    'Send for Recall':        { bg:'#fee2e2', color:'#991b1b', border:'#fca5a5' },
+  };
+  const c = Object.entries(cfg).find(([k]) => as.label?.includes(k.replace('Send for ','')))?.[1] || { bg:'#f1f5f9', color:'#475569', border:'#e2e8f0' };
+  return `<span style="background:${c.bg};color:${c.color};border:1px solid ${c.border};padding:3px 10px;border-radius:99px;font-size:11px;font-weight:700;white-space:nowrap;">${as.label}</span>`;
+}
+
 function actBuildTable(activities) {
   return `
   <div class="table-card">
@@ -405,11 +415,12 @@ function actBuildTable(activities) {
           <tr>
             <th>Activity ID</th>
             <th>Activity Name</th>
-            <th>Obligation</th>
+            <th>Obligation Name</th>
             <th>Department</th>
             <th>Assigned To</th>
             <th>Due Date</th>
             <th>Status</th>
+            <th>Action</th>
           </tr>
         </thead>
         <tbody>
@@ -423,19 +434,14 @@ function actBuildTable(activities) {
                 ${a.activityId}
               </span>
             </td>
-            <td style="max-width:220px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"
+            <td style="max-width:200px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"
                 title="${a.activityName}">${a.activityName}</td>
-            <td>
-              <span style="font-size:11px;color:#64748b;font-family:monospace;background:#f1f5f9;
-                           padding:2px 7px;border-radius:4px;border:1px solid #e2e8f0;cursor:pointer"
-                    onclick="openTaskDetail('${a.obligationId}')"
-                    title="${a.obligationTitle}">
-                ${a.obligationId}
-              </span>
-            </td>
+            <td style="max-width:200px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer;color:#6366f1;font-size:12px;font-weight:600"
+                title="${a.obligationTitle}"
+                onclick="openTaskDetail('${a.obligationId}')">${a.obligationTitle}</td>
             <td><span class="task-dept-chip">${a.department}</span></td>
             <td style="font-size:12px">${a.assignee}</td>
-            <td style="font-size:12px">${actFmtDate(a.dueDate)}</td>
+            <td>${actFmtDueDate(a.dueDate)}</td>
             <td>
               <select class="status-select ${actStatusClass(a.status)}"
                       data-activity-id="${a.activityId}"
@@ -447,6 +453,7 @@ function actBuildTable(activities) {
                 <option value="Overdue"     ${a.status==='Overdue'     ?'selected':''}>Overdue</option>
               </select>
             </td>
+            <td id="act-action-cell-${a.activityId}">${actGetActionLabel(a)}</td>
           </tr>`).join('')}
         </tbody>
       </table>
@@ -505,7 +512,12 @@ function actHandleStatusChange(selectEl) {
     const act = DUMMY_ACTIONS[obligationId].find(a => a.id === activityId);
     if (act) act.status = newStatus;
   }
+  if (typeof ACTD_DUMMY !== 'undefined' && ACTD_DUMMY[activityId]) {
+    ACTD_DUMMY[activityId].status = newStatus;
+  }
   selectEl.className = `status-select ${actStatusClass(newStatus)}`;
+  const cell = document.getElementById(`act-action-cell-${activityId}`);
+  if (cell) cell.innerHTML = actGetActionLabel({ activityId });
   if (typeof showToast === 'function') showToast(`Activity ${activityId} → "${newStatus}"`, 'success');
 }
 

@@ -240,16 +240,13 @@ function _sumRun(circ) {
 /* ================================================================ BUILD DOCUMENT */
 function _sumBuildDoc(circ, data, org, aud, dep, date) {
   const depLabel = {brief:'Brief',standard:'Standard',detailed:'Detailed'}[dep]||'Standard';
-  const purpose  = data.summary ||
-    `This directive issued by <strong>${circ.regulator||'the regulator'}</strong> introduces a
-    revised compliance framework for regulated financial entities. All entities within the defined
-    scope must achieve full compliance by the prescribed deadline. Non-compliance exposes entities
-    to supervisory action, regulatory penalties, and reputational risk.`;
-  const sections = _sumSections(circ, data, org, purpose);
-    `This directive issued by <strong>${circ.regulator||'the regulator'}</strong> introduces a
-    revised compliance framework for regulated financial entities. All entities within the defined
-    scope must achieve full compliance by the prescribed deadline. Non-compliance exposes entities
-    to supervisory action, regulatory penalties, and reputational risk.`;
+const purpose = data.summary ||
+  `This directive issued by <strong>${circ.regulator || 'the regulator'}</strong> introduces a
+  revised compliance framework for regulated financial entities. All entities within the defined
+  scope must achieve full compliance by the prescribed deadline. Non-compliance exposes entities
+  to supervisory action, regulatory penalties, and reputational risk.`;
+
+const sections = _sumSections(circ, data, org, purpose);
 
   return `
   <div class="sum-doc" id="sum-doc">
@@ -376,7 +373,7 @@ function _sumBindDocEvents(circ) {
     if (dhDotsMenu) dhDotsMenu.style.display = 'none';
     _sumOpenRegenCtxModal(circ);
   });
-  v
+  
   document.getElementById('sum-dh-mi-depth')?.addEventListener('click', () => {
     if (dhDotsMenu) dhDotsMenu.style.display = 'none';
     _ovShowDepthModal?.() || showToast('Depth setting coming soon.', 'info');

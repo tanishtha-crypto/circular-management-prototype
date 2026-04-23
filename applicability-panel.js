@@ -1088,16 +1088,14 @@ function _appDeriveEntities(entityType, circ) {
   }
 
   // existing fallback below — unchanged
-  if (Array.isArray(circ?.applicableEntities) && circ.applicableEntities.length) {
-    return circ.applicableEntities.map(ent => ({
-      name: typeof ent === 'string' ? ent : ent.name,
-      sub:  typeof ent === 'object' ? ent.description : null,
-      circTarget: reg,
-      match: typeof ent === 'string'
-        ? ent.toLowerCase().includes(et.toLowerCase())
-        : (ent.match !== undefined ? ent.match : ent.name?.toLowerCase().includes(et.toLowerCase())),
-    }));
-  }
+if (Array.isArray(circ?.applicableEntities) && circ.applicableEntities.length) {
+  return circ.applicableEntities.map(ent => ({
+    name:       typeof ent === 'string' ? ent : ent.name,
+    sub:        typeof ent === 'object' ? ent.description || null : null,
+    applicable: typeof ent === 'object' ? (ent.applicable ? 'yes' : 'partial') : 'no',  // ← key fix
+    match:      typeof ent === 'object' ? ent.applicable : false,
+  }));
+}
 
   const rbiEntities = [
     { name: 'Scheduled Commercial Banks (excluding RRBs)', match: true },
@@ -1105,10 +1103,18 @@ function _appDeriveEntities(entityType, circ) {
     { name: 'Banks engaged in housing finance lending', match: true },
   ];
   const sebiEntities = [
-    { name: 'Listed Companies', sub: 'Entities listed on NSE / BSE', match: (typeof ORG_PROFILE !== 'undefined' ? ORG_PROFILE.listed : 'No') === 'Yes' },
-    { name: 'Registered Stock Brokers', sub: null, match: et === 'SEBI' },
-    { name: 'Asset Management Companies', sub: null, match: false },
-    { name: 'Portfolio Management Services', sub: null, match: false },
+    
+  { name: 'Mutual Funds', sub: 'SEBI regulated mutual fund entities', match: false },
+  { name: 'Asset Management Companies', sub: 'AMCs managing mutual fund schemes', match: et === 'SEBI' || et === 'AMC' },
+  { name: 'Trustee Companies / Boards of Trustees of Mutual Funds', sub: 'Trustee oversight entities for mutual funds', match: false },
+ 
+  { name: 'Association of Mutual Funds in India', sub: 'Industry association for mutual funds', match: false },
+  // { name: 'Recognized Stock Exchanges & Clearing Corporations', sub: 'Market infrastructure institutions', match: false },
+  //  { name: 'Registrars to an Issue and Share Transfer Agents', sub: 'RTAs supporting mutual fund folios and servicing', match: false },
+  // { name: 'Stock Brokers', sub: 'SEBI registered brokers and intermediaries', match: false },
+  // { name: 'Depositories', sub: 'Depository participants and institutions', match: false },
+  // { name: 'Custodians', sub: 'Entities providing custody services for securities', match: false }
+
   ];
   return (reg === 'SEBI' ? sebiEntities : rbiEntities).map(e => ({ ...e, circTarget: reg }));
 }
@@ -1117,54 +1123,112 @@ function _appDeriveEntities(entityType, circ) {
    DERIVE PARAMS
 ───────────────────────────────────────────────────────── */
 function _appDeriveParams(entityType, circ) {
-  const reg = circ?.regulator || 'RBI';
+  const reg = circ?.regulator || 'SEBI';
   const et  = entityType || 'NBFC';
   const org = typeof ORG_PROFILE !== 'undefined' ? ORG_PROFILE : {};
 
   // RBI Master Circular on Housing Finance specific data
-  if (circ?.id === 'RBI-HF-2024-001') {
+  if (reg === 'SEBI') {
     return [
-      {
-        name: 'Entity Type',
-        threshold: 'Scheduled Commercial Bank engaged in housing finance lending',
-        status: et === 'Bank' ? 'yes' : 'no',
-        reason: et === 'Bank'
-          ? 'Your entity is a Scheduled Commercial Bank — directly within scope.'
-          : 'Circular applies only to banks engaged in housing finance lending. Your entity type does not meet this criterion.'
-      },
-      {
-        name: 'Housing Loan Origination',
-        threshold: 'Entity must originate or service housing loans',
-        status: et === 'Bank' ? 'yes' : 'no',
-        reason: et === 'Bank'
-          ? 'Banks originate housing loans and are subject to these directions.'
-          : 'AMCs and non-lending entities do not originate loans — not applicable.'
-      },
-      {
-        name: 'On-book Credit Exposure to Real Estate',
-        threshold: 'LTV and risk weights apply to lender balance sheet',
-        status: et === 'Bank' ? 'yes' : 'no',
-        reason: 'LTV and risk weight norms are prudential lending requirements for banks\' balance sheet exposures only.'
-      },
-      {
-        name: 'Investment in Real Estate-linked Securities',
-        threshold: 'Exposure through debt/equity instruments of real estate sector',
-        status: 'partial',
-        reason: 'Indirect exposure via REITs or real estate company securities may be impacted through market risk and SEBI-imposed exposure limits.'
-      },
-      {
-        name: 'RBI vs SEBI Jurisdiction',
-        threshold: 'RBI regulates banks/NBFCs; SEBI regulates AMCs',
-        status: reg === 'RBI' && et === 'Bank' ? 'yes' : 'partial',
-        reason: 'RBI directly regulates banks. For SEBI-regulated entities, RBI macro-prudential signals influence the risk environment but are not directly binding.'
-      },
-      {
-        name: 'Risk Management & Prudential Norms',
-        threshold: 'Concentration and exposure norms via applicable regulator',
-        status: 'partial',
-        reason: 'Though RBI norms apply directly only to banks, equivalent controls exist under SEBI Mutual Fund Regulations for other entity types.'
-      },
-    ];
+      // {
+      //   name: 'Entity Type',
+      //   threshold: 'Scheduled Commercial Bank engaged in housing finance lending',
+      //   status: et === 'Bank' ? 'yes' : 'no',
+      //   reason: et === 'Bank'
+      //     ? 'Your entity is a Scheduled Commercial Bank — directly within scope.'
+      //     : 'Circular applies only to banks engaged in housing finance lending. Your entity type does not meet this criterion.'
+      // },
+      // {
+      //   name: 'Housing Loan Origination',
+      //   threshold: 'Entity must originate or service housing loans',
+      //   status: et === 'Bank' ? 'yes' : 'no',
+      //   reason: et === 'Bank'
+      //     ? 'Banks originate housing loans and are subject to these directions.'
+      //     : 'AMCs and non-lending entities do not originate loans — not applicable.'
+      // },
+      // {
+      //   name: 'On-book Credit Exposure to Real Estate',
+      //   threshold: 'LTV and risk weights apply to lender balance sheet',
+      //   status: et === 'Bank' ? 'yes' : 'no',
+      //   reason: 'LTV and risk weight norms are prudential lending requirements for banks\' balance sheet exposures only.'
+      // },
+      // {
+      //   name: 'Investment in Real Estate-linked Securities',
+      //   threshold: 'Exposure through debt/equity instruments of real estate sector',
+      //   status: 'partial',
+      //   reason: 'Indirect exposure via REITs or real estate company securities may be impacted through market risk and SEBI-imposed exposure limits.'
+      // },
+      // {
+      //   name: 'RBI vs SEBI Jurisdiction',
+      //   threshold: 'RBI regulates banks/NBFCs; SEBI regulates AMCs',
+      //   status: reg === 'RBI' && et === 'Bank' ? 'yes' : 'partial',
+      //   reason: 'RBI directly regulates banks. For SEBI-regulated entities, RBI macro-prudential signals influence the risk environment but are not directly binding.'
+      // },
+      // {
+      //   name: 'Risk Management & Prudential Norms',
+      //   threshold: 'Concentration and exposure norms via applicable regulator',
+      //   status: 'partial',
+      //   reason: 'Though RBI norms apply directly only to banks, equivalent controls exist under SEBI Mutual Fund Regulations for other entity types.'
+      // },
+      
+  {
+    name: 'Scope of Application',
+    threshold: 'Applicable to Mutual Funds, AMCs, Trustee Companies / Board of Trustees of Mutual Funds, and AMFI',
+    orgVal: et,
+    status: reg === 'SEBI' ? 'yes' : 'partial',
+    reason: 'This circular applies to mutual fund governance entities including AMCs and Trustees.'
+  },
+  {
+    name: 'Trustee Oversight Responsibility',
+    threshold: 'Applicable where trustee company / board of trustees has fiduciary oversight over mutual funds',
+    orgVal: org.entityType || et,
+    status: 'partial',
+    reason: 'The circular assigns core responsibilities to Trustees for protection of unitholders.'
+  },
+  {
+    name: 'AMC Board Governance Responsibility',
+    threshold: 'Applicable where AMC board is responsible for protecting unitholder interests',
+    orgVal: org.entityType || et,
+    status: 'partial',
+    reason: 'AMC boards are accountable for ensuring that unitholder interests are protected.'
+  },
+  {
+    name: 'Core Responsibilities of Trustees',
+    threshold: 'Fee fairness, scheme performance review, prevention of mis-selling, conflict management, market abuse controls',
+    orgVal: org.industry || 'Financial Services',
+    status: 'yes',
+    reason: 'These are the central governance and supervisory requirements under the circular.'
+  },
+  {
+    name: 'Fraud Prevention and System-level Checks',
+    threshold: 'System-level checks to prevent fraudulent transactions including front running, form splitting and mis-selling',
+    orgVal: 'Governance / Risk Controls',
+    status: 'yes',
+    reason: 'The circular requires Trustees to ensure AMCs have system-level fraud prevention controls.'
+  },
+  {
+    name: 'Unit Holder Protection Committee (UHPC)',
+    threshold: 'Applicable where AMC constitutes and operates UHPC for investor protection, complaints, disclosures and compliance review',
+    orgVal: org.entityType || et,
+    status: 'partial',
+    reason: 'UHPC requirements apply where the entity is involved in AMC governance and investor protection.'
+  },
+  {
+    name: 'Conflict of Interest and Fair Treatment',
+    threshold: 'Required where conflicts between AMC stakeholders / associates and unitholders must be managed or disclosed',
+    orgVal: 'Applicable if mutual fund governance role exists',
+    status: 'yes',
+    reason: 'The circular requires Trustees to address conflicts of interest and prevent undue advantage to associates.'
+  },
+  {
+    name: 'Compliance Nature',
+    threshold: 'Ongoing governance and supervisory compliance effective from 2024-01-01',
+    orgVal: circ?.effectiveDate || '2024-01-01',
+    status: 'yes',
+    reason: 'This is an ongoing governance obligation from the effective date.'
+  }
+]
+    
   }
 
   // Default fallback for all other circulars

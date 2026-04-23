@@ -9,6 +9,8 @@
  */
 
 const AO_DEPTS = ['Compliance', 'Risk', 'Legal', 'IT', 'Operations', 'HR', 'Finance'];
+const IS_SPOC = document.body.dataset.userRole === 'spoc';
+const SPOC_DEPT_LIST = window.SPOC_PROFILE?.departments || [];
 const AO_PEOPLE = {
   Compliance: ['Sneha Das', 'Meera Pillai', 'Arjun Kumar', 'Ravi Menon'],
   Risk: ['Anand Krishnan', 'Neha Rao', 'Vikram Singh', 'Pooja Shah'],
@@ -180,7 +182,7 @@ function _aoCircMeta(circId) {
 }
 
 /* ── MAIN RENDER ── */
-window.renderAssignObligation = function(circId, activeTab = 'obligation') {
+window.renderAssignObligation = function(circId, activeTab = 'activities') {
   const area = document.getElementById('content-area');
   if (!area) return;
   _aoInjectStyles();
@@ -200,13 +202,13 @@ window.renderAssignObligation = function(circId, activeTab = 'obligation') {
 /* ── TABLE HEADER (used inside each chapter) ── */
 function _aoTableHeader() {
   return `<tr class="ao-inner-thead">
-    <th class="ao-th-chk"></th>
+    ${IS_SPOC ? '' : '<th class="ao-th-chk"></th>'}
     <th>OB ID</th>
     <th class="ao-th-text">Obligation</th>
     <th>Department</th>
     <th>Assignee</th>
     <th>Due Date</th>
-    <th>Assignment Status</th>
+    <th>Status</th>
     <th></th>
   </tr>`;
 }
@@ -234,10 +236,8 @@ function _aoBuildPage(circs, activeCirc, activeTab = 'obligation')  {
       </div>
       <div class="ao-head-right">
         <button class="ao-btn ao-btn-ghost" onclick="window.history.back()">← Back</button>
-        <button class="ao-btn ao-btn-pri" onclick="_aoSaveAll('${activeCirc.id}')">💾 Save All</button>
-      <div class="ao-tab-switch">
-  
-</div>
+        <button class="ao-btn ao-btn-pri" onclick="_aoSaveAll('${activeCirc.id}')">💾 this is  Save All</button>
+      
       </div>
     </div>
 
@@ -281,6 +281,7 @@ function _aoBuildPage(circs, activeCirc, activeTab = 'obligation')  {
     </div>
 
     <div class="ao-toolbar">
+      ${IS_SPOC ? '' : `
       <div class="ao-tl-left">
         <label class="ao-check-wrap">
           <input type="checkbox" id="ao-sel-all" onchange="_aoToggleAll(this.checked)"/>
@@ -288,10 +289,34 @@ function _aoBuildPage(circs, activeCirc, activeTab = 'obligation')  {
         </label>
         <span class="ao-tl-hint">Select to bulk assign</span>
         <span class="ao-sel-badge" id="ao-sel-badge" style="display:none;"></span>
-      </div>
-      <div class="ao-tl-right">
-        <select class="ao-flt-sel" id="ao-filter-status" onchange="_aoApplyFilters()"><option value="">All Statuses</option><option>Unassigned</option><option>Assigned</option><option>Acknowledged</option></select>
-        <select class="ao-flt-sel" id="ao-filter-dept" onchange="_aoApplyFilters()"><option value="">All Departments</option>${AO_DEPTS.map(d => `<option>${d}</option>`).join('')}</select>
+      </div>`}
+      <div class="ao-tl-right" style="${IS_SPOC?'margin-left:0;':''}">
+        <select class="ao-flt-sel" id="ao-filter-status" onchange="_aoApplyFilters()">
+          <option value="">All Statuses</option>
+          <option>Unassigned</option><option>Assigned</option><option>Acknowledged</option>
+        </select>
+        ${IS_SPOC
+          ? `
+          <!-- SPOC: Branch filter (only their branches) -->
+          <select class="ao-flt-sel" id="ao-filter-branch" onchange="_aoApplyFilters()">
+            <option value="">All Branches</option>
+            ${(window.SPOC_PROFILE?.branches || [window.SPOC_PROFILE?.branch]).filter(Boolean).map(b =>
+              `<option value="${b}">${b}</option>`
+            ).join('')}
+          </select>
+          <!-- SPOC: Dept filter (only their depts) -->
+          <select class="ao-flt-sel" id="ao-filter-dept" onchange="_aoApplyFilters()">
+            <option value="">All Departments</option>
+            ${(window.SPOC_PROFILE?.departments || []).map(d =>
+              `<option value="${d}">${d}</option>`
+            ).join('')}
+          </select>`
+          : `
+          <select class="ao-flt-sel" id="ao-filter-dept" onchange="_aoApplyFilters()">
+            <option value="">All Departments</option>
+            ${AO_DEPTS.map(d=>`<option>${d}</option>`).join('')}
+          </select>`
+        }
       </div>
     </div>
 
@@ -300,7 +325,7 @@ function _aoBuildPage(circs, activeCirc, activeTab = 'obligation')  {
     </div>
   </div>
 
-  <div class="ao-bulk-bar" id="ao-bulk-bar" style="display:none;">
+  <div class="ao-bulk-bar" id="ao-bulk-bar" style="display:${IS_SPOC?'none!important':'none'};">
     <div class="ao-bulk-left">
       <span class="ao-bulk-count" id="ao-bulk-count">0 selected</span>
       <button class="ao-bulk-clear" onclick="_aoClearSel()">✕</button>
@@ -360,9 +385,9 @@ function _aoRenderChapter(ch, ci, circId) {
       <table class="ao-table">
         <thead>${_aoTableHeader()}</thead>
         <tbody id="ao-tbody-${safeChId}">
-          ${ch.sections.flatMap(s => s.clauses.flatMap(cl => {
+        ${ch.sections.flatMap(s => s.clauses.flatMap(cl => {
     const safeClId = _aoSafeId(cl.clauseId);
-    return [_aoRenderClauseGroupHeader(cl, safeClId, circId), ...cl.obligations.map(ob => _aoRenderObRow(ob, safeClId, circId))];
+    return cl.obligations.map(ob => _aoRenderObRow(ob, safeClId, circId));
   })).join('')}
         </tbody>
       </table>
@@ -409,37 +434,128 @@ function _aoRenderObRow(ob, safeClauseId, circId) {
 <tr class="ao-ob-row ${ob.status === 'Unassigned' ? 'ao-ob-unassigned' : ''}"
     id="ao-row-${ob.id}"
     data-obid="${ob.id}" data-circid="${circId}" data-clauseid="${safeClauseId}"
-    data-status="${ob.status}" data-priority="${ob.priority}" data-dept="${ob.dept || ''}">
+    data-status="${ob.status}" data-priority="${ob.priority}" data-dept="${ob.dept || ''}" data-branch="${ob.branch || ''}">
   <td class="ao-td-chk" onclick="event.stopPropagation()">
-    <label class="ao-check-wrap">
+    ${IS_SPOC ? '' : `<label class="ao-check-wrap">
       <input type="checkbox" class="ao-row-chk" data-id="${ob.id}" data-clause="${safeClauseId}" onchange="_aoRowCheck(this)"/>
       <span class="ao-checkmark"></span>
-    </label>
+    </label>`}
   </td>
   <td><span class="ao-ob-id-badge">${ob.id}</span></td>
   <td class="ao-td-text" onclick="_aoOpenDrawer('${ob.id}','${circId}')">
     <span class="ao-ob-text">${ob.text}</span>
   </td>
   <td onclick="event.stopPropagation()">
-    <select class="ao-inline-sel ${ob.dept ? 'filled' : ''}" onchange="_aoInlineDeptChange('${ob.id}','${circId}',this)">
-      <option value="">Dept…</option>
-      ${AO_DEPTS.map(d => `<option ${d === ob.dept ? 'selected' : ''}>${d}</option>`).join('')}
-    </select>
+    ${IS_SPOC
+      ? `<span style="font-size:12px;font-weight:600;color:#475569;background:#f1f5f9;padding:3px 10px;border-radius:6px;">${ob.dept || '—'}</span>`
+      : `<select class="ao-inline-sel ${ob.dept ? 'filled' : ''}" onchange="_aoInlineDeptChange('${ob.id}','${circId}',this)">
+          <option value="">Dept…</option>
+          ${AO_DEPTS.map(d => `<option ${d === ob.dept ? 'selected' : ''}>${d}</option>`).join('')}
+        </select>`
+    }
   </td>
   <td onclick="event.stopPropagation()">
-    ${ob.assignee
-      ? `<div class="ao-assignee-filled"><span class="ao-av">${ob.assignee.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2)}</span><span class="ao-assignee-name">${ob.assignee}</span></div>`
-      : `<span class="ao-assignee-empty-lbl">—</span>`}
+    ${IS_SPOC
+      ? `<div class="ao-ta-wrap" id="ao-ta-wrap-${ob.id}">
+          <input class="ao-inline-sel filled" id="ao-inline-assignee-${ob.id}"
+            value="${ob.assignee || ''}" placeholder="Search assignee…" autocomplete="off"
+            oninput="_aoSpocTypeahead('${ob.id}','${ob.dept||''}',this.value)"
+            onfocus="_aoSpocTypeahead('${ob.id}','${ob.dept||''}',this.value)"
+            style="min-width:140px;"/>
+          <div class="ao-sug-box" id="ao-sug-${ob.id}" style="display:none;"></div>
+        </div>`
+      : ob.assignee
+        ? `<div class="ao-assignee-filled"><span class="ao-av">${ob.assignee.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2)}</span><span class="ao-assignee-name">${ob.assignee}</span></div>`
+        : `<span class="ao-assignee-empty-lbl">—</span>`
+    }
   </td>
   <td onclick="event.stopPropagation()">
-    <input type="date" class="ao-inline-date ${ob.dueDate ? 'filled' : ''}"
-           value="${ob.dueDate || ''}"
-           onchange="_aoInlineDueChange('${ob.id}','${circId}',this)"/>
+    ${IS_SPOC
+      ? `<span style="font-size:12px;font-weight:600;color:#475569;">${ob.dueDate || '—'}</span>`
+      : `<input type="date" class="ao-inline-date ${ob.dueDate ? 'filled' : ''}"
+               value="${ob.dueDate || ''}"
+               onchange="_aoInlineDueChange('${ob.id}','${circId}',this)"/>`
+    }
+  </td>
+  <td>
+    ${ob.approver
+      ? `<div style="display:flex;align-items:center;gap:6px;">
+           <div style="width:22px;height:22px;border-radius:50%;background:#f5f3ff;color:#6d28d9;font-size:8px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;border:1px solid #c4b5fd;">
+             ${(ob.approver).split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2)}
+           </div>
+           <span style="font-size:12px;font-weight:500;color:#1e293b;">${ob.approver}</span>
+         </div>`
+      : `<span style="color:#94a3b8;font-size:12px;">—</span>`
+    }
   </td>
   <td><span class="ao-st-badge ${stCls}">${ob.status}</span></td>
   <td><button class="ao-ob-open-btn" onclick="_aoOpenDrawer('${ob.id}','${circId}')" title="Open detail">›</button></td>
 </tr>`;
 }
+
+
+window._aoSpocTypeahead = function(obId, dept, query) {
+  const sugBox = document.getElementById(`ao-sug-${obId}`);
+  if (!sugBox) return;
+
+  /* SPOC can only assign within their branch departments */
+  const spocDepts = window.SPOC_PROFILE?.departments || [];
+  let pool = [];
+  spocDepts.forEach(d => {
+    if (AO_PEOPLE[d]) pool.push(...AO_PEOPLE[d]);
+  });
+  pool = [...new Set(pool)];
+
+  const q = (query||'').trim().toLowerCase();
+  const res = q ? pool.filter(p => p.toLowerCase().includes(q)) : pool.slice(0, 8);
+
+  if (!res.length) { sugBox.style.display = 'none'; return; }
+  sugBox.style.display = 'block';
+  sugBox.innerHTML = res.map(p => `
+  <div class="ao-sug-item" onclick="_aoSpocPickPerson('${obId}','${p.replace(/'/g,"\\'")}','${dept}')">
+    <span class="ao-sug-av">${p.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2)}</span>
+    <span class="ao-sug-name">${p}</span>
+  </div>`).join('');
+
+  setTimeout(() => {
+    document.addEventListener('click', function h(e) {
+      if (!document.getElementById(`ao-ta-wrap-${obId}`)?.contains(e.target)) {
+        sugBox.style.display = 'none';
+        document.removeEventListener('click', h);
+      }
+    });
+  }, 0);
+};
+
+window._aoSpocPickPerson = function(obId, name, dept) {
+  /* update input */
+  const inp = document.getElementById(`ao-inline-assignee-${obId}`);
+  if (inp) inp.value = name;
+  const sug = document.getElementById(`ao-sug-${obId}`);
+  if (sug) sug.style.display = 'none';
+
+  /* save to data */
+  const circId = document.querySelector(`#ao-row-${obId}`)?.dataset.circid;
+  if (!circId) return;
+  const chapters = _aoGetData(circId);
+  for (const ch of chapters) {
+    for (const s of ch.sections) {
+      for (const cl of s.clauses) {
+        const ob = cl.obligations.find(o => o.id === obId);
+        if (ob) {
+          ob.assignee = name;
+          ob.status = 'Assigned';
+          /* update status badge inline */
+          const st = document.querySelector(`#ao-row-${obId} .ao-st-badge`);
+          if (st) { st.textContent = 'Assigned'; st.className = 'ao-st-badge ao-s-asgn'; }
+          if (typeof showToast === 'function') showToast(`${obId} assigned to ${name} ✓`, 'success');
+          return;
+        }
+      }
+    }
+  }
+};
+
 
 /* ── DRAWER ── */
 window._aoOverlayClick = function (e) { if (e.target.id === 'ao-overlay') _aoCloseDrawerDirect(); };
@@ -494,32 +610,49 @@ window._aoOpenDrawer = function (obId, circId) {
     <div class="ao-dr-field-row3">
       <div class="ao-dr-field">
         <label class="ao-dr-label">Department</label>
-        <select class="ao-dr-input" id="ao-dr-dept-${obId}">
-          <option value="">Select department…</option>
-          ${AO_DEPTS.map(d => `<option ${d === ob.dept ? 'selected' : ''}>${d}</option>`).join('')}
-        </select>
+        ${IS_SPOC
+          ? `<div class="ao-dr-input" style="background:#f8fafc;color:#475569;pointer-events:none;opacity:0.8;">${ob.dept||'—'}</div>`
+          : `<select class="ao-dr-input" id="ao-dr-dept-${obId}">
+              <option value="">Select department…</option>
+              ${AO_DEPTS.map(d=>`<option ${d===ob.dept?'selected':''}>${d}</option>`).join('')}
+            </select>`
+        }
       </div>
       <div class="ao-dr-field">
         <label class="ao-dr-label">Assign to Person</label>
         <div class="ao-ta-wrap" id="ao-ta-wrap-${obId}">
           <input class="ao-dr-input" id="ao-dr-assignee-${obId}"
                  value="${ob.assignee || ''}" placeholder="Type name…" autocomplete="off"
-                 oninput="_aoTypeahead('${obId}',this.value)"
-                 onfocus="_aoTypeahead('${obId}',this.value)"/>
+                 oninput="${IS_SPOC?`_aoSpocTypeahead('${obId}','${ob.dept||''}',this.value)`:`_aoTypeahead('${obId}',this.value)`}"
+                 onfocus="${IS_SPOC?`_aoSpocTypeahead('${obId}','${ob.dept||''}',this.value)`:`_aoTypeahead('${obId}',this.value)`}"/>
           <div class="ao-sug-box" id="ao-sug-${obId}" style="display:none;"></div>
         </div>
       </div>
       <div class="ao-dr-field">
         <label class="ao-dr-label">Due Date</label>
-        <input type="date" class="ao-dr-input" id="ao-dr-due-${obId}" value="${ob.dueDate || ''}"/>
+        ${IS_SPOC
+          ? `<div class="ao-dr-input" style="background:#f8fafc;color:#475569;pointer-events:none;opacity:0.8;">${ob.dueDate||'—'}</div>`
+          : `<input type="date" class="ao-dr-input" id="ao-dr-due-${obId}" value="${ob.dueDate||''}"/>`
+        }
       </div>
     </div>
 
     <div class="ao-dr-field">
+      <label class="ao-dr-label">Approver</label>
+      ${IS_SPOC
+        ? `<div class="ao-dr-input" style="background:#f8fafc;color:#475569;pointer-events:none;opacity:0.8;">${ob.approver||'—'}</div>`
+        : `<input class="ao-dr-input" id="ao-dr-approver-${obId}"
+               value="${ob.approver||''}" placeholder="Type approver name…"
+               autocomplete="off"/>`
+      }
+    </div>
+
+    ${IS_SPOC ? '' : `
+    <div class="ao-dr-field">
       <label class="ao-dr-label">Notes / Instructions</label>
       <textarea class="ao-dr-input ao-dr-ta" id="ao-dr-notes-${obId}"
-                placeholder="Add context or instructions…">${ob._notes || ''}</textarea>
-    </div>
+                placeholder="Add context or instructions…">${ob._notes||''}</textarea>
+    </div>`}
   </div>
 
   <div class="ao-circ-ref-table" id="ao-circ-ref-${obId}" style="display:none;">
@@ -708,10 +841,11 @@ window._aoDrawerSave = function (obId, circId) {
   let ob = null, safeClId = '';
   for (const ch of chapters) { for (const s of ch.sections) { for (const cl of s.clauses) { const f = cl.obligations.find(o => o.id === obId); if (f) { ob = f; safeClId = _aoSafeId(cl.clauseId); break; } } if (ob) break; } if (ob) break; }
   if (!ob) return;
-  ob.dept = document.getElementById(`ao-dr-dept-${obId}`)?.value || ob.dept;
+  ob.dept     = document.getElementById(`ao-dr-dept-${obId}`)?.value     || ob.dept;
   ob.assignee = document.getElementById(`ao-dr-assignee-${obId}`)?.value || ob.assignee;
-  ob.dueDate = document.getElementById(`ao-dr-due-${obId}`)?.value || ob.dueDate;
-  ob._notes = document.getElementById(`ao-dr-notes-${obId}`)?.value || '';
+  ob.approver = document.getElementById(`ao-dr-approver-${obId}`)?.value || ob.approver;
+  ob.dueDate  = document.getElementById(`ao-dr-due-${obId}`)?.value      || ob.dueDate;
+  ob._notes   = document.getElementById(`ao-dr-notes-${obId}`)?.value    || '';
   if (ob.dept) ob.status = 'Assigned';
   // Find which chapter body to update
   let chSafeId = '';
@@ -820,9 +954,12 @@ window._aoToggleChapter = function (safeChId) {
 /* ── FILTERS ── */
 window._aoApplyFilters = function () {
   const fS = document.getElementById('ao-filter-status')?.value || '';
-  const fD = document.getElementById('ao-filter-dept')?.value || '';
+  const fD = document.getElementById('ao-filter-dept')?.value   || '';
+  const fB = document.getElementById('ao-filter-branch')?.value || '';
   document.querySelectorAll('.ao-ob-row').forEach(row => {
-    const ok = (!fS || row.dataset.status === fS) && (!fD || row.dataset.dept === fD);
+    const ok = (!fS || row.dataset.status === fS)
+            && (!fD || row.dataset.dept   === fD)
+            && (!fB || row.dataset.branch === fB);
     row.style.display = ok ? '' : 'none';
   });
 };
@@ -842,20 +979,20 @@ function _aoUpdateStats(circId) {
 
 window._aoSwitchCirc = function (circId) { document.getElementById('ao-csel-drop').style.display = 'none'; renderAssignObligation(circId); };
 window._aoSaveAll = function () { if (typeof showToast === 'function') showToast('All assignments saved ✓', 'success'); };
-window._aoSwitchMainTab = function(tab, circId) {
-  if (tab === 'activities') {
-    if (typeof window.renderAssignActivity === 'function') {
-      window.renderAssignActivity(circId, '', 'activities');
-    } else {
-      console.error('renderAssignActivity is not loaded');
-    }
-  } else {
-    window.renderAssignObligation(circId, 'obligation');
-  }
-};
+
 
 /* ── BIND ── */
 function _aoBindAll(circId) {
+  /* SPOC: auto-hide rows not in their departments */
+  if (IS_SPOC) {
+    const spocDepts = window.SPOC_PROFILE?.departments || [];
+    document.querySelectorAll('.ao-ob-row').forEach(row => {
+      if (spocDepts.length && row.dataset.dept && !spocDepts.includes(row.dataset.dept)) {
+        row.style.display = 'none';
+      }
+    });
+  }
+
   const btn = document.getElementById('ao-csel-btn');
   const drop = document.getElementById('ao-csel-drop');
   const srch = document.getElementById('ao-csel-search');

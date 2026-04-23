@@ -7,12 +7,13 @@
 :root{
   --pri:#6366f1;--pri-d:#4f46e5;
   --success:#10b981;--warn:#f59e0b;--danger:#ef4444;
-  --bg:#f1f5f9;--surface:#fff;--border:#e2e8f0;
+  --bg:#f8fafc;--surface:#fff;--border:#e2e8f0;
   --text:#0f172a;--text2:#475569;--text3:#94a3b8;
   --sidebar:240px;--topbar:52px;
 }
 body{font-family:'DM Sans',system-ui,sans-serif;background:var(--bg);color:var(--text);display:flex;min-height:100vh;font-size:13px}
 
+/* SIDEBAR */
 #sb{width:var(--sidebar);flex-shrink:0;background:#0f172a;display:flex;flex-direction:column;position:fixed;left:0;top:0;bottom:0;z-index:100}
 .sb-logo{padding:16px 18px 12px;border-bottom:1px solid rgba(255,255,255,.07);display:flex;align-items:center;gap:9px}
 .sb-logo-ic{width:30px;height:30px;background:#6366f1;border-radius:7px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:14px}
@@ -29,23 +30,28 @@ body{font-family:'DM Sans',system-ui,sans-serif;background:var(--bg);color:var(-
 .sb-un{font-size:12px;font-weight:700;color:#e2e8f0}
 .sb-ur{font-size:10px;color:#64748b}
 
+/* MAIN */
 #main{margin-left:var(--sidebar);flex:1;display:flex;flex-direction:column;min-height:100vh}
 #topbar{height:var(--topbar);background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 20px;gap:10px;position:sticky;top:0;z-index:50}
 #page-title{font-size:15px;font-weight:800;color:var(--text);flex:1}
 .tb-btn{display:flex;align-items:center;gap:5px;padding:6px 12px;border-radius:7px;border:1px solid var(--border);background:var(--surface);font-size:12px;font-weight:600;color:var(--text2);cursor:pointer;font-family:inherit}
 .tb-av{width:30px;height:30px;border-radius:50%;background:#eef2ff;color:#4338ca;font-size:10px;font-weight:800;display:flex;align-items:center;justify-content:center;border:1.5px solid #c7d2fe}
 
+/* PAGES */
 .pg{display:none;flex:1;flex-direction:column}
 .pg.on{display:flex}
 .pb{padding:20px;flex:1}
 
+/* CHIP */
 .chip{display:inline-block;font-size:10.5px;font-weight:700;padding:2px 8px;border-radius:99px;white-space:nowrap}
 
+/* TABLE CARD */
 .tc{background:var(--surface);border:1px solid var(--border);border-radius:11px;overflow:hidden}
 .tc-hd{display:flex;align-items:center;justify-content:space-between;padding:13px 16px;border-bottom:1px solid var(--border);background:#fafbff}
 .tc-tit{font-size:13.5px;font-weight:800}
 .tc-sub{font-size:11px;color:var(--text3);margin-top:1px}
 
+/* FILTER BAR */
 .fb{display:flex;align-items:center;gap:7px;padding:9px 12px;border-bottom:1px solid var(--border);background:var(--bg);flex-wrap:wrap}
 .fs{position:relative;flex:1;min-width:140px;max-width:220px}
 .fs input{width:100%;padding:6px 8px 6px 26px;border:1px solid var(--border);border-radius:6px;font-size:12px;outline:none;background:#fff;font-family:inherit}
@@ -55,6 +61,7 @@ body{font-family:'DM Sans',system-ui,sans-serif;background:var(--bg);color:var(-
 .fsel:focus{border-color:var(--pri)}
 .f-clr{padding:5px 9px;background:none;border:1px solid #fca5a5;border-radius:6px;font-size:11px;font-weight:700;color:var(--danger);cursor:pointer;font-family:inherit}
 
+/* MAIN TABLE */
 .ot{width:100%;border-collapse:collapse;font-size:12.5px}
 .ot thead tr{background:#f8fafc}
 .ot th{padding:9px 12px;text-align:left;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text3);border-bottom:1px solid var(--border);white-space:nowrap}
@@ -74,9 +81,8 @@ body{font-family:'DM Sans',system-ui,sans-serif;background:var(--bg);color:var(-
 .btn-ghost{background:#fff;color:var(--text2);border:1px solid var(--border)}
 .btn-ghost:hover{background:var(--bg)}
 .btn-sm{padding:4px 10px;font-size:11.5px;border-radius:6px}
-.btn-xs{padding:3px 8px;font-size:11px;border-radius:5px}
 
-/* DETAIL */
+/* DETAIL LAYOUT */
 #pg-detail .pb{padding:0;display:flex;flex-direction:column;flex:1}
 .det-hd{padding:13px 20px;border-bottom:1px solid var(--border);background:var(--surface);position:sticky;top:var(--topbar);z-index:40}
 .det-bc{display:flex;align-items:center;gap:5px;font-size:11px;margin-bottom:5px}
@@ -88,50 +94,65 @@ body{font-family:'DM Sans',system-ui,sans-serif;background:var(--bg);color:var(-
 .det-chip-b{font-size:10.5px;font-weight:700;padding:2px 8px;border-radius:99px;background:#eef2ff;color:#4338ca;border:1px solid #c7d2fe}
 .det-chip-g{font-size:10.5px;font-weight:700;padding:2px 8px;border-radius:99px;background:#f1f5f9;color:#64748b;border:1px solid #e2e8f0}
 
-/* SINGLE FULL-WIDTH PANEL */
-.det-body{flex:1;overflow-y:auto;padding:20px;display:flex;flex-direction:column;gap:10px;background:var(--bg)}
-.det-body::-webkit-scrollbar{width:4px}
-.det-body::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:99px}
+/* 2-col body */
+.det-body{display:flex;flex:1;overflow:hidden;min-height:0;justify-content:center;background:var(--bg)}
+.det-right{width:100%;max-width:560px;overflow-y:auto;padding:20px;display:flex;flex-direction:column;gap:10px;background:var(--bg)}
+.det-right::-webkit-scrollbar{width:3px}
+.det-right::-webkit-scrollbar-thumb{background:#e2e8f0;border-radius:99px}
+/* SECTION LABEL */
+.sl{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--text3);margin-bottom:9px;display:flex;align-items:center;gap:7px}
+.sl::after{content:'';flex:1;height:1px;background:var(--border)}
 
-/* ACCORDION CARDS — each with distinct subtle bg */
-.acc-card{border:1px solid var(--border);border-radius:11px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.04)}
-.acc-card.ac-blue  .acc-hd{background:#eef2ff}
-.acc-card.ac-slate .acc-hd{background:#f8fafc}
-.acc-card.ac-teal  .acc-hd{background:#f0fdf9}
-.acc-card.ac-amber .acc-hd{background:#fffbeb}
-.acc-card.ac-rose  .acc-hd{background:#fff1f2}
-.acc-card.ac-violet .acc-hd{background:#f5f3ff}
-.acc-hd{display:flex;align-items:center;justify-content:space-between;padding:11px 16px;cursor:pointer;user-select:none;transition:filter .12s}
-.acc-hd:hover{filter:brightness(.97)}
-.acc-hd-left{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;color:var(--text)}
-.acc-bdg{font-size:10px;font-weight:800;background:#e0e7ff;color:#3730a3;padding:1px 6px;border-radius:99px}
-.acc-arrow{font-size:11px;color:var(--text3);transition:transform .2s;display:inline-block}
-.acc-arrow.open{transform:rotate(180deg)}
-.acc-body{background:#fff;border-top:1px solid var(--border);padding:16px}
-.acc-body.hidden{display:none}
-
-/* ACTION INFO GRID */
-.info-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:0}
-.ig-cell{padding:10px 14px;border-right:1px solid #f1f5f9;border-bottom:1px solid #f1f5f9}
-.ig-cell:nth-child(3n){border-right:none}
-.ig-cell:nth-last-child(-n+3){border-bottom:none}
-.ig-lbl{font-size:10.5px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px}
-.ig-val{font-size:12.5px;font-weight:600;color:var(--text)}
-.ig-val.small{font-size:11.5px;font-weight:500}
+/* DL */
+.dl{display:flex;flex-direction:column}
+.drow{display:flex;align-items:baseline;gap:8px;padding:5px 0;border-bottom:1px solid #f1f5f9}
+.drow:last-child{border-bottom:none}
+.dlbl{font-size:11px;font-weight:700;color:var(--text3);min-width:100px;flex-shrink:0}
+.dval{font-size:12.5px;color:var(--text)}
 .dcode{font-family:monospace;font-size:11px;background:#eef2ff;color:#4338ca;border:1px solid #c7d2fe;padding:2px 6px;border-radius:4px}
-.ob-box{font-size:12.5px;color:var(--text2);line-height:1.65;border-left:2px solid var(--pri);padding:7px 11px;background:#f8f9ff;border-radius:0 6px 6px 0;margin-bottom:12px}
+.ob-box{font-size:12.5px;color:var(--text2);line-height:1.65;border-left:2px solid var(--pri);padding:7px 11px;background:#f8f9ff;border-radius:0 6px 6px 0}
 .desc-box{font-size:12.5px;color:var(--text3);line-height:1.65}
 
-/* EVIDENCE */
-.ev-row{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid #f4f5f8}
-.ev-row:last-child{border-bottom:none}
-.ev-icon{width:32px;height:32px;border-radius:7px;background:#eef2ff;color:#4338ca;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;border:1px solid #c7d2fe}
-.ev-name{font-size:12.5px;font-weight:600;color:var(--text)}
-.ev-meta{font-size:11px;color:var(--text3);margin-top:1px}
-.ev-actions{margin-left:auto;display:flex;gap:6px;flex-shrink:0}
+/* ACCORDION */
+.acc{border:1px solid var(--border);border-radius:9px;overflow:hidden}
+.acc-hd{display:flex;align-items:center;justify-content:space-between;padding:11px 14px;background:#fafbff;cursor:pointer;user-select:none;transition:background .12s}
+.acc-hd:hover{background:#f1f5f9}
+.acc-hd-left{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;color:var(--text)}
+.acc-bdg{font-size:10px;font-weight:800;background:#e0e7ff;color:#3730a3;padding:1px 6px;border-radius:99px}
+.acc-arrow{font-size:11px;color:var(--text3);transition:transform .2s}
+.acc-arrow.open{transform:rotate(180deg)}
+.acc-body{border-top:1px solid var(--border);padding:14px}
+.acc-body.hidden{display:none}
 
-/* DECISION */
-.dec-opts{display:flex;flex-direction:column;gap:6px;margin-bottom:12px}
+/* COMMENTS */
+.cmt-thread{display:flex;flex-direction:column;gap:9px;margin-bottom:12px}
+.cmt{display:flex;gap:8px;align-items:flex-start}
+.cmt-bd{flex:1;background:#f8fafc;border:1px solid var(--border);border-radius:4px 9px 9px 9px;padding:8px 11px}
+.cmt-meta{display:flex;align-items:center;gap:5px;margin-bottom:3px;flex-wrap:wrap}
+.cmt-nm{font-size:12px;font-weight:700}
+.cmt-rl{font-size:10.5px;color:var(--text3)}
+.cmt-tm{font-size:10.5px;color:#cbd5e1;margin-left:auto}
+.cmt-tx{font-size:12px;color:var(--text2);line-height:1.5}
+.cmt-av{width:24px;height:24px;border-radius:50%;background:#eef2ff;color:#4338ca;font-size:9px;font-weight:800;display:inline-flex;align-items:center;justify-content:center;border:1.5px solid #c7d2fe;flex-shrink:0}
+
+/* RIGHT PANEL */
+.rp-info{padding:13px 14px;border-bottom:1px solid var(--border)}
+.rp-sl{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--text3);margin-bottom:8px;display:flex;align-items:center;gap:7px}
+.rp-sl::after{content:'';flex:1;height:1px;background:var(--border)}
+.rp-row{display:flex;align-items:baseline;gap:7px;padding:4px 0;border-bottom:1px solid #f1f5f9}
+.rp-row:last-child{border-bottom:none}
+.rp-rows{display:flex;flex-direction:column}
+.rp-lbl{font-size:11px;font-weight:700;color:var(--text3);min-width:75px;flex-shrink:0}
+.rp-val{font-size:12.5px;color:var(--text);font-weight:500}
+
+.dec-box{padding:14px;flex:1;display:flex;flex-direction:column;gap:11px}
+.dec-tit{font-size:13px;font-weight:800;color:var(--text)}
+.dec-sub{font-size:11.5px;color:var(--text3);line-height:1.5;margin-top:2px}
+.fwd-lbl{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:var(--text3);margin-bottom:5px}
+.fwd-sel{width:100%;padding:8px 9px;border:1px solid var(--border);border-radius:7px;font-family:inherit;font-size:12.5px;color:var(--text);outline:none;background:#fff;cursor:pointer}
+.fwd-sel:focus{border-color:var(--pri);box-shadow:0 0 0 2px rgba(99,102,241,.1)}
+
+.dec-opts{display:flex;flex-direction:column;gap:6px}
 .dec-opt{display:flex;align-items:center;gap:9px;padding:9px 11px;border-radius:7px;border:1.5px solid var(--border);cursor:pointer;transition:all .12s;background:#fff}
 .dec-opt:hover{border-color:#c7d2fe;background:#f8f9ff}
 .dec-opt.sel-approve{border-color:#86efac;background:#f0fdf4}
@@ -146,53 +167,26 @@ body{font-family:'DM Sans',system-ui,sans-serif;background:var(--bg);color:var(-
 .dec-opt.sel-reject  .dec-radio{border-color:var(--danger);background:var(--danger)}
 .dec-opt.sel-back    .dec-radio{border-color:#7c3aed;background:#7c3aed}
 .dec-opt.sel-forward .dec-radio{border-color:#0369a1;background:#0369a1}
-.fwd-lbl{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:var(--text3);margin-bottom:5px}
-.fwd-sel{width:100%;padding:8px 9px;border:1px solid var(--border);border-radius:7px;font-family:inherit;font-size:12.5px;color:var(--text);outline:none;background:#fff;cursor:pointer;margin-bottom:12px}
-.fwd-sel:focus{border-color:var(--pri);box-shadow:0 0 0 2px rgba(99,102,241,.1)}
+
 .rem-lbl{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:var(--text3);margin-bottom:5px}
 .dec-remark{width:100%;padding:8px 9px;border:1px solid var(--border);border-radius:7px;font-family:inherit;font-size:12.5px;outline:none;resize:vertical;min-height:72px;color:var(--text);background:#fff}
 .dec-remark:focus{border-color:var(--pri);box-shadow:0 0 0 2px rgba(99,102,241,.08)}
-.dec-submit{width:100%;padding:10px;background:var(--pri);color:#fff;border:none;border-radius:8px;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;transition:background .12s;margin-top:10px}
+.dec-submit{width:100%;padding:10px;background:var(--pri);color:#fff;border:none;border-radius:8px;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;transition:background .12s}
 .dec-submit:hover{background:var(--pri-d)}
 .dec-submit:disabled{background:#e2e8f0;color:#94a3b8;cursor:not-allowed}
 
-/* COMMENTS */
-.cmt-thread{display:flex;flex-direction:column;gap:9px;margin-bottom:12px}
-.cmt{display:flex;gap:8px;align-items:flex-start}
-.cmt-bd{flex:1;background:#f8fafc;border:1px solid var(--border);border-radius:4px 9px 9px 9px;padding:8px 11px}
-.cmt-meta{display:flex;align-items:center;gap:5px;margin-bottom:3px;flex-wrap:wrap}
-.cmt-nm{font-size:12px;font-weight:700}
-.cmt-rl{font-size:10.5px;color:var(--text3)}
-.cmt-tm{font-size:10.5px;color:#cbd5e1;margin-left:auto}
-.cmt-tx{font-size:12px;color:var(--text2);line-height:1.5}
-.cmt-av{width:24px;height:24px;border-radius:50%;background:#eef2ff;color:#4338ca;font-size:9px;font-weight:800;display:inline-flex;align-items:center;justify-content:center;border:1.5px solid #c7d2fe;flex-shrink:0}
-
-/* DECIDED */
-.decided-card{text-align:center;padding:20px}
-.decided-ic{font-size:34px;margin-bottom:7px}
+.decided-box{text-align:center;padding:24px 14px}
+.decided-ic{font-size:36px;margin-bottom:8px}
 .decided-tit{font-size:15px;font-weight:800;margin-bottom:3px}
+.decided-sub{font-size:12px;color:var(--text3);margin-top:6px;line-height:1.5}
 
-/* DASHBOARD */
-.dash-stat{background:#fff;border:1px solid var(--border);border-radius:10px;padding:16px}
+/* PLACEHOLDER PAGES */
+.ph{display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;gap:10px;color:var(--text3)}
+.ph-ic{font-size:40px}
+.ph-tit{font-size:16px;font-weight:800;color:var(--text)}
+.ph-sub{font-size:13px}
 
-/* REPORTS / SETTINGS */
-.rep-card{background:#fff;border:1px solid var(--border);border-radius:10px;padding:18px;cursor:pointer;transition:box-shadow .15s}
-.rep-card:hover{box-shadow:0 4px 16px rgba(0,0,0,.08)}
-.set-row{background:#fff;border:1px solid var(--border);border-radius:9px;padding:14px 18px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;transition:background .12s}
-.set-row:hover{background:#f8fafc}
-
-/* MODAL OVERLAY */
-.modal-overlay{position:fixed;inset:0;background:rgba(15,23,42,.45);z-index:500;display:flex;align-items:center;justify-content:center}
-.modal{background:#fff;border-radius:14px;width:560px;max-width:92vw;max-height:80vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.2)}
-.modal-hd{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--border)}
-.modal-tit{font-size:14px;font-weight:800}
-.modal-close{background:none;border:none;font-size:18px;cursor:pointer;color:var(--text3);padding:2px 6px;border-radius:5px}
-.modal-close:hover{background:var(--bg);color:var(--text)}
-.modal-body{flex:1;overflow-y:auto;padding:18px;display:flex;flex-direction:column;gap:12px}
-.doc-preview{background:#f8fafc;border:1px solid var(--border);border-radius:9px;padding:20px;text-align:center;min-height:200px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px}
-.doc-meta-row{display:flex;gap:8px;flex-wrap:wrap}
-.doc-meta-pill{font-size:11px;font-weight:600;background:#f1f5f9;color:var(--text2);border:1px solid var(--border);padding:3px 9px;border-radius:99px}
-
+/* TOAST */
 .toast-wrap{position:fixed;bottom:20px;right:20px;z-index:9999;display:flex;flex-direction:column;gap:7px}
 .toast{padding:10px 16px;border-radius:9px;font-size:13px;font-weight:600;color:#fff;box-shadow:0 4px 20px rgba(0,0,0,.15);display:flex;align-items:center;gap:7px;animation:tin .2s ease}
 @keyframes tin{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
@@ -206,21 +200,38 @@ body{font-family:'DM Sans',system-ui,sans-serif;background:var(--bg);color:var(-
 <aside id="sb">
   <div class="sb-logo">
     <div class="sb-logo-ic">⬡</div>
-    <div><div class="sb-logo-main">CMS</div><div class="sb-logo-sub">Compliance Suite</div></div>
+    <div>
+      <div class="sb-logo-main">CMS</div>
+      <div class="sb-logo-sub">Compliance Suite</div>
+    </div>
   </div>
   <nav class="sb-nav">
     <div class="sb-s">Workspace</div>
-    <div class="sb-a" id="nav-dashboard" onclick="nav('dashboard')"><span>◧</span> Dashboard</div>
-    <div class="sb-a on" id="nav-approvals" onclick="nav('approvals')"><span>✦</span> My Approvals <span class="sb-bdg" id="sb-bdg">3</span></div>
-    <div class="sb-a" id="nav-history" onclick="nav('history')"><span>◷</span> History</div>
+    <div class="sb-a" id="nav-dashboard" onclick="nav('dashboard')">
+      <span>◧</span> Dashboard
+    </div>
+    <div class="sb-a on" id="nav-approvals" onclick="nav('approvals')">
+      <span>✦</span> My Approvals
+      <span class="sb-bdg" id="sb-bdg">3</span>
+    </div>
+    <div class="sb-a" id="nav-history" onclick="nav('history')">
+      <span>◷</span> History
+    </div>
     <div class="sb-s" style="margin-top:6px">Insights</div>
-    <div class="sb-a" id="nav-reports" onclick="nav('reports')"><span>◫</span> Reports</div>
+    <div class="sb-a" id="nav-reports" onclick="nav('reports')">
+      <span>◫</span> Reports
+    </div>
     <div class="sb-s" style="margin-top:6px">System</div>
-    <div class="sb-a" id="nav-settings" onclick="nav('settings')"><span>◎</span> Settings</div>
+    <div class="sb-a" id="nav-settings" onclick="nav('settings')">
+      <span>◎</span> Settings
+    </div>
   </nav>
   <div class="sb-ft">
     <div class="sb-av">RV</div>
-    <div><div class="sb-un">Ravi Verma</div><div class="sb-ur">Department Owner</div></div>
+    <div>
+      <div class="sb-un">Ravi Verma</div>
+      <div class="sb-ur">Department Owner</div>
+    </div>
   </div>
 </aside>
 
@@ -236,28 +247,47 @@ body{font-family:'DM Sans',system-ui,sans-serif;background:var(--bg);color:var(-
     <div class="pb">
       <div style="font-size:20px;font-weight:800;margin-bottom:4px">Good morning, Ravi 👋</div>
       <div style="font-size:12.5px;color:var(--text3);margin-bottom:20px">Here's your approval overview</div>
-      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;margin-bottom:24px" id="dash-stats"></div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;margin-bottom:24px" id="dash-stats"></div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px">
-        <div class="tc"><div class="tc-hd"><div><div class="tc-tit">⏳ Awaiting Decision</div><div class="tc-sub">Pending approvals</div></div><button class="btn btn-pri btn-sm" onclick="nav('approvals')">View All →</button></div><div id="dash-pending"></div></div>
-        <div class="tc"><div class="tc-hd"><div><div class="tc-tit">✅ Recent Decisions</div><div class="tc-sub">Your latest actions</div></div></div><div id="dash-recent"></div></div>
+        <div class="tc">
+          <div class="tc-hd"><div><div class="tc-tit">⏳ Awaiting Decision</div><div class="tc-sub">Pending approvals</div></div><button class="btn btn-pri btn-sm" onclick="nav('approvals')">View All →</button></div>
+          <div id="dash-pending"></div>
+        </div>
+        <div class="tc">
+          <div class="tc-hd"><div><div class="tc-tit">✅ Recent Decisions</div><div class="tc-sub">Your latest actions</div></div></div>
+          <div id="dash-recent"></div>
+        </div>
       </div>
     </div>
   </div>
 
-  <!-- LIST -->
+  <!-- APPROVALS LIST -->
   <div class="pg on" id="pg-approvals">
     <div class="pb">
       <div class="tc">
-        <div class="tc-hd"><div><div class="tc-tit">Pending Approvals</div><div class="tc-sub">Actions submitted for your final decision</div></div></div>
+        <div class="tc-hd">
+          <div><div class="tc-tit">Pending Approvals</div><div class="tc-sub">Actions submitted for your final decision</div></div>
+        </div>
         <div class="fb">
-          <div class="fs"><span class="fs-ic">⌕</span><input id="f-q" placeholder="Search by ID, obligation, action…" oninput="renderTable()"/></div>
-          <select class="fsel" id="f-status" onchange="renderTable()"><option value="">All Status</option><option>Pending Approval</option><option>Approved</option><option>Rejected</option><option>Sent Back</option><option>Forwarded</option></select>
-          <select class="fsel" id="f-risk" onchange="renderTable()"><option value="">All Risk</option><option>Critical</option><option>High</option><option>Medium</option><option>Low</option></select>
+          <div class="fs">
+            <span class="fs-ic">⌕</span>
+            <input id="f-q" placeholder="Search by ID, obligation, action…" oninput="renderTable()"/>
+          </div>
+          <select class="fsel" id="f-status" onchange="renderTable()">
+            <option value="">All Status</option>
+            <option>Pending Approval</option><option>Approved</option><option>Rejected</option><option>Sent Back</option><option>Forwarded</option>
+          </select>
+          <select class="fsel" id="f-risk" onchange="renderTable()">
+            <option value="">All Risk</option>
+            <option>Critical</option><option>High</option><option>Medium</option><option>Low</option>
+          </select>
           <button class="f-clr" onclick="clearF()">✕ Clear</button>
         </div>
         <div style="overflow-x:auto">
           <table class="ot">
-            <thead><tr><th>Obl. ID</th><th>Obligation Name</th><th>Action Name</th><th>Submitted By</th><th>Due Date</th><th>Compliance Status</th><th></th>Action</tr></thead>
+            <thead><tr>
+              <th>Obl. ID</th><th>Obligation Name</th><th>Action Name</th><th>Submitted By</th><th>Due Date</th><th>Status</th><th></th>
+            </tr></thead>
             <tbody id="ot-body"></tbody>
           </table>
         </div>
@@ -265,7 +295,7 @@ body{font-family:'DM Sans',system-ui,sans-serif;background:var(--bg);color:var(-
     </div>
   </div>
 
-  <!-- DETAIL — single full-width panel -->
+  <!-- DETAIL -->
   <div class="pg" id="pg-detail">
     <div class="pb">
       <div class="det-hd">
@@ -280,7 +310,10 @@ body{font-family:'DM Sans',system-ui,sans-serif;background:var(--bg);color:var(-
         </div>
         <div class="det-chips" id="det-chips"></div>
       </div>
-      <div class="det-body" id="det-body"></div>
+      <div class="det-body">
+
+        <div class="det-right" id="det-right"></div>
+      </div>
     </div>
   </div>
 
@@ -288,7 +321,14 @@ body{font-family:'DM Sans',system-ui,sans-serif;background:var(--bg);color:var(-
   <div class="pg" id="pg-history">
     <div class="pb">
       <div style="font-size:18px;font-weight:800;margin-bottom:16px">Decision History</div>
-      <div class="tc"><div style="overflow-x:auto"><table class="ot"><thead><tr><th>Obl. ID</th><th>Action Name</th><th>Decision</th><th>Decided On</th><th>Remarks</th></tr></thead><tbody id="hist-body"></tbody></table></div></div>
+      <div class="tc">
+        <div style="overflow-x:auto">
+          <table class="ot">
+            <thead><tr><th>Obl. ID</th><th>Action Name</th><th>Decision</th><th>Decided On</th><th>Remarks</th></tr></thead>
+            <tbody id="hist-body"></tbody>
+          </table>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -296,9 +336,9 @@ body{font-family:'DM Sans',system-ui,sans-serif;background:var(--bg);color:var(-
   <div class="pg" id="pg-reports">
     <div class="pb">
       <div style="font-size:18px;font-weight:800;margin-bottom:20px">Reports</div>
-      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px">
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px">
         ${['Approval Summary','Overdue Actions','Circular Compliance','Risk Heatmap','Forwarding Log','Decision Audit Trail'].map((r,i)=>`
-        <div class="rep-card" onclick="toast('Opening ${r}…','ok')">
+        <div class="tc" style="padding:18px;cursor:pointer" onclick="toast('Opening ${r}…','ok')">
           <div style="font-size:22px;margin-bottom:10px">${['📊','⚠️','📋','🗺️','➜','🔍'][i]}</div>
           <div style="font-size:13.5px;font-weight:700;margin-bottom:4px">${r}</div>
           <div style="font-size:11.5px;color:var(--text3)">View report →</div>
@@ -311,25 +351,23 @@ body{font-family:'DM Sans',system-ui,sans-serif;background:var(--bg);color:var(-
   <div class="pg" id="pg-settings">
     <div class="pb">
       <div style="font-size:18px;font-weight:800;margin-bottom:20px">Settings</div>
-      <div style="display:flex;flex-direction:column;gap:10px;max-width:600px">
-        ${[['Notification Preferences','Choose how and when you receive approval alerts'],['Delegation Rules','Set auto-forward rules when you are unavailable'],['Approval SLA Thresholds','Configure due date warning windows'],['Audit Log Access','Manage who can view your decision history'],['Profile & Display','Update your name, role and display preferences']].map(([t,s])=>`
-        <div class="set-row" onclick="toast('Opening ${t}…','ok')">
-          <div><div style="font-size:13px;font-weight:700">${t}</div><div style="font-size:11.5px;color:var(--text3);margin-top:2px">${s}</div></div>
-          <span style="color:var(--text3);font-size:18px">›</span>
+      <div style="display:flex;flex-direction:column;gap:12px;max-width:560px">
+        ${[
+          ['Notification Preferences','Choose how and when you receive approval alerts'],
+          ['Delegation Rules','Set auto-forward rules when you are unavailable'],
+          ['Approval SLA Thresholds','Configure due date warning windows'],
+          ['Audit Log Access','Manage who can view your decision history'],
+          ['Profile & Display','Update your name, role and display preferences'],
+        ].map(([t,s])=>`
+        <div class="tc" style="padding:14px 18px;display:flex;align-items:center;justify-content:space-between;cursor:pointer" onclick="toast('Opening ${t}…','ok')">
+          <div>
+            <div style="font-size:13px;font-weight:700">${t}</div>
+            <div style="font-size:11.5px;color:var(--text3);margin-top:2px">${s}</div>
+          </div>
+          <span style="color:var(--text3);font-size:16px">›</span>
         </div>`).join('')}
       </div>
     </div>
-  </div>
-</div>
-
-<!-- DOC MODAL -->
-<div class="modal-overlay" id="doc-modal" style="display:none" onclick="closeModal(event)">
-  <div class="modal">
-    <div class="modal-hd">
-      <div class="modal-tit" id="modal-title">Document Preview</div>
-      <button class="modal-close" onclick="document.getElementById('doc-modal').style.display='none'">✕</button>
-    </div>
-    <div class="modal-body" id="modal-body"></div>
   </div>
 </div>
 
@@ -337,12 +375,12 @@ body{font-family:'DM Sans',system-ui,sans-serif;background:var(--bg);color:var(-
 
 <script>
 const PEOPLE=[
-  {id:'p1',name:'Arjun Kumar',role:'Manager'},
-  {id:'p2',name:'Priya Nair',role:'Compliance Officer'},
-  {id:'p3',name:'Karan Shah',role:'Legal Counsel'},
-  {id:'p4',name:'Sneha Das',role:'Compliance Officer'},
-  {id:'p5',name:'Meera Pillai',role:'Senior Analyst'},
-  {id:'p6',name:'Vivek Rao',role:'Risk Manager'},
+  {id:'p1',name:'Arjun Kumar',   role:'Manager'},
+  {id:'p2',name:'Priya Nair',    role:'Compliance Officer'},
+  {id:'p3',name:'Karan Shah',    role:'Legal Counsel'},
+  {id:'p4',name:'Sneha Das',     role:'Compliance Officer'},
+  {id:'p5',name:'Meera Pillai',  role:'Senior Analyst'},
+  {id:'p6',name:'Vivek Rao',     role:'Risk Manager'},
 ];
 
 const DATA=[
@@ -356,10 +394,6 @@ const DATA=[
     description:'Prepare a detailed board committee charter covering governance structure, reporting lines to the Board, meeting cadence, and escalation protocols per RBI C1.1.',
     submittedBy:'Raj Iyer',submittedByRole:'IT Engineer',submittedOn:'08 Mar 2025',
     decision:null,decisionRemark:'',decidedOn:'',forwardedTo:null,
-    evidence:[
-      {id:'EV-001',name:'Committee_Charter_Draft_v2.docx',type:'Policy Document',uploadedBy:'Raj Iyer',date:'07 Mar 2025',size:'245 KB',pages:12},
-      {id:'EV-002',name:'Board_Meeting_Notes.pdf',type:'Meeting Minutes',uploadedBy:'Raj Iyer',date:'07 Mar 2025',size:'89 KB',pages:4},
-    ],
     comments:[
       {author:'Arjun Kumar',role:'Manager',av:'AK',time:'01 Mar',text:'Please prioritise — board review in 2 weeks.'},
       {author:'Raj Iyer',role:'IT Engineer',av:'RI',time:'07 Mar',text:'Charter complete. Legal has reviewed and approved the draft.'},
@@ -376,9 +410,6 @@ const DATA=[
     description:'Complete legal review of the committee charter, ensure alignment with RBI guidelines and prepare for board ratification.',
     submittedBy:'Karan Shah',submittedByRole:'Legal Counsel',submittedOn:'09 Mar 2025',
     decision:null,decisionRemark:'',decidedOn:'',forwardedTo:null,
-    evidence:[
-      {id:'EV-003',name:'Charter_Legal_Review_v1.pdf',type:'Legal Review',uploadedBy:'Karan Shah',date:'09 Mar 2025',size:'312 KB',pages:8},
-    ],
     comments:[
       {author:'Karan Shah',role:'Legal Counsel',av:'KS',time:'09 Mar',text:'Legal review done. No issues found. Ready for owner sign-off.'},
       {author:'Priya Nair',role:'Compliance Officer',av:'PN',time:'09 Mar',text:'Confirmed legal alignment with RBI circular.'},
@@ -394,7 +425,6 @@ const DATA=[
     description:'Update the KYC risk scoring algorithm and integrate with CBS. Include PEP flag, transaction velocity and geographic risk.',
     submittedBy:'Raj Iyer',submittedByRole:'IT Engineer',submittedOn:'09 Mar 2025',
     decision:null,decisionRemark:'',decidedOn:'',forwardedTo:null,
-    evidence:[],
     comments:[
       {author:'Raj Iyer',role:'IT Engineer',av:'RI',time:'09 Mar',text:'Model updated. UAT passed. Attaching test results.'},
     ]
@@ -409,9 +439,6 @@ const DATA=[
     description:'Schedule and coordinate the inaugural Board Cybersecurity Committee meeting.',
     submittedBy:'Sneha Das',submittedByRole:'Compliance Officer',submittedOn:'05 Mar 2025',
     decision:'Approved',decisionRemark:'Meeting scheduled as per RBI timeline. Approved.',decidedOn:'06 Mar 2025',forwardedTo:null,
-    evidence:[
-      {id:'EV-004',name:'Inaugural_Meeting_Invite.pdf',type:'Calendar Invite',uploadedBy:'Sneha Das',date:'05 Mar 2025',size:'54 KB',pages:2},
-    ],
     comments:[
       {author:'Sneha Das',role:'Compliance Officer',av:'SD',time:'05 Mar',text:'Meeting booked for March 15. Invite sent to all board members.'},
       {author:'Ravi Verma',role:'Department Owner',av:'RV',time:'06 Mar',text:'Approved. Good work on the timeline.'},
@@ -419,7 +446,7 @@ const DATA=[
   },
 ];
 
-let _cid=null,_dec=null;
+let _cid=null,_dec=null,_accOpen=true;
 
 function sc(s){return({'Pending Approval':{bg:'#fef9c3',fg:'#854d0e'},Approved:{bg:'#ecfdf5',fg:'#065f46'},Rejected:{bg:'#fee2e2',fg:'#991b1b'},'Sent Back':{bg:'#ede9fe',fg:'#5b21b6'},Forwarded:{bg:'#e0f2fe',fg:'#0369a1'}})[s]||{bg:'#f1f5f9',fg:'#475569'}}
 function rc(r){return({Critical:{bg:'#fdf2f8',fg:'#9d174d'},High:{bg:'#fee2e2',fg:'#991b1b'},Medium:{bg:'#fef9c3',fg:'#854d0e'},Low:{bg:'#dcfce7',fg:'#166534'}})[r]||{bg:'#f1f5f9',fg:'#475569'}}
@@ -441,7 +468,9 @@ function nav(p){
   if(p!=='detail'){_cid=null;_dec=null}
 }
 
-function updateBadge(){document.getElementById('sb-bdg').textContent=DATA.filter(i=>i.status==='Pending Approval').length}
+function updateBadge(){
+  document.getElementById('sb-bdg').textContent=DATA.filter(i=>i.status==='Pending Approval').length;
+}
 
 function renderTable(){
   const q=(document.getElementById('f-q')?.value||'').toLowerCase();
@@ -454,15 +483,15 @@ function renderTable(){
     return true;
   });
   const tb=document.getElementById('ot-body');if(!tb)return;
-  if(!items.length){tb.innerHTML=`<tr><td colspan="7" class="empty">No actions match</td></tr>`;return;}
+  if(!items.length){tb.innerHTML=`<tr><td colspan="7" class="empty">No actions match the current filters</td></tr>`;return;}
   tb.innerHTML=items.map(item=>{
     const s=sc(item.status),r=rc(item.risk);
     const av=item.submittedBy.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
     const urgent=item.status==='Pending Approval'&&isOver(item.dueDate);
     return `<tr class="ot-row${urgent?' urgent':''}" onclick="openAction('${item.id}')">
       <td><code class="ot-id">${item.id}</code></td>
-      <td><div style="font-weight:600;font-size:12.5px">${item.oblName}</div><div style="font-size:10.5px;color:var(--text3);margin-top:1px">${item.circularId} · ${item.clauseRef}</div></td>
-      <td><div style="font-weight:600;font-size:12.5px">${item.actionName}</div><div style="font-size:10.5px;color:var(--text3);margin-top:1px">${item.dept}</div></td>
+      <td><div style="font-weight:600;font-size:12.5px;color:var(--text)">${item.oblName}</div><div style="font-size:10.5px;color:var(--text3);margin-top:1px">${item.circularId} · ${item.clauseRef}</div></td>
+      <td><div style="font-weight:600;font-size:12.5px;color:var(--text)">${item.actionName}</div><div style="font-size:10.5px;color:var(--text3);margin-top:1px">${item.dept}</div></td>
       <td><div style="display:flex;align-items:center;gap:6px"><span class="ot-av">${av}</span><div><div style="font-size:12.5px;font-weight:600">${item.submittedBy}</div><div style="font-size:10.5px;color:var(--text3)">${item.submittedOn}</div></div></div></td>
       <td><div class="${dueClass(item.dueDate)}">${fmt(item.dueDate)}</div><span class="chip" style="background:${r.bg};color:${r.fg};font-size:10px;margin-top:3px;display:inline-block">${item.risk}</span></td>
       <td><span class="chip" style="background:${s.bg};color:${s.fg}">${item.status}</span></td>
@@ -475,7 +504,7 @@ function clearF(){['f-q','f-status','f-risk'].forEach(id=>{const el=document.get
 
 function openAction(id){
   const item=DATA.find(i=>i.id===id);if(!item)return;
-  _cid=id;_dec=null;
+  _cid=id;_dec=null;_accOpen=true;
   const s=sc(item.status),r=rc(item.risk);
   document.getElementById('det-bc-id').textContent=id;
   document.getElementById('det-tit').textContent=item.actionName;
@@ -488,42 +517,202 @@ function openAction(id){
     <span class="det-chip-g">${item.clauseRef}</span>
     <span class="det-chip-g">${item.dept}</span>
     <span class="det-chip-g">Due ${fmt(item.dueDate)}</span>`;
-  renderDetailPanel(item);
+ renderRightPanel(item);
   document.querySelectorAll('.pg').forEach(p=>p.classList.remove('on'));
   document.getElementById('pg-detail').classList.add('on');
   document.getElementById('nav-approvals').classList.add('on');
 }
-
-function fileIcon(name){
-  if(name.endsWith('.pdf'))return'📄';
-  if(name.endsWith('.docx')||name.endsWith('.doc'))return'📝';
-  if(name.endsWith('.xlsx'))return'📊';
-  return'📎';
+// function renderLeftPanel(item){
+//   const left=document.getElementById('det-left');if(!left)return;
+//   const over=isOver(item.dueDate),near=isNear(item.dueDate);
+//   left.innerHTML=`
+//   <div>
+//     <div class="sl">Action Details</div>
+//     <div class="dl">
+//       ${dr('Obligation ID',`<code class="dcode">${item.id}</code>`)}
+//       ${dr('Obligation',item.oblName)}
+//       ${dr('Action Name',item.actionName)}
+//       ${dr('Circular',item.circularId+' — '+item.circularTitle)}
+//       ${dr('Clause Ref',`<code class="dcode">${item.clauseRef}</code>`)}
+//       ${dr('Department',item.dept)}
+//       ${dr('Risk / Priority',item.risk+' / '+item.priority)}
+//       ${dr('Due Date',`<span class="${dueClass(item.dueDate)}">${fmt(item.dueDate)}</span>`)}
+//       ${dr('Submitted By',item.submittedBy+' — '+item.submittedByRole)}
+//       ${dr('Submitted On',item.submittedOn)}
+//     </div>
+//   </div>
+//   <div>
+//     <div class="sl">Obligation</div>
+//     <div class="ob-box">${item.obligation}</div>
+//   </div>
+//   <div>
+//     <div class="sl">Description</div>
+//     <div class="desc-box">${item.description}</div>
+//   </div>
+//   <div class="acc" id="cmt-acc">
+//     <div class="acc-hd" onclick="toggleAcc()">
+//       <div class="acc-hd-left">
+//         💬 Comments Thread
+//         <span class="acc-bdg" id="acc-cmt-bdg">${item.comments.length}</span>
+//       </div>
+//       <span class="acc-arrow open" id="acc-arrow">▾</span>
+//     </div>
+//     <div class="acc-body" id="acc-body">
+//       <div class="cmt-thread" id="cmt-thread">
+//         ${item.comments.map(c=>`
+//           <div class="cmt">
+//             <span class="cmt-av">${c.av}</span>
+//             <div class="cmt-bd">
+//               <div class="cmt-meta">
+//                 <span class="cmt-nm">${c.author}</span>
+//                 <span class="cmt-rl">${c.role}</span>
+//                 <span class="cmt-tm">${c.time}</span>
+//               </div>
+//               <div class="cmt-tx">${c.text}</div>
+//             </div>
+//           </div>`).join('')}
+//       </div>
+//       <div style="display:flex;gap:8px;align-items:flex-start;padding-top:10px;border-top:1px solid var(--border)">
+//         <span class="cmt-av" style="background:#1e293b;color:#fff;border-color:#1e293b">RV</span>
+//         <div style="flex:1">
+//           <textarea class="dec-remark" id="cmt-inp" style="min-height:50px" placeholder="Add a comment…"></textarea>
+//           <div style="display:flex;justify-content:flex-end;margin-top:7px">
+//             <button class="btn btn-pri btn-sm" onclick="postCmt()">Post Comment</button>
+//           </div>
+//         </div>
+//       </div>
+//     </div>
+//   </div>`;
+// }
+function toggleAcc(){
+  _accOpen=!_accOpen;
+  const body=document.getElementById('acc-body');
+  const arrow=document.getElementById('acc-arrow');
+  if(body)body.classList.toggle('hidden',!_accOpen);
+  if(arrow)arrow.classList.toggle('open',_accOpen);
 }
 
-function renderDetailPanel(item){
-  const body=document.getElementById('det-body');if(!body)return;
+function postCmt(){
+  const item=DATA.find(i=>i.id===_cid);if(!item)return;
+  const el=document.getElementById('cmt-inp');
+  const text=el?.value.trim();
+  if(!text){toast('Type something first','warn');return;}
+  item.comments.push({author:'Ravi Verma',role:'Department Owner',av:'RV',time:'just now',text});
+  const thread=document.getElementById('cmt-thread');
+  if(thread){
+    const div=document.createElement('div');div.className='cmt';
+    div.innerHTML=`<span class="cmt-av" style="background:#1e293b;color:#fff;border-color:#1e293b">RV</span>
+    <div class="cmt-bd"><div class="cmt-meta"><span class="cmt-nm">Ravi Verma</span><span class="cmt-rl">Department Owner</span><span class="cmt-tm">just now</span></div><div class="cmt-tx">${text}</div></div>`;
+    thread.appendChild(div);
+  }
+  const bdg=document.getElementById('acc-cmt-bdg');if(bdg)bdg.textContent=item.comments.length;
+  if(el)el.value='';
+  toast('Comment posted');
+}
+
+function renderRightPanel(item){
+  const rp=document.getElementById('det-right');if(!rp)return;
   const pplOpts=PEOPLE.map(p=>`<option value="${p.name}">${p.name} — ${p.role}</option>`).join('');
-  const r=rc(item.risk),s=sc(item.status);
 
-  /* evidence rows */
-  const evHtml=item.evidence.length
-    ?item.evidence.map(ev=>`
-      <div class="ev-row">
-        <div class="ev-icon">${fileIcon(ev.name)}</div>
-        <div style="flex:1;min-width:0">
-          <div class="ev-name">${ev.name}</div>
-          <div class="ev-meta">${ev.type} · ${ev.uploadedBy} · ${ev.date} · ${ev.size}</div>
-        </div>
-        <div class="ev-actions">
-          <button class="btn btn-ghost btn-xs" onclick="viewDoc('${ev.id}','${item.id}')">👁 View</button>
-          <button class="btn btn-ghost btn-xs" onclick="toast('Downloading ${ev.name}','ok')">⬇ Download</button>
-        </div>
-      </div>`).join('')
-    :`<div class="empty" style="padding:20px">No documents attached</div>`;
+  if(item.decision){
+    const icons={Approved:'✅',Rejected:'❌','Sent Back':'↩',Forwarded:'➜'};
+    const colors={Approved:'#166534',Rejected:'#991b1b','Sent Back':'#5b21b6',Forwarded:'#0369a1'};
+    rp.innerHTML=`
+    ${card('Action Info','📋',true,`
+      ${rr('Action ID',`<code class="dcode">${item.id}</code>`)}
+      ${rr('Submitted By',item.submittedBy+' — '+item.submittedByRole)}
+      ${rr('Submitted On',item.submittedOn)}
+      ${rr('Due Date',`<span class="${dueClass(item.dueDate)}">${fmt(item.dueDate)}</span>`)}
+      ${rr('Circular',item.circularId+' — '+item.circularTitle)}
+      ${rr('Clause / Dept',item.clauseRef+' · '+item.dept)}
+      ${rr('Risk / Priority',item.risk+' / '+item.priority)}
+    `,'rp-rows')}
+    ${card('Obligation & Description','📄',false,`
+      <div class="ob-box" style="margin-bottom:10px">${item.obligation}</div>
+      <div class="desc-box">${item.description}</div>
+    `)}
+    <div class="tc" style="padding:20px;text-align:center">
+      <div style="font-size:36px;margin-bottom:8px">${icons[item.decision]||'◎'}</div>
+      <div style="font-size:15px;font-weight:800;color:${colors[item.decision]||'#0f172a'}">${item.decision}</div>
+      ${item.forwardedTo?`<div style="font-size:11.5px;color:var(--text2);margin-top:4px">To: <b>${item.forwardedTo}</b></div>`:''}
+      <div style="font-size:12px;color:var(--text3);margin-top:6px;line-height:1.5">${item.decisionRemark}</div>
+      <div style="font-size:11px;color:var(--text3);margin-top:8px">Decided on ${item.decidedOn}</div>
+    </div>
+    ${commentsCard(item)}`;
+    bindAcc();return;
+  }
 
-  /* comment thread */
-  const cmtHtml=item.comments.map(c=>`
+  rp.innerHTML=`
+  ${card('Action Info','📋',true,`
+    ${rr('Action ID',`<code class="dcode">${item.id}</code>`)}
+    ${rr('Submitted By',item.submittedBy+' — '+item.submittedByRole)}
+    ${rr('Submitted On',item.submittedOn)}
+    ${rr('Due Date',`<span class="${dueClass(item.dueDate)}">${fmt(item.dueDate)}</span>`)}
+    ${rr('Circular',item.circularId+' — '+item.circularTitle)}
+    ${rr('Clause / Dept',item.clauseRef+' · '+item.dept)}
+    ${rr('Risk / Priority',item.risk+' / '+item.priority)}
+  `,'rp-rows')}
+  ${card('Obligation & Description','📄',false,`
+    <div class="ob-box" style="margin-bottom:10px">${item.obligation}</div>
+    <div class="desc-box">${item.description}</div>
+  `)}
+  <div class="tc" style="padding:14px 16px;display:flex;flex-direction:column;gap:11px">
+    <div>
+      <div style="font-size:13px;font-weight:800;color:var(--text)">Your Decision</div>
+      <div style="font-size:11.5px;color:var(--text3);margin-top:2px">Select an outcome and add your remarks.</div>
+    </div>
+    <div class="dec-opts">
+      <div class="dec-opt" id="do-approve" onclick="selDec('approve')">
+        <span class="dec-opt-ic">✅</span>
+        <div><div class="dec-opt-tit">Approve</div><div class="dec-opt-sub">Action is complete</div></div>
+        <div class="dec-radio"></div>
+      </div>
+      <div class="dec-opt" id="do-back" onclick="selDec('back')">
+        <span class="dec-opt-ic">↩</span>
+        <div><div class="dec-opt-tit">Send Back</div><div class="dec-opt-sub">Return for revision</div></div>
+        <div class="dec-radio"></div>
+      </div>
+      <div class="dec-opt" id="do-reject" onclick="selDec('reject')">
+        <span class="dec-opt-ic">❌</span>
+        <div><div class="dec-opt-tit">Reject</div><div class="dec-opt-sub">Does not meet requirements</div></div>
+        <div class="dec-radio"></div>
+      </div>
+      <div class="dec-opt" id="do-forward" onclick="selDec('forward')">
+        <span class="dec-opt-ic" style="font-size:13px">➜</span>
+        <div><div class="dec-opt-tit">Forward</div><div class="dec-opt-sub">Delegate to someone</div></div>
+        <div class="dec-radio"></div>
+      </div>
+    </div>
+    <div id="fwd-wrap" style="display:none">
+      <div class="fwd-lbl">Forward To</div>
+      <select class="fwd-sel" id="fwd-person" onchange="checkSubmit()">
+        <option value="">Select person…</option>
+        ${pplOpts}
+      </select>
+    </div>
+    <div>
+      <div class="rem-lbl">Remarks <span style="font-weight:400;color:var(--text3);text-transform:none;font-size:11px;letter-spacing:0">(required)</span></div>
+      <textarea class="dec-remark" id="dec-rem" placeholder="Add your remarks before submitting…" oninput="checkSubmit()"></textarea>
+    </div>
+    <button class="dec-submit" id="dec-btn" onclick="submitDec('${item.id}')" disabled>Submit Decision</button>
+  </div>
+  ${commentsCard(item)}`;
+  bindAcc();
+}
+
+function card(title,ic,startOpen,body,bodyClass=''){
+  const id='acc-'+Math.random().toString(36).slice(2,7);
+  return `<div class="acc">
+    <div class="acc-hd" onclick="this.nextElementSibling.classList.toggle('hidden');this.querySelector('.acc-arrow').classList.toggle('open')">
+      <div class="acc-hd-left">${ic} ${title}</div>
+      <span class="acc-arrow ${startOpen?'open':''}" style="display:inline-block">▾</span>
+    </div>
+    <div class="acc-body ${bodyClass} ${startOpen?'':'hidden'}">${body}</div>
+  </div>`;
+}
+
+function commentsCard(item){
+  const cmts=item.comments.map(c=>`
     <div class="cmt">
       <span class="cmt-av">${c.av}</span>
       <div class="cmt-bd">
@@ -531,114 +720,27 @@ function renderDetailPanel(item){
         <div class="cmt-tx">${c.text}</div>
       </div>
     </div>`).join('');
-
-  /* decision section — decided or form */
-  let decHtml='';
-  if(item.decision){
-    const icons={Approved:'✅',Rejected:'❌','Sent Back':'↩',Forwarded:'➜'};
-    const colors={Approved:'#166534',Rejected:'#991b1b','Sent Back':'#5b21b6',Forwarded:'#0369a1'};
-    decHtml=`
-      <div class="decided-card">
-        <div class="decided-ic">${icons[item.decision]||'◎'}</div>
-        <div class="decided-tit" style="color:${colors[item.decision]||'#0f172a'}">${item.decision}</div>
-        ${item.forwardedTo?`<div style="font-size:11.5px;color:var(--text2);margin-top:4px">To: <b>${item.forwardedTo}</b></div>`:''}
-        <div style="font-size:12px;color:var(--text3);margin-top:6px;line-height:1.5">${item.decisionRemark}</div>
-        <div style="font-size:11px;color:var(--text3);margin-top:8px">Decided on ${item.decidedOn}</div>
-      </div>`;
-  } else {
-    decHtml=`
-      <div class="dec-opts">
-        <div class="dec-opt" id="do-approve" onclick="selDec('approve')"><span class="dec-opt-ic">✅</span><div><div class="dec-opt-tit">Approve</div><div class="dec-opt-sub">Action is complete</div></div><div class="dec-radio"></div></div>
-        <div class="dec-opt" id="do-back" onclick="selDec('back')"><span class="dec-opt-ic">↩</span><div><div class="dec-opt-tit">Send Back</div><div class="dec-opt-sub">Return for revision</div></div><div class="dec-radio"></div></div>
-        <div class="dec-opt" id="do-reject" onclick="selDec('reject')"><span class="dec-opt-ic">❌</span><div><div class="dec-opt-tit">Reject</div><div class="dec-opt-sub">Does not meet requirements</div></div><div class="dec-radio"></div></div>
-        <div class="dec-opt" id="do-forward" onclick="selDec('forward')"><span class="dec-opt-ic" style="font-size:13px">➜</span><div><div class="dec-opt-tit">Forward</div><div class="dec-opt-sub">Delegate to someone</div></div><div class="dec-radio"></div></div>
-      </div>
-      <div id="fwd-wrap" style="display:none;margin-bottom:4px">
-        <div class="fwd-lbl">Forward To</div>
-        <select class="fwd-sel" id="fwd-person" onchange="checkSubmit()"><option value="">Select person…</option>${pplOpts}</select>
-      </div>
-      <div class="rem-lbl">Remarks <span style="font-weight:400;color:var(--text3);text-transform:none;font-size:11px;letter-spacing:0">(required)</span></div>
-      <textarea class="dec-remark" id="dec-rem" placeholder="Add your remarks before submitting…" oninput="checkSubmit()"></textarea>
-      <button class="dec-submit" id="dec-btn" onclick="submitDec('${item.id}')" disabled>Submit Decision</button>`;
-  }
-
-  body.innerHTML=`
-  ${acc('Action Info','📋','ac-blue',true,`
-    <div class="info-grid">
-      ${ig('Obligation ID',`<code class="dcode">${item.id}</code>`)}
-      ${ig('Action Name',item.actionName)}
-      ${ig('Department',item.dept)}
-      ${ig('Circular',item.circularId)}
-      ${ig('Clause Ref',`<code class="dcode">${item.clauseRef}</code>`)}
-      ${ig('Risk / Priority','<span class="chip" style="background:'+r.bg+';color:'+r.fg+'">'+item.risk+'</span> / '+item.priority)}
-      ${ig('Submitted By',item.submittedBy)}
-      ${ig('Submitted On',item.submittedOn)}
-      ${ig('Due Date','<span class="'+dueClass(item.dueDate)+'">'+fmt(item.dueDate)+'</span>')}
+  return `<div class="acc">
+    <div class="acc-hd" onclick="this.nextElementSibling.classList.toggle('hidden');this.querySelector('.acc-arrow').classList.toggle('open')">
+      <div class="acc-hd-left">💬 Comments <span class="acc-bdg">${item.comments.length}</span></div>
+      <span class="acc-arrow" style="display:inline-block">▾</span>
     </div>
-  `)}
-  ${acc('Obligation & Description','📄','ac-slate',false,`
-    <div style="font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text3);margin-bottom:6px">Obligation</div>
-    <div class="ob-box">${item.obligation}</div>
-    <div style="font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text3);margin:12px 0 6px">Description</div>
-    <div class="desc-box">${item.description}</div>
-  `)}
-  ${acc('Evidence & Documents','📎','ac-teal',false,evHtml,item.evidence.length)}
-  ${acc(item.decision?'Decision Outcome':'Your Decision','⚖️','ac-amber',true,decHtml)}
-  ${acc('Comments Thread','💬','ac-violet',false,`
-    <div class="cmt-thread" id="cmt-thread">${cmtHtml}</div>
-    <div style="display:flex;gap:8px;align-items:flex-start;padding-top:10px;border-top:1px solid var(--border)">
-      <span class="cmt-av" style="background:#1e293b;color:#fff;border-color:#1e293b">RV</span>
-      <div style="flex:1">
-        <textarea class="dec-remark" id="cmt-inp" style="min-height:50px" placeholder="Add a comment…"></textarea>
-        <div style="display:flex;justify-content:flex-end;margin-top:7px">
-          <button class="btn btn-pri btn-sm" onclick="postCmt()">Post</button>
+    <div class="acc-body hidden">
+      <div class="cmt-thread" id="cmt-thread">${cmts}</div>
+      <div style="display:flex;gap:8px;align-items:flex-start;padding-top:10px;border-top:1px solid var(--border)">
+        <span class="cmt-av" style="background:#1e293b;color:#fff;border-color:#1e293b">RV</span>
+        <div style="flex:1">
+          <textarea class="dec-remark" id="cmt-inp" style="min-height:50px" placeholder="Add a comment…"></textarea>
+          <div style="display:flex;justify-content:flex-end;margin-top:7px">
+            <button class="btn btn-pri btn-sm" onclick="postCmt()">Post</button>
+          </div>
         </div>
       </div>
     </div>
-  `,item.comments.length)}`;
-}
-
-function acc(title,ic,colorCls,startOpen,body,badge){
-  const bdgHtml=badge!=null?`<span class="acc-bdg">${badge}</span>`:'';
-  return `<div class="acc-card ${colorCls}">
-    <div class="acc-hd" onclick="this.nextElementSibling.classList.toggle('hidden');this.querySelector('.acc-arrow').classList.toggle('open')">
-      <div class="acc-hd-left">${ic} ${title} ${bdgHtml}</div>
-      <span class="acc-arrow ${startOpen?'open':''}"  >▾</span>
-    </div>
-    <div class="acc-body${startOpen?'':' hidden'}">${body}</div>
   </div>`;
 }
 
-function ig(label,val){
-  return `<div class="ig-cell"><div class="ig-lbl">${label}</div><div class="ig-val">${val}</div></div>`;
-}
-
-function viewDoc(evId,itemId){
-  const item=DATA.find(i=>i.id===itemId);if(!item)return;
-  const ev=item.evidence.find(e=>e.id===evId);if(!ev)return;
-  document.getElementById('modal-title').textContent=ev.name;
-  document.getElementById('modal-body').innerHTML=`
-    <div class="doc-meta-row">
-      <span class="doc-meta-pill">${ev.type}</span>
-      <span class="doc-meta-pill">${ev.size}</span>
-      <span class="doc-meta-pill">${ev.pages} pages</span>
-      <span class="doc-meta-pill">By ${ev.uploadedBy}</span>
-      <span class="doc-meta-pill">${ev.date}</span>
-    </div>
-    <div class="doc-preview">
-      <div style="font-size:48px">${fileIcon(ev.name)}</div>
-      <div style="font-size:14px;font-weight:700;color:var(--text)">${ev.name}</div>
-      <div style="font-size:12px;color:var(--text3)">Preview not available in demo</div>
-      <button class="btn btn-pri btn-sm" style="margin-top:8px" onclick="toast('Downloading ${ev.name}','ok')">⬇ Download File</button>
-    </div>
-    <div style="font-size:12px;color:var(--text3);line-height:1.6">
-      This document was submitted as evidence for <b>${item.actionName}</b> under circular <b>${item.circularId}</b>. 
-      Uploaded by ${ev.uploadedBy} on ${ev.date}. Please review the document before making your decision.
-    </div>`;
-  document.getElementById('doc-modal').style.display='flex';
-}
-
-function closeModal(e){if(e.target.id==='doc-modal')document.getElementById('doc-modal').style.display='none'}
+function bindAcc(){}
 
 function selDec(type){
   _dec=type;
@@ -653,10 +755,11 @@ function selDec(type){
 
 function checkSubmit(){
   const hasRem=(document.getElementById('dec-rem')?.value.trim().length||0)>0;
+  const hasDec=!!_dec;
   const isFwd=_dec==='forward';
   const hasPerson=!isFwd||(document.getElementById('fwd-person')?.value||'')!=='';
   const btn=document.getElementById('dec-btn');
-  if(btn)btn.disabled=!(hasRem&&!!_dec&&hasPerson);
+  if(btn)btn.disabled=!(hasRem&&hasDec&&hasPerson);
 }
 
 function submitDec(id){
@@ -669,30 +772,13 @@ function submitDec(id){
   item.decidedOn=new Date().toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'});
   if(_dec==='forward')item.forwardedTo=document.getElementById('fwd-person')?.value||'';
   item.comments.push({author:'Ravi Verma',role:'Department Owner',av:'RV',time:'just now',text:`Decision: ${map[_dec]}. ${rem}`});
+  renderRightPanel(item);
   updateBadge();
   const sch=document.getElementById('det-status-chip');
   if(sch){const s=sc(item.status);sch.style.background=s.bg;sch.style.color=s.fg;sch.textContent=item.status}
   const msgs={approve:'Action approved ✓',reject:'Action rejected',back:'Sent back for revision',forward:'Forwarded successfully'};
   toast(msgs[_dec]||'Decision submitted',_dec==='approve'?'ok':'warn');
   _dec=null;
-  renderDetailPanel(item);
-}
-
-function postCmt(){
-  const item=DATA.find(i=>i.id===_cid);if(!item)return;
-  const el=document.getElementById('cmt-inp');
-  const text=el?.value.trim();
-  if(!text){toast('Type something first','warn');return;}
-  item.comments.push({author:'Ravi Verma',role:'Department Owner',av:'RV',time:'just now',text});
-  const thread=document.getElementById('cmt-thread');
-  if(thread){
-    const div=document.createElement('div');div.className='cmt';
-    div.innerHTML=`<span class="cmt-av" style="background:#1e293b;color:#fff;border-color:#1e293b">RV</span>
-      <div class="cmt-bd"><div class="cmt-meta"><span class="cmt-nm">Ravi Verma</span><span class="cmt-rl">Department Owner</span><span class="cmt-tm">just now</span></div><div class="cmt-tx">${text}</div></div>`;
-    thread.appendChild(div);
-  }
-  if(el)el.value='';
-  toast('Comment posted');
 }
 
 function renderHistory(){
@@ -721,14 +807,42 @@ function renderDashboard(){
     {label:'Forwarded',val:DATA.filter(i=>i.status==='Forwarded').length,ic:'➜',c:'#0369a1'},
   ];
   const sg=document.getElementById('dash-stats');
-  if(sg)sg.innerHTML=stats.map(s=>`<div class="dash-stat"><div style="font-size:20px;margin-bottom:8px">${s.ic}</div><div style="font-size:24px;font-weight:800;color:${s.c}">${s.val}</div><div style="font-size:11.5px;color:var(--text3);margin-top:2px">${s.label}</div></div>`).join('');
+  if(sg)sg.innerHTML=stats.map(s=>`
+    <div style="background:#fff;border:1px solid var(--border);border-radius:10px;padding:16px">
+      <div style="font-size:20px;margin-bottom:8px">${s.ic}</div>
+      <div style="font-size:24px;font-weight:800;color:${s.c}">${s.val}</div>
+      <div style="font-size:11.5px;color:var(--text3);margin-top:2px">${s.label}</div>
+    </div>`).join('');
+
   const pending=DATA.filter(i=>i.status==='Pending Approval').slice(0,4);
   const pl=document.getElementById('dash-pending');
-  if(pl)pl.innerHTML=pending.length?pending.map(item=>{const r=rc(item.risk);return`<div style="display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid #f4f5f8;cursor:pointer" onclick="openAction('${item.id}')"><code style="font-size:10px;background:#eef2ff;color:#4338ca;border:1px solid #c7d2fe;padding:2px 6px;border-radius:4px;flex-shrink:0">${item.id}</code><div style="flex:1;min-width:0"><div style="font-size:12.5px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${item.actionName}</div><div style="font-size:11px;color:var(--text3)">${item.submittedBy}</div></div><span class="chip" style="background:${r.bg};color:${r.fg};font-size:10px">${item.risk}</span></div>`}).join(''):`<div class="empty">🎉 Nothing pending</div>`;
+  if(pl)pl.innerHTML=pending.length?pending.map(item=>{
+    const r=rc(item.risk);
+    return `<div style="display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid #f4f5f8;cursor:pointer" onclick="openAction('${item.id}')">
+      <code style="font-size:10px;background:#eef2ff;color:#4338ca;border:1px solid #c7d2fe;padding:2px 6px;border-radius:4px;flex-shrink:0">${item.id}</code>
+      <div style="flex:1;min-width:0">
+        <div style="font-size:12.5px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${item.actionName}</div>
+        <div style="font-size:11px;color:var(--text3)">${item.submittedBy}</div>
+      </div>
+      <span class="chip" style="background:${r.bg};color:${r.fg};font-size:10px">${item.risk}</span>
+    </div>`}).join(''):`<div class="empty">🎉 Nothing pending</div>`;
+
   const recent=DATA.filter(i=>i.decision).slice(-4).reverse();
   const rl=document.getElementById('dash-recent');
-  if(rl)rl.innerHTML=recent.length?recent.map(item=>{const s=sc(item.status);return`<div style="display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid #f4f5f8;cursor:pointer" onclick="openAction('${item.id}')"><code style="font-size:10px;background:#eef2ff;color:#4338ca;border:1px solid #c7d2fe;padding:2px 6px;border-radius:4px;flex-shrink:0">${item.id}</code><div style="flex:1;min-width:0"><div style="font-size:12.5px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${item.actionName}</div><div style="font-size:11px;color:var(--text3)">${item.decidedOn}</div></div><span class="chip" style="background:${s.bg};color:${s.fg};font-size:10px">${item.decision}</span></div>`}).join(''):`<div class="empty">No decisions yet</div>`;
+  if(rl)rl.innerHTML=recent.length?recent.map(item=>{
+    const s=sc(item.status);
+    return `<div style="display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid #f4f5f8;cursor:pointer" onclick="openAction('${item.id}')">
+      <code style="font-size:10px;background:#eef2ff;color:#4338ca;border:1px solid #c7d2fe;padding:2px 6px;border-radius:4px;flex-shrink:0">${item.id}</code>
+      <div style="flex:1;min-width:0">
+        <div style="font-size:12.5px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${item.actionName}</div>
+        <div style="font-size:11px;color:var(--text3)">${item.decidedOn}</div>
+      </div>
+      <span class="chip" style="background:${s.bg};color:${s.fg};font-size:10px">${item.decision}</span>
+    </div>`}).join(''):`<div class="empty">No decisions yet</div>`;
 }
+
+function dr(l,v){return`<div class="drow"><span class="dlbl">${l}</span><span class="dval">${v}</span></div>`}
+function rr(l,v){return`<div class="rp-row"><span class="rp-lbl">${l}</span><span class="rp-val">${v}</span></div>`}
 
 function toast(msg,type='ok'){
   const wrap=document.getElementById('tw');

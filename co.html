@@ -15,7 +15,7 @@
     rel="stylesheet" />
 </head>
 
-<body>
+<body data-user-role="co">
 
   <!-- ========== SIDEBAR ========== -->
   <aside id="sidebar">
@@ -39,19 +39,19 @@
         </li>
 
         <!-- AI Engine with submenu -->
-        <li class="nav-item has-submenu" data-page="ai-engine">
-          <a href="#" class="nav-link submenu-toggle">
+        <li class="nav-item" data-page="ai-overview">
+          <a href="#ai-overview" data-page="ai-overview" class="nav-link submenu-toggle" >
             <span class="nav-icon">◈</span>
             <span class="nav-label">AI Engine</span>
             <span class="submenu-arrow">›</span>
           </a>
-          <ul class="submenu">
-            <li data-page="ai-overview"><a href="#ai-overview">Overview</a></li>
-            <li data-page="ai-applicability"><a href="#ai-applicability">Applicability Analysis</a></li>
+          <!-- <ul class="submenu">
+            <li data-page="ai-overview"><a href="#ai-overview">Overview</a></li> -->
+            <!-- <li data-page="ai-applicability"><a href="#ai-applicability">Applicability Analysis</a></li>
             <li data-page="ai-summary"><a href="#ai-summary">Executive Summary</a></li>
             <li data-page="ai-clause"><a href="#ai-clause">Clause Generation</a></li>
-            <li data-page="ai-evidence"><a href="#ai-evidence">Evaluate Evidence</a></li>
-          </ul>
+            <li data-page="ai-evidence"><a href="#ai-evidence">Evaluate Evidence</a></li> -->
+          <!-- </ul> -->
         </li>
 
         <li class="nav-item has-submenu" data-page="circular-library">
@@ -67,7 +67,7 @@
             <li class="nav-item" data-page="circular-explorer">
               <a href="#circular-explorer" class="nav-link">
                 <!-- <span class="nav-icon">🌲</span> -->
-                <span class="nav-label">Circular Hierarchy</span>
+                <!-- <span class="nav-label">Circular Hierarchy</span> -->
               </a>
             </li>
 
@@ -83,6 +83,12 @@
             <span class="submenu-arrow">›</span>
           </a>
           <ul class="submenu">
+            <li class="nav-item " data-page="all-items" a href="#all-items-co">
+              <a href="#all-items" class="nav-link">
+                <!-- <span class="nav-icon">◉</span> -->
+                <span class="nav-label">All Items</span>
+                <!-- <span class="submenu-arrow">›</span> -->
+              </a>
             <!-- <li data-page="ai-applicability"><a href="#ai-applicability"></a></li> -->
             <li class="nav-item " data-page="my-items-obligations" a href="#my-items-obligations">
               <a href="#task-management" class="nav-link">
@@ -257,7 +263,7 @@
 
   <!-- JS Modules -->
   <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script>
-  <script src="js/data.js"></script>
+ 
   <script src="./data.js"></script>
   <script src="./dashboard.js"></script>
   <script src="./overview-panel.js"></script>
@@ -270,10 +276,12 @@
   <script src="./applicability.js"></script>
   <script src="./executive.js"></script>
     <script src="./ai-chapter-view.js"></script>
-
+<script src="./clause-panel-table-view.js"></script>
   <script src="./circular-library.js"></script>
+   
   <script src="./my-items-obligations.js"></script>
   <script src="./my-items-activity.js"></script>
+
   <script src="./assign-action.js"></script>
   <script src="./action-screen.js"></script>
   <script src="./action-screen-activity.js"></script>

@@ -46,6 +46,7 @@ window._mlRenderChapterView = function (circs) {
             '<span class="cl-nav-title">Chapters</span>' +
             '<div style="display:flex;align-items:center;gap:6px;">' +
               '<span class="cl-nav-count" id="ml-ch-nav-count">—</span>' +
+              '<button onclick="_mlChOpenStructureMenu()" style="width:20px;height:20px;border-radius:4px;border:1px solid var(--cl-border);background:#fff;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;color:var(--cl-blue);font-weight:700;line-height:1;" title="Add chapter / section">+</button>' +
               '<button class="cl-nav-collapse-btn" id="ml-ch-collapse-btn" onclick="_mlChNavCollapse()" title="Collapse">‹</button>' +
             '</div>' +
           '</div>' +
@@ -165,7 +166,7 @@ function _mlChBuildTree(circ) {
   var flow = window._savedFlow && window._savedFlow[circ.id];
   var chapters = (flow && flow.clauses) || (circ.chapters) || _buildDemoClauses();
   var total = chapters.reduce(function(s,ch){ return s + (ch.clauses||[]).length; }, 0);
-  if (countEl) countEl.textContent = total + ' clauses';
+  if (countEl) countEl.textContent = total + ' obligations';
 
   var hasAnySections = chapters.some(function(ch){ return ch.sections && ch.sections.length; });
 
@@ -187,10 +188,10 @@ function _mlChBuildTree(circ) {
         '</button>';
       }).join('');
       /* "View all" link */
-      sectionsHtml += '<button class="ml-ch-viewall-btn" onclick="_mlChSelectChapter(' + ci + ')">View all ' + (ch.clauses||[]).length + ' clauses →</button>';
+      sectionsHtml += '<button class="ml-ch-viewall-btn" onclick="_mlChSelectChapter(' + ci + ')">View all obligations →</button>';
     } else {
       /* no sections — single "view all" entry */
-      sectionsHtml = '<button class="ml-ch-viewall-btn" onclick="_mlChSelectChapter(' + ci + ')">View all ' + (ch.clauses||[]).length + ' clauses →</button>';
+      sectionsHtml = '<button class="ml-ch-viewall-btn" onclick="_mlChSelectChapter(' + ci + ')">View all obligations →</button>';
     }
 
     return '<div class="ml-ch-nav-chapter" id="ml-ch-chapter-' + ci + '">' +
@@ -309,47 +310,24 @@ window._mlChRenderStack = function(ci, ch, clauses, chNum, chTitle, secLabel) {
           (secLabel && secLabel !== 'All Clauses' ? '<div style="font-size:11px;color:var(--cl-t3);margin-top:3px;">' + secLabel + '</div>' : '') +
         '</div>' +
         '<div style="display:flex;align-items:center;gap:8px;">' +
-          '<span style="font-size:11px;color:var(--cl-t3);background:var(--cl-hover);border:1px solid var(--cl-border);padding:3px 10px;border-radius:10px;">' + clauses.length + ' clause' + (clauses.length!==1?'s':'') + '</span>' +
+          '<span style="font-size:11px;color:var(--cl-t3);background:var(--cl-hover);border:1px solid var(--cl-border);padding:3px 10px;border-radius:10px;">Obligations</span>' +
           '<div class="ml-ws-dots-wrap" id="ml-ws-dots-' + ci + '">' +
             '<button class="ml-ws-dots-btn" onclick="event.stopPropagation();document.getElementById(\'ml-ws-dots-' + ci + '\').classList.toggle(\'open\')">⋮</button>' +
             '<div class="ml-ws-dots-menu">' +
-              '<button class="ml-ws-dots-item" onclick="document.getElementById(\'ml-ws-dots-' + ci + '\').classList.remove(\'open\');_mlOpenAddObligationPopup()">+ Add Obligation</button>' +
-              '<button class="ml-ws-dots-item" onclick="document.getElementById(\'ml-ws-dots-' + ci + '\').classList.remove(\'open\');_mlOpenAddActionPopup(\'\',\'\')">+ Add Action</button>' +
-              '<button class="ml-ws-dots-item" onclick="document.getElementById(\'ml-ws-dots-' + ci + '\').classList.remove(\'open\');_mlOpenExportPopup()">Export / Import</button>' +
+              '<div style="padding:4px 10px;font-size:9px;font-weight:800;color:var(--cl-t3);text-transform:uppercase;letter-spacing:.06em;">Add</div>' +
+              '<button class="ml-ws-dots-item" onclick="document.getElementById(\'ml-ws-dots-' + ci + '\').classList.remove(\'open\');_mlChAddObligationInline()">+ Add Obligation</button>' +
+              '<button class="ml-ws-dots-item" onclick="document.getElementById(\'ml-ws-dots-' + ci + '\').classList.remove(\'open\');_mlChAddActionInline()">+ Add Action</button>' +
+              '<div style="border-top:1px solid var(--cl-border-lt);margin:4px 0;"></div>' +
+              '<div style="padding:4px 10px;font-size:9px;font-weight:800;color:var(--cl-t3);text-transform:uppercase;letter-spacing:.06em;">Data</div>' +
+              '<button class="ml-ws-dots-item" onclick="document.getElementById(\'ml-ws-dots-' + ci + '\').classList.remove(\'open\');_mlChOpenExportModal()">⬆ Export</button>' +
+              '<button class="ml-ws-dots-item" onclick="document.getElementById(\'ml-ws-dots-' + ci + '\').classList.remove(\'open\');_mlChOpenImportModal()">⬇ Import</button>' +
             '</div>' +
           '</div>' +
         '</div>' +
       '</div>' +
       /* CLAUSE LIST */
       '<div id="ml-ch-clause-list">' +
-        (clauses.length ? clauses.map(function(cl, cli) {
-          var obligs = cl.obligation ? (Array.isArray(cl.obligation) ? cl.obligation : [cl.obligation]) : (Array.isArray(cl.obligations) ? cl.obligations : []);
-          var actions = (cl.actionable||'').split(';').map(function(a){return a.trim();}).filter(Boolean);
-          var totalActs = actions.length || (window._mlActionItems||[]).filter(function(a){ return a.clauseId === cl.id; }).length;
-          var oblCount = obligs.length || 1;
-          /* 30 words of text */
-          var words = (cl.text||cl.obligation||'').split(' ');
-          var shortText = words.slice(0,30).join(' ') + (words.length > 30 ? '…' : '');
-          return '<div class="ml-cl-row" id="ml-cl-row-' + ci + '-' + cli + '" onclick="_mlChToggleClause2(' + ci + ',' + cli + ')">' +
-            '<span style="font-size:11px;color:var(--cl-t3);transition:transform .2s;flex-shrink:0;" id="ml-cl-arr2-' + ci + '-' + cli + '">▶</span>' +
-            '<span class="ml-cl-info-icon">ⓘ</span>' +
-            '<span class="ml-cl-id-chip">' + cl.id + '</span>' +
-            '<span class="ml-cl-text">' + shortText + '</span>' +
-            '<div class="ml-cl-right">' +
-              '<span class="ml-cl-obl-pill">' + oblCount + ' Obligation' + (oblCount>1?'s':'') + '</span>' +
-              (totalActs ? '<span style="font-size:9px;font-weight:600;color:var(--cl-t2);background:var(--cl-hover);border:1px solid var(--cl-border);padding:2px 8px;border-radius:10px;">' + totalActs + ' Actions</span>' : '') +
-              '<button class="ml-cl-eye-btn" onclick="event.stopPropagation();_mlOpenOblDetailPopupForClause(\'' + cl.id + '\',' + ci + ',' + cli + ')" title="View details">' +
-                '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>' +
-              '</button>' +
-            '</div>' +
-          '</div>' +
-          '<div class="ml-cl-expand-header">' +
-            '<span style="font-size:10px;font-weight:800;color:var(--cl-t3);text-transform:uppercase;letter-spacing:.08em;">Obligations</span>' +
-            '<span style="font-size:10px;color:var(--cl-t3);">' + obligs.length + ' obligation' + (obligs.length!==1?'s':'') + '</span>' +
-          '</div>' +
-          _mlChBuildOblAccordions(cl, ci, cli, obligs) +
-          '</div>';
-        }).join('') : '<div style="padding:24px;text-align:center;font-size:13px;color:var(--cl-t3);">No clauses in this section.</div>') +
+        _mlChBuildOblList(clauses, ci) +
       '</div>' +
     '</div>';
 
@@ -357,54 +335,112 @@ window._mlChRenderStack = function(ci, ch, clauses, chNum, chTitle, secLabel) {
   document.addEventListener('click', function(){ document.querySelectorAll('.ml-ws-dots-wrap.open').forEach(function(w){w.classList.remove('open');}); });
 };
 
-/* build obligation list for a clause row
-   ob = obligation text (e.g. "Trustees shall ensure fairness…")
-   actions under each ob come from window._mlActionItems filtered by obligationId
+/* Build flat obligation list from all clauses in current section.
+   Each obligation is an accordion row. Expanded body shows action items.
+   Data comes from window._mlActionItems (same as table view).
 */
-function _mlChBuildOblAccordions(cl, ci, cli, obligs) {
-  if (!obligs.length) obligs = [cl.obligation || cl.text || ''];
+function _mlChSeedDummyData() {
+  window._mlActionItems = [
+    /* ── CIRCULAR 1: Master Circular on Cybersecurity ── */
+    { actionId:'ACT-001', action:'Establish Board-approved cybersecurity policy and designate a CISO with direct reporting to the Board', obligationId:'OBL-001', obligationName:'Establish and maintain a Board-approved cybersecurity governance framework with designated oversight committee', circId:'CIRC-001', department:'Compliance', assignedTo:'Raj Kumar', status:'Assigned', dueDate:'2025-03-31', frequency:'Annual', tags:[] },
+    { actionId:'ACT-002', action:'Conduct quarterly Board-level review of cybersecurity risk posture and remediation status', obligationId:'OBL-001', obligationName:'Establish and maintain a Board-approved cybersecurity governance framework with designated oversight committee', circId:'CIRC-001', department:'Risk', assignedTo:'Priya Nair', status:'Unassigned', dueDate:'2025-06-30', frequency:'Quarterly', tags:[] },
+    { actionId:'ACT-003', action:'Commission independent cybersecurity risk assessment covering all critical IT assets and third-party vendors', obligationId:'OBL-002', obligationName:'Conduct annual independent cybersecurity risk assessment covering all IT assets, vendors and data flows', circId:'CIRC-001', department:'IT', assignedTo:'John Doe', status:'Assigned', dueDate:'2025-04-15', frequency:'Annual', tags:[] },
+    { actionId:'ACT-004', action:'Maintain updated asset inventory and include all data flows in scope of annual risk assessment', obligationId:'OBL-002', obligationName:'Conduct annual independent cybersecurity risk assessment covering all IT assets, vendors and data flows', circId:'CIRC-001', department:'IT', assignedTo:'Jane Smith', status:'Assigned', dueDate:'2025-04-15', frequency:'Annual', tags:[] },
+    { actionId:'ACT-005', action:'Update transaction monitoring thresholds and alert rules to align with revised AML/KYC guidelines', obligationId:'OBL-003', obligationName:'Update and enforce transaction monitoring thresholds as per revised AML/KYC regulatory requirements', circId:'CIRC-001', department:'Compliance', assignedTo:'Raj Kumar', status:'Assigned', dueDate:'2025-02-28', frequency:'Monthly', tags:[] },
+    { actionId:'ACT-006', action:'Train compliance and operations teams on revised AML/KYC threshold changes and escalation procedures', obligationId:'OBL-003', obligationName:'Update and enforce transaction monitoring thresholds as per revised AML/KYC regulatory requirements', circId:'CIRC-001', department:'Operations', assignedTo:'', status:'Unassigned', dueDate:'2025-03-15', frequency:'Ad-hoc', tags:[] },
+    { actionId:'ACT-007', action:'Ensure all PII data of Indian residents is stored exclusively on servers physically located within India', obligationId:'OBL-004', obligationName:'Ensure all sensitive personal data of Indian citizens is stored on servers located within Indian territory', circId:'CIRC-001', department:'IT', assignedTo:'John Doe', status:'Assigned', dueDate:'2025-05-31', frequency:'Annual', tags:[] },
+    { actionId:'ACT-008', action:'Measure and report Scope 1, 2 and 3 emissions annually in the RBI-prescribed ESG disclosure format', obligationId:'OBL-005', obligationName:'Measure and disclose Scope 1, 2, and 3 carbon emissions annually in the prescribed ESG reporting format', circId:'CIRC-001', department:'Finance', assignedTo:'Priya Nair', status:'Unassigned', dueDate:'2025-09-30', frequency:'Annual', tags:[] },
 
-  return obligs.map(function(ob, oi) {
-    var obText = typeof ob === 'string' ? ob : (ob.text || ob.name || '');
-    var obId   = (typeof ob === 'object' && ob.id) ? ob.id : ('OBL-' + cl.id + '-' + (oi+1));
-    var uid    = ci + '-' + cli + '-' + oi;
+    /* ── CIRCULAR 2: Housing Finance Circular ── */
+    { actionId:'ACT-013', action:'Review and update board-approved housing finance policy to incorporate all RBI consolidated guidelines', obligationId:'OBL-007', obligationName:'Ensure all housing finance operations comply with consolidated RBI guidelines and maintain board-approved policy', circId:'CIRC-002', department:'Compliance', assignedTo:'Raj Kumar', status:'Assigned', dueDate:'2025-03-31', frequency:'Annual', tags:[] },
+    { actionId:'ACT-014', action:'File updated housing finance policy with NHB and obtain board resolution confirming approval', obligationId:'OBL-007', obligationName:'Ensure all housing finance operations comply with consolidated RBI guidelines and maintain board-approved policy', circId:'CIRC-002', department:'Legal', assignedTo:'Jane Smith', status:'Unassigned', dueDate:'2025-04-30', frequency:'Annual', tags:[] },
+    { actionId:'ACT-015', action:'Segregate land-only loan accounts in MIS and apply separate classification codes in regulatory reporting', obligationId:'OBL-008', obligationName:'Segregate and correctly classify land-only loans separate from housing loan portfolio in MIS and regulatory reporting', circId:'CIRC-002', department:'Finance', assignedTo:'John Doe', status:'Assigned', dueDate:'2025-02-28', frequency:'Monthly', tags:[] },
+    { actionId:'ACT-016', action:'Implement system-level LTV cap enforcement at origination and generate monthly portfolio LTV compliance report', obligationId:'OBL-009', obligationName:'Enforce Loan-to-Value ratio limits at origination and monitor compliance at portfolio level on an ongoing basis', circId:'CIRC-002', department:'Risk', assignedTo:'Priya Nair', status:'Assigned', dueDate:'2025-03-15', frequency:'Monthly', tags:[] },
+    { actionId:'ACT-017', action:'Flag and escalate any LTV breaches identified during portfolio monitoring to credit risk committee', obligationId:'OBL-009', obligationName:'Enforce Loan-to-Value ratio limits at origination and monitor compliance at portfolio level on an ongoing basis', circId:'CIRC-002', department:'Risk', assignedTo:'', status:'Unassigned', dueDate:'2025-03-15', frequency:'Monthly', tags:[] },
+    { actionId:'ACT-018', action:'Classify eligible housing loans under PSL and include in PSL returns filed with RBI within stipulated timelines', obligationId:'OBL-010', obligationName:'Classify eligible housing loans under Priority Sector Lending and report under PSL returns within stipulated timelines', circId:'CIRC-002', department:'Compliance', assignedTo:'Raj Kumar', status:'Assigned', dueDate:'2025-04-21', frequency:'Quarterly', tags:[] },
+    { actionId:'ACT-019', action:'Link all floating-rate housing loans to Repo Rate benchmark and implement quarterly interest rate reset mechanism', obligationId:'OBL-011', obligationName:'Ensure all floating-rate housing loans are linked to Repo Rate or other approved external benchmark with quarterly reset', circId:'CIRC-002', department:'IT', assignedTo:'John Doe', status:'Assigned', dueDate:'2025-05-31', frequency:'Quarterly', tags:[] },
+    { actionId:'ACT-020', action:'Cap loan tenor at 30 years and build EMI-to-NMI ratio check (max 50%) into the loan origination system', obligationId:'OBL-012', obligationName:'Cap repayment tenor at 30 years and ensure EMI does not exceed 50% of borrower net monthly income at sanction', circId:'CIRC-002', department:'Operations', assignedTo:'Jane Smith', status:'Unassigned', dueDate:'2025-06-30', frequency:'Ad-hoc', tags:[] },
+  ];
+}
+
+function _mlChBuildOblList(clauses, ci) {
+  /* Always build directly from clause data — dynamic per chapter/section */
+  var oblMap = {};
+  var oblOrder = [];
+  window._mlChOblDataMap = window._mlChOblDataMap || {};
+
+  /* PRIMARY: build from clause data always */
+  {
+    clauses.forEach(function(cl, cli) {
+      var obligs = Array.isArray(cl.obligations) ? cl.obligations
+        : Array.isArray(cl.obligation) ? cl.obligation
+        : typeof cl.obligations === 'string' && cl.obligations ? [cl.obligations]
+        : typeof cl.obligation === 'string' && cl.obligation ? [cl.obligation]
+        : [cl.text || ''];
+      var acts = Array.isArray(cl.actionables) ? cl.actionables
+          : Array.isArray(cl.actionable) ? cl.actionable
+          : typeof cl.actionables === 'string' ? cl.actionables.split(';').map(function(a){return a.trim();}).filter(Boolean)
+          : typeof cl.actionable === 'string' ? cl.actionable.split(';').map(function(a){return a.trim();}).filter(Boolean)
+          : [];
+      obligs.forEach(function(ob, oi) {
+        var obText = typeof ob === 'string' ? ob : (ob.text || ob.name || '');
+        var obId   = (typeof ob === 'object' && ob.id) ? ob.id : ('OBL-' + cl.id + '-' + (oi+1));
+        if (!oblMap[obId]) {
+          oblMap[obId] = { id: obId, name: obText, actions: [] };
+          oblOrder.push(obId);
+        }
+        window._mlChOblDataMap[obId] = { id: obId, name: obText };
+        acts.forEach(function(a, ai) {
+          oblMap[obId].actions.push({
+            actionId: 'ACT-' + cl.id + '-' + (oi+1) + '-' + (ai+1),
+            action: a,
+            obligationId: obId,
+            obligationName: obText,
+            circId: (window._mlChActiveCirc && window._mlChActiveCirc.id) || '',
+            department: cl.department || '',
+            assignedTo: '', status: cl.status || '', dueDate: '', frequency: 'Monthly', tags: []
+          });
+        });
+      });
+    });
+  }
+
+  /* sync all built action items into _mlActionItems so popups work */
+  window._mlActionItems = window._mlActionItems || [];
+  oblOrder.forEach(function(obId) {
+    (oblMap[obId].actions || []).forEach(function(actItem) {
+      var idx = window._mlActionItems.findIndex(function(a){ return a.actionId === actItem.actionId; });
+      if (idx >= 0) window._mlActionItems[idx] = actItem;
+      else window._mlActionItems.push(actItem);
+    });
+  });
+
+  if (!oblOrder.length) {
+    return '<div style="padding:24px;text-align:center;font-size:13px;color:var(--cl-t3);">No obligations found for this section.</div>';
+  }
+
+  return oblOrder.map(function(obId, oi) {
+    var obl     = oblMap[obId];
+    var uid     = 'ch-obl-' + ci + '-' + oi;
+    var actList = obl.actions;
+    window._mlChUidToObl = window._mlChUidToObl || {};
+    window._mlChUidToObl[uid] = { id: obl.id, name: obl.name };
 
     var obStatus = (window._mlOblStatuses && window._mlOblStatuses[uid]) || '';
     var obDepts  = (window._mlOblDepts    && window._mlOblDepts[uid])    || [];
     var obAssign = (window._mlOblAssign   && window._mlOblAssign[uid])   || '';
     if (typeof obDepts === 'string') obDepts = obDepts ? obDepts.split(',').map(function(d){return d.trim();}) : [];
 
-    /* get real action items from table view data matching this obligation */
-    var actItems = (window._mlActionItems||[]).filter(function(a){
-      return a.obligationId === obId;
-    });
-    /* fallback: split actionable string on clause */
-    if (!actItems.length) {
-      var rawActs = (cl.actionable||'').split(';').map(function(a){return a.trim();}).filter(Boolean);
-      actItems = rawActs.map(function(a, ai){
-        return {
-          actionId: 'ACT-' + cl.id + '-' + (oi+1) + '-' + (ai+1),
-          action: a,
-          obligationId: obId,
-          department: obDepts.join(', '),
-          assignedTo: obAssign,
-          status: obStatus,
-          dueDate: '', frequency: 'Monthly', tags: []
-        };
-      });
-    }
-
-    /* dept display on obl header — show dept if all actions share same, else "N depts" */
-    var allActDeptArr = actItems.map(function(a, ai){
+    /* dept display: if all actions share same dept show it, else show count */
+    var allDepts = [];
+    actList.forEach(function(a, ai) {
       var d = window._mlActDepts && window._mlActDepts[uid+'-'+ai];
-      if (d) return Array.isArray(d) ? d : [d];
-      return obDepts;
+      var arr = d ? (Array.isArray(d) ? d : [d]) : (a.department ? [a.department] : []);
+      arr.forEach(function(dep){ if(allDepts.indexOf(dep)<0) allDepts.push(dep); });
     });
-    var flatDepts = [];
-    allActDeptArr.forEach(function(arr){ arr.forEach(function(d){ if(flatDepts.indexOf(d)<0) flatDepts.push(d); }); });
     var deptDisplay = obDepts.length ? obDepts.join(', ')
-      : flatDepts.length === 1 ? flatDepts[0]
-      : flatDepts.length > 1  ? flatDepts.length + ' depts'
+      : allDepts.length === 1 ? allDepts[0]
+      : allDepts.length > 1  ? allDepts.length + ' depts'
       : '';
 
     var statusStyle = obStatus === 'Assigned'
@@ -414,22 +450,36 @@ function _mlChBuildOblAccordions(cl, ci, cli, obligs) {
       : 'background:#f3f4f6;color:#6b7280;border-color:#d1d5db;';
 
     return (
-      '<div class="ml-cl-obl-item" id="ml-cl-obl-' + uid + '">' +
+      '<div style="border:1px solid var(--cl-border);border-radius:10px;margin-bottom:6px;overflow:hidden;" id="ml-obl-card-' + uid + '">' +
 
-        /* ── OBLIGATION HEADER ── */
-        '<div class="ml-cl-obl-header" style="cursor:default;">' +
-          '<span class="ml-cl-obl-num">O' + (oi+1) + '</span>' +
-          '<span class="ml-cl-obl-preview">' + obText.substring(0,70) + (obText.length>70?'…':'') + '</span>' +
+        /* ── OBLIGATION HEADER (accordion trigger) ── */
+        '<div style="display:flex;align-items:center;gap:8px;padding:10px 14px;background:#fff;transition:background .12s;">' +
+          /* clickable area for accordion — excludes eye btn */
+          '<div style="display:flex;align-items:center;gap:8px;flex:1;min-width:0;cursor:pointer;" onclick="_mlChToggleOblRow(\'' + uid + '\')">' +
+
+          /* expand arrow */
+          '<span style="font-size:9px;color:var(--cl-t3);transition:transform .2s;flex-shrink:0;" id="ml-obl-arr-' + uid + '">▶</span>' +
+
+          /* obl id chip */
+          '<span style="font-family:monospace;font-size:10px;font-weight:700;color:#fff;background:var(--cl-purple);padding:2px 8px;border-radius:4px;flex-shrink:0;white-space:nowrap;">' + obl.id + '</span>' +
+
+          /* obl name */
+          '<span style="flex:1;font-size:12px;font-weight:500;color:var(--cl-t1);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0;">' +
+            obl.name.substring(0,70) + (obl.name.length>70?'…':'') +
+          '</span>' +
+          '</div>' + /* end of clickable accordion area */
+
+          /* right badges — NOT inside the accordion click zone */
           '<div style="display:flex;align-items:center;gap:5px;flex-shrink:0;">' +
 
             /* action count */
-            (actItems.length
+            (actList.length
               ? '<span style="font-size:9px;font-weight:600;color:var(--cl-blue);background:var(--cl-blue-lt);border:1px solid var(--cl-blue-mid);padding:2px 9px;border-radius:10px;white-space:nowrap;">'
-                + actItems.length + ' Action' + (actItems.length>1?'s':'') + '</span>'
+                + actList.length + ' Action' + (actList.length>1?'s':'') + '</span>'
               : '') +
 
-            /* dept badge (multi-select) */
-            '<span class="ml-cl-dept-badge" onclick="event.stopPropagation();_mlChOblDeptPicker(\'' + uid + '\')" style="cursor:pointer;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'
+            /* dept badge */
+            '<span class="ml-cl-dept-badge" onclick="event.stopPropagation();_mlChOblDeptPicker(\'' + uid + '\')">'
               + (deptDisplay || '+ Dept') +
             '</span>' +
 
@@ -438,50 +488,62 @@ function _mlChBuildOblAccordions(cl, ci, cli, obligs) {
               ? '<span class="ml-cl-assignee-badge" onclick="event.stopPropagation();_mlChOblAssigneePicker(\'' + uid + '\')">' + obAssign + '</span>'
               : '<span class="ml-cl-assignee-badge" onclick="event.stopPropagation();_mlChOblAssigneePicker(\'' + uid + '\')" style="background:var(--cl-hover);border-color:var(--cl-border);color:var(--cl-t3);">Assign</span>') +
 
-            /* status */
+            /* status badge */
             (obStatus ? '<span class="ml-cl-status-badge" style="' + statusStyle + '">' + obStatus + '</span>' : '') +
 
-            /* eye → obligation detail popup */
-            '<button class="ml-cl-eye-btn" onclick="event.stopPropagation();_mlChOpenOblPopup(\'' + uid + '\',\'' + obId + '\',' + JSON.stringify(obText) + ',\'' + obAssign + '\',\'' + obStatus + '\')" title="View obligation">' +
+            /* eye → obligation detail popup (same as table view) */
+            '<button class="ml-cl-eye-btn" onclick="event.stopPropagation();_mlChOpenOblPopupById(\'' + uid + '\')" title="View obligation">' +
               '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>' +
             '</button>' +
 
           '</div>' +
-        '</div>' +
+        '</div>' + /* end of right badges */
+        '</div>' + /* end of obl header row */
 
-        /* ── ACTION ROWS ── */
-        '<div style="border-top:1px solid var(--cl-border-lt);background:#fafbfd;">' +
-          (actItems.length ? actItems.map(function(actItem, ai) {
+        /* ── ACTION LIST (accordion body, hidden by default) ── */
+        '<div id="ml-obl-body-' + uid + '" style="display:none;border-top:1px solid var(--cl-border-lt);background:#fafbfd;">' +
+          (actList.length ? actList.map(function(actItem, ai) {
             var actUid    = uid + '-' + ai;
-            var actDepts  = (window._mlActDepts  && window._mlActDepts[actUid])  || obDepts;
+            var actDepts  = (window._mlActDepts    && window._mlActDepts[actUid])    || obDepts;
             if (typeof actDepts === 'string') actDepts = actDepts ? actDepts.split(',').map(function(d){return d.trim();}) : [];
             if (!Array.isArray(actDepts)) actDepts = [];
-            var actAssign = (window._mlActAssign    && window._mlActAssign[actUid])    || obAssign;
-            var actStatus = (window._mlActStatuses  && window._mlActStatuses[actUid])  || obStatus;
+            var actAssign = (window._mlActAssign   && window._mlActAssign[actUid])   || obAssign || actItem.assignedTo || '';
+            var actStatus = (window._mlActStatuses && window._mlActStatuses[actUid]) || obStatus  || actItem.status    || '';
             var actDeptDisplay = actDepts.length === 1 ? actDepts[0]
-              : actDepts.length > 1 ? actDepts.length + ' depts' : '';
+              : actDepts.length > 1 ? actDepts.length + ' depts'
+              : (actItem.department || '');
             var aStatusStyle = actStatus === 'Assigned'
               ? 'background:#dcfce7;color:#15803d;border-color:#6ee7b7;'
               : actStatus === 'Unassigned'
               ? 'background:#fef3c7;color:#b45309;border-color:#fcd34d;'
               : 'background:#f3f4f6;color:#6b7280;border-color:#d1d5db;';
 
-            return '<div class="ml-cl-act-row" id="ml-cl-act-' + actUid + '">' +
-              /* real Action ID chip */
+            var fullActItem = {
+              actionId: actItem.actionId, action: actItem.action,
+              obligationId: obl.id, obligationName: obl.name,
+              circId: actItem.circId || (window._mlChActiveCirc && window._mlChActiveCirc.id) || '',
+              circTitle: (window._mlChActiveCirc && window._mlChActiveCirc.title) || '',
+              department: actDepts.join(', ') || actItem.department || '',
+              assignedTo: actAssign, status: actStatus,
+              dueDate: actItem.dueDate || '', frequency: actItem.frequency || 'Monthly', tags: actItem.tags || []
+            };
+            window._mlChActDataMap = window._mlChActDataMap || {};
+            window._mlChActDataMap[actUid] = fullActItem;
+
+            return '<div style="display:flex;align-items:center;gap:8px;padding:8px 14px;border-bottom:1px solid var(--cl-border-lt);">' +
+              /* action id chip */
               '<span style="font-family:monospace;font-size:10px;font-weight:700;color:#fff;background:var(--cl-blue);padding:2px 7px;border-radius:4px;flex-shrink:0;white-space:nowrap;">' + actItem.actionId + '</span>' +
               /* action text */
-              '<span class="ml-cl-act-text">' + (actItem.action||'').substring(0,60) + ((actItem.action||'').length>60?'…':'') + '</span>' +
+              '<span style="flex:1;font-size:12px;color:var(--cl-t1);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0;">' + (actItem.action||'').substring(0,65) + ((actItem.action||'').length>65?'…':'') + '</span>' +
+              /* badges */
               '<div style="display:flex;align-items:center;gap:5px;flex-shrink:0;">' +
-                /* dept multi-select */
-                '<span class="ml-cl-dept-badge" onclick="event.stopPropagation();_mlChActDeptPicker(\'' + actUid + '\')" style="cursor:pointer;">' + (actDeptDisplay || '+ Dept') + '</span>' +
-                /* assignee */
+                '<span class="ml-cl-dept-badge" onclick="event.stopPropagation();_mlChActDeptPicker(\'' + actUid + '\')">' + (actDeptDisplay || '+ Dept') + '</span>' +
                 (actAssign
                   ? '<span class="ml-cl-assignee-badge" onclick="event.stopPropagation();_mlChActAssigneePicker(\'' + actUid + '\')">' + actAssign + '</span>'
                   : '<span class="ml-cl-assignee-badge" onclick="event.stopPropagation();_mlChActAssigneePicker(\'' + actUid + '\')" style="background:var(--cl-hover);border-color:var(--cl-border);color:var(--cl-t3);">Assign</span>') +
-                /* status */
                 (actStatus ? '<span class="ml-cl-status-badge" style="' + aStatusStyle + '">' + actStatus + '</span>' : '') +
-                /* eye → action detail popup (same as table view) */
-                '<button class="ml-cl-eye-btn" onclick="event.stopPropagation();_mlChOpenActionDetail(\'' + actUid + '\',' + JSON.stringify(actItem) + ')" title="View action">' +
+                /* eye → opens exact same popup as clicking action name in table view */
+                '<button class="ml-cl-eye-btn" onclick="event.stopPropagation();_mlChOpenActionDetailById(\'' + actUid + '\')" title="View action">' +
                   '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>' +
                 '</button>' +
               '</div>' +
@@ -494,7 +556,6 @@ function _mlChBuildOblAccordions(cl, ci, cli, obligs) {
     );
   }).join('');
 }
-
 
 window._mlChTab = function(btn, panelIdx, ci, cli) {
   var wrap = document.getElementById('ml-cl-panels-' + ci + '-' + cli);
@@ -583,15 +644,17 @@ window._mlChToggleClause2 = function(ci, cli) {
   var row    = document.getElementById('ml-cl-row-' + ci + '-' + cli);
   var expand = document.getElementById('ml-cl-expand2-' + ci + '-' + cli);
   var arr    = document.getElementById('ml-cl-arr2-' + ci + '-' + cli);
+  var card   = document.getElementById('ml-cl-card-' + ci + '-' + cli);
   if (!row || !expand) return;
-  var isOpen = row.classList.contains('expanded');
-  document.querySelectorAll('.ml-cl-row').forEach(function(r){ r.classList.remove('expanded'); });
+  var isOpen = expand.style.display !== 'none';
+  /* close all */
   document.querySelectorAll('[id^="ml-cl-expand2-"]').forEach(function(e){ e.style.display='none'; });
   document.querySelectorAll('[id^="ml-cl-arr2-"]').forEach(function(a){ a.style.transform=''; });
+  document.querySelectorAll('[id^="ml-cl-card-"]').forEach(function(c){ c.style.borderColor=''; });
   if (!isOpen) {
-    row.classList.add('expanded');
     expand.style.display = 'block';
     if (arr) arr.style.transform = 'rotate(90deg)';
+    if (card) card.style.borderColor = 'var(--cl-blue)';
   }
 };
 
@@ -600,8 +663,16 @@ window._mlChToggleObl = function(uid) {
   var arr  = document.getElementById('ml-cl-obl-arr-' + uid);
   if (!body) return;
   var isOpen = body.classList.contains('open');
-  body.classList.toggle('open', !isOpen);
-  if (arr) arr.style.transform = isOpen ? '' : 'rotate(180deg)';
+  /* close all sibling obl bodies in same clause expand */
+  var parent = body.closest('[id^="ml-cl-expand2-"]');
+  if (parent) {
+    parent.querySelectorAll('.ml-cl-obl-body.open').forEach(function(b){ b.classList.remove('open'); });
+    parent.querySelectorAll('[id^="ml-cl-obl-arr-"]').forEach(function(a){ a.style.transform = ''; });
+  }
+  if (!isOpen) {
+    body.classList.add('open');
+    if (arr) arr.style.transform = 'rotate(180deg)';
+  }
 };
 
 /* state stores */
@@ -709,6 +780,401 @@ window._mlChSetActAssign = function(actUid, person) {
   showToast('Action assigned to ' + person + '.','success');
 };
 
+/* ── Structure menu — add chapter / section / subsection ── */
+window._mlChOpenStructureMenu = function() {
+  var ex = document.getElementById('ml-struct-modal'); if(ex) ex.remove();
+  var overlay = document.createElement('div');
+  overlay.className = 'dr-modal-overlay'; overlay.id = 'ml-struct-modal';
+  overlay.innerHTML =
+    '<div class="dr-modal" style="max-width:380px;">' +
+      '<div class="dr-modal-head"><div class="dr-modal-head-left"><div class="dr-modal-eyebrow">Add Structure</div><div class="dr-modal-subject">What do you want to add?</div></div><button class="dr-modal-close" onclick="document.getElementById(\'ml-struct-modal\').remove()">✕</button></div>' +
+      '<div class="dr-modal-body" style="padding:16px;display:flex;flex-direction:column;gap:8px;">' +
+        [
+          { type:'chapter',    label:'📖 Chapter',    sub:'A new top-level chapter' },
+          { type:'section',    label:'§ Section',     sub:'A section within the active chapter' },
+          { type:'subsection', label:'¶ Subsection',  sub:'A subsection within the active section' },
+        ].map(function(opt) {
+          return '<button onclick="_mlChOpenStructureAdd(\'' + opt.type + '\')" style="display:flex;flex-direction:column;align-items:flex-start;gap:2px;padding:12px 14px;border:1px solid #e5e7eb;border-radius:8px;background:#f9fafb;cursor:pointer;text-align:left;width:100%;font-family:inherit;">' +
+            '<span style="font-size:13px;font-weight:600;color:var(--cl-t1);">' + opt.label + '</span>' +
+            '<span style="font-size:11px;color:var(--cl-t3);">' + opt.sub + '</span>' +
+          '</button>';
+        }).join('') +
+        '<div style="border-top:1px solid var(--cl-border-lt);margin:4px 0;"></div>' +
+        '<button onclick="document.getElementById(\'ml-struct-modal\').remove();_mlChOpenBulkUpload()" style="display:flex;flex-direction:column;align-items:flex-start;gap:2px;padding:12px 14px;border:1px solid #e5e7eb;border-radius:8px;background:#f9fafb;cursor:pointer;text-align:left;width:100%;font-family:inherit;">' +
+          '<span style="font-size:13px;font-weight:600;color:var(--cl-t1);">📂 Bulk Upload</span>' +
+          '<span style="font-size:11px;color:var(--cl-t3);">Upload chapters, sections & subsections via Excel/CSV</span>' +
+        '</button>' +
+      '</div>' +
+    '</div>';
+  document.body.appendChild(overlay);
+  overlay.addEventListener('click', function(e){ if(e.target===overlay) overlay.remove(); });
+};
+
+window._mlChOpenBulkUpload = function() {
+  var ex = document.getElementById('ml-bulk-upload-modal'); if(ex) ex.remove();
+  var overlay = document.createElement('div');
+  overlay.className = 'dr-modal-overlay'; overlay.id = 'ml-bulk-upload-modal';
+  overlay.innerHTML =
+    '<div class="dr-modal" style="max-width:480px;">' +
+      '<div class="dr-modal-head"><div class="dr-modal-head-left"><div class="dr-modal-eyebrow">Bulk Upload Structure</div><div class="dr-modal-subject">Upload chapters, sections & subsections</div></div><button class="dr-modal-close" onclick="document.getElementById(\'ml-bulk-upload-modal\').remove()">✕</button></div>' +
+      '<div class="dr-modal-body" style="padding:20px;display:flex;flex-direction:column;gap:12px;">' +
+        '<div style="background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:12px 14px;font-size:12px;color:#92400e;">Expected columns: <b>Type</b> (Chapter/Section/Subsection), <b>Title</b>, <b>Parent</b> (title of parent for sections/subsections)</div>' +
+        '<button class="dr-btn dr-btn-sec" style="width:100%;padding:12px;justify-content:flex-start;gap:10px;" onclick="_mlChDownloadStructureTemplate()">📥 Download Template CSV</button>' +
+        '<label style="display:flex;flex-direction:column;align-items:center;gap:8px;padding:24px;border:2px dashed #d1d5db;border-radius:10px;cursor:pointer;background:#f9fafb;">' +
+          '<span style="font-size:28px;">📂</span>' +
+          '<span style="font-size:13px;font-weight:600;color:var(--cl-t2);">Click to choose Excel or CSV file</span>' +
+          '<span style="font-size:11px;color:var(--cl-t3);">Supported: .csv, .xlsx, .xls</span>' +
+          '<input type="file" accept=".csv,.xlsx,.xls" style="display:none;" onchange="_mlChHandleBulkUpload(this)"/>' +
+        '</label>' +
+      '</div>' +
+      '<div class="dr-modal-foot"><button class="dr-btn dr-btn-ghost" onclick="document.getElementById(\'ml-bulk-upload-modal\').remove()">Cancel</button></div>' +
+    '</div>';
+  document.body.appendChild(overlay);
+  overlay.addEventListener('click', function(e){ if(e.target===overlay) overlay.remove(); });
+};
+
+window._mlChDownloadStructureTemplate = function() {
+  var csv = 'Type,Title,Parent\nChapter,Housing Finance Regulations,\nSection,Eligible Activities,Housing Finance Regulations\nSubsection,Documentation,Eligible Activities\n';
+  var blob = new Blob([csv],{type:'text/csv'});
+  var a = document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='structure_template.csv'; a.click();
+};
+
+window._mlChHandleBulkUpload = function(input) {
+  var file = input.files[0]; if(!file) return;
+  showToast('Structure uploaded. Processing...','success');
+  document.getElementById('ml-bulk-upload-modal').remove();
+};
+
+window._mlChOpenStructureAdd = function(type) {
+  document.getElementById('ml-struct-modal').remove();
+  var labels = { chapter:'Chapter', section:'Section', subsection:'Subsection', clause:'Clause' };
+  var fields = {
+    chapter:    [{ id:'title', label:'Title', type:'text', placeholder:'e.g. Risk Management' }],
+    section:    [{ id:'title', label:'Section Title', type:'text', placeholder:'e.g. Eligible Activities' }],
+    subsection: [{ id:'title', label:'Subsection Title', type:'text', placeholder:'e.g. Documentation Requirements' }],
+    clause:     [
+      { id:'id',   label:'Clause ID', type:'text', placeholder:'e.g. C3.4' },
+      { id:'text', label:'Clause Text', type:'textarea', placeholder:'Enter the clause text…' },
+      { id:'dept', label:'Department', type:'select', options:['','Compliance','Risk','Legal','IT','Operations','HR','Finance','Credit'] },
+      { id:'risk', label:'Risk Level', type:'select', options:['','High','Medium','Low'] },
+    ]
+  };
+  var ex2 = document.getElementById('ml-struct-add-modal'); if(ex2) ex2.remove();
+  var overlay2 = document.createElement('div');
+  overlay2.className = 'dr-modal-overlay'; overlay2.id = 'ml-struct-add-modal';
+  overlay2.innerHTML =
+    '<div class="dr-modal" style="max-width:460px;">' +
+      '<div class="dr-modal-head"><div class="dr-modal-head-left"><div class="dr-modal-eyebrow">Add ' + labels[type] + '</div></div><button class="dr-modal-close" onclick="document.getElementById(\'ml-struct-add-modal\').remove()">✕</button></div>' +
+      '<div class="dr-modal-body" style="padding:16px;display:flex;flex-direction:column;gap:10px;">' +
+        (fields[type]||[]).map(function(f) {
+          var input = f.type === 'textarea'
+            ? '<textarea id="ml-sadd-'+f.id+'" style="width:100%;height:70px;padding:8px;border:1px solid #d1d5db;border-radius:6px;font-size:12px;font-family:inherit;resize:vertical;" placeholder="'+f.placeholder+'"></textarea>'
+            : f.type === 'select'
+            ? '<select id="ml-sadd-'+f.id+'" style="padding:7px 10px;border:1px solid #d1d5db;border-radius:6px;font-size:12px;">' + (f.options||[]).map(function(o){return '<option value="'+o+'">'+(o||'— Select —')+'</option>';}).join('') + '</select>'
+            : '<input id="ml-sadd-'+f.id+'" type="text" placeholder="'+f.placeholder+'" style="padding:7px 10px;border:1px solid #d1d5db;border-radius:6px;font-size:12px;width:100%;"/>';
+          return '<label style="font-size:12px;font-weight:600;color:var(--cl-t2);">'+f.label+'</label>' + input;
+        }).join('') +
+      '</div>' +
+      '<div class="dr-modal-foot">' +
+        '<button class="dr-btn dr-btn-ghost" onclick="document.getElementById(\'ml-struct-add-modal\').remove()">Cancel</button>' +
+        '<button class="dr-btn dr-btn-pri" onclick="_mlChCommitStructureAdd(\'' + type + '\')">Add ' + labels[type] + '</button>' +
+      '</div>' +
+    '</div>';
+  document.body.appendChild(overlay2);
+  overlay2.addEventListener('click', function(e){ if(e.target===overlay2) overlay2.remove(); });
+  setTimeout(function(){ var first=overlay2.querySelector('input,textarea'); if(first) first.focus(); }, 50);
+};
+
+window._mlChCommitStructureAdd = function(type) {
+  var get = function(id){ var el=document.getElementById('ml-sadd-'+id); return el?(el.value||'').trim():''; };
+  var circ = window._mlChActiveCirc;
+  var chapters = window._mlChActiveChapters || [];
+
+  if (type === 'chapter') {
+    var title = get('title'); if(!title){ showToast('Title required.','error'); return; }
+    var newCh = { num: chapters.length+1, title: title, clauses: [], sections: [] };
+    chapters.push(newCh);
+    if (circ) circ.chapters = chapters;
+    document.getElementById('ml-struct-add-modal').remove();
+    _mlChBuildTree(circ);
+    showToast('Chapter "'+title+'" added.','success');
+    return;
+  }
+
+  if (type === 'section') {
+    var title = get('title'); if(!title){ showToast('Title required.','error'); return; }
+    var ci = window._mlChActiveChapterIdx;
+    if (ci == null){ showToast('Open a chapter first.','error'); return; }
+    var ch = chapters[ci];
+    if (!ch.sections) ch.sections = [];
+    ch.sections.push({ id:'Section '+(ch.sections.length+1), text:title, clauses:[] });
+    document.getElementById('ml-struct-add-modal').remove();
+    _mlChBuildTree(circ);
+    showToast('Section "'+title+'" added.','success');
+    return;
+  }
+
+  if (type === 'subsection') {
+    var title = get('title'); if(!title){ showToast('Title required.','error'); return; }
+    var ci = window._mlChActiveChapterIdx;
+    if (ci == null){ showToast('Open a chapter first.','error'); return; }
+    var ch = chapters[ci];
+    if (!ch.sections) ch.sections = [];
+    var lastSec = ch.sections[ch.sections.length-1];
+    if (!lastSec){ showToast('Add a section first.','error'); return; }
+    if (!lastSec.subsections) lastSec.subsections = [];
+    lastSec.subsections.push({ text:title, clauses:[] });
+    document.getElementById('ml-struct-add-modal').remove();
+    _mlChBuildTree(circ);
+    showToast('Subsection "'+title+'" added.','success');
+    return;
+  }
+
+  if (type === 'clause') {
+    var id   = get('id');   if(!id){   showToast('Clause ID required.','error');   return; }
+    var text = get('text'); if(!text){ showToast('Clause text required.','error'); return; }
+    var dept = get('dept'); var risk = get('risk');
+    var ci = window._mlChActiveChapterIdx != null ? window._mlChActiveChapterIdx : 0;
+    var ch = chapters[ci];
+    if (!ch){ showToast('No active chapter.','error'); return; }
+    if (!ch.clauses) ch.clauses = [];
+    ch.clauses.push({ id:id, text:text, department:dept, risk:risk||'Medium', status:'Unassigned', obligations:[], actionables:[] });
+    document.getElementById('ml-struct-add-modal').remove();
+    _mlChBuildTree(circ);
+    if (window._mlChLastStackArgs) _mlChReRenderStack();
+    showToast('Clause '+id+' added.','success');
+    return;
+  }
+};
+
+window._mlChSaveNewObligation = function() {
+  var text = (document.getElementById('ml-aob-text')||{}).value || '';
+  var dept = (document.getElementById('ml-aob-dept')||{}).value || '';
+  if (!text.trim()) { showToast('Please enter obligation text.','error'); return; }
+  var args = window._mlChLastStackArgs;
+  if (args && args[2] && args[2].length) {
+    var cl = args[2][0];
+    if (!Array.isArray(cl.obligations)) {
+      cl.obligations = cl.obligation ? (Array.isArray(cl.obligation) ? cl.obligation : [cl.obligation]) : [];
+      delete cl.obligation;
+    }
+    cl.obligations.push(text.trim());
+    if (dept) cl.department = cl.department || dept;
+  }
+  document.getElementById('ml-add-obl-modal').remove();
+  _mlChReRenderStack();
+  showToast('Obligation added.', 'success');
+};
+
+window._mlChSaveNewObligation = function() {
+  var text = (document.getElementById('ml-add-obl-text')||{}).value || '';
+  var dept = (document.getElementById('ml-add-obl-dept')||{}).value || '';
+  if (!text.trim()) { showToast('Please enter obligation text.','error'); return; }
+  /* inject into first clause of current section so it persists through re-render */
+  var args = window._mlChLastStackArgs;
+  if (args && args[2] && args[2].length) {
+    var cl = args[2][0];
+    if (!Array.isArray(cl.obligations)) {
+      cl.obligations = cl.obligation ? (Array.isArray(cl.obligation) ? cl.obligation : [cl.obligation]) : [];
+      delete cl.obligation;
+    }
+    cl.obligations.push(text.trim());
+    if (dept) cl.department = cl.department || dept;
+  }
+  document.getElementById('ml-add-obl-modal').remove();
+  _mlChReRenderStack();
+  showToast('Obligation added.', 'success');
+};
+
+/* ── Add Action inline ── */
+/* ── Add Action inline — full popup ── */
+window._mlChAddActionInline = function() {
+  var args = window._mlChLastStackArgs;
+  var clauses = args ? args[2] : [];
+  var oblOptions = [];
+  clauses.forEach(function(cl) {
+    var obligs = Array.isArray(cl.obligations) ? cl.obligations
+      : Array.isArray(cl.obligation) ? cl.obligation
+      : typeof cl.obligation === 'string' && cl.obligation ? [cl.obligation] : [];
+    obligs.forEach(function(ob, oi) {
+      var txt = typeof ob === 'string' ? ob : (ob.text||'');
+      oblOptions.push({ id: 'OBL-'+cl.id+'-'+(oi+1), label: txt.substring(0,60), clauseRef: cl, oblIdx: oi });
+    });
+  });
+
+  var allDepts = ['Compliance','Risk','Legal','IT','Operations','HR','Finance','Credit','Procurement'];
+  var freqOpts = ['Monthly','Quarterly','Annually','Ad-hoc','As per Regulation'];
+  var statusOpts = ['Assigned','Unassigned','Not Applicable'];
+  var ex = document.getElementById('ml-add-act-modal'); if(ex) ex.remove();
+  var overlay = document.createElement('div');
+  overlay.className = 'dr-modal-overlay'; overlay.id = 'ml-add-act-modal';
+  overlay.innerHTML =
+    '<div class="dr-modal" style="max-width:600px;">' +
+      '<div class="dr-modal-head"><div class="dr-modal-head-left"><div class="dr-modal-eyebrow">Add Action</div><div class="dr-modal-subject">New Action Entry</div></div><button class="dr-modal-close" onclick="document.getElementById(\'ml-add-act-modal\').remove()">✕</button></div>' +
+      '<div class="dr-modal-body" style="padding:16px;display:flex;flex-direction:column;gap:10px;max-height:65vh;overflow-y:auto;">' +
+
+        /* obl search dropdown */
+        '<div><label style="font-size:10px;font-weight:700;color:#6b7280;text-transform:uppercase;display:block;margin-bottom:4px;">Parent Obligation <span style="color:#ef4444;">*</span></label>' +
+        (oblOptions.length
+          ? '<select id="ml-aact-obl" style="width:100%;padding:8px 10px;border:1px solid #e5e7eb;border-radius:6px;font-size:12px;background:#fff;">' +
+              oblOptions.map(function(o,i){return '<option value="'+i+'">'+o.id+' — '+o.label+'</option>';}).join('') +
+            '</select>'
+          : '<div style="font-size:12px;color:var(--cl-t3);padding:8px;background:#f9fafb;border-radius:6px;">No obligations found. Add an obligation first.</div>') +
+        '</div>' +
+
+        '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">' +
+          '<div><label style="font-size:10px;font-weight:700;color:#6b7280;text-transform:uppercase;display:block;margin-bottom:4px;">Action ID</label><input type="text" id="ml-aact-id" placeholder="ACT-XXX" style="width:100%;padding:8px 10px;border:1px solid #e5e7eb;border-radius:6px;font-size:12px;"/></div>' +
+          '<div><label style="font-size:10px;font-weight:700;color:#6b7280;text-transform:uppercase;display:block;margin-bottom:4px;">Assigned To</label><input type="text" id="ml-aact-assignee" placeholder="Enter name…" style="width:100%;padding:8px 10px;border:1px solid #e5e7eb;border-radius:6px;font-size:12px;"/></div>' +
+          '<div><label style="font-size:10px;font-weight:700;color:#6b7280;text-transform:uppercase;display:block;margin-bottom:4px;">Assignment Status</label><select id="ml-aact-status" style="width:100%;padding:8px 10px;border:1px solid #e5e7eb;border-radius:6px;font-size:12px;background:#fff;">' + statusOpts.map(function(s){return '<option>'+s+'</option>';}).join('') + '</select></div>' +
+          '<div><label style="font-size:10px;font-weight:700;color:#6b7280;text-transform:uppercase;display:block;margin-bottom:4px;">Frequency</label><select id="ml-aact-freq" style="width:100%;padding:8px 10px;border:1px solid #e5e7eb;border-radius:6px;font-size:12px;background:#fff;">' + freqOpts.map(function(f){return '<option>'+f+'</option>';}).join('') + '</select></div>' +
+          '<div><label style="font-size:10px;font-weight:700;color:#6b7280;text-transform:uppercase;display:block;margin-bottom:4px;">Internal Due Date</label><input type="date" id="ml-aact-intdue" style="width:100%;padding:8px 10px;border:1px solid #e5e7eb;border-radius:6px;font-size:12px;"/></div>' +
+          '<div><label style="font-size:10px;font-weight:700;color:#6b7280;text-transform:uppercase;display:block;margin-bottom:4px;">External Due Date</label><input type="date" id="ml-aact-extdue" style="width:100%;padding:8px 10px;border:1px solid #e5e7eb;border-radius:6px;font-size:12px;"/></div>' +
+        '</div>' +
+
+        /* multi-dept */
+        '<div><label style="font-size:10px;font-weight:700;color:#6b7280;text-transform:uppercase;display:block;margin-bottom:4px;">Departments</label>' +
+        '<div style="display:flex;flex-wrap:wrap;gap:6px;" id="ml-aact-dept-wrap">' +
+          allDepts.map(function(d){
+            return '<label style="display:flex;align-items:center;gap:5px;padding:5px 10px;border:1px solid #e5e7eb;border-radius:20px;cursor:pointer;font-size:11px;font-weight:500;color:#374151;background:#f9fafb;">' +
+              '<input type="checkbox" value="'+d+'" style="accent-color:#3b82f6;width:13px;height:13px;"/>'+d+'</label>';
+          }).join('') +
+        '</div></div>' +
+
+        /* tags */
+        '<div><label style="font-size:10px;font-weight:700;color:#6b7280;text-transform:uppercase;display:block;margin-bottom:4px;">Tags</label>' +
+        '<input type="text" id="ml-aact-tags" placeholder="e.g. Compliance, Reporting (comma-separated)" style="width:100%;padding:8px 10px;border:1px solid #e5e7eb;border-radius:6px;font-size:12px;"/></div>' +
+
+        '<div><label style="font-size:10px;font-weight:700;color:#6b7280;text-transform:uppercase;display:block;margin-bottom:4px;">Action Name <span style="color:#ef4444;">*</span></label><textarea id="ml-aact-text" placeholder="Describe the action…" style="width:100%;height:70px;padding:8px 10px;border:1px solid #e5e7eb;border-radius:6px;font-size:12px;font-family:inherit;resize:vertical;"></textarea></div>' +
+
+      '</div>' +
+      '<div class="dr-modal-foot">' +
+        '<button class="dr-btn dr-btn-ghost" onclick="document.getElementById(\'ml-add-act-modal\').remove()">Cancel</button>' +
+        (oblOptions.length ? '<button class="dr-btn dr-btn-pri" onclick="_mlChSaveNewAction(' + JSON.stringify(oblOptions.map(function(o){return {id:o.id,clauseId:o.clauseRef.id,oblIdx:o.oblIdx};})) + ')">Add Action</button>' : '') +
+      '</div>' +
+    '</div>';
+  document.body.appendChild(overlay);
+  overlay.addEventListener('click', function(e){ if(e.target===overlay) overlay.remove(); });
+  setTimeout(function(){ var t=document.getElementById('ml-aact-id'); if(t) t.focus(); }, 50);
+};
+
+window._mlChSaveNewAction = function(oblOptions) {
+  var text = (document.getElementById('ml-aact-text')||{}).value || '';
+  if (!text.trim()) { showToast('Please enter action text.','error'); return; }
+  var selIdx = parseInt((document.getElementById('ml-aact-obl')||{}).value || '0');
+  var opt = oblOptions[selIdx];
+  var args = window._mlChLastStackArgs;
+  var clauses = args ? args[2] : [];
+  var cl = clauses.find(function(c){ return c.id === opt.clauseId; });
+  if (cl) {
+    if (!Array.isArray(cl.actionables)) {
+      cl.actionables = cl.actionable ? (Array.isArray(cl.actionable) ? cl.actionable : [cl.actionable]) : [];
+      delete cl.actionable;
+    }
+    cl.actionables.push(text.trim());
+  }
+  document.getElementById('ml-add-act-modal').remove();
+  _mlChReRenderStack();
+  showToast('Action added.', 'success');
+};
+
+/* ── Export modal ── */
+window._mlChOpenExportModal = function() {
+  var ex = document.getElementById('ml-ch-export-modal'); if(ex) ex.remove();
+  var overlay = document.createElement('div');
+  overlay.className = 'dr-modal-overlay'; overlay.id = 'ml-ch-export-modal';
+  overlay.innerHTML =
+    '<div class="dr-modal" style="max-width:420px;">' +
+      '<div class="dr-modal-head"><div class="dr-modal-head-left"><div class="dr-modal-eyebrow">Export / Import</div><div class="dr-modal-subject">Obligations & Action Items</div></div><button class="dr-modal-close" onclick="document.getElementById(\'ml-ch-export-modal\').remove()">✕</button></div>' +
+      '<div class="dr-modal-body" style="padding:20px;display:flex;flex-direction:column;gap:12px;">' +
+        '<button class="dr-btn dr-btn-sec" style="width:100%;padding:12px 16px;justify-content:flex-start;gap:10px;" onclick="_mlChDownloadOblTemplate()">📥 Download Template CSV</button>' +
+        '<button class="dr-btn dr-btn-sec" style="width:100%;padding:12px 16px;justify-content:flex-start;gap:10px;" onclick="_mlChExportOblData()">📊 Export Current Data</button>' +
+        '<label class="dr-btn dr-btn-sec" style="width:100%;padding:12px 16px;justify-content:flex-start;gap:10px;cursor:pointer;">📤 Upload Excel / CSV<input type="file" accept=".csv,.xlsx,.xls" style="display:none;" onchange="_mlChHandleImport(this)"/></label>' +
+      '</div>' +
+    '</div>';
+  document.body.appendChild(overlay);
+  overlay.addEventListener('click', function(e){ if(e.target===overlay) overlay.remove(); });
+};
+
+window._mlChDownloadOblTemplate = function() {
+  var csv = 'Obligation ID,Obligation Name,Clause ID,Section,Sub-Section,Department,Frequency,Due Date,Action ID,Action Name,Assigned To,Status,Tags\n';
+  csv += 'OBL-001,Ensure compliance with reporting requirements,CL-1.1,Section 12,Clause (a),Compliance,Monthly,2025-03-31,ACT-001,Submit compliance certificate,John Doe,Assigned,Reporting\n';
+  var blob = new Blob([csv],{type:'text/csv'});
+  var a = document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='obligations_template.csv'; a.click();
+  document.getElementById('ml-ch-export-modal').remove();
+};
+
+window._mlChExportOblData = function() {
+  var args = window._mlChLastStackArgs;
+  var clauses = args ? args[2] : [];
+  var rows = [['Obligation ID','Obligation Name','Clause ID','Department','Status','Action ID','Action Name','Assigned To']];
+  clauses.forEach(function(cl) {
+    var obligs = Array.isArray(cl.obligations) ? cl.obligations : Array.isArray(cl.obligation) ? cl.obligation : typeof cl.obligation === 'string' && cl.obligation ? [cl.obligation] : [];
+    var acts   = Array.isArray(cl.actionables) ? cl.actionables : typeof cl.actionable === 'string' ? cl.actionable.split(';').map(function(a){return a.trim();}).filter(Boolean) : [];
+    obligs.forEach(function(ob,oi){
+      var obText = typeof ob==='string'?ob:(ob.text||'');
+      var obId   = 'OBL-'+cl.id+'-'+(oi+1);
+      if (acts.length) {
+        acts.forEach(function(a,ai){ rows.push([obId,obText,cl.id,cl.department||'',cl.status||'','ACT-'+cl.id+'-'+(oi+1)+'-'+(ai+1),a,'']); });
+      } else {
+        rows.push([obId,obText,cl.id,cl.department||'',cl.status||'','','','']);
+      }
+    });
+  });
+  var csv = rows.map(function(r){ return r.map(function(c){ return '"'+(c||'').replace(/"/g,'""')+'"'; }).join(','); }).join('\n');
+  var blob = new Blob([csv],{type:'text/csv'});
+  var a = document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='obligations_export.csv'; a.click();
+  document.getElementById('ml-ch-export-modal').remove();
+};
+
+/* ── Import modal ── */
+window._mlChOpenImportModal = function() {
+  var ex = document.getElementById('ml-import-modal'); if(ex) ex.remove();
+  var overlay = document.createElement('div');
+  overlay.className = 'dr-modal-overlay'; overlay.id = 'ml-import-modal';
+  overlay.innerHTML =
+    '<div class="dr-modal" style="max-width:440px;">' +
+      '<div class="dr-modal-head"><div class="dr-modal-head-left"><div class="dr-modal-eyebrow">Import Obligations & Actions</div><div class="dr-modal-subject">CSV with columns: Obligation, Action, Department, Status</div></div><button class="dr-modal-close" onclick="document.getElementById(\'ml-import-modal\').remove()">✕</button></div>' +
+      '<div class="dr-modal-body" style="padding:20px;display:flex;flex-direction:column;align-items:center;gap:12px;">' +
+        '<label style="display:flex;flex-direction:column;align-items:center;gap:8px;padding:24px;border:2px dashed #d1d5db;border-radius:10px;width:100%;cursor:pointer;">' +
+          '<span style="font-size:28px;">📂</span>' +
+          '<span style="font-size:13px;font-weight:600;color:var(--cl-t2);">Click to choose CSV file</span>' +
+          '<span style="font-size:11px;color:var(--cl-t3);">Columns: Obligation, Action, Department, Status</span>' +
+          '<input type="file" accept=".csv" style="display:none;" onchange="_mlChHandleImport(this)"/>' +
+        '</label>' +
+      '</div>' +
+      '<div class="dr-modal-foot"><button class="dr-btn dr-btn-ghost" onclick="document.getElementById(\'ml-import-modal\').remove()">Cancel</button></div>' +
+    '</div>';
+  document.body.appendChild(overlay);
+  overlay.addEventListener('click', function(e){ if(e.target===overlay) overlay.remove(); });
+};
+
+window._mlChHandleImport = function(input) {
+  var file = input.files[0]; if(!file) return;
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    var lines = e.target.result.split('\n').filter(function(l){return l.trim();});
+    if (lines.length < 2) { showToast('CSV appears empty.','error'); return; }
+    var args = window._mlChLastStackArgs;
+    var clauses = args ? args[2] : [];
+    var cl = clauses[0];
+    if (!cl) { showToast('No clauses in current section.','error'); return; }
+    if (!Array.isArray(cl.obligations)) cl.obligations = [];
+    if (!Array.isArray(cl.actionables)) cl.actionables = [];
+    var added = 0;
+    lines.slice(1).forEach(function(line) {
+      var cols = line.match(/(".*?"|[^,]+)/g) || [];
+      var clean = cols.map(function(c){ return c.replace(/^"|"$/g,'').replace(/""/g,'"').trim(); });
+      var obl = clean[0]||''; var act = clean[1]||'';
+      if (obl && cl.obligations.indexOf(obl)<0) cl.obligations.push(obl);
+      if (act && cl.actionables.indexOf(act)<0) { cl.actionables.push(act); added++; }
+    });
+    document.getElementById('ml-import-modal').remove();
+    _mlChReRenderStack();
+    showToast('Imported ' + added + ' action(s).','success');
+  };
+  reader.readAsText(file);
+};
+
 /* re-render current stack without changing chapter/section */
 window._mlChReRenderStack = function() {
   if (window._mlChLastStackArgs) {
@@ -716,44 +1182,156 @@ window._mlChReRenderStack = function() {
   }
 };
 
-v
+window._mlChToggleOblRow = function(uid) {
+  var body = document.getElementById('ml-obl-body-' + uid);
+  var arr  = document.getElementById('ml-obl-arr-' + uid);
+  var card = document.getElementById('ml-obl-card-' + uid);
+  if (!body) return;
+  var isOpen = body.style.display !== 'none';
+  document.querySelectorAll('[id^="ml-obl-body-"]').forEach(function(b){ b.style.display='none'; });
+  document.querySelectorAll('[id^="ml-obl-arr-"]').forEach(function(a){ a.style.transform=''; });
+  document.querySelectorAll('[id^="ml-obl-card-"]').forEach(function(c){ c.style.borderColor=''; });
+  if (!isOpen) {
+    body.style.display = 'block';
+    if (arr)  arr.style.transform = 'rotate(90deg)';
+    if (card) card.style.borderColor = 'var(--cl-blue)';
+  }
+};
 
+window._mlChOpenOblPopupById = function(uid) {
+  var oblData = window._mlChUidToObl && window._mlChUidToObl[uid];
+  if (!oblData) { showToast('Obligation data not found.', 'error'); return; }
+  var obId     = oblData.id;
+  var obText   = oblData.name;
+  var obAssign = (window._mlOblAssign   && window._mlOblAssign[uid])   || '';
+  var obStatus = (window._mlOblStatuses && window._mlOblStatuses[uid]) || '';
+  _mlChOpenOblPopup(uid, obId, obText, obAssign, obStatus);
+};
+
+window._mlChOpenOblPopup = function(uid, obId, obText, obAssign, obStatus) {
+  var depts  = window._mlOblDepts[uid] || [];
+  if (typeof depts === 'string') depts = depts ? depts.split(',').map(function(d){return d.trim();}) : [];
+  var circId = (window._mlChActiveCirc && window._mlChActiveCirc.id) || '';
+
+  /* ensure _mlActionItems has actions for this obligation */
+  window._mlActionItems = window._mlActionItems || [];
+
+  /* find related actions already in _mlActionItems */
+  var relatedActions = window._mlActionItems.filter(function(a){
+    return a.obligationId === obId;
+  });
+
+  /* if none found, build from current clause data */
+  if (!relatedActions.length) {
+    var currentClauses = window._mlChLastStackArgs ? window._mlChLastStackArgs[2] : [];
+    currentClauses.forEach(function(cl) {
+      var obligs = Array.isArray(cl.obligations) ? cl.obligations
+        : Array.isArray(cl.obligation) ? cl.obligation
+        : typeof cl.obligation === 'string' && cl.obligation ? [cl.obligation] : [];
+      obligs.forEach(function(ob, oi) {
+        var thisId = (typeof ob === 'object' && ob.id) ? ob.id : ('OBL-' + cl.id + '-' + (oi+1));
+        if (thisId !== obId) return;
+        var acts = Array.isArray(cl.actionables) ? cl.actionables
+          : typeof cl.actionable === 'string' ? cl.actionable.split(';').map(function(a){return a.trim();}).filter(Boolean) : [];
+        acts.forEach(function(a, ai) {
+          var newItem = {
+            actionId: 'ACT-' + cl.id + '-' + (oi+1) + '-' + (ai+1),
+            action: a,
+            obligationId: obId,
+            obligationName: obText,
+            circId: circId,
+            circTitle: (window._mlChActiveCirc && window._mlChActiveCirc.title) || '',
+            department: depts.join(', ') || cl.department || '',
+            assignedTo: obAssign || '',
+            status: obStatus || cl.status || '',
+            dueDate: '', frequency: 'Monthly', tags: []
+          };
+          var idx = window._mlActionItems.findIndex(function(x){ return x.actionId === newItem.actionId; });
+          if (idx >= 0) window._mlActionItems[idx] = newItem;
+          else window._mlActionItems.push(newItem);
+          relatedActions.push(newItem);
+        });
+      });
+    });
+  }
+
+  /* build item exactly as _mlOpenOblDetailPopup expects — same shape as table view OBL-ID click */
+  var item = {
+    obligationId:   obId,
+    obligationName: obText,
+    circId:         circId,
+    dueDate:        '',
+    frequency:      relatedActions[0] ? (relatedActions[0].frequency || 'Monthly') : 'Monthly',
+    department:     depts.join(', ') || (relatedActions[0] ? relatedActions[0].department : ''),
+    status:         obStatus || (relatedActions[0] ? relatedActions[0].status : ''),
+    assignedTo:     obAssign || (relatedActions[0] ? relatedActions[0].assignedTo : ''),
+    tags:           []
+  };
+
+  /* ensure circTitle set for popup footer */
+  item.circTitle = (window._mlChActiveCirc && window._mlChActiveCirc.title) || circId;
+  /* call the exact same popup as table view OBL-ID click */
+  if (typeof _mlOpenOblDetailPopup === 'function') {
+    _mlOpenOblDetailPopup(item, 0);
+  }
+};
+
+window._mlChOpenActionDetailFromObl = function(actItem) {
+  document.getElementById('ml-obl-detail-modal').remove();
+  /* sync and open same action popup as table view */
+  window._mlActionItems = window._mlActionItems || [];
+  var idx = window._mlActionItems.findIndex(function(a){ return a.actionId === actItem.actionId; });
+  if (idx < 0) { window._mlActionItems.push(actItem); idx = window._mlActionItems.length - 1; }
+  else window._mlActionItems[idx] = actItem;
+  _mlOpenDetailPopup(actItem, idx);
+};
 /* open action detail popup from chapter view — same popup as table view */
+window._mlChOpenActionDetailById = function(actUid) {
+  var actItem = window._mlChActDataMap && window._mlChActDataMap[actUid];
+  if (!actItem) { showToast('Action data not found.', 'error'); return; }
+  _mlChOpenActionDetail(actUid, actItem);
+};
+
 window._mlChOpenActionDetail = function(actUid, actItem) {
-  /* actItem is the full action object from _mlActionItems or fallback mock */
   if (typeof actItem === 'string') {
-    /* legacy string call — build mock */
     actItem = {
       actionId: actUid, action: actItem,
       obligationId: '—', obligationName: actItem,
       circId: (window._mlChActiveCirc && window._mlChActiveCirc.id) || '',
-      department: '', assignedTo: '', status: 'Pending',
+      circTitle: (window._mlChActiveCirc && window._mlChActiveCirc.title) || '',
+      department: '', assignedTo: '', status: '',
       dueDate: '', frequency: 'Monthly', tags: []
     };
   }
-  /* merge any locally set dept/assign/status overrides */
-  var actDepts  = window._mlActDepts     && window._mlActDepts[actUid];
-  var actAssign = window._mlActAssign    && window._mlActAssign[actUid];
-  var actStatus = window._mlActStatuses  && window._mlActStatuses[actUid];
-  if (actDepts)  actItem.department  = Array.isArray(actDepts) ? actDepts.join(', ') : actDepts;
-  if (actAssign) actItem.assignedTo  = actAssign;
-  if (actStatus) actItem.status      = actStatus;
 
-  /* ensure it is in _mlActionItems so the popup can find it */
+  /* apply any local overrides from dept/assign/status pickers */
+  var actDepts  = window._mlActDepts    && window._mlActDepts[actUid];
+  var actAssign = window._mlActAssign   && window._mlActAssign[actUid];
+  var actStatus = window._mlActStatuses && window._mlActStatuses[actUid];
+  if (actDepts)  actItem.department = Array.isArray(actDepts) ? actDepts.join(', ') : actDepts;
+  if (actAssign) actItem.assignedTo = actAssign;
+  if (actStatus) actItem.status     = actStatus;
+
+  /* ensure circTitle is set so popup footer shows correctly */
+  if (!actItem.circTitle) {
+    actItem.circTitle = (window._mlChActiveCirc && window._mlChActiveCirc.title) || actItem.circId || '';
+  }
+
+  /* sync into _mlActionItems so popup can find it by index */
   window._mlActionItems = window._mlActionItems || [];
-  var existing = window._mlActionItems.findIndex(function(a){ return a.actionId === actItem.actionId; });
-  if (existing >= 0) {
-    window._mlActionItems[existing] = actItem;
+  var existingIdx = window._mlActionItems.findIndex(function(a){ return a.actionId === actItem.actionId; });
+  if (existingIdx >= 0) {
+    window._mlActionItems[existingIdx] = actItem;
   } else {
     window._mlActionItems.push(actItem);
-    existing = window._mlActionItems.length - 1;
+    existingIdx = window._mlActionItems.length - 1;
   }
 
+  /* call the exact same popup as table view action name click */
   if (typeof _mlOpenDetailPopup === 'function') {
-    _mlOpenDetailPopup(actItem, existing);
+    _mlOpenDetailPopup(actItem, existingIdx);
   }
 };
-
 /* open obl detail popup from clause eye btn in chapter view */
 window._mlOpenOblDetailPopupForClause = function(clauseId, ci, cli) {
   var chapters = window._mlChActiveChapters || [];

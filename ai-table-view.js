@@ -75,87 +75,104 @@ window._mlShowTableView = function () {
   });
 }
 
-window._mlExtractActionItems = function(circs) {
-  if (!CMS_DATA || !CMS_DATA.tasks) return [];
 
-  /* Build obligation lookup: clauseRef → { obligationText, clauseId } */
-  var obligationMap = {};
-  CMS_DATA.circulars.forEach(function(c) {
-    (c.chapters || []).forEach(function(ch) {
+
+window._mlExtractActionItems = function(circs) {
+  if (!CMS_DATA || !CMS_DATA.circulars) return [];
+
+  var items = [];
+
+  circs.forEach(function(circ) {
+    var sections = (circ.chapters || []).concat(circ.annexures || []);
+
+    sections.forEach(function(ch) {
       (ch.clauses || []).forEach(function(cl) {
-        var obligs = Array.isArray(cl.obligations)
-          ? cl.obligations
-          : (cl.obligation ? [cl.obligation] : []);
-        obligationMap[cl.id] = {
-          clauseId: cl.id,
-          obligations: obligs,
-          clauseText: cl.text || ''
-        };
+        if (!cl.id) return;
+
+        // Normalize obligations
+        var obligs = Array.isArray(cl.obligations) ? cl.obligations
+          : Array.isArray(cl.obligation) ? cl.obligation
+          : typeof cl.obligation === 'string' && cl.obligation ? [cl.obligation]
+          : typeof cl.obligations === 'string' && cl.obligations ? [cl.obligations]
+          : [];
+
+        // Normalize actionables
+        var acts = Array.isArray(cl.actionables) ? cl.actionables
+          : Array.isArray(cl.actionable) ? cl.actionable
+          : typeof cl.actionables === 'string' ? cl.actionables.split(';').map(function(a){ return a.trim(); }).filter(Boolean)
+          : typeof cl.actionable === 'string' ? cl.actionable.split(';').map(function(a){ return a.trim(); }).filter(Boolean)
+          : [];
+
+        if (!obligs.length) return;
+
+       obligs.forEach(function(ob, oi) {
+  var oblText = typeof ob === 'string' ? ob : (ob.text || ob.name || '');
+  var obId    = (typeof ob === 'object' && ob.id) ? ob.id : ('OBL-' + cl.id + '-' + (oi + 1));
+
+  if (acts.length > 0) {
+    acts.forEach(function(act, ai) {
+      var actText = typeof act === 'string' ? act : (act.text || String(act));
+      var computedId = circ.id + '-' + cl.id + '-OB' + (oi + 1) + '-A' + (ai + 1);
+
+      // Match task by exact actionId first, then fall back to clauseRef
+      var matchingTask = null;
+      if (CMS_DATA.tasks) {
+        matchingTask = CMS_DATA.tasks.find(function(t) {
+          return t.id === computedId || (t.circularId === circ.id && t.clauseRef === cl.id);
+        });
+      }
+
+      items.push({
+        actionId:       computedId,
+        action:         matchingTask && matchingTask.title ? matchingTask.title : actText,
+        department:     (matchingTask ? matchingTask.department : cl.department) || '',
+        status:         (matchingTask ? matchingTask.status : cl.status) || 'Assigned',
+        assignedTo:     (matchingTask && matchingTask.assignee && (typeof matchingTask.assignee === 'object' ? Object.keys(matchingTask.assignee).length : matchingTask.assignee)) ? matchingTask.assignee : {},
+        tags:           (matchingTask ? matchingTask.tags : []) || [],
+        risk:           (matchingTask ? (matchingTask.risk || matchingTask.priority) : cl.risk) || 'Medium',
+        obligationId:   obId,
+        obligationName: oblText,
+        clauseId:       cl.id,
+        circId:         circ.id,
+        circTitle:      circ.title || '',
+        dueDate:        (matchingTask ? matchingTask.dueDate : cl.dueDate) || '',
+        frequency:      (matchingTask ? matchingTask.frequency : '') || 'Monthly',
+        chapterTitle:   ch.title || ''
+      });
+    });
+  } else {
+    var computedId = circ.id + '-' + cl.id + '-OB' + (oi + 1) + '-A1';
+    var matchingTask = null;
+    if (CMS_DATA.tasks) {
+      matchingTask = CMS_DATA.tasks.find(function(t) {
+        return t.id === computedId || (t.circularId === circ.id && t.clauseRef === cl.id);
+      });
+    }
+    items.push({
+      actionId:       computedId,
+      action:         matchingTask && matchingTask.title ? matchingTask.title : '',
+      department:     (matchingTask ? matchingTask.department : cl.department) || '',
+      status:         (matchingTask ? matchingTask.status : cl.status) || 'Assigned',
+      assignedTo:     (matchingTask && matchingTask.assignee) ? matchingTask.assignee : {},
+      tags:           (matchingTask ? matchingTask.tags : []) || [],
+      risk:           (matchingTask ? (matchingTask.risk || matchingTask.priority) : cl.risk) || 'Medium',
+      obligationId:   obId,
+      obligationName: oblText,
+      clauseId:       cl.id,
+      circId:         circ.id,
+      circTitle:      circ.title || '',
+      dueDate:        (matchingTask ? matchingTask.dueDate : cl.dueDate) || '',
+      frequency:      (matchingTask ? matchingTask.frequency : '') || 'Monthly',
+      chapterTitle:   ch.title || ''
+    });
+  }
+});
       });
     });
   });
 
-  var circIds = circs.map(function(c) { return c.id; });
-  var items = [];
-  CMS_DATA.tasks.forEach(function(task) {
-    // Only include tasks whose circularId is in the filtered set
-    if (!circIds.includes(task.circularId)) return;
-    var circular = circs.find(function(c) { return c.id === task.circularId; }) || {};
-   /* ── Mock obligation mapping ──
-       Groups: multiple actions can share the same obligation
-       This simulates real clause → obligation → action hierarchy  */
-    var mockObligationMap = {
-      'ACT-001': { id: 'OBL-001', name: 'Establish and maintain a Board-approved cybersecurity governance framework with designated oversight committee' },
-      'ACT-002': { id: 'OBL-001', name: 'Establish and maintain a Board-approved cybersecurity governance framework with designated oversight committee' },
-      'ACT-003': { id: 'OBL-002', name: 'Conduct annual independent cybersecurity risk assessment covering all IT assets, vendors and data flows' },
-      'ACT-004': { id: 'OBL-002', name: 'Conduct annual independent cybersecurity risk assessment covering all IT assets, vendors and data flows' },
-      'ACT-005': { id: 'OBL-003', name: 'Update and enforce transaction monitoring thresholds as per revised AML/KYC regulatory requirements' },
-      'ACT-006': { id: 'OBL-003', name: 'Update and enforce transaction monitoring thresholds as per revised AML/KYC regulatory requirements' },
-      'ACT-007': { id: 'OBL-004', name: 'Ensure all sensitive personal data of Indian citizens is stored on servers located within Indian territory' },
-      'ACT-008': { id: 'OBL-005', name: 'Measure and disclose Scope 1, 2, and 3 carbon emissions annually in the prescribed ESG reporting format' },
-      'ACT-009': { id: 'OBL-006', name: 'Conduct enhanced due diligence on all critical vendors prior to onboarding and on a periodic basis thereafter' },
-      'ACT-010': { id: 'OBL-002', name: 'Conduct annual independent cybersecurity risk assessment covering all IT assets, vendors and data flows' },
-      'ACT-011': { id: 'OBL-003', name: 'Update and enforce transaction monitoring thresholds as per revised AML/KYC regulatory requirements' },
-      'ACT-012': { id: 'OBL-006', name: 'Conduct enhanced due diligence on all critical vendors prior to onboarding and on a periodic basis thereafter' },
-      'ACT-013': { id: 'OBL-007', name: 'Ensure all housing finance operations comply with consolidated RBI guidelines and maintain board-approved policy' },
-      'ACT-014': { id: 'OBL-007', name: 'Ensure all housing finance operations comply with consolidated RBI guidelines and maintain board-approved policy' },
-      'ACT-015': { id: 'OBL-008', name: 'Segregate and correctly classify land-only loans separate from housing loan portfolio in MIS and regulatory reporting' },
-      'ACT-016': { id: 'OBL-009', name: 'Enforce Loan-to-Value ratio limits at origination and monitor compliance at portfolio level on an ongoing basis' },
-      'ACT-017': { id: 'OBL-009', name: 'Enforce Loan-to-Value ratio limits at origination and monitor compliance at portfolio level on an ongoing basis' },
-      'ACT-018': { id: 'OBL-010', name: 'Classify eligible housing loans under Priority Sector Lending and report under PSL returns within stipulated timelines' },
-      'ACT-019': { id: 'OBL-011', name: 'Ensure all floating-rate housing loans are linked to Repo Rate or other approved external benchmark with quarterly reset' },
-      'ACT-020': { id: 'OBL-012', name: 'Cap repayment tenor at 30 years and ensure EMI does not exceed 50% of borrower net monthly income at sanction' },
-      'ACT-021': { id: 'OBL-013', name: 'Issue Key Fact Statement to every housing loan applicant prior to sanction disclosing all-in cost and charges' },
-      'ACT-022': { id: 'OBL-014', name: 'Submit NHB refinance utilisation certificates quarterly and annual compliance reports within 30 days of period end' },
-      'ACT-023': { id: 'OBL-015', name: 'Remove foreclosure charges and prepayment penalties for all floating-rate individual housing loan accounts' },
-      'ACT-024': { id: 'OBL-007', name: 'Ensure all housing finance operations comply with consolidated RBI guidelines and maintain board-approved policy' },
-      'ACT-025': { id: 'OBL-016', name: 'File half-yearly housing loan portfolio return with RBI within 21 days of close of each half-year period' },
-      'ACT-026': { id: 'OBL-008', name: 'Segregate and correctly classify land-only loans separate from housing loan portfolio in MIS and regulatory reporting' },
-    };
-
-    var oblData = mockObligationMap[task.id] || { id: task.obligationId || '—', name: 'General compliance obligation as per applicable regulatory circular and internal policy framework' };
-
-    items.push({
-      actionId: task.id,
-      action: task.title || '',
-      department: task.department || '',
-      status:  task.status,
-      assignedTo: task.assignee || '',
-      tags: task.tags || [],
-      risk: task.risk || task.priority || 'Medium',
-      obligationId: oblData.id,
-      obligationName: oblData.name,
-      clauseId: task.clauseRef || '',
-      circId: task.circularId || '',
-      circTitle: circular.title || '',
-      dueDate: task.dueDate || '',
-      frequency: 'Monthly',
-      chapterTitle: ''
-    });
-  });
   return items;
-}
-
+};
 
   
 
@@ -201,8 +218,23 @@ window._mlRenderTable= function(circs) {
   ? item.department.split(',').map(function(d){ return '<span style="background:#e0f2fe;color:#0369a1;padding:2px 6px;border-radius:3px;font-size:11px;font-weight:600;display:inline-block;margin:1px;">' + d.trim() + '</span>'; }).join('')
   : '<span style="color:#9ca3af;font-style:italic;">Assign</span>') +
 '</td>' +
-'<td class="ml-inline-assignee" data-idx="' + idx + '" style="cursor:pointer;font-size:12px;color:#374151;padding:6px 8px;border-radius:4px;transition:background 0.2s;" title="Click to assign">' +
-  (item.assignedTo || '<span style="color:#9ca3af;font-style:italic;">Assign</span>') +
+'<td class="ml-inline-assignee" data-idx="' + idx + '" style="cursor:pointer;padding:6px 8px;border-radius:4px;transition:background 0.2s;" title="Click to assign">' +
+  (function() {
+    var a = item.assignedTo;
+    var empty = !a ||
+      (typeof a === 'string' && !a.trim()) ||
+      (typeof a === 'object' && !Array.isArray(a) && Object.keys(a).length === 0);
+    if (empty) return '<span style="color:#9ca3af;font-style:italic;font-size:12px;">Assign</span>';
+    if (typeof a === 'string' && a.trim()) {
+      return '<span style="background:#ede9fe;color:#5b21b6;border:1px solid #ddd6fe;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:600;">' + a + '</span>';
+    }
+    return Object.entries(a).map(function(entry) {
+      return '<div style="display:flex;align-items:center;gap:4px;margin:2px 0;">' +
+        '<span style="font-size:9px;color:#6b7280;background:#f3f4f6;padding:1px 5px;border-radius:3px;min-width:52px;text-align:center;">' + entry[0] + '</span>' +
+        '<span style="background:#ede9fe;color:#5b21b6;border:1px solid #ddd6fe;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:600;">' + entry[1] + '</span>' +
+      '</div>';
+    }).join('');
+  })() +
 '</td>' +
       '<td class="ml-inline-status" data-idx="' + idx + '" style="cursor:pointer;padding:4px 0;transition:opacity 0.2s;" title="Click to change status">' +
   '<span style="padding:4px 12px;border-radius:12px;font-size:11px;font-weight:700;background:' + sc + ';cursor:pointer;">' + item.status + '</span>' +
@@ -310,7 +342,17 @@ var overlay = document.createElement('div');
             _mlDetailField('Frequency', task.frequency || item.frequency || 'Monthly') +
             _mlDetailField('Status', '<span style="font-weight:600;font-size:11px;cursor:pointer;" onclick="_mlOpenStatusDropdown(' + idx + '); return false;">' + (item.status || 'Assigned') + '</span>') +
             _mlDetailField('Department', item.department || '—') +
-            _mlDetailField('Assigned To', item.assignedTo || '—') +
+            _mlDetailField('Assigned To', (function() {
+  var a = item.assignedTo;
+  if (!a || (typeof a === 'object' && !Object.keys(a).length)) return '—';
+  if (typeof a === 'string') return a;
+  return Object.entries(a).map(function(e) {
+    return '<span style="display:inline-flex;align-items:center;gap:4px;margin:1px 2px;">' +
+      '<span style="font-size:9px;color:#6b7280;background:#f3f4f6;padding:1px 5px;border-radius:3px;">' + e[0] + '</span>' +
+      '<span style="background:#ede9fe;color:#5b21b6;padding:2px 7px;border-radius:12px;font-size:11px;font-weight:600;">' + e[1] + '</span>' +
+    '</span>';
+  }).join('');
+})()) +
           '</div>' +
         '</div>' +
 
@@ -688,7 +730,9 @@ window._mlOpenDepartmentSelector = function(idx) {
         '<div id="ml-dept-list" style="max-height:300px;overflow-y:auto;">' +
           allDepts.map(function(d, i) {
             return '<label style="display:flex;align-items:center;padding:10px 12px;border:1px solid #e5e7eb;border-radius:6px;margin-bottom:8px;cursor:pointer;background:#f9fafb;transition:all 0.2s;">' +
-              '<input type="checkbox" value="' + d + '" id="ml-dept-' + i + '" ' + (item.department === d ? 'checked' : '') + ' style="width:18px;height:18px;cursor:pointer;accent-color:#3b82f6;"/>' +
+              '<input type="checkbox" value="' + d + '" id="ml-dept-' + i + '" ' + 
+  (item.department && item.department.split(',').map(function(x){return x.trim();}).indexOf(d) > -1 ? 'checked' : '') + 
+  ' style="width:18px;height:18px;cursor:pointer;accent-color:#3b82f6;"/>' +
               '<span style="margin-left:10px;font-weight:500;color:#374151;flex:1;">' + d + '</span>' +
             '</label>';
           }).join('') +
@@ -706,43 +750,125 @@ window._mlOpenDepartmentSelector = function(idx) {
 window._mlOpenAssigneeSelector = function(idx) {
   var item = window._mlActionItems[idx];
   var allAssignees = _mlGetUniqueAssignees();
+
+  // Parse current depts
+  var depts = item.department
+    ? item.department.split(',').map(function(d){ return d.trim(); }).filter(Boolean)
+    : ['General'];
+
+  // Parse current assignees (store as object: { dept: assignee })
+  var currentMap = {};
+  if (typeof item.assignedTo === 'object' && !Array.isArray(item.assignedTo)) {
+    currentMap = item.assignedTo;
+  } else if (typeof item.assignedTo === 'string' && item.assignedTo.trim()) {
+    // migrate legacy single string → assign to first dept
+    currentMap[depts[0]] = item.assignedTo;
+  }
+
   var existing = document.getElementById('ml-assignee-selector-modal');
   if (existing) existing.remove();
+
   var overlay = document.createElement('div');
-  overlay.className = 'dr-modal-overlay'; overlay.id = 'ml-assignee-selector-modal';
+  overlay.className = 'dr-modal-overlay';
+  overlay.id = 'ml-assignee-selector-modal';
+
   overlay.innerHTML =
-    '<div class="dr-modal" style="max-width:420px;">' +
-      '<div class="dr-modal-head"><div class="dr-modal-head-left"><div class="dr-modal-eyebrow">Assign To</div><div class="dr-modal-subject">Action: ' + item.actionId + '</div></div><button class="dr-modal-close" onclick="document.getElementById(\'ml-assignee-selector-modal\').remove()">&#x2715;</button></div>' +
-      '<div class="dr-modal-body" style="padding:20px;">' +
-        '<input type="text" id="ml-assignee-search" placeholder="Search assignees…" style="width:100%;padding:10px;border:1px solid #e5e7eb;border-radius:6px;margin-bottom:16px;font-size:13px;"/>' +
-        '<div id="ml-assignee-list" style="max-height:300px;overflow-y:auto;">' +
-          allAssignees.map(function(name, i) {
-            return '<label style="display:flex;align-items:center;padding:10px 12px;border:1px solid #e5e7eb;border-radius:6px;margin-bottom:8px;cursor:pointer;background:#f9fafb;transition:all 0.2s;">' +
-              '<input type="radio" name="ml-assignee-radio" value="' + name + '" id="ml-assignee-' + i + '" ' + (item.assignedTo === name ? 'checked' : '') + ' style="width:18px;height:18px;cursor:pointer;accent-color:#3b82f6;"/>' +
-              '<span style="margin-left:10px;font-weight:500;color:#374151;flex:1;">' + name + '</span>' +
-            '</label>';
-          }).join('') +
+    '<div class="dr-modal" style="max-width:460px;">' +
+      '<div class="dr-modal-head">' +
+        '<div class="dr-modal-head-left">' +
+          '<div class="dr-modal-eyebrow">Assign To</div>' +
+          '<div class="dr-modal-subject">Action: ' + item.actionId + '</div>' +
         '</div>' +
+        '<button class="dr-modal-close" onclick="document.getElementById(\'ml-assignee-selector-modal\').remove()">&#x2715;</button>' +
+      '</div>' +
+      '<div class="dr-modal-body" style="padding:20px;display:flex;flex-direction:column;gap:14px;">' +
+        depts.map(function(dept) {
+          var currentVal = currentMap[dept] || '';
+          return '<div style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;padding:12px 14px;">' +
+            '<div style="font-size:10px;font-weight:700;color:#0369a1;text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;">' +
+              '<span style="background:#e0f2fe;padding:2px 8px;border-radius:4px;">' + dept + '</span>' +
+            '</div>' +
+            '<select class="ml-dept-assignee-select" data-dept="' + dept + '" ' +
+              'style="width:100%;padding:9px 10px;border:1px solid #d1d5db;border-radius:6px;font-size:13px;background:white;">' +
+              '<option value="">— Select assignee —</option>' +
+              allAssignees.map(function(name) {
+                return '<option value="' + name + '"' + (currentVal === name ? ' selected' : '') + '>' + name + '</option>';
+              }).join('') +
+            '</select>' +
+            '<input type="text" class="ml-dept-assignee-input" data-dept="' + dept + '" placeholder="Or type a name…" value="' + currentVal + '" style="width:100%;margin-top:6px;padding:8px 10px;border:1px solid #d1d5db;border-radius:6px;font-size:13px;"/>' +
+          '</div>';
+        }).join('') +
       '</div>' +
       '<div class="dr-modal-foot">' +
         '<button class="dr-btn dr-btn-ghost" onclick="document.getElementById(\'ml-assignee-selector-modal\').remove()">Cancel</button>' +
         '<button class="dr-btn dr-btn-pri" onclick="_mlSaveAssignee(' + idx + ')">Save</button>' +
       '</div>' +
     '</div>';
+
   document.body.appendChild(overlay);
   overlay.addEventListener('click', function(e){ if(e.target===overlay) overlay.remove(); });
-}
+};
 
 window._mlSaveAssignee = function(idx) {
-  var checked = document.querySelector('#ml-assignee-selector-modal input[type="radio"]:checked');
-  if (checked) {
-    window._mlActionItems[idx].assignedTo = checked.value;
-    _mlRenderTable(CMS_DATA.circulars);
-  }
+  var selects = document.querySelectorAll('#ml-assignee-selector-modal .ml-dept-assignee-select');
+  var assigneeMap = {};
+  selects.forEach(function(sel) {
+    var dept = sel.dataset.dept;
+    var val = sel.value;
+    if (!val) {
+      // fall back to free-text input for this dept
+      var inp = document.querySelector('#ml-assignee-selector-modal .ml-dept-assignee-input[data-dept="' + dept + '"]');
+      if (inp && inp.value.trim()) val = inp.value.trim();
+    }
+    if (val) assigneeMap[dept] = val;
+  });
+
+  // Capture actionId before any re-render
+  var actionId = window._mlActionItems[idx].actionId;
+
+  window._mlActionItems[idx].assignedTo = assigneeMap;
+
+  var task = CMS_DATA.tasks.find(function(t){ return t.id === actionId; });
+  if (task) task.assignee = assigneeMap;
+
   document.getElementById('ml-assignee-selector-modal').remove();
+
+  // Patch only the affected cell — no full re-render so object isn't lost
+  var rows = document.querySelectorAll('#ml-tbody .ml-action-row');
+  rows.forEach(function(row) {
+    if (parseInt(row.dataset.idx) === idx) {
+      var cell = row.querySelector('.ml-inline-assignee');
+      if (!cell) return;
+      var isEmpty = !assigneeMap || !Object.keys(assigneeMap).length;
+      if (isEmpty) {
+        cell.innerHTML = '<span style="color:#9ca3af;font-style:italic;font-size:12px;">Assign</span>';
+      } else {
+        cell.innerHTML = Object.entries(assigneeMap).map(function(entry) {
+          return '<div style="display:flex;align-items:center;gap:4px;margin:2px 0;">' +
+            '<span style="font-size:9px;color:#6b7280;background:#f3f4f6;padding:1px 5px;border-radius:3px;min-width:52px;text-align:center;">' + entry[0] + '</span>' +
+            '<span style="background:#ede9fe;color:#5b21b6;border:1px solid #ddd6fe;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:600;">' + entry[1] + '</span>' +
+          '</div>';
+        }).join('');
+      }
+    }
+  });
+
+  // Also sync department cell in case it changed
+  var rows2 = document.querySelectorAll('#ml-tbody .ml-action-row');
+  rows2.forEach(function(row) {
+    if (parseInt(row.dataset.idx) === idx) {
+      var deptCell = row.querySelector('.ml-inline-dept');
+      var item = window._mlActionItems[idx];
+      if (deptCell && item.department) {
+        deptCell.innerHTML = item.department.split(',').map(function(d) {
+          return '<span style="background:#e0f2fe;color:#0369a1;padding:2px 6px;border-radius:3px;font-size:11px;font-weight:600;display:inline-block;margin:1px;">' + d.trim() + '</span>';
+        }).join('');
+      }
+    }
+  });
   if (window._mlActiveView === 'chapter') _mlRenderChapterView(_mlGetFilteredCircs());
-  showToast('Assignee updated.', 'success');
-}
+  showToast('Assignees updated.', 'success');
+};
 
 window._mlOpenStatusDropdown = function(idx) {
   var item = window._mlActionItems[idx];
@@ -1153,12 +1279,19 @@ window._mlSaveNewAction = function(actionId, obligationId) {
   ? document.getElementById('ml-new-action-obl-id').value || obligationId
   : obligationId;
   
+var assigneeVal = {};
+if (dept && assignee) {
+  assigneeVal[dept] = assignee;
+} else if (assignee) {
+  assigneeVal['General'] = assignee;
+}
+
 var newTask = {
     id: actionId,
     title: desc,
     obligationId: selectedOblId,
     department: dept || 'Unassigned',
-    assignee: assignee || '',
+    assignee: assigneeVal,
     priority: 'Medium',
     status: status,
     risk: 'Medium',
@@ -1173,10 +1306,34 @@ var newTask = {
   showToast('Action ' + actionId + ' added successfully.', 'success');
 }
 
-window._mlGetUniqueAssignees = function() {
-  var assignees = CMS_DATA.tasks.map(function(t) { return t.assignee; }).filter(function(a) { return a && a.trim(); });
-  return [...new Set(assignees)].sort();
+// ── DEMO SEED: give first task two depts + two assignees for visual demo ──
+if (CMS_DATA && CMS_DATA.tasks && CMS_DATA.tasks.length > 0 && !CMS_DATA._demoSeeded) {
+  CMS_DATA._demoSeeded = true;
+  CMS_DATA.tasks[0].department = 'Compliance, Risk, Digital';
+CMS_DATA.tasks[0].assignee = 'Ananya Sharma';
+  if (CMS_DATA.tasks[1]) {
+    CMS_DATA.tasks[1].department = 'Legal, IT';
+    CMS_DATA.tasks[1].assignee = { 'Legal': 'Priya Nair', 'IT': 'Vikram Das' };
+  }
 }
+
+window._mlGetUniqueAssignees = function() {
+  var assignees = [];
+  CMS_DATA.tasks.forEach(function(t) {
+    var a = t.assignee;
+    if (!a) return;
+    if (typeof a === 'string' && a.trim()) {
+      assignees.push(a.trim());
+    } else if (typeof a === 'object') {
+      Object.values(a).forEach(function(name) {
+        if (name && name.trim()) assignees.push(name.trim());
+      });
+    }
+  });
+  var demo = ['Ananya Sharma', 'Rohan Mehta', 'Priya Nair', 'Vikram Das', 'Sneha Iyer'];
+demo.forEach(function(n){ assignees.push(n); });
+  return [...new Set(assignees)].sort();
+};
 
 window._mlDetailField = function(label, value, fullWidth) {
   return '<div style="' +
@@ -1335,16 +1492,36 @@ window._mlSaveInlineEdit = function(idx) {
 window._mlSaveDepartment = function(idx) {
   var checked = document.querySelectorAll('#ml-dept-selector-modal input[type="checkbox"]:checked');
   var depts = Array.from(checked).map(function(cb){ return cb.value; });
-  if (depts.length) {
-    window._mlActionItems[idx].department = depts.join(', ');
-    var task = CMS_DATA.tasks.find(function(t){ return t.id === window._mlActionItems[idx].actionId; });
-    if (task) task.department = depts.join(', ');
-    _mlRenderTable(CMS_DATA.circulars);
-  }
+
   document.getElementById('ml-dept-selector-modal').remove();
+
+  if (!depts.length) {
+    showToast('Please select at least one department.', 'error');
+    return;
+  }
+
+  // Capture the actionId BEFORE re-render (which rebuilds _mlActionItems)
+  var actionId = window._mlActionItems[idx].actionId;
+
+  window._mlActionItems[idx].department = depts.join(', ');
+  // Reset assignee map so stale per-dept assignments are cleared
+  window._mlActionItems[idx].assignedTo = {};
+
+  var task = CMS_DATA.tasks.find(function(t){ return t.id === actionId; });
+  if (task) {
+    task.department = depts.join(', ');
+    task.assignee = {};
+  }
+
+  _mlRenderTable(_mlGetFilteredCircs ? _mlGetFilteredCircs() : CMS_DATA.circulars);
   if (window._mlActiveView === 'chapter') _mlRenderChapterView(_mlGetFilteredCircs());
-  showToast('Department updated.', 'success');
-}
+
+  showToast('Department updated. Now assign people.', 'success');
+
+  // Find new idx after re-render by matching actionId
+  var newIdx = (window._mlActionItems || []).findIndex(function(a){ return a.actionId === actionId; });
+  if (newIdx > -1) _mlOpenAssigneeSelector(newIdx);
+};
 
 window._mlUpdateStatusBadges = function() {
   var filtered   = _mlGetFilteredCircs();

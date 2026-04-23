@@ -172,7 +172,7 @@ function buildLibraryHTML() {
         <table style="width:100%;min-width:760px;border-collapse:collapse">
           <thead>
             <tr style="background:#f8fafc">
-              ${['Circular ID','Title','Regulator','Type','Issued','Effective','Due Date','Departments','View Circular']
+              ${['Circular ID','Title','Regulator','Type','Issued','Effective','Due Date','Departments','Applicability','Executive Summary','View Circular']
                 .map((h,i) => `<th style="padding:10px 14px;text-align:${i===8?'center':'left'};
                   font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;
                   color:var(--text-muted);border-bottom:1px solid var(--border);white-space:nowrap">${h}</th>`)
@@ -213,7 +213,7 @@ function renderCircularTable() {
 
   if (circulars.length === 0) {
     tbody.innerHTML = `
-      <tr><td colspan="9" style="text-align:center;padding:52px 24px">
+      <tr><td colspan="11" style="text-align:center;padding:52px 24px">
         <div style="font-size:32px;margin-bottom:10px">🔍</div>
         <div style="font-size:15px;font-weight:700;color:var(--text-primary);margin-bottom:4px">No circulars found</div>
         <div style="font-size:13px;color:var(--text-muted)">Try adjusting your search or filter criteria.</div>
@@ -291,6 +291,15 @@ function renderCircularTable() {
 
       <td style="padding:12px 14px;max-width:200px">${depts}</td>
 
+<td style="padding:12px 14px;text-align:center" onclick="event.stopPropagation()">
+  ${applicabilityBadge(c)}
+</td>
+
+<td style="padding:12px 14px;text-align:center" onclick="event.stopPropagation()">
+  ${executiveSummaryBadge(c)}
+</td>
+
+
       <td style="padding:12px 14px" onclick="event.stopPropagation()">
         <div class="circ-action-cell" style="justify-content:center">
           <button class="circ-action-btn" title="Preview circular document"
@@ -315,6 +324,147 @@ function dueDateBadge(dateStr) {
   const icon  = diffDays < 0 ? '⚠ ' : '';
   return `<span style="font-size:12.5px;font-weight:${diffDays<=14?'700':'400'};color:${color}">${icon}${formatDate(dateStr)}</span>`;
 }
+
+function applicabilityBadge(c) {
+  const a = window._savedFlow?.[c.id]?.applicability;
+
+  if (!a) {
+    return `<span style="
+      display:inline-flex;align-items:center;justify-content:center;
+      padding:4px 10px;border-radius:999px;font-size:11px;font-weight:700;
+      background:#f1f5f9;color:#64748b;border:1px solid #cbd5e1;
+      white-space:nowrap;">— Pending</span>`;
+  }
+
+  let bg = '#fef3c7', color = '#b45309', border = '#fcd34d', label = 'Partial';
+  if (a.verdict === 'Applicable' || a.applicable === true) {
+    bg = '#dcfce7'; color = '#15803d'; border = '#86efac'; label = 'Applicable';
+  } else if (a.verdict === 'Not Applicable' || a.applicable === false) {
+    bg = '#fee2e2'; color = '#b91c1c'; border = '#fca5a5'; label = 'Not Applicable';
+  } else if (a.verdict === 'Partially Applicable') {
+    bg = '#fef3c7'; color = '#b45309'; border = '#fcd34d'; label = 'Partially Applicable';
+  }
+
+  return `<button
+    onclick="event.stopPropagation(); openApplicabilityModal('${c.id}')"
+    style="
+      display:inline-flex;align-items:center;justify-content:center;
+      padding:4px 10px;border-radius:999px;font-size:11px;font-weight:700;
+      background:${bg};color:${color};border:1px solid ${border};
+      white-space:nowrap;cursor:pointer;">
+    ${label}
+  </button>`;
+}
+
+function executiveSummaryBadge(c) {
+  const s = window._savedFlow?.[c.id]?.summary;
+  if (!s?.savedPdf) {
+    return `<span style="
+      display:inline-flex;align-items:center;justify-content:center;
+      padding:4px 10px;border-radius:999px;font-size:11px;font-weight:700;
+      background:#f1f5f9;color:#64748b;border:1px solid #cbd5e1;
+      white-space:nowrap;">— Not Saved</span>`;
+  }
+
+  return `<button
+    onclick="event.stopPropagation(); openExecutiveSummaryPDF('${c.id}')"
+    style="
+      display:inline-flex;align-items:center;justify-content:center;
+      padding:4px 10px;border-radius:999px;font-size:11px;font-weight:700;
+      background:#dbeafe;color:#1d4ed8;border:1px solid #93c5fd;
+      white-space:nowrap;cursor:pointer;">
+    📄 View PDF
+  </button>`;
+}
+
+function openExecutiveSummaryPDF(circularId) {
+  const pdfFile = window._savedFlow?.[circularId]?.summary?.savedPdf;
+  if (!pdfFile) {
+    showToast?.('No executive summary PDF saved yet.', 'warning');
+    return;
+  }
+  window.open(encodeURI(pdfFile), '_blank');
+}
+
+window._savedFlow = {
+  'SEBI-MF-2023-117': {
+    applicability: {
+      applicable: true,
+      verdict: 'Partially Applicable',
+      entityType: 'AMC',
+      scope: 'Applicable to AMC governance, trustee oversight, UHPC compliance and investor grievance controls',
+      deadline: '2024-01-01',
+      entities: [
+        {
+          name: 'Asset Management Companies',
+          type: 'Primary Regulated Entity',
+          applicable: true,
+          reason: 'The circular directly applies to AMCs for governance, investor protection and board oversight.'
+        },
+        {
+          name: 'Trustee Companies / Board of Trustees of Mutual Funds',
+          type: 'Oversight Entity',
+          applicable: true,
+          reason: 'Trustees are specifically responsible for protecting unitholder interests and ensuring compliance.'
+        },
+        {
+          name: 'Association of Mutual Funds in India',
+          type: 'Industry Association',
+          applicable: false,
+          reason: 'AMFI has only indirect applicability for coordination and industry guidance.'
+        },
+        {
+          name: 'Registrars to an Issue and Share Transfer Agents',
+          type: 'Operational Support Entity',
+          applicable: false,
+          reason: 'RTAs may support complaint handling but are not primary regulated entities under this circular.'
+        }
+      ],
+      requirementsApplicability: [
+        {
+          requirement: 'Scope of Application',
+          threshold: 'Applicable to Mutual Funds, AMCs, Trustee Companies / Board of Trustees of Mutual Funds, and AMFI',
+          applicable: true,
+          status: 'Applicable'
+        },
+        {
+          requirement: 'Trustee Oversight Responsibility',
+          threshold: 'Applicable where trustee company / board of trustees has fiduciary oversight over mutual funds',
+          applicable: true,
+          status: 'Applicable'
+        },
+        {
+          requirement: 'AMC Board Governance Responsibility',
+          threshold: 'Applicable where AMC board is responsible for protecting unitholder interests',
+          applicable: true,
+          status: 'Applicable'
+        },
+        {
+          requirement: 'Unit Holder Protection Committee (UHPC)',
+          threshold: 'Applicable where AMC constitutes and operates UHPC for investor protection, complaints, disclosures and compliance review',
+          applicable: true,
+          status: 'Applicable'
+        },
+        {
+          requirement: 'Conflict of Interest and Fair Treatment',
+          threshold: 'Required where conflicts between AMC stakeholders and unitholders must be managed or disclosed',
+          applicable: true,
+          status: 'Applicable'
+        },
+        {
+          requirement: 'Recognized Stock Exchanges & Clearing Corporations',
+          threshold: 'Only applicable if exchange-level grievance handling or disclosure obligations exist',
+          applicable: false,
+          status: 'Not Applicable'
+        }
+      ]
+    },
+    summary: {
+      savedPdf: './Executive Summary Sample.pdf'
+    }
+  }
+};
+
 
 /* ================================================================
    PDF VIEWER
@@ -630,6 +780,158 @@ function renderApplicabilityTab(c) {
     </div>
 
   </div>`;
+}
+
+
+function openApplicabilityModal(circularId) {
+  const circular = CMS_DATA.circulars.find(c => c.id === circularId);
+  const a = window._savedFlow?.[circularId]?.applicability;
+
+  if (!a) {
+    showToast?.('No saved applicability analysis found.', 'warning');
+    return;
+  }
+
+  const overlay = document.createElement('div');
+  overlay.id = 'applicability-view-overlay';
+  overlay.innerHTML = `
+    <div id="applicability-view-backdrop" style="
+      position:fixed;inset:0;background:rgba(15,23,42,.6);backdrop-filter:blur(4px);
+      z-index:9999;display:flex;align-items:center;justify-content:center;padding:24px;">
+      
+      <div id="applicability-view-box" style="
+        width:min(1100px,95vw);max-height:90vh;overflow:auto;
+        background:#fff;border-radius:18px;border:1px solid #e2e8f0;
+        box-shadow:0 30px 80px rgba(0,0,0,.25);">
+
+        <div style="
+          display:flex;justify-content:space-between;align-items:flex-start;
+          padding:18px 22px;border-bottom:1px solid #e2e8f0;background:#f8fafc;">
+          <div>
+            <div style="font-size:12px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.06em">
+              Saved Applicability Analysis
+            </div>
+            <div style="font-size:18px;font-weight:800;color:#0f172a;margin-top:4px">
+              ${circular?.title || circularId}
+            </div>
+            <div style="font-size:12px;color:#64748b;margin-top:4px">
+              ${circularId}
+            </div>
+          </div>
+          <button onclick="closeApplicabilityModal()" style="
+            border:none;background:#fff;border:1px solid #cbd5e1;color:#475569;
+            width:34px;height:34px;border-radius:10px;cursor:pointer;font-size:16px;">✕</button>
+        </div>
+
+        <div style="padding:22px;display:flex;flex-direction:column;gap:18px">
+
+          <div style="
+            display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;
+            padding:14px 16px;border-radius:12px;
+            background:${
+              a.verdict === 'Applicable' || a.applicable === true ? '#dcfce7' :
+              a.verdict === 'Not Applicable' || a.applicable === false ? '#fee2e2' : '#fef3c7'
+            };
+            border:1px solid ${
+              a.verdict === 'Applicable' || a.applicable === true ? '#86efac' :
+              a.verdict === 'Not Applicable' || a.applicable === false ? '#fca5a5' : '#fcd34d'
+            };">
+            <div>
+              <div style="font-size:16px;font-weight:800;color:#0f172a">
+                ${a.verdict || (a.applicable ? 'Applicable' : 'Review Required')}
+              </div>
+              <div style="font-size:12px;color:#475569;margin-top:3px">
+                ${a.scope || 'Applicability analysis saved from AI engine'}
+              </div>
+            </div>
+            <div style="display:flex;gap:10px;flex-wrap:wrap">
+              ${a.entityType ? `<span style="padding:4px 10px;border-radius:999px;background:#fff;border:1px solid #cbd5e1;font-size:11px;font-weight:700;color:#334155">Entity: ${a.entityType}</span>` : ''}
+              ${a.deadline ? `<span style="padding:4px 10px;border-radius:999px;background:#fff;border:1px solid #cbd5e1;font-size:11px;font-weight:700;color:#334155">Deadline: ${a.deadline}</span>` : ''}
+            </div>
+          </div>
+
+          ${a.entities?.length ? `
+          <div style="border:1px solid #e2e8f0;border-radius:14px;overflow:hidden">
+            <div style="padding:12px 16px;background:#f8fafc;border-bottom:1px solid #e2e8f0">
+              <div style="font-size:12px;font-weight:800;color:#0f172a">Applicable Entities</div>
+            </div>
+            <table style="width:100%;border-collapse:collapse;font-size:12px">
+              <thead>
+                <tr style="background:#fafafa">
+                  <th style="padding:10px 14px;text-align:left;color:#64748b;border-bottom:1px solid #e2e8f0">Entity</th>
+                  <th style="padding:10px 14px;text-align:left;color:#64748b;border-bottom:1px solid #e2e8f0">Type</th>
+                  <th style="padding:10px 14px;text-align:left;color:#64748b;border-bottom:1px solid #e2e8f0">Applicable</th>
+                  <th style="padding:10px 14px;text-align:left;color:#64748b;border-bottom:1px solid #e2e8f0">Reason</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${a.entities.map(e => `
+                  <tr style="border-bottom:1px solid #f1f5f9">
+                    <td style="padding:10px 14px;font-weight:600;color:#0f172a">${e.name || '—'}</td>
+                    <td style="padding:10px 14px;color:#475569">${e.type || '—'}</td>
+                    <td style="padding:10px 14px">
+                      <span style="
+                        padding:3px 10px;border-radius:999px;font-size:11px;font-weight:700;
+                        background:${e.applicable ? '#dcfce7' : '#fee2e2'};
+                        color:${e.applicable ? '#15803d' : '#b91c1c'};">
+                        ${e.applicable ? '✓ Yes' : '✗ No'}
+                      </span>
+                    </td>
+                    <td style="padding:10px 14px;color:#64748b">${e.reason || '—'}</td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+          </div>` : ''}
+
+          ${a.requirementsApplicability?.length ? `
+          <div style="border:1px solid #e2e8f0;border-radius:14px;overflow:hidden">
+            <div style="padding:12px 16px;background:#f8fafc;border-bottom:1px solid #e2e8f0">
+              <div style="font-size:12px;font-weight:800;color:#0f172a">Applicability Parameters</div>
+            </div>
+            <table style="width:100%;border-collapse:collapse;font-size:12px">
+              <thead>
+                <tr style="background:#fafafa">
+                  <th style="padding:10px 14px;text-align:left;color:#64748b;border-bottom:1px solid #e2e8f0">Requirement</th>
+                  <th style="padding:10px 14px;text-align:left;color:#64748b;border-bottom:1px solid #e2e8f0">Threshold</th>
+                  <th style="padding:10px 14px;text-align:left;color:#64748b;border-bottom:1px solid #e2e8f0">Applicable</th>
+                  <th style="padding:10px 14px;text-align:left;color:#64748b;border-bottom:1px solid #e2e8f0">Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${a.requirementsApplicability.map(r => `
+                  <tr style="border-bottom:1px solid #f1f5f9">
+                    <td style="padding:10px 14px;font-weight:600;color:#0f172a">${r.requirement || r.name || '—'}</td>
+                    <td style="padding:10px 14px;color:#475569">${r.threshold || '—'}</td>
+                    <td style="padding:10px 14px">
+                      <span style="
+                        padding:3px 10px;border-radius:999px;font-size:11px;font-weight:700;
+                        background:${r.applicable ? '#dcfce7' : '#fee2e2'};
+                        color:${r.applicable ? '#15803d' : '#b91c1c'};">
+                        ${r.applicable ? '✓ Yes' : '✗ No'}
+                      </span>
+                    </td>
+                    <td style="padding:10px 14px;color:#475569">${r.status || '—'}</td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+          </div>` : ''}
+
+        </div>
+      </div>
+    </div>
+  `;
+
+  overlay.addEventListener('click', (e) => {
+    if (e.target.id === 'applicability-view-backdrop') closeApplicabilityModal();
+  });
+
+  document.body.appendChild(overlay);
+}
+
+function closeApplicabilityModal() {
+  document.getElementById('applicability-view-overlay')?.remove();
 }
 
 /* ================================================================

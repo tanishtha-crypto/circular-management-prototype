@@ -5,12 +5,14 @@ window._drPanelApplicability = function (flow) {
   var vb = a.applicable ? '#dcfce7' : '#fee2e2';
 
   var entityRows = (a.entities||[]).map(function(e, ei) {
-    return '<tr id="dr-ent-row-' + ei + '">' +
-      '<td><span class="dr-ent-name" id="dr-ent-name-' + ei + '" contenteditable="false" style="outline:none;display:inline-block;min-width:80px;font-weight:600;color:#1a1a2e;">' + e.name + '</span></td>' +
-      '<td><span class="dr-app-pill ' + (e.applicable?'dr-app-yes':'dr-app-no') + '" id="dr-ent-app-' + ei + '">' + (e.applicable?'&#x2713; Yes':'&#x2717; No') + '</span></td>' +
-      '<td class="dr-table-edit-cell" style="display:none;"><button class="dr-tbl-del-btn" onclick="_drDelEntityRow(' + ei + ')">&#x2715;</button></td>' +
-    '</tr>';
-  }).join('');
+  var name       = typeof e === 'string' ? e : e.name;
+  var applicable = typeof e === 'string' ? false : !!e.applicable;  // ← key fix
+  return '<tr id="dr-ent-row-' + ei + '">' +
+    '<td><span class="dr-ent-name" id="dr-ent-name-' + ei + '" contenteditable="false" style="outline:none;display:inline-block;min-width:80px;font-weight:600;color:#1a1a2e;">' + name + '</span></td>' +
+    '<td><span class="dr-app-pill ' + (applicable ? 'dr-app-yes' : 'dr-app-no') + '" id="dr-ent-app-' + ei + '">' + (applicable ? '&#x2713; Yes' : '&#x2717; No') + '</span></td>' +
+    '<td class="dr-table-edit-cell" style="display:none;"><button class="dr-tbl-del-btn" onclick="_drDelEntityRow(' + ei + ')">&#x2715;</button></td>' +
+  '</tr>';
+}).join('');
 
   var reqRows = (a.requirementsApplicability||[]).map(function(r, ri) {
     return '<tr id="dr-req-row-' + ri + '">' +

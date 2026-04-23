@@ -231,7 +231,7 @@
 //             <th>Assignee</th>
 //             <th>Due Date</th>
 //             <th>Priority</th>
-//             <th>Status</th>
+//             <th> Assignment Status</th>
 //             <th></th>
 //           </tr>
 //         </thead>
@@ -1067,48 +1067,91 @@ const AA_PEOPLE = {
 function _aaGetActivities(circId) {
   const base = [
     {
-      clauseId: 'C1.1', clauseText: 'The entity shall establish and maintain a Board-approved compliance policy framework.',
+      clauseId: 'C1.1', clauseText: 'All Digital Platforms of REs shall be compliant with Section 40 of RPwD Act, 2016 relating to Accessibility.',
       obligations: [
         {
-          obId: 'OB-001', obText: 'Establish and maintain a Board-approved compliance policy, reviewed annually.',
+          obId: 'OB-3(a)', obText: 'Ensure all digital platforms comply with accessibility standards under RPwD Act',
+          dept: 'Digital',
+          activities: [
+            { id: 'ACT-001', name: 'Identify all digital platforms such as website, mobile app, investor portal and WhatsApp-based servicing', assignee: 'Sneha Das', status: 'Assigned', dueDate: '2025-04-15' },
+            { id: 'ACT-002', name: 'Review whether distributor platforms such as Groww, PhonePe and Upstox are covered', assignee: null, status: 'Unassigned', dueDate: '2025-04-30' },
+            { id: 'ACT-003', name: 'Map all digital channels against Section 40 accessibility requirements', assignee: 'Meera Pillai', status: 'Assigned', dueDate: '2025-05-10' },
+          ]
+        },
+        {
+          obId: 'OB-3(a)', obText: 'Provide accessible information and communication technology to persons with disabilities',
+          dept: 'Digital',
+          activities: [
+            { id: 'ACT-004', name: 'Ensure content is available in accessible formats', assignee: 'Sneha Das', status: 'Assigned', dueDate: '2025-04-15' },
+            { id: 'ACT-005', name: 'Provide sign language interpretation, audio description and closed captioning', assignee: null, status: 'Unassigned', dueDate: '2025-04-30' },
+            { id: 'ACT-006', name: 'Review all website and mobile content for hearing and visual accessibility', assignee: 'Meera Pillai', status: 'Assigned', dueDate: '2025-05-10' },
+          ]
+        },
+         {
+          obId: 'OB-3(d)', obText: 'Ensure websites and uploaded documents comply with accessibility standards',
+          dept: 'Legal',
+          activities: [
+            { id: 'ACT-007', name: 'Ensure website follows Government website accessibility guidelines', assignee: 'Sneha Das', status: 'Assigned', dueDate: '2025-04-15' },
+            { id: 'ACT-008', name: 'Publish documents in OCR-based PDF or ePUB format', assignee: null, status: 'Unassigned', dueDate: '2025-04-30' },
+            { id: 'ACT-009', name: 'Review all uploaded documents for accessibility before publishing', assignee: 'Meera Pillai', status: 'Assigned', dueDate: '2025-05-10' },
+          ]
+        }
+        
+      ]
+    },
+    {
+      clauseId: 'C1.2', clauseText: 'Within 1 month of the issuance of circular, REs shall submit a list of digital platforms provided by them for the investors and submit a compliance/action taken report.',
+      obligations: [
+        {
+          obId: '5(1)', obText: 'Submit digital platform inventory',
           dept: 'Compliance',
           activities: [
-            { id: 'AV-001', name: 'Draft compliance policy document', assignee: 'Sneha Das', status: 'Assigned', dueDate: '2025-04-15' },
-            { id: 'AV-002', name: 'Present policy to Board for approval', assignee: null, status: 'Unassigned', dueDate: '2025-04-30' },
-            { id: 'AV-003', name: 'Distribute approved policy to all depts', assignee: 'Meera Pillai', status: 'Assigned', dueDate: '2025-05-10' },
-            { id: 'AV-004', name: 'Schedule annual review cycle', assignee: null, status: 'Unassigned', dueDate: '2025-05-15' },
+            { id: 'ACT-0010', name: 'Prepare list of all digital platforms provided to investors', assignee: 'Arjun Kumar', status: 'Assigned', dueDate: '2025-03-31' },
+            { id: 'ACT-011', name: 'Submit compliance report for each clause of the circular', assignee: 'Arjun Kumar', status: 'Assigned', dueDate: '2025-04-05' },
+            { id: 'ACT-012', name: 'Complete filing by August 31, 2025', assignee: null, status: 'Unassigned', dueDate: '2025-04-20' },
+          ]
+        },
+         {
+          obId: 'OB-5(1)', obText: 'Submit compliance report within one month',
+          dept: 'Compliance',
+          activities: [
+            { id: 'ACT-0010', name: 'Prepare list of all digital platforms provided to investors', assignee: 'Arjun Kumar', status: 'Assigned', dueDate: '2025-03-31' },
+            { id: 'ACT-011', name: 'Submit compliance report for each clause of the circular', assignee: 'Arjun Kumar', status: 'Assigned', dueDate: '2025-04-05' },
+            { id: 'ACT-012', name: 'Complete filing by August 31, 2025', assignee: null, status: 'Unassigned', dueDate: '2025-04-20' },
           ]
         },
       ]
     },
     {
-      clauseId: 'C1.2', clauseText: 'A designated Compliance Officer shall be appointed with Board-level reporting.',
+      clauseId: 'C2.1', clauseText: 'Within 45 days of the issuance of circular, REs shall appoint IAAP certified accessibility professionals as Auditor.',
       obligations: [
         {
-          obId: 'OB-003', obText: 'Appoint a designated Compliance Officer with direct Board Audit Committee reporting.',
+          obId: 'OB-5(2)', obText: 'Appoint IAAP certified accessibility auditor',
           dept: 'Compliance',
           activities: [
-            { id: 'AV-005', name: 'Identify and shortlist CO candidates', assignee: 'Arjun Kumar', status: 'Assigned', dueDate: '2025-03-31' },
-            { id: 'AV-006', name: 'Issue formal appointment letter', assignee: 'Arjun Kumar', status: 'Assigned', dueDate: '2025-04-05' },
-            { id: 'AV-007', name: 'Notify regulator of CO appointment', assignee: null, status: 'Unassigned', dueDate: '2025-04-20' },
+            { id: 'ACT-013', name: 'Identify IAAP certified auditor', assignee: 'Suresh Kumar', status: 'Assigned', dueDate: '2025-04-08' },
+            { id: 'ACT-014', name: 'Complete appointment by September 14, 2025', assignee: null, status: 'Unassigned', dueDate: '2025-09-14' },
+            { id: 'ACT-015', name: 'Track readiness and compliance status for each digital platform', assignee: 'Lakshmi Rao', status: 'Assigned', dueDate: '2025-05-01' },
           ]
         },
       ]
     },
-    {
-      clauseId: 'C2.1', clauseText: 'All customer-facing processes must reflect updated regulatory requirements within 30 days.',
+     {
+      clauseId: 'C2.5(3)', clauseText: 'Within 3 month of issuance of the circular, REs shall conduct Accessibility Audit for the digital platforms.',
       obligations: [
         {
-          obId: 'OB-006', obText: 'Update all customer-facing processes within 30 days of the effective date.',
-          dept: 'Operations',
+          obId: 'OB-5(3)', obText: 'Conduct accessibility audit for all digital platforms',
+          dept: 'IT',
           activities: [
-            { id: 'AV-013', name: 'Map all affected customer-facing processes', assignee: 'Suresh Kumar', status: 'Assigned', dueDate: '2025-04-08' },
-            { id: 'AV-014', name: 'Update SOPs and process documentation', assignee: null, status: 'Unassigned', dueDate: '2025-04-20' },
-            { id: 'AV-015', name: 'Train frontline staff on updated processes', assignee: 'Lakshmi Rao', status: 'Assigned', dueDate: '2025-05-01' },
+            { id: 'AV-008', name: 'Audit websites, mobile apps and portals', assignee: 'Raj Iyer', status: 'Assigned', dueDate: '2025-04-10' },
+            { id: 'AV-009', name: 'Include usability testing by persons with disabilities', assignee: null, status: 'Unassigned', dueDate: '2025-04-25' },
+            { id: 'AV-010', name: 'Complete accessibility audit by October 31, 2025', assignee: 'Sanjay Mehta', status: 'Assigned', dueDate: '2025-10-31' },
+
           ]
         },
       ]
     },
+
     {
       clauseId: 'C2.2', clauseText: 'Transaction monitoring systems shall detect and report suspicious activity in real-time.',
       obligations: [
@@ -1217,18 +1260,7 @@ function _aaBuildPage(circs, activeCirc, deptFilter, activeTab = 'activities') {
       <div class="aa-head-right">
         <button class="aa-btn aa-btn-ghost" onclick="window.history.back()">← Back</button>
         <button class="aa-btn aa-btn-pri" onclick="_aaSaveAll('${activeCirc.id}')">💾 Save All</button>
-         <div class="aa-tab-switch">
-  <button
-    class="aa-tab-btn ${activeTab === 'activities' ? 'active' : ''}"
-    onclick="_aaSwitchMainTab('activities','${activeCirc.id}')">
-    Activities
-  </button>
-  <button
-    class="aa-tab-btn ${activeTab === 'obligation' ? 'active' : ''}"
-    onclick="_aaSwitchMainTab('obligation','${activeCirc.id}')">
-    Obligation
-  </button>
-</div>
+        
       </div>
     </div>
 
@@ -1296,7 +1328,10 @@ function _aaBuildPage(circs, activeCirc, deptFilter, activeTab = 'activities') {
         <span class="aa-sel-badge" id="aa-sel-badge" style="display:none;"></span>
       </div>
       <div class="aa-tl-right">
-        <span class="aa-tl-hint">Click any row to assign · Select multiple for bulk assign</span>
+        <div class="aa-view-toggle">
+          <button class="aa-vtbtn active" data-view="hierarchical" onclick="_aaSetView('hierarchical','${activeCirc.id}')">≡ Hierarchical</button>
+          <button class="aa-vtbtn" data-view="table" onclick="_aaSetView('table','${activeCirc.id}')">⊞ Table</button>
+        </div>
       </div>
     </div>
 
@@ -1337,15 +1372,312 @@ function _aaBuildPage(circs, activeCirc, deptFilter, activeTab = 'activities') {
 }
 
 
+window._aaCurrentView = 'hierarchical';
+
+window._aaSetView = function(view, circId) {
+  window._aaCurrentView = view;
+  document.querySelectorAll('.aa-vtbtn').forEach(b => {
+    b.classList.toggle('active', b.dataset.view === view);
+  });
+  _aaRenderActivitiesContent(circId);
+};
+
 function _aaRenderActivitiesContent(circId) {
   const mount = document.getElementById('aa-tab-content');
   if (!mount) return;
+  if (window._aaCurrentView === 'table') {
+    _aaRenderTableView(circId, mount);
+  } else {
+    _aaRenderHierView(circId, mount);
+  }
+}
 
+function _aaRenderHierView(circId, mount) {
+  const allObs = _aaGetActivities(circId).flatMap(cl =>
+    cl.obligations.map(ob => ({ ob, cl }))
+  );
   mount.innerHTML = `
     <div class="aa-clauses-list" id="aa-clauses-list">
-      ${_aaGetActivities(circId).map((cl, ci) => _aaRenderClauseCard(cl, ci, circId)).join('')}
+      ${allObs.map(({ ob, cl }, i) => _aaRenderObGroup(ob, cl, i, _aaSafeId(cl.clauseId), circId)).join('')}
+    </div>`;
+}
+
+
+function _aaRenderTableView(circId, mount) {
+  const allObs = _aaGetActivities(circId).flatMap(cl =>
+    cl.obligations.map(ob => ({ ob, cl }))
+  );
+  const allActs = allObs.flatMap(({ ob, cl }) =>
+    ob.activities.map(act => ({ act, ob, cl }))
+  );
+
+  mount.innerHTML = `
+  <div style="border-radius:10px;overflow:hidden;border:1px solid var(--aa-border);background:#fff;">
+    <div style="overflow-x:auto;">
+      <table class="aa-tbl-flat">
+        <thead>
+          <tr>
+            <th style="width:40px"></th>
+            <th style="width:90px">Obl ID</th>
+            <th style="min-width:150px">Obligation Name</th>
+            <th style="min-width:160px">Action Name</th>
+            <th style="width:155px">Department</th>
+            <th style="width:145px">Assigned To</th>
+            <th style="width:145px">Approver</th>
+            <th style="width:110px">Due Date</th>
+            <th style="width:110px;text-align:center">Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${allActs.map(({ act, ob, cl }) => _aaFlatRow(act, ob, cl, circId)).join('')}
+        </tbody>
+      </table>
     </div>
-  `;
+  </div>`;
+}
+
+function _aaFlatRow(act, ob, cl, circId) {
+  if (!Array.isArray(act._depts))    act._depts    = ob.dept ? [ob.dept] : [];
+  if (!Array.isArray(act._assignees)) act._assignees = act.assignee ? [act.assignee] : [];
+  if (!act._approver)                act._approver  = '';
+  const subs = act.subBranches || [];
+
+  const deptHtml = act._depts.length
+    ? act._depts.map(d=>`<span class="aa-pill aa-pill-dept">${d}</span>`).join('')
+    : `<span class="aa-pill aa-pill-add">+ Dept</span>`;
+
+  const assignHtml = act._assignees.length
+    ? act._assignees.slice(0,2).map(p=>`<span class="aa-pill aa-pill-person">${p}</span>`).join('')
+      + (act._assignees.length>2 ? `<span class="aa-pill aa-pill-more">+${act._assignees.length-2}</span>` : '')
+    : `<span class="aa-pill aa-pill-add">+ Add</span>`;
+
+  const approverHtml = act._approver
+    ? `<span class="aa-pill aa-pill-person">${act._approver}</span>`
+    : `<span class="aa-pill aa-pill-add">+ Add</span>`;
+
+  const subHtml = subs.length ? `
+    <div class="aa-sub-list">
+      ${subs.map(s=>`<div class="aa-sub-item"><span class="aa-sub-id">${s.id}</span><span class="aa-sub-name">${(s.name||'').substring(0,28)}</span></div>`).join('')}
+    </div>` : '';
+
+  const stCls = act.status === 'Assigned' ? 'aa-s-asgn' : 'aa-s-none';
+  const safeObId = _aaSafeId(ob.obId);
+
+  return `
+  <tr class="aa-flat-row ${act.status==='Unassigned'?'aa-act-unassigned':''}" id="aa-flat-${act.id}"
+      data-actid="${act.id}" data-obid="${safeObId}" data-dept="${ob.dept||''}" data-status="${act.status}">
+    <!-- checkbox -->
+    <td class="aa-td-chk" onclick="event.stopPropagation()">
+      <label class="aa-check-wrap">
+        <input type="checkbox" class="aa-row-chk" data-id="${act.id}" data-obid="${safeObId}" onchange="_aaRowCheck(this)"/>
+        <span class="aa-checkmark"></span>
+      </label>
+    </td>
+    <!-- obl id -->
+    <td><span class="aa-ob-id-flat">${ob.obId}</span></td>
+    <!-- obl name -->
+    <td><div class="aa-flat-title">${ob.obText.substring(0,60)}${ob.obText.length>60?'…':''}</div></td>
+    <!-- action name -->
+    <td>
+      <div class="aa-flat-title">${act.name}</div>
+      <div class="aa-flat-sub">${act.id}</div>
+    </td>
+    <!-- department multi-select + sub-branch -->
+    <td id="aa-flat-dept-${act.id}">
+      <div style="display:flex;align-items:center;gap:4px;flex-wrap:wrap;">
+        <span class="aa-clickable" onclick="aaOpenDeptSelect('${act.id}','${circId}')">${deptHtml}</span>
+        <button class="aa-sb-btn" onclick="event.stopPropagation();aaOpenSubBranch('${act.id}','${ob.obId}','${circId}')" title="Add sub-branch">+</button>
+      </div>
+      ${subHtml}
+    </td>
+    <!-- assigned to search+select -->
+    <td id="aa-flat-assign-${act.id}" class="aa-clickcell" onclick="aaOpenPersonSelect('_assignees','${act.id}','${circId}')" title="Edit assignees">
+      <div style="display:flex;flex-wrap:wrap;gap:2px;">${assignHtml}</div>
+    </td>
+    <!-- approver search+select -->
+    <td id="aa-flat-approver-${act.id}" class="aa-clickcell" onclick="aaOpenApproverSelect('${act.id}','${circId}')" title="Edit approver">
+      <div style="display:flex;flex-wrap:wrap;gap:2px;">${approverHtml}</div>
+    </td>
+    <!-- due date -->
+    <td style="white-space:nowrap">${_aaFmtDue(act.dueDate)}</td>
+    <!-- status -->
+    <td style="text-align:center">
+      <span class="aa-st-badge ${stCls}">${act.status}</span>
+    </td>
+  </tr>`;
+}
+
+/* ── due date chip ── */
+function _aaFmtDue(ds) {
+  if (!ds) return `<span style="color:#94a3b8;font-size:12px">—</span>`;
+  const due=new Date(ds), now=new Date(); now.setHours(0,0,0,0);
+  const diff=Math.ceil((due-now)/86400000);
+  let c,bg,br;
+  if(diff<0){c='#dc2626';bg='#fee2e2';br='#fca5a5';}
+  else if(diff<=7){c='#b45309';bg='#fef9c3';br='#fde68a';}
+  else if(diff<=30){c='#0369a1';bg='#dbeafe';br='#93c5fd';}
+  else{c='#64748b';bg='#f1f5f9';br='#e2e8f0';}
+  return `<span style="background:${bg};color:${c};border:1px solid ${br};padding:2px 9px;border-radius:99px;font-size:11px;font-weight:700;white-space:nowrap">${due.toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'})}</span>`;
+}
+
+/* ── dept multi-select popup ── */
+window.aaOpenDeptSelect = function(actId, circId) {
+  const act = _aaFindAct(actId, circId); if (!act) return;
+  if (!Array.isArray(act._depts)) act._depts = [];
+  _aaShowPickerModal({
+    title:'Select Departments', pool:AA_DEPTS, current:act._depts, multi:true,
+    onSave(vals) {
+      act._depts = vals;
+      const cell = document.getElementById(`aa-flat-dept-${actId}`); if (!cell) return;
+      const deptHtml = vals.length ? vals.map(d=>`<span class="aa-pill aa-pill-dept">${d}</span>`).join('') : `<span class="aa-pill aa-pill-add">+ Dept</span>`;
+      const subHtml = (act.subBranches||[]).length ? `<div class="aa-sub-list">${act.subBranches.map(s=>`<div class="aa-sub-item"><span class="aa-sub-id">${s.id}</span><span class="aa-sub-name">${(s.name||'').substring(0,28)}</span></div>`).join('')}</div>` : '';
+      cell.innerHTML = `<div style="display:flex;align-items:center;gap:4px;flex-wrap:wrap;"><span class="aa-clickable" onclick="aaOpenDeptSelect('${actId}','${circId}')">${deptHtml}</span><button class="aa-sb-btn" onclick="event.stopPropagation();aaOpenSubBranch('${actId}','','${circId}')" title="Add sub-branch">+</button></div>${subHtml}`;
+      if (typeof showToast==='function') showToast('Departments updated.','success');
+    }
+  });
+};
+
+/* ── assigned to multi-select popup ── */
+window.aaOpenPersonSelect = function(field, actId, circId) {
+  const act = _aaFindAct(actId, circId); if (!act) return;
+  if (!Array.isArray(act[field])) act[field] = act.assignee ? [act.assignee] : [];
+  _aaShowPickerModal({
+    title:'Assigned To', pool:Object.values(AA_PEOPLE).flat().filter((v,i,a)=>a.indexOf(v)===i),
+    current:act[field], multi:true,
+    onSave(vals) {
+      act[field] = vals; act.assignee = vals[0]||'';
+      const cell = document.getElementById(`aa-flat-assign-${actId}`); if (!cell) return;
+      const html = vals.length ? vals.slice(0,2).map(p=>`<span class="aa-pill aa-pill-person">${p}</span>`).join('')+(vals.length>2?`<span class="aa-pill aa-pill-more">+${vals.length-2}</span>`:'') : `<span class="aa-pill aa-pill-add">+ Add</span>`;
+      cell.querySelector('div').innerHTML = html;
+      if (typeof showToast==='function') showToast('Updated.','success');
+    }
+  });
+};
+
+/* ── approver single-select popup ── */
+window.aaOpenApproverSelect = function(actId, circId) {
+  const act = _aaFindAct(actId, circId); if (!act) return;
+  _aaShowPickerModal({
+    title:'Approver / Owner', pool:Object.values(AA_PEOPLE).flat().filter((v,i,a)=>a.indexOf(v)===i),
+    current:act._approver ? [act._approver] : [], multi:false,
+    onSave(vals) {
+      act._approver = vals[0]||'';
+      const cell = document.getElementById(`aa-flat-approver-${actId}`); if (!cell) return;
+      const html = act._approver ? `<span class="aa-pill aa-pill-person">${act._approver}</span>` : `<span class="aa-pill aa-pill-add">+ Add</span>`;
+      cell.querySelector('div').innerHTML = html;
+      if (typeof showToast==='function') showToast('Updated.','success');
+    }
+  });
+};
+
+/* ── sub-branch popup ── */
+window.aaOpenSubBranch = function(actId, obId, circId) {
+  document.getElementById('aa-sb-overlay')?.remove();
+  const ov = document.createElement('div');
+  ov.id = 'aa-sb-overlay';
+  ov.className = 'aa-modal-ov';
+  ov.innerHTML = `
+  <div class="aa-modal aa-sb-modal" onclick="event.stopPropagation()">
+    <div class="aa-modal-hd"><span class="aa-modal-title">Add Sub-Branch / Division</span>
+      <button class="aa-modal-close" onclick="document.getElementById('aa-sb-overlay').remove()">✕</button></div>
+    <div class="aa-sb-body">
+      <div class="aa-sb-field"><label>Name *</label><input id="aa-sb-name" type="text" placeholder="Sub-branch name…"/></div>
+      <div class="aa-sb-grid">
+        <div class="aa-sb-field"><label>Department</label>
+          <select id="aa-sb-dept"><option value="">— Select —</option>${AA_DEPTS.map(d=>`<option>${d}</option>`).join('')}</select></div>
+        <div class="aa-sb-field"><label>Assigned To</label>
+          <input id="aa-sb-assign" type="text" list="aa-sb-pl1" placeholder="Search…"/>
+          <datalist id="aa-sb-pl1">${Object.values(AA_PEOPLE).flat().map(p=>`<option value="${p}">`).join('')}</datalist></div>
+        <div class="aa-sb-field"><label>Approver</label>
+          <input id="aa-sb-owner" type="text" list="aa-sb-pl2" placeholder="Search…"/>
+          <datalist id="aa-sb-pl2">${Object.values(AA_PEOPLE).flat().map(p=>`<option value="${p}">`).join('')}</datalist></div>
+        <div class="aa-sb-field"><label>Due Date</label><input id="aa-sb-due" type="date"/></div>
+        <div class="aa-sb-field"><label>Status</label>
+          <select id="aa-sb-status"><option>Open</option><option>In Progress</option><option>Complete</option><option>Overdue</option></select></div>
+      </div>
+      <div class="aa-sb-field"><label>Description</label><textarea id="aa-sb-desc" rows="3" placeholder="Optional…" style="resize:vertical"></textarea></div>
+    </div>
+    <div class="aa-modal-ft">
+      <button class="aa-btn aa-btn-ghost aa-btn-sm" onclick="document.getElementById('aa-sb-overlay').remove()">Cancel</button>
+      <button class="aa-btn aa-btn-pri aa-btn-sm" onclick="aaSaveSubBranch('${actId}','${circId}')">Add</button>
+    </div>
+  </div>`;
+  document.body.appendChild(ov);
+  ov.addEventListener('click', e => { if(e.target===ov) ov.remove(); });
+  setTimeout(()=>document.getElementById('aa-sb-name')?.focus(), 40);
+};
+
+window.aaSaveSubBranch = function(actId, circId) {
+  const name = document.getElementById('aa-sb-name')?.value.trim();
+  if (!name) { if(typeof showToast==='function') showToast('Name is required.','error'); return; }
+  const act = _aaFindAct(actId, circId); if (!act) return;
+  if (!Array.isArray(act.subBranches)) act.subBranches = [];
+  const sb = { id:`${actId}-SB${Date.now().toString().slice(-4)}`, name,
+    dept: document.getElementById('aa-sb-dept')?.value||'',
+    assign: document.getElementById('aa-sb-assign')?.value||'',
+    owner: document.getElementById('aa-sb-owner')?.value||'',
+    dueDate: document.getElementById('aa-sb-due')?.value||'',
+    status: document.getElementById('aa-sb-status')?.value||'Open',
+    desc: document.getElementById('aa-sb-desc')?.value||'' };
+  act.subBranches.push(sb);
+  document.getElementById('aa-sb-overlay')?.remove();
+  if(typeof showToast==='function') showToast(`Sub-branch ${sb.id} added.`,'success');
+  /* refresh dept cell */
+  const cell = document.getElementById(`aa-flat-dept-${actId}`);
+  if (cell) {
+    const deptHtml = (act._depts||[]).length ? act._depts.map(d=>`<span class="aa-pill aa-pill-dept">${d}</span>`).join('') : `<span class="aa-pill aa-pill-add">+ Dept</span>`;
+    const subHtml = `<div class="aa-sub-list">${act.subBranches.map(s=>`<div class="aa-sub-item"><span class="aa-sub-id">${s.id}</span><span class="aa-sub-name">${(s.name||'').substring(0,28)}</span></div>`).join('')}</div>`;
+    cell.innerHTML = `<div style="display:flex;align-items:center;gap:4px;flex-wrap:wrap;"><span class="aa-clickable" onclick="aaOpenDeptSelect('${actId}','${circId}')">${deptHtml}</span><button class="aa-sb-btn" onclick="event.stopPropagation();aaOpenSubBranch('${actId}','','${circId}')" title="Add sub-branch">+</button></div>${subHtml}`;
+  }
+};
+
+/* ── generic picker modal ── */
+function _aaShowPickerModal({ title, pool, current, multi, onSave }) {
+  document.getElementById('aa-picker-modal')?.remove();
+  let sel = [...current];
+  const ov = document.createElement('div');
+  ov.id = 'aa-picker-modal'; ov.className = 'aa-modal-ov';
+  ov.innerHTML = `
+  <div class="aa-modal" onclick="event.stopPropagation()">
+    <div class="aa-modal-hd"><span class="aa-modal-title">${title}</span>
+      <button class="aa-modal-close" onclick="document.getElementById('aa-picker-modal').remove()">✕</button></div>
+    <div class="aa-modal-search"><input id="aa-picker-q" type="text" placeholder="Search…" autocomplete="off" oninput="aaPickerFilter(this.value)"/></div>
+    <div class="aa-modal-list" id="aa-picker-list">
+      ${pool.map(p=>`
+      <label class="aa-modal-item" data-val="${p}">
+        <input type="${multi?'checkbox':'radio'}" name="aa-picker" value="${p}" ${sel.includes(p)?'checked':''} class="aa-modal-inp"/>
+        <span class="aa-modal-lbl">${p}</span>
+      </label>`).join('')}
+    </div>
+    <div class="aa-modal-ft">
+      <button class="aa-btn aa-btn-ghost aa-btn-sm" onclick="document.getElementById('aa-picker-modal').remove()">Cancel</button>
+      <button class="aa-btn aa-btn-pri aa-btn-sm" onclick="aaPickerSave()">Save</button>
+    </div>
+  </div>`;
+  document.body.appendChild(ov);
+  ov.addEventListener('click', e => { if(e.target===ov) ov.remove(); });
+  setTimeout(()=>document.getElementById('aa-picker-q')?.focus(), 40);
+  window._aaPickerSaveCb = () => {
+    const vals = [...document.querySelectorAll('#aa-picker-list .aa-modal-inp:checked')].map(i=>i.value);
+    onSave(vals); ov.remove();
+  };
+}
+window.aaPickerFilter = function(q) {
+  q = q.toLowerCase();
+  document.querySelectorAll('#aa-picker-list .aa-modal-item').forEach(item => {
+    item.style.display = item.dataset.val.toLowerCase().includes(q) ? '' : 'none';
+  });
+};
+window.aaPickerSave = function() { window._aaPickerSaveCb?.(); };
+
+/* ── helper: find activity across all clauses ── */
+function _aaFindAct(actId, circId) {
+  for (const cl of _aaGetActivities(circId))
+    for (const ob of cl.obligations) {
+      const a = ob.activities.find(a => a.id === actId);
+      if (a) return a;
+    }
+  return null;
 }
 
 /* ── CLAUSE CARD (accordion) ── */
@@ -1408,8 +1740,10 @@ function _aaRenderObGroup(ob, cl, oi, safeClId, circId) {
           <th>Activity</th>
           <th>Department</th>
           <th>Assignee</th>
+          <!--- <th>Approver</th> --->
           <th>Due Date</th>
-          <th>Status</th>
+          
+          <th>Assignment Status</th>
           <th></th>
         </tr>
       </thead>
@@ -1445,7 +1779,14 @@ function _aaRenderActRow(act, ob, cl, circId) {
   <td onclick="_aaOpenDrawer('${act.id}','${ob.obId}','${cl.clauseId}','${circId}')" class="aa-td-name">
     <span class="aa-act-name">${act.name}</span>
   </td>
-  <td><span class="aa-dept-chip aa-dept-${(ob.dept || '').toLowerCase()}">${ob.dept || '—'}</span></td>
+  <td id="aa-hier-dept-${act.id}" onclick="event.stopPropagation()">
+    <div style="display:flex;align-items:center;gap:4px;flex-wrap:wrap;">
+      <span class="aa-clickable" onclick="aaOpenDeptSelect('${act.id}','${circId}')">
+        ${(act._depts&&act._depts.length) ? act._depts.map(d=>`<span class="aa-dept-chip aa-dept-${d.toLowerCase()}">${d}</span>`).join('') : `<span class="aa-dept-chip aa-dept-${(ob.dept||'').toLowerCase()}">${ob.dept||'—'}</span>`}
+      </span>
+      <button class="aa-sb-btn" onclick="event.stopPropagation();aaOpenSubBranch('${act.id}','${ob.obId}','${circId}')" title="Add sub-branch">+</button>
+    </div>
+  </td>
   <td onclick="event.stopPropagation()" class="aa-td-assignee">
     <div class="aa-ita-wrap" id="aa-ita-wrap-${act.id}">
       ${act.assignee
@@ -1461,11 +1802,17 @@ function _aaRenderActRow(act, ob, cl, circId) {
            </div>`}
     </div>
   </td>
+  <!--- <td id="aa-hier-appr-${act.id}" class="aa-td-assignee" onclick="event.stopPropagation()">
+    <div onclick="aaOpenApproverSelect('${act.id}','${circId}')">
+      ${act._approver ? `<div class="aa-assignee-filled"><span class="aa-av">${act._approver.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2)}</span><span class="aa-assignee-name">${act._approver}</span></div>` : `<span style="font-size:11px;color:#94a3b8;font-style:italic;cursor:pointer">+ Add</span>`}
+    </div>
+  </td>--->
   <td onclick="event.stopPropagation()">
     <input type="date" class="aa-inline-date ${act.dueDate ? 'filled' : ''}"
            value="${act.dueDate || ''}"
            onchange="_aaInlineDueChange('${act.id}','${ob.obId}','${circId}',this)"/>
   </td>
+  
   <td><span class="aa-st-badge ${stCls}">${act.status}</span></td>
   <td><button class="aa-open-btn" onclick="_aaOpenDrawer('${act.id}','${ob.obId}','${cl.clauseId}','${circId}')" title="Open detail">›</button></td>
 </tr>`;
@@ -2105,6 +2452,16 @@ function _aaInjectStyles() {
 .aa-dr-more-btn-inline{padding:8px 13px;background:#f8f9fb;border:1.5px solid var(--aa-border);border-radius:var(--aa-r);font-family:inherit;font-size:11px;font-weight:600;color:var(--aa-text-sec);cursor:pointer;white-space:nowrap;transition:all .13s;}
 .aa-dr-more-btn-inline:hover,.aa-more-btn-active{border-color:var(--aa-accent);color:var(--aa-accent);background:var(--aa-accent-lt);}
 
+/* ob-card as standalone top-level card */
+#aa-clauses-list > .aa-ob-card {
+  border-radius: 10px;
+  border: 1px solid var(--aa-border);
+  margin-bottom: 12px;
+  overflow: hidden;
+  box-shadow: var(--aa-sh);
+  border-top: 1px solid var(--aa-border) !important;
+}
+
 /* BULK BAR */
 .aa-bulk-bar{position:fixed;bottom:28px;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:0;background:var(--aa-cl-bg);border-radius:14px;box-shadow:0 8px 40px rgba(10,15,28,.35);z-index:200;overflow:hidden;animation:aaIn .22s ease;white-space:nowrap;}
 .aa-bulk-left{display:flex;align-items:center;gap:10px;padding:14px 18px;}
@@ -2125,6 +2482,67 @@ function _aaInjectStyles() {
 .aa-sug-dark .aa-sug-av{background:rgba(255,255,255,.1);color:rgba(255,255,255,.8);border-color:rgba(255,255,255,.15);}
 .aa-bulk-go{padding:0 24px;background:var(--aa-accent);color:#fff;border:none;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;transition:all .14s;align-self:stretch;}
 .aa-bulk-go:hover{background:#0b6a8a;}
+
+
+/* view toggle */
+.aa-view-toggle{display:flex;gap:0;}
+.aa-vtbtn{padding:6px 14px;border:1px solid var(--aa-border);background:#f8fafc;font-family:inherit;font-size:12px;font-weight:600;cursor:pointer;color:#64748b;transition:all .13s;}
+.aa-vtbtn:first-child{border-radius:7px 0 0 7px;}
+.aa-vtbtn:last-child{border-radius:0 7px 7px 0;border-left:none;}
+.aa-vtbtn.active{background:#1a2235;color:#fff;border-color:#1a2235;}
+/* flat table */
+.aa-tbl-flat{width:100%;border-collapse:collapse;font-size:12.5px;}
+.aa-tbl-flat thead tr{background:#f8fafc;}
+.aa-tbl-flat th{padding:10px 12px;text-align:left;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#6b7280;border-bottom:2px solid #e5e7eb;white-space:nowrap;}
+.aa-tbl-flat td{padding:11px 12px;border-bottom:1px solid #f4f5f8;vertical-align:middle;}
+.aa-flat-row{transition:background .1s;}
+.aa-flat-row:hover td{background:#f8f9ff;}
+.aa-flat-row:last-child td{border-bottom:none;}
+.aa-flat-title{font-size:12px;font-weight:600;color:#1f2937;line-height:1.4;}
+.aa-flat-sub{font-size:10px;color:#94a3b8;font-family:monospace;margin-top:1px;}
+.aa-ob-id-flat{font-family:monospace;font-size:10.5px;font-weight:800;color:#6366f1;background:#eef2ff;border:1px solid #c7d2fe;padding:2px 8px;border-radius:5px;white-space:nowrap;}
+/* pills */
+.aa-pill{display:inline-flex;align-items:center;font-size:10.5px;font-weight:700;padding:2px 8px;border-radius:99px;white-space:nowrap;margin:1px 2px 1px 0;line-height:1.4;}
+.aa-pill-dept{background:#e0f2fe;color:#0369a1;border:1px solid #7dd3fc;}
+.aa-pill-person{background:#eef2ff;color:#4338ca;border:1px solid #c7d2fe;}
+.aa-pill-more{background:#f1f5f9;color:#64748b;border:1px solid #e2e8f0;cursor:pointer;}
+.aa-pill-add{background:#f8fafc;color:#94a3b8;border:1px dashed #e2e8f0;font-style:italic;font-weight:500;cursor:pointer;}
+/* sub-branch */
+.aa-sub-list{margin-top:5px;padding-left:8px;border-left:2px solid #c7d2fe;}
+.aa-sub-item{display:flex;align-items:center;gap:5px;padding:2px 0;font-size:10px;}
+.aa-sub-id{color:#6366f1;font-family:monospace;font-weight:700;}
+.aa-sub-name{color:#6b7280;}
+/* sub-branch add button */
+.aa-sb-btn{width:20px;height:20px;border-radius:50%;border:1.5px dashed #c7d2fe;background:#f8fafc;color:#6366f1;font-size:14px;line-height:1;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;font-family:inherit;padding:0;transition:all .13s;}
+.aa-sb-btn:hover{background:#eef2ff;border-color:#6366f1;border-style:solid;}
+.aa-clickable{display:inline-flex;flex-wrap:wrap;gap:2px;cursor:pointer;}
+.aa-clickcell{cursor:pointer;transition:background .1s;}
+.aa-clickcell:hover{background:#f0f4ff !important;}
+/* modal */
+.aa-modal-ov{position:fixed;inset:0;background:rgba(15,23,42,.38);z-index:900;display:flex;align-items:center;justify-content:center;}
+.aa-modal{background:#fff;border-radius:12px;width:360px;max-width:94vw;max-height:80vh;display:flex;flex-direction:column;box-shadow:0 16px 50px rgba(0,0,0,.2);overflow:hidden;}
+.aa-sb-modal{width:500px;}
+.aa-modal-hd{display:flex;align-items:center;justify-content:space-between;padding:13px 18px;border-bottom:1px solid #e5e7eb;}
+.aa-modal-title{font-size:14px;font-weight:800;color:#1f2937;}
+.aa-modal-close{background:none;border:none;font-size:18px;cursor:pointer;color:#6b7280;padding:2px 6px;border-radius:5px;}
+.aa-modal-close:hover{background:#f1f5f9;}
+.aa-modal-search{padding:10px 14px;border-bottom:1px solid #f3f4f6;}
+.aa-modal-search input{width:100%;padding:7px 10px;border:1px solid #e5e7eb;border-radius:7px;font-size:13px;font-family:inherit;outline:none;box-sizing:border-box;}
+.aa-modal-search input:focus{border-color:#6366f1;}
+.aa-modal-list{flex:1;overflow-y:auto;padding:6px;}
+.aa-modal-item{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:7px;cursor:pointer;}
+.aa-modal-item:hover{background:#f8f9ff;}
+.aa-modal-inp{width:15px;height:15px;accent-color:#6366f1;flex-shrink:0;cursor:pointer;}
+.aa-modal-lbl{font-size:13px;font-weight:500;color:#1f2937;}
+.aa-modal-ft{padding:12px 14px;border-top:1px solid #e5e7eb;display:flex;justify-content:flex-end;gap:8px;}
+.aa-sb-body{padding:16px;display:flex;flex-direction:column;gap:12px;max-height:65vh;overflow-y:auto;}
+.aa-sb-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.aa-sb-field label{display:block;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#6b7280;margin-bottom:4px;}
+.aa-sb-field input,.aa-sb-field select,.aa-sb-field textarea{width:100%;padding:8px 10px;border:1px solid #e5e7eb;border-radius:7px;font-size:13px;font-family:inherit;outline:none;color:#1f2937;box-sizing:border-box;}
+.aa-sb-field input:focus,.aa-sb-field select:focus,.aa-sb-field textarea:focus{border-color:#6366f1;}
+/* standalone ob-card */
+#aa-clauses-list > .aa-ob-card{border-radius:10px;border:1px solid var(--aa-border);margin-bottom:12px;overflow:hidden;box-shadow:var(--aa-sh);border-top:1px solid var(--aa-border) !important;}
+
   `;
   document.head.appendChild(s);
 }

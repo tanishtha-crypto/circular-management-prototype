@@ -21,6 +21,8 @@
     'ai-suggestion': () => { setTitle('AI Suggestion'); renderAISuggestionPage(); },
     'circular-library': () => { setTitle('Circular Library'); renderCircularLibrary(); },
     'drafts-circular-library': () => { setTitle('Draft Circular Library'); renderMyDraftsPage(); },
+  
+'all-items': () => { setTitle('All Items'); renderCOTrackingView(); },
     'my-items-obligations': () => { setTitle('My Items - Obligations'); renderMyItemsObligations(); },
     'my-items-activity': () => { setTitle('My Items - Activity'); renderMyItemsActivity(); },
     'assign-activity': () => { setTitle('Assign Activity'); renderAssignActivity(); },
@@ -335,6 +337,8 @@
     </div>`;
   };
 
+
+  
   /* ================================================================
      SETTINGS PAGE
      ================================================================ */
@@ -427,6 +431,26 @@
     // Load initial page
     navigateTo('dashboard');
   }
+
+  window.getDisplayStatus = function(t) {
+  const wf = t._workflowState || '';
+  if (wf === 'closed')                  return { label:'Closed',             color:'#15803d', bg:'#dcfce7', border:'#86efac' };
+  if (wf === 'sent_for_closure')        return { label:'Sent for Closure',   color:'#15803d', bg:'#dcfce7', border:'#86efac' };
+  if (wf === 'clarification_requested') return { label:'Clarification Req',  color:'#b45309', bg:'#fef9c3', border:'#fde68a' };
+  if (wf === 'clarification_sent')      return { label:'Clarif. Sent',       color:'#0369a1', bg:'#e0f2fe', border:'#93c5fd' };
+
+  // use whichever status field exists
+  const s = t.assigneeStatus || t.status || 'Open';
+  const map = {
+    'Complete':    { label:'Complete',    color:'#15803d', bg:'#dcfce7', border:'#86efac' },
+    'Closed':      { label:'Closed',      color:'#15803d', bg:'#dcfce7', border:'#86efac' },
+    'In Progress': { label:'In Progress', color:'#1d4ed8', bg:'#dbeafe', border:'#93c5fd' },
+    'Overdue':     { label:'Overdue',     color:'#dc2626', bg:'#fee2e2', border:'#fca5a5' },
+    'Open':        { label:'Open',        color:'#2563eb', bg:'#eff6ff', border:'#93c5fd' },
+    'Assigned':    { label:'Open',        color:'#475569', bg:'#f1f5f9', border:'#e2e8f0' },
+  };
+  return map[s] || { label: s, color:'#475569', bg:'#f1f5f9', border:'#e2e8f0' };
+};
 
   function initSidebarCollapse() {
     const btn = document.getElementById('sidebar-toggle');

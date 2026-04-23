@@ -92,25 +92,7 @@ window.closeTaskDetail = function () {
   _tdTask = null;
   const area = document.getElementById('content-area');
   if (!area) return;
-  if (typeof renderMyItemsObligations === 'function') {
-    renderMyItemsObligations();
-    // Re-apply any action status changes back to the freshly rendered table
-setTimeout(() => {
-  const tasks = (typeof CMS_DATA !== 'undefined') ? CMS_DATA.tasks : [];
-  tasks.forEach(t => {
-    if (!t._actionStatus) return;
-    const cell = document.getElementById(`action-cell-${t.id}`);
-    if (!cell) return;
-    const cfg = t._actionStatus;
-    cell.innerHTML = `
-      <span style="display:inline-block;padding:3px 10px;border-radius:99px;font-size:11px;font-weight:700;
-        background:${cfg.bg};color:${cfg.color};border:1px solid ${cfg.border};white-space:nowrap;">
-        ${cfg.icon} ${cfg.label}
-      </span>`;
-  });
-}, 50); // after renderMyItemsObligations finishes painting
-  }
-  
+  if (typeof renderMyItemsObligations === 'function') renderMyItemsObligations();
   else area.innerHTML = '<div style="padding:40px;text-align:center;color:#94a3b8">No task list renderer found.</div>';
 };
 
@@ -163,10 +145,9 @@ function tdBuildPanel(t) {
       <!-- Vertical tabs — Activities removed -->
       <nav class="tdp-vtabs">
         ${[
-      ['overview',    '◈',  'Overview'],
-      ['activities',  '⚡', 'Actions'],
-      ['evidence',    '📎', 'Evidence'],
-      ['comments',    '💬', 'Comments'],
+      ['overview', '◈', 'Overview'],
+      ['evidence', '📎', 'Evidence'],
+      ['comments', '💬', 'Comments'],
     ].map(([id, ic, lb]) => `
           <button class="tdp-vtab" id="tdp-vt-${id}" onclick="tdSwitchTab('${id}')">
             <span class="tdp-vt-icon">${ic}</span>
@@ -245,7 +226,7 @@ window.tdSwitchTab = function (tab) {
   const pane = document.getElementById('tdp-pane');
   if (!pane || !_tdTask) return;
   // activities removed — only overview, evidence, comments
-  const map = { overview: tdPaneOverview, activities: tdPaneActivities, evidence: tdPaneEvidence, comments: tdPaneComments };
+  const map = { overview: tdPaneOverview, evidence: tdPaneEvidence, comments: tdPaneComments };
   pane.innerHTML = (map[tab] || tdPaneOverview)(_tdTask);
   pane.style.animation = 'none';
   void pane.offsetHeight;
@@ -555,7 +536,7 @@ window._tdShowOblDetailModal = function(taskId) {
       <div style="padding:16px 20px;border-bottom:1px solid #e2e8f0;background:#fafbfc;">
         <div style="font-size:10px;font-weight:800;color:#f59e0b;text-transform:uppercase;letter-spacing:.08em;margin-bottom:12px;display:flex;align-items:center;gap:6px;">
           <span style="width:3px;height:14px;background:#f59e0b;border-radius:2px;display:inline-block;"></span>
-          Take Action
+          Take  Action
         </div>
         <div style="display:flex;align-items:flex-end;gap:10px;flex-wrap:wrap;margin-bottom:10px;">
           <div style="flex:1;min-width:140px;">
@@ -571,9 +552,9 @@ window._tdShowOblDetailModal = function(taskId) {
             <label style="font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase;display:block;margin-bottom:4px;">Send To</label>
             <select id="tdp-odm-person-${task.id}" style="width:100%;padding:8px 10px;border:1.5px solid #e2e8f0;border-radius:6px;font-size:12px;font-family:inherit;outline:none;" onfocus="this.style.borderColor='#6366f1'" onblur="this.style.borderColor='#e2e8f0'">
               <option value="">— Select —</option>
-              ${task.assignee?`<option>${task.assignee}</option>`:''}
-              ${task.reviewer?`<option>${task.reviewer}</option>`:''}
-              ${task.owner?`<option>${task.owner}</option>`:''}
+              ${task.assignee?`<option>Assignee: ${task.assignee}</option>`:''}
+              ${task.reviewer?`<option>Reviewer: ${task.reviewer}</option>`:''}
+              ${task.owner?`<option>Owner: ${task.owner}</option>`:''}
             </select>
           </div>
           <button onclick="_tdOdmSubmit('${task.id}')" style="padding:9px 16px;background:#6366f1;border:none;border-radius:6px;font-size:12px;font-weight:700;color:#fff;cursor:pointer;white-space:nowrap;" onmouseover="this.style.background='#4f46e5'" onmouseout="this.style.background='#6366f1'">Send →</button>
@@ -1072,181 +1053,11 @@ function tdPaneOverview(t) {
 
   </div>`;
 }
-
 /* ══════════════════════════════════════════════════════════════
    PANE: EVIDENCE
    Shows obligation title (not action title), no Notes column
    ══════════════════════════════════════════════════════════════ */
-
-/* ══════════════════════════════════════════════════════════════
-   PANE: ACTIVITIES
-   Shows all actions (sibling activities) for this obligation.
-   Columns: Act ID | Action Name | Assigned To | Due Date | Status | Progress
-   Click Act ID → navigates to assign-activity screen for that obligation
-   ══════════════════════════════════════════════════════════════ */
-function tdPaneActivities(t) {
-  const actions = getActions(t.id);
-
-  const statusColor = s => ({
-    'Complete':    '#10b981',
-    'In Progress': '#f59e0b',
-    'Overdue':     '#ef4444',
-    'Open':        '#6366f1',
-    'Assigned':    '#10b981',
-    'Unassigned':  '#94a3b8',
-  })[s] || '#64748b';
-
-  const statusBg = s => ({
-    'Complete':    '#dcfce7',
-    'In Progress': '#fef9c3',
-    'Overdue':     '#fee2e2',
-    'Open':        '#eef2ff',
-    'Assigned':    '#dcfce7',
-    'Unassigned':  '#f1f5f9',
-  })[s] || '#f1f5f9';
-
-  /* overall progress */
-  const total    = actions.length;
-  const done     = actions.filter(a => a.status === 'Complete' || a.status === 'Assigned').length;
-  const pct      = total ? Math.round(done / total * 100) : 0;
-  const progColor = pct === 100 ? '#10b981' : pct >= 50 ? '#f59e0b' : '#ef4444';
-
-  return `
-  <div class="tdp-inner">
-
-    <!-- Header row -->
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px;">
-      <div class="tdp-section-label" style="margin-bottom:0;">
-        Activities
-        <span style="font-size:13px;font-weight:500;color:#64748b;text-transform:none;letter-spacing:0;">
-          — ${total} action${total!==1?'s':''}
-        </span>
-      </div>
-      <!-- Overall progress pill -->
-      <div style="display:flex;align-items:center;gap:10px;background:#fff;border:1px solid #e2e8f0;border-radius:99px;padding:5px 14px;">
-        <span style="font-size:11px;font-weight:700;color:#64748b;">Overall Progress</span>
-        <div style="width:80px;height:5px;background:#e2e8f0;border-radius:99px;overflow:hidden;">
-          <div style="height:100%;width:${pct}%;background:${progColor};border-radius:99px;transition:width .4s;"></div>
-        </div>
-        <span style="font-size:12px;font-weight:800;color:${progColor};">${pct}%</span>
-      </div>
-    </div>
-
-    ${!total
-      ? `<div class="tdp-empty">
-           <div style="font-size:36px;margin-bottom:12px">⚡</div>
-           <p>No activities found for this obligation.</p>
-         </div>`
-      : `<div class="tdp-tbl-wrap">
-           <table class="tdp-tbl">
-             <thead>
-               <tr>
-                 <th style="width:110px;">Act ID</th>
-                 <th>Action Name</th>
-                 <th style="width:130px;">Department</th>
-                 <th style="width:150px;">Assigned To</th>
-                 <th style="width:110px;">Due Date</th>
-                 <th style="width:120px;">Status</th>
-                 <th style="width:130px;">Progress</th>
-               </tr>
-             </thead>
-             <tbody>
-               ${actions.map(a => {
-                 /* per-activity progress: evidence uploaded = progress */
-                 const evCount  = (a.evidence || []).length;
-                 const actPct   = a.status === 'Complete' ? 100
-                                : a.status === 'In Progress' ? 60
-                                : a.status === 'Overdue'     ? 30
-                                : evCount > 0               ? 40
-                                : 0;
-                 const actColor = actPct === 100 ? '#10b981'
-                                : actPct >= 50  ? '#f59e0b'
-                                : actPct > 0    ? '#ef4444'
-                                : '#e2e8f0';
-
-                 return `
-                 <tr style="cursor:pointer;"
-                     onmouseover="this.style.background='#f8fafc'"
-                     onmouseout="this.style.background='transparent'">
-                   <!-- ACT ID — click to navigate -->
-                   <td onclick="_tdNavToActivity('${a.id}','${t.id}')">
-                     <span style="font-family:monospace;font-size:10.5px;font-weight:800;
-                                  color:#6366f1;background:#eef2ff;border:1px solid #c7d2fe;
-                                  padding:2px 8px;border-radius:5px;white-space:nowrap;
-                                  cursor:pointer;text-decoration:underline dotted;"
-                           title="Open in Activity screen">
-                       ${a.id}
-                     </span>
-                   </td>
-                   <!-- ACTION NAME -->
-                   <td onclick="_tdNavToActivity('${a.id}','${t.id}')">
-                     <div style="font-size:13px;font-weight:600;color:#1e293b;line-height:1.4;">${a.name}</div>
-                     ${a.obligation ? `<div style="font-size:11px;color:#94a3b8;margin-top:2px;line-height:1.4;max-width:320px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${a.obligation}</div>` : ''}
-                   </td>
-                   <!-- DEPARTMENT -->
-                   <td>
-                     ${a.dept ? `<span style="font-size:10.5px;font-weight:700;padding:2px 9px;border-radius:4px;
-                       background:#e0f2fe;color:#0369a1;border:1px solid #7dd3fc;white-space:nowrap;">${a.dept}</span>` : `<span style="color:#94a3b8;font-size:12px;">—</span>`}
-                   </td>
-                   <!-- ASSIGNED TO -->
-                   <td>
-                     ${a.assignee
-                       ? `<div style="display:flex;align-items:center;gap:7px;">
-                            <span style="width:24px;height:24px;border-radius:50%;background:#eef2ff;color:#4338ca;
-                                         font-size:9px;font-weight:800;display:flex;align-items:center;justify-content:center;
-                                         flex-shrink:0;border:1px solid #c7d2fe;">
-                              ${tdInitials(a.assignee)}
-                            </span>
-                            <span style="font-size:12.5px;font-weight:500;color:#1e293b;">${a.assignee}</span>
-                          </div>`
-                       : `<span style="font-size:12px;color:#94a3b8;font-style:italic;">Unassigned</span>`}
-                   </td>
-                   <!-- DUE DATE -->
-                   <td style="white-space:nowrap;">
-                     ${t.dueDate
-                       ? `<span style="font-size:12px;font-weight:600;color:#475569;">${tdFmtDate(t.dueDate)}</span>`
-                       : `<span style="color:#94a3b8;font-size:12px;">—</span>`}
-                   </td>
-                   <!-- STATUS -->
-                   <td>
-                     <span style="background:${statusBg(a.status)};color:${statusColor(a.status)};
-                                  border:1px solid ${statusColor(a.status)}44;
-                                  padding:3px 10px;border-radius:99px;
-                                  font-size:11px;font-weight:700;white-space:nowrap;">
-                       ${a.status}
-                     </span>
-                   </td>
-                   <!-- PROGRESS BAR -->
-                   <td>
-                     <div style="display:flex;align-items:center;gap:7px;">
-                       <div style="flex:1;height:5px;background:#e2e8f0;border-radius:99px;overflow:hidden;min-width:50px;">
-                         <div style="height:100%;width:${actPct}%;background:${actColor};border-radius:99px;transition:width .4s;"></div>
-                       </div>
-                       <span style="font-size:11px;font-weight:700;color:${actColor};min-width:28px;text-align:right;">${actPct}%</span>
-                     </div>
-                   </td>
-                 </tr>`;
-               }).join('')}
-             </tbody>
-           </table>
-         </div>`
-    }
-
-  </div>`;
-}
-
-/* ── Navigate from Act ID to the assign-activity screen ── */
-window._tdNavToActivity = function(actId, taskId) {
-  if (typeof renderMyItemsActivity === 'function') {
-    renderMyItemsActivity();
-  } else {
-    if (typeof showToast === 'function') showToast(`Navigate to Activity: ${actId}`, 'info');
-  }
-};
-
-
-
-   function tdPaneEvidence(t) {
+function tdPaneEvidence(t) {
   const actions = getActions(t.id);
   const uploadedEvs = actions.flatMap(a => (a.evidence || []).map(ev => ({ ...ev, activityName: t.title })));
 
@@ -1291,7 +1102,7 @@ window._tdNavToActivity = function(actId, taskId) {
                
                  <th>Date</th>
                    <th>AI Score</th>
-                 <th>Compliance Status</th>
+                 <th>Status</th>
                  
                </tr>
              </thead>
@@ -1518,10 +1329,10 @@ window._tdArChange = function (taskId, sel) {
 
 function _tdApplyActionStatus(task, type) {
   const cfg = {
-    'Send for Clarification': { label: ' Sent for Clarification', color: '#854d0e', bg: '#fef9c3', border: '#fde68a', icon: '💬', time: 'just now' },
+    'Send for Clarification': { label: '💬 Sent for Clarification', color: '#854d0e', bg: '#fef9c3', border: '#fde68a', icon: '💬', time: 'just now' },
     'Send for Closure':       { label: '✅ Sent for Closure',       color: '#166534', bg: '#dcfce7', border: '#86efac', icon: '✅', time: 'just now' },
     'Send for Recall':        { label: '🔁 Sent for Recall',        color: '#991b1b', bg: '#fee2e2', border: '#fca5a5', icon: '🔁', time: 'just now' },
-    'Ask for Clarification':  { label: ' Sent for Clarification', color: '#854d0e', bg: '#fef9c3', border: '#fde68a', icon: '💬', time: 'just now' },
+    'Ask for Clarification':  { label: '💬 Sent for Clarification', color: '#854d0e', bg: '#fef9c3', border: '#fde68a', icon: '💬', time: 'just now' },
     'Ask for Closure':        { label: '✅ Sent for Closure',       color: '#166534', bg: '#dcfce7', border: '#86efac', icon: '✅', time: 'just now' },
     'Ask for Recall':         { label: '🔁 Sent for Recall',        color: '#991b1b', bg: '#fee2e2', border: '#fca5a5', icon: '🔁', time: 'just now' },
   };
@@ -1530,36 +1341,6 @@ function _tdApplyActionStatus(task, type) {
   /* update inline badges if visible */
   const badge = document.getElementById(`tdp-obl-action-badge-${task.id}`);
   if (badge) { badge.textContent = task._actionStatus.label; badge.style.color = task._actionStatus.color; }
-// Sync compliance status badge in the parent table row
-const tableStatusCell = (() => {
-  const cell = document.getElementById(`action-cell-${task.id}`);
-  if (!cell) return null;
-  const row = cell.closest('tr');
-  return row ? row.querySelectorAll('td')[4] : null; // index 4 = Compliance Status column
-})();
-if (tableStatusCell) {
-  const newStatus = type.includes('Closure') ? 'Complete' : task.status;
-  const colors = {
-    'Complete':    'background:#dcfce7;color:#15803d;border:1px solid #86efac;',
-    'Overdue':     'background:#fee2e2;color:#dc2626;border:1px solid #fca5a5;',
-    'In Progress': 'background:#dbeafe;color:#1d4ed8;border:1px solid #93c5fd;',
-    'Open':        'background:#f1f5f9;color:#475569;border:1px solid #e2e8f0;',
-  };
-  tableStatusCell.innerHTML = `<span style="display:inline-block;padding:3px 10px;border-radius:99px;font-size:11px;font-weight:700;${colors[newStatus]||colors['Open']}">${newStatus}</span>`;
-// Sync back to my-items table action cell
-const myItemsCell = document.getElementById(`action-cell-${task.id}`);
-if (myItemsCell) {
-  const cfg = task._actionStatus;
-  myItemsCell.innerHTML = `
-    <span style="display:inline-block;padding:3px 10px;border-radius:99px;font-size:11px;font-weight:700;
-      background:${cfg.bg};color:${cfg.color};border:1px solid ${cfg.border};white-space:nowrap;">
-      ${cfg.icon} ${cfg.label}
-    </span>`;
-}
-
-}
-
-
 }
 
 window._tdQuickAction = function(taskId, type) {
@@ -1580,9 +1361,6 @@ window._tdArSubmit = function (taskId) {
   const task = getTasks().find(t => t.id === taskId);
   if (task) _tdApplyActionStatus(task, type);
 
-  if (type === 'Ask for Closure' || type === 'Send for Closure') {
-  task.status = 'Complete';
-}
   if (typeof showToast === 'function') showToast(`"${type}" sent to ${person} ✓`, 'success');
   document.getElementById(`tdp-ar-type-${taskId}`).value = '';
   document.getElementById(`tdp-ar-person-${taskId}`).value = '';

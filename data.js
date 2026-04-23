@@ -10,249 +10,508 @@
 const CMS_DATA = {
 
   circulars: [
+   
+    ///HDFC Document 1
+//     {
+//   "id": "SEBI-MF-2023-117 (HDFC)",
+//   "title": "Roles and Responsibilities of Trustees and Board of Directors of AMCs of Mutual Funds",
+//   "regulator": "SEBI",
+//   "issuedDate": "2023-07-07",
+//   "effectiveDate": "2024-01-01",
+//   "type": "Circular",
+//   "status": "Active",
+//   "libraryStatus": "Assigned",
+//   "docUrl": "./2023-07-07 - Role & Resp of Trustees and AMC directors of a Mutual Fund.pdf",
+//   "departments": ["Compliance", "Risk", "Legal"],
+//   "risk": "High",
+//   "complianceScore": 0,
+//   "summary": "Defines core responsibilities of Trustees and operational mechanisms through UHPC to protect unitholders.",
+  
+//   "chapters": [
+//     {
+//       "num": 4,
+//       "title": "Core Responsibilities of Trustees",
+//       "clauses": [
+//         {
+//           "id": "4.1.1(a)",
+//           "text": "Trustees shall ensure fairness of fees and expenses charged by AMCs.",
+//           "obligations": [
+//             "Ensure fairness of AMC fees and expenses"
+//           ],
+//           "actionables": [
+//             "Review fee structure periodically",
+//             "Benchmark fees with peers"
+//           ],
+//           "department": "Compliance",
+//           "risk": "High",
+//           "status": "Assigned",
+//           "pageNo": 2
+//         },
+//         {
+//           "id": "4.1.2",
+//           "text": "Trustees shall ensure system-level checks to prevent fraud including front running.",
+//           "obligations": [
+//             "Ensure systems prevent fraudulent transactions"
+//           ],
+//           "actionables": [
+//             "Implement fraud detection systems",
+//             "Review alerts periodically"
+//           ],
+//           "department": "Risk",
+//           "risk": "High",
+//           "status": "Assigned",
+//           "pageNo": 2
+//         }
+//       ]
+//     }
+//   ],
+
+//   "annexures": [
+//     {
+//       "id": "Annexure 1",
+//       "title": "Unit Holder Protection Committee",
+//       "clauses": [
+//         {
+//           "id": "1(a)",
+//           "text": "Chairperson of the Committee shall be an independent director.",
+//           "obligations": [
+//             "Ensure UHPC Chairperson is independent"
+//           ],
+//           "actionables": [
+//             "Verify independence criteria",
+//             "Document board approval"
+//           ],
+//           "department": "Compliance",
+//           "risk": "Medium",
+//           "status": "Assigned",
+//           "pageNo": 6
+//         },
+//         {
+//           "id": "2(a)",
+//           "text": "At least four meetings shall be held in a financial year.",
+//           "obligations": [
+//             "Ensure minimum four UHPC meetings annually"
+//           ],
+//           "actionables": [
+//             "Schedule quarterly meetings",
+//             "Track meeting completion"
+//           ],
+//           "department": "Compliance",
+//           "risk": "Medium",
+//           "status": "Assigned",
+//           "pageNo": 6
+//         },
+//         {
+//           "id": "4.1(a)",
+//           "text": "Review of unit holder complaints and grievances periodically.",
+//           "obligations": [
+//             "Ensure periodic review of complaints"
+//           ],
+//           "actionables": [
+//             "Track complaint ageing",
+//             "Perform root cause analysis"
+//           ],
+//           "department": "Compliance",
+//           "risk": "High",
+//           "status": "Assigned",
+//           "pageNo": 6
+//         },
+//         {
+//           "id": "4.3(a)",
+//           "text": "Ensure compliance with applicable laws for complaints and disclosures.",
+//           "obligations": [
+//             "Ensure regulatory compliance in grievance handling"
+//           ],
+//           "actionables": [
+//             "Implement compliance checks",
+//             "Audit complaint processes"
+//           ],
+//           "department": "Compliance",
+//           "risk": "High",
+//           "status": "Assigned",
+//           "pageNo": 7
+//         }
+//       ]
+//     }
+//   ],
+
+//   "amendments": []
+// },'='=
+
+
+{
+  "id": "SEBI-ITD-2025-111",
+  "title": "Rights of Persons with Disabilities Act, 2016 and rules made thereunder - mandatory compliance by all Regulated Entities",
+  "regulator": "SEBI",
+  "issuedDate": "2025-07-31",
+  "effectiveDate": "2025-07-31",
+  "type": "Circular",
+  "status": "Active",
+  "libraryStatus": "Assigned",
+  "docUrl": "./2025-07-31-SEBI Circular on Rights of Persons with Disabilities Act, 2016.pdf",
+  "departments": [
+    "Compliance",
+    "IT",
+  
+    "Customer Service",
+  ],
+  "risk": "High",
+  "complianceScore": 0,
+  "summary": "Mandates all SEBI regulated entities to ensure accessibility of digital platforms for persons with disabilities in line with the RPwD Act, 2016, accessibility standards, annual reporting, accessibility audits and grievance redressal mechanisms.",
+ "applicableEntities": [
+  { "name": "All Recognised Stock Exchanges", "applicable": true },
+  { "name": "All Recognised Clearing Corporations", "applicable": true },
+  { "name": "All Registered Depositories", "applicable": false },
+  { "name": "All Registered Intermediaries", "applicable": false },
+  { "name": "Association of Mutual Funds in India (AMFI)", "applicable": true },
+  { "name": "Association of Portfolio Managers in India (APMI)", "applicable": false },
+  { "name": "BSE Administration & Supervision Limited (BASL)", "applicable": false }
+],
+  "chapters": [
     {
-      "id": "RBI-HF-2024-001",
-      "title": "Master Circular on Housing Finance",
-      "regulator": "RBI",
-      "issuedDate": "2024-04-02",
-      "effectiveDate": "2024-04-02",
-      "dueDate": "2024-12-31",
-      "type": "Master",
-      "status": "Active",
-      "libraryStatus": "Reviewed & Applicable",
-      "docUrl": "./RBI Master Circular.pdf",
-      "departments": ["Credit", "Risk", "Operations"],
+  "num": 1,
+  "title": "Purpose and Applicability",
+  "clauses": [
+    {
+      "id": "1",
+      "text": "To protect the rights and dignity of persons with disabilities and ensure their full and effective participation in securities market, it is necessary to provide for their access to Digital Platforms of SEBI Regulated Entities.",
+      "obligations": [],
+      "actionables": [],
+      "department": "Compliance",
       "risk": "High",
-      "complianceScore": 70,
-      "summary": "The Master Circular on Housing Finance consolidates RBI guidelines for banks on housing loans.",
-      "chapters": [
+      "status": "Assigned",
+      "pageNo": 1,
+      "internalNotes": ""
+    },
+    {
+      "id": "2",
+      "text": "For the purpose of this Circular, the term “Regulated Entity or RE” shall refer to SEBI registered/ recognised intermediaries (for example stockbrokers, mutual funds, KYC Registration Agencies, QRTAs, etc.) and Market Infrastructure Institutions (Stock Exchanges, Depositories and Clearing Corporations) regulated by SEBI.",
+      "obligations": [],
+      "actionables": [],
+      "department": "Compliance",
+      "risk": "Medium",
+      "status": "Assigned",
+      "pageNo": 1,
+      "internalNotes": ""
+    }
+  ]
+},
+    {
+      "num": 2,
+      "title": "Accessibility Compliance Requirements",
+      "clauses": [
         {
-          "num": 2,
-          "title": "Housing Loan Regulations",
-          "clauses": [
-            {
-              "id": "C2.1",
-              "text": "Banks may grant loans for purchase, construction, repair, and improvement of housing units.",
-              "obligations": [
-                "Ensure loans are sanctioned only for eligible housing purposes.",
-                "Ensure internal policy clearly defines permissible loan categories.",
-                "Ensure end-use of funds aligns with approved housing purpose."
-              ],
-              "actionables": [
-                "Define eligible housing loan categories in credit policy.",
-                "Implement purpose validation in loan origination system (LOS).",
-                "Conduct post-disbursement end-use verification."
-              ],
-              "department": "Credit",
-              "risk": "High",
-              "status": "Assigned",
-              "pageNo": 4
-            },
-            {
-              "id": "C2.2",
-              "text": "Loans shall not be granted for speculative real estate activities or unauthorized constructions.",
-              "obligations": [
-                "Restrict financing to authorized and legally compliant properties.",
-                "Ensure no exposure to speculative real estate activities.",
-                "Ensure property approvals and legal clearances are verified."
-              ],
-              "actionables": [
-                "Perform legal due diligence including title verification.",
-                "Verify sanctioned building plans and approvals.",
-                "Implement negative list for speculative projects."
-              ],
-              "department": "Risk",
-              "risk": "High",
-              "status": "Assigned"
-            },
-            {
-              "id": "C2.3",
-              "text": "Banks must ensure borrower compliance with sanctioned plans and obtain necessary certificates.",
-              "obligations": [
-                "Ensure sanctioned building plan is obtained before loan approval.",
-                "Obtain borrower undertaking for adherence to sanctioned plan.",
-                "Ensure architect certification during construction stages.",
-                "Ensure completion certificate is obtained post construction."
-              ],
-              "actionables": [
-                "Include sanctioned plan in documentation checklist.",
-                "Collect borrower affidavit for compliance.",
-                "Empanel architects for stage-wise certification.",
-                "Track and obtain completion certificate within defined timeline."
-              ],
-              "department": "Operations",
-              "risk": "Medium",
-              "status": "Unassigned"
-            }
+          "id": "3(a)",
+          "text": "All Digital Platforms of REs shall be compliant with Section 40 of RPwD Act, 2016 relating to Accessibility.",
+          "obligations": [
+            "Ensure all digital platforms comply with accessibility standards under RPwD Act"
           ],
-          "sections": [
-            {
-              "id": "Section 1",
-              "text": "Eligible Housing Finance Activities",
-              "clauses": ["C2.1"]
-            },
-            {
-              "id": "Section 2",
-              "text": "Restrictions and Compliance",
-              "clauses": ["C2.2", "C2.3"]
-            }
-          ]
+          "actionables": [
+            "Identify all digital platforms such as website, mobile app, investor portal and WhatsApp-based servicing",
+            "Review whether distributor platforms such as Groww, PhonePe and Upstox are covered",
+            "Map all digital channels against Section 40 accessibility requirements"
+          ],
+          "department": "Digital",
+          "risk": "High",
+          "status": "Assigned",
+          "pageNo": 2,
+          "assignee":"Meera Phillai",
+          "internalNotes": "AMC should identify all investor-facing digital channels including websites, mobile apps, WhatsApp servicing and distributor journeys."
         },
         {
-          "num": 3,
-          "title": "Loan Exposure and Risk Management",
-          "clauses": [
-            {
-              "id": "C3.1",
-              "text": "Banks must adhere to prescribed Loan-to-Value (LTV) ratios and risk weights.",
-              "obligations": [
-                "Ensure LTV ratios are within RBI prescribed limits.",
-                "Ensure risk weights are applied as per regulatory norms.",
-                "Ensure property valuation excludes ineligible components."
-              ],
-              "actionables": [
-                "Configure LOS to auto-calculate LTV.",
-                "Implement system validation to restrict breaches.",
-                "Update valuation policy excluding stamp duty where applicable."
-              ],
-              "department": "Risk",
-              "risk": "High",
-              "status": "Unassigned"
-            },
-            {
-              "id": "C3.2",
-              "text": "Banks must frame board-approved policies on real estate exposure limits.",
-              "obligations": [
-                "Establish board-approved exposure limits for housing sector.",
-                "Ensure periodic review of exposure policies.",
-                "Ensure compliance with prudential norms."
-              ],
-              "actionables": [
-                "Draft exposure policy and present to Board.",
-                "Set exposure thresholds in risk systems.",
-                "Conduct periodic policy review and update."
-              ],
-              "department": "Risk",
-              "risk": "High",
-              "status": "Unassigned"
-            }
-          ]
+          "id": "3(b)",
+          "text": "All Digital Platforms of REs shall be compliant with Section 42 of RPwD Act, 2016 relating to access to information and communication technology.",
+          "obligations": [
+            "Provide accessible information and communication technology to persons with disabilities"
+          ],
+          "actionables": [
+            "Ensure content is available in accessible formats",
+            "Provide sign language interpretation, audio description and closed captioning",
+            "Review all website and mobile content for hearing and visual accessibility"
+          ],
+          "department": "IT",
+          "risk": "High",
+          "status": "Assigned",
+          "pageNo": 2,
+          "internalNotes": "All AMC content should be made accessible for hearing impairment, visual impairment and other disabilities."
         },
         {
-          "num": 4,
-          "title": "Disbursement and Product Guidelines",
-          "clauses": [
-            {
-              "id": "C4.1",
-              "text": "Loan disbursement must be linked to stages of construction.",
-              "obligations": [
-                "Ensure disbursement is linked to construction progress.",
-                "Avoid upfront disbursement in under-construction projects.",
-                "Ensure inspection before each disbursement."
-              ],
-              "actionables": [
-                "Define stage-wise disbursement matrix.",
-                "Link disbursement to inspection approval.",
-                "Restrict bulk disbursement in LOS."
-              ],
-              "department": "Operations",
-              "risk": "High",
-              "status": "Assigned"
-            },
-            {
-              "id": "C4.2",
-              "text": "Banks must ensure customers are informed of risks in innovative loan products.",
-              "obligations": [
-                "Ensure transparency in loan product features.",
-                "Ensure customers are informed of associated risks.",
-                "Ensure suitability of loan products for borrowers."
-              ],
-              "actionables": [
-                "Update product disclosure documents.",
-                "Implement customer acknowledgment process.",
-                "Train staff on product suitability assessment."
-              ],
-              "department": "Compliance",
-              "risk": "Medium",
-              "status": "Assigned"
-            }
-          ]
-        },
-        {
-          "num": 5,
-          "title": "Regulatory Compliance and Fair Practices",
-          "clauses": [
-            {
-              "id": "C5.1",
-              "text": "Banks must comply with RBI directions on interest rates and EMI reset.",
-              "obligations": [
-                "Ensure compliance with RBI interest rate guidelines.",
-                "Ensure proper implementation of EMI reset norms.",
-                "Ensure transparency in interest rate changes."
-              ],
-              "actionables": [
-                "Align loan systems with RBI rate guidelines.",
-                "Automate EMI reset calculations.",
-                "Notify customers of rate changes."
-              ],
-              "department": "Finance",
-              "risk": "Medium",
-              "status": "Assigned"
-            },
-            {
-              "id": "C5.2",
-              "text": "Disclosure of mortgage details by builders must be ensured.",
-              "obligations": [
-                "Ensure builder discloses mortgage details to buyers.",
-                "Ensure disclosure in project marketing materials.",
-                "Restrict funding where disclosure is absent."
-              ],
-              "actionables": [
-                "Include disclosure clause in agreements.",
-                "Verify builder disclosures before disbursement.",
-                "Maintain disclosure records."
-              ],
-              "department": "Legal",
-              "risk": "Medium",
-              "status": "Assigned"
-            },
-            {
-              "id": "C5.3",
-              "text": "Banks must follow fair lending practices including penal charges and document release.",
-              "obligations": [
-                "Ensure compliance with RBI fair lending guidelines.",
-                "Ensure transparency in penal charges.",
-                "Ensure timely release of property documents.",
-                "Ensure customer protection standards are followed."
-              ],
-              "actionables": [
-                "Update fair lending policy.",
-                "Disclose penal charges clearly.",
-                "Define document release timelines.",
-                "Monitor customer complaints and grievances."
-              ],
-              "department": "Compliance",
-              "risk": "High",
-              "status": "Assigned"
-            }
-          ]
-        }
-      ],
-      "amendments": [
-        {
-          "date": "2023-08-18",
-          "version": "1.1",
-          "description": "Guidelines on penal charges and EMI reset incorporated."
-        },
-        {
-          "date": "2023-09-13",
-          "version": "1.2",
-          "description": "Responsible lending conduct guidelines added."
+          "id": "3(d)",
+          "text": "All Digital Platforms of REs shall be compliant with Rule 15(1)(c) of the Rights of Persons with Disabilities Rules, 2017.",
+          "obligations": [
+            "Ensure websites and uploaded documents comply with accessibility standards"
+          ],
+          "actionables": [
+            "Ensure website follows Government website accessibility guidelines",
+            "Publish documents in OCR-based PDF or ePUB format",
+            "Review all uploaded documents for accessibility before publishing"
+          ],
+          "department": "Legal",
+          "risk": "High",
+          "status": "Assigned",
+          "pageNo": 2,
+          "internalNotes": "All uploaded documents should be in OCR PDF or ePUB format and comply with Government website accessibility standards."
         }
       ]
     },
-    ///HDFC Document 1
     {
+      "num": 3,
+      "title": "Implementation Timelines and Reporting",
+      "clauses": [
+        {
+          "id": "5(1)",
+          "text": "Within 1 month of the issuance of circular, REs shall submit a list of digital platforms provided by them for the investors and submit a compliance/action taken report.",
+          "obligations": [
+            "Submit digital platform inventory",
+            "Submit compliance report within one month"
+          ],
+          "actionables": [
+            "Prepare list of all digital platforms provided to investors",
+            "Submit compliance report for each clause of the circular",
+            "Complete filing by August 31, 2025"
+          ],
+          "department": "Compliance",
+          "risk": "High",
+          "status": "Assigned",
+          "pageNo": 2,
+          "dueDate": "2025-08-31"
+        },
+        {
+          "id": "5(2)",
+          "text": "Within 45 days of the issuance of circular, REs shall appoint IAAP certified accessibility professionals as Auditor.",
+          "obligations": [
+            "Appoint IAAP certified accessibility auditor"
+          ],
+          "actionables": [
+            "Identify IAAP certified auditor",
+            "Complete appointment by September 14, 2025",
+            "Track readiness and compliance status for each digital platform"
+          ],
+          "department": "Compliance",
+          "risk": "High",
+          "status": "Assigned",
+          "pageNo": 2,
+          "dueDate": "2025-09-14"
+        },
+        {
+          "id": "5(3)",
+          "text": "Within 3 month of issuance of the circular, REs shall conduct Accessibility Audit for the digital platforms.",
+          "obligations": [
+            "Conduct accessibility audit for all digital platforms"
+          ],
+          "actionables": [
+            "Audit websites, mobile apps and portals",
+            "Include usability testing by persons with disabilities",
+            "Complete accessibility audit by October 31, 2025"
+          ],
+          "department": "IT",
+          "risk": "High",
+          "status": "Assigned",
+          "pageNo": 2,
+          "dueDate": "2025-10-31"
+        },
+        {
+          "id": "5(4)",
+          "text": "Within 6 months of issuance of circular, REs shall remediate findings from the audit and ensure compliance with this circular.",
+          "obligations": [
+            "Remediate audit findings and achieve compliance"
+          ],
+          "actionables": [
+            "Prepare remediation plan",
+            "Close all audit findings",
+            "Complete remediation by January 31, 2026"
+          ],
+          "department": "IT",
+          "risk": "High",
+          "status": "Assigned",
+          "pageNo": 2,
+          "dueDate": "2026-01-31"
+        }
+      ]
+    }
+  ],
+  "annexures":[
+    {
+  "id": "Annexure I",
+  "title": "Directions on Digital Accessibility for Persons with Disabilities",
+  "clauses": [
+    {
+
+    },
+    {
+      "id": "B.1",
+      "text": "All REs shall ensure that their Digital Platforms and content published on the digital platform shall strictly adhere to the accessibility standards and guidelines, including WCAG 2.1 or latest version.",
+      "obligations": [
+        "Ensure compliance with WCAG accessibility standards across all digital platforms"
+      ],
+      "actionables": [
+        "Review websites, portals and mobile applications against WCAG 2.1",
+        "Document gaps and remediation requirements",
+        "Ensure future releases are compliant with latest WCAG standards"
+      ],
+      "department": "Digital",
+      "risk": "High",
+      "status": "Assigned",
+      "pageNo": 4,
+      "internalNotes": "Digital Team should identify all requirements under WCAG 2.1 and ensure compliance."
+    },
+    {
+      "id": "B.2",
+      "text": "All REs shall ensure that their Digital Platforms and content published on the digital platform shall strictly adhere to accessibility guidelines as described in the latest version of Guidelines for Indian Government Websites (GIGW).",
+      "obligations": [
+        "Ensure websites comply with GIGW accessibility standards"
+      ],
+      "actionables": [
+        "Map current website design against GIGW requirements",
+        "Implement changes for non-compliant website features"
+      ],
+      "department": "Digital",
+      "risk": "High",
+      "status": "Assigned",
+      "pageNo": 4,
+      "internalNotes": "AMC website should comply with Indian Government website accessibility standards."
+    },
+    {
+      "id": "B.3",
+      "text": "All REs shall ensure that their Digital Platforms and content published on the digital platform shall strictly adhere to IS 17802: Indian Standards on Accessibility Requirements for ICT Products and Services.",
+      "obligations": [
+        "Ensure ICT systems comply with IS 17802 accessibility requirements"
+      ],
+      "actionables": [
+        "Review technology stack for IS 17802 compliance",
+        "Validate accessibility of ICT products and services"
+      ],
+      "department": "IT",
+      "risk": "Medium",
+      "status": "Assigned",
+      "pageNo": 4,
+      "internalNotes": "Technology team should review all ICT products against IS 17802 requirements."
+    },
+    {
+      "id": "1.2",
+      "text": "The major roles and responsibilities of the Nodal Officer shall be to ensure digital accessibility for every investor by ensuring that activities, including but not limited to conducting accessibility audits, mitigation of accessibility audit findings, implementation of accessibility guidelines, and timely redressal of grievance.",
+      "obligations": [
+        "Ensure Nodal Officer drives digital accessibility compliance"
+      ],
+      "actionables": [
+        "Define responsibilities of Nodal Officer",
+        "Assign reporting and grievance monitoring responsibilities",
+        "Ensure Nodal Officer acts as contact point for SEBI"
+      ],
+      "department": "Compliance",
+      "risk": "High",
+      "status": "Assigned",
+      "pageNo": 5,
+      "internalNotes": "Harish to act as Nodal Officer and coordinate audit, remediation and SEBI reporting."
+    },
+    {
+      "id": "1.3",
+      "text": "A grievance redressal mechanism specific to accessibility issues shall be institutionalized within the REs.",
+      "obligations": [
+        "Implement grievance redressal process for accessibility-related complaints"
+      ],
+      "actionables": [
+        "Provide dedicated email, helpline and web form for PwD grievances",
+        "Implement escalation matrix to senior officers",
+        "Track and close accessibility complaints"
+      ],
+      "department": "Customer Service",
+      "risk": "High",
+      "status": "Assigned",
+      "pageNo": 5,
+      "internalNotes": "Existing investor support channels should be enhanced to support PwD accessibility grievances."
+    },
+    {
+      "id": "2.2",
+      "text": "All circulars, notices, and investor documents published on the Digital Platforms of the REs in PDF or other formats must follow accessible document standards.",
+      "obligations": [
+        "Ensure all investor documents follow accessibility standards"
+      ],
+      "actionables": [
+        "Publish tagged PDFs with logical reading order",
+        "Ensure proper headings and alt text",
+        "Review all uploaded investor documents for accessibility before publication"
+      ],
+      "department": "Legal",
+      "risk": "High",
+      "status": "Assigned",
+      "pageNo": 5,
+      "internalNotes": "All PDF, Word and Excel documents uploaded on AMC website should comply with accessible document standards."
+    },
+    {
+      "id": "3.1",
+      "text": "Training modules that give detailed understanding on digital accessibility shall be part of all internal training programs for staff and third-party service providers.",
+      "obligations": [
+        "Conduct digital accessibility awareness and training programs"
+      ],
+      "actionables": [
+        "Train internal teams on accessible document creation",
+        "Provide awareness sessions to third-party service providers",
+        "Include behavioural training and assistive tools in learning modules"
+      ],
+      "department": "HR",
+      "risk": "Medium",
+      "status": "Assigned",
+      "pageNo": 6,
+      "internalNotes": "Sandip should conduct training sessions for departments responsible for website uploads and digital content."
+    },
+    {
+      "id": "4.2",
+      "text": "KYC and client registration forms shall include a mandatory field to indicate disability status and options to select specific provisions such as helpdesk call back for assistance.",
+      "obligations": [
+        "Capture disability status and assistance requirements in registration journeys"
+      ],
+      "actionables": [
+        "Update KYC forms to include disability-related fields",
+        "Add callback assistance options",
+        "Ensure manual review of PwD application rejections"
+      ],
+      "department": "Operations",
+      "risk": "High",
+      "status": "Assigned",
+      "pageNo": 6,
+      "internalNotes": "PwD-related application rejections should be manually reviewed by a designated officer."
+    },
+    {
+      "id": "5.4",
+      "text": "All REs shall conduct annual accessibility audits of their digital platforms including websites, mobile apps, portals through IAAP certified accessibility professionals.",
+      "obligations": [
+        "Conduct annual accessibility audits"
+      ],
+      "actionables": [
+        "Schedule yearly audits by IAAP certified professionals",
+        "Submit annual audit reports to reporting authority",
+        "Track remediation of recurring findings"
+      ],
+      "department": "IT",
+      "risk": "High",
+      "status": "Assigned",
+      "pageNo": 7,
+      "internalNotes": "Annual accessibility audits should be built into recurring compliance calendar."
+    },
+    {
+      "id": "6.2",
+      "text": "Accessibility requirements shall be part of all Request for Proposals (RFPs) and procurement contracts of the REs and evaluation criteria of the REs shall assign due weightage to accessibility readiness.",
+      "obligations": [
+        "Include accessibility clauses in procurement and vendor contracts"
+      ],
+      "actionables": [
+        "Update RFP templates",
+        "Insert accessibility clauses in legal agreements",
+        "Evaluate vendors for accessibility readiness"
+      ],
+      "department": "Procurement",
+      "risk": "Medium",
+      "status": "Assigned",
+      "pageNo": 7,
+      "internalNotes": "Procurement and Legal teams should update all vendor agreements and RFP templates."
+    }
+  ]
+}
+  ]
+},
+
+{
   "id": "SEBI-MF-2023-117",
   "title": "Roles and Responsibilities of Trustees and Board of Directors of AMCs of Mutual Funds",
   "regulator": "SEBI",
@@ -265,8 +524,13 @@ const CMS_DATA = {
   "departments": ["Compliance", "Risk", "Legal"],
   "risk": "High",
   "complianceScore": 0,
-  "summary": "Defines core responsibilities of Trustees and operational mechanisms through UHPC to protect unitholders.",
-  
+  "sebiEntities": [
+  "Mutual Funds",
+  "Asset Management Companies",
+  "Trustee Companies / Board of Trustees of Mutual Funds",
+  "Association of Mutual Funds in India"
+],
+  "summary": "Defines core responsibilities of Trustees, Board of Directors of AMCs and operational mechanisms through UHPC to protect unitholders.",
   "chapters": [
     {
       "num": 4,
@@ -274,13 +538,14 @@ const CMS_DATA = {
       "clauses": [
         {
           "id": "4.1.1(a)",
-          "text": "Trustees shall ensure fairness of fees and expenses charged by AMCs.",
+          "text": "The Trustees shall ensure the fairness of the fees and expenses charged by the AMCs.",
           "obligations": [
             "Ensure fairness of AMC fees and expenses"
           ],
           "actionables": [
             "Review fee structure periodically",
-            "Benchmark fees with peers"
+            "Benchmark fees and expenses with peers",
+            "Document rationale for fee approvals"
           ],
           "department": "Compliance",
           "risk": "High",
@@ -288,24 +553,267 @@ const CMS_DATA = {
           "pageNo": 2
         },
         {
-          "id": "4.1.2",
-          "text": "Trustees shall ensure system-level checks to prevent fraud including front running.",
+          "id": "4.1.1(b)",
+          "text": "The Trustees shall review the performance of AMC in its schemes vis-a-vis performance of peers or the appropriate benchmarks.",
           "obligations": [
-            "Ensure systems prevent fraudulent transactions"
+            "Review AMC scheme performance against peers and benchmarks"
           ],
           "actionables": [
-            "Implement fraud detection systems",
-            "Review alerts periodically"
+            "Perform periodic benchmarking of schemes",
+            "Review underperforming schemes",
+            "Escalate persistent underperformance to the board"
+          ],
+          "department": "Risk",
+          "risk": "Medium",
+          "status": "Assigned",
+          "pageNo": 2
+        },
+        {
+          "id": "4.1.1(c)",
+          "text": "The Trustees shall ensure that the AMCs have put in place adequate systems to prevent mis-selling to increase assets under their management and valuation of the AMCs.",
+          "obligations": [
+            "Ensure systems exist to prevent mis-selling practices"
+          ],
+          "actionables": [
+            "Implement mis-selling detection controls",
+            "Review distributor sales practices",
+            "Monitor investor complaints related to mis-selling"
+          ],
+          "department": "Compliance",
+          "risk": "High",
+          "status": "Assigned",
+          "pageNo": 2
+        },
+        {
+          "id": "4.1.1(d)",
+          "text": "The Trustees shall ensure that operations of AMCs are not unduly influenced by the AMCs Sponsor, its associates and other stakeholders of AMCs.",
+          "obligations": [
+            "Ensure AMC operations remain independent from sponsor influence"
+          ],
+          "actionables": [
+            "Review governance arrangements",
+            "Identify sponsor influence risks",
+            "Document conflict management measures"
+          ],
+          "department": "Legal",
+          "risk": "High",
+          "status": "Assigned",
+          "pageNo": 2
+        },
+        {
+          "id": "4.1.1(e)",
+          "text": "The Trustees shall ensure that undue or unfair advantage is not given by AMCs to any of their associates/group entities.",
+          "obligations": [
+            "Ensure no undue benefit is provided to group entities or associates"
+          ],
+          "actionables": [
+            "Review related party transactions",
+            "Monitor preferential treatment to associates",
+            "Maintain audit trail of approvals"
+          ],
+          "department": "Compliance",
+          "risk": "High",
+          "status": "Assigned",
+          "pageNo": 2
+        },
+        {
+          "id": "4.1.1(f)",
+          "text": "The Trustees shall be responsible to address conflicts of interest, if any, between the shareholders/stakeholders/associates of the AMCs and unitholders.",
+          "obligations": [
+            "Address conflicts of interest between AMC stakeholders and unitholders"
+          ],
+          "actionables": [
+            "Establish conflict of interest policy",
+            "Review conflict disclosures periodically",
+            "Escalate material conflicts to Trustees"
+          ],
+          "department": "Legal",
+          "risk": "High",
+          "status": "Assigned",
+          "pageNo": 2
+        },
+        {
+          "id": "4.1.1(g)",
+          "text": "The Trustees shall ensure that the AMC has put in place adequate systems to prevent misconduct including market abuse/misuse of information by the employees, AMC and connected entities of the AMCs.",
+          "obligations": [
+            "Ensure systems prevent market abuse and misuse of information"
+          ],
+          "actionables": [
+            "Implement insider trading controls",
+            "Monitor employee dealing activities",
+            "Conduct periodic compliance surveillance"
           ],
           "department": "Risk",
           "risk": "High",
           "status": "Assigned",
           "pageNo": 2
+        },
+        {
+          "id": "4.1.2",
+          "text": "The Trustees shall take steps to ensure that there are system level checks in place at AMCs’ end to prevent fraudulent transactions including front running by employees, form splitting/ mis-selling by distributors etc. The Trustees shall review such checks periodically.",
+          "obligations": [
+            "Ensure systems prevent fraudulent transactions including front running",
+            "Ensure periodic review of fraud prevention controls"
+          ],
+          "actionables": [
+            "Implement fraud detection systems",
+            "Review surveillance alerts periodically",
+            "Monitor front running and form splitting incidents"
+          ],
+          "department": "Risk",
+          "risk": "High",
+          "status": "Assigned",
+          "pageNo": 2
+        },
+        {
+          "id": "4.1.3",
+          "text": "The Trustees and their resource persons shall independently evaluate the extent of compliance by AMCs vis-à-vis the identified key areas and not merely rely on AMCs’ submissions /external assurances.",
+          "obligations": [
+            "Conduct independent evaluation of AMC compliance"
+          ],
+          "actionables": [
+            "Perform independent compliance testing",
+            "Review evidence beyond AMC submissions",
+            "Document independent observations"
+          ],
+          "department": "Compliance",
+          "risk": "High",
+          "status": "Assigned",
+          "pageNo": 2
+        },
+        {
+          "id": "4.1.8",
+          "text": "The Trustees shall periodically review the steps taken by AMCs for folios which do not contain all the Know Your Client (KYC) attributes / updated KYC attributes and ensure that the AMCs take remedial steps necessary for updating the KYC attributes especially pertaining to bank details, PAN, mobile phone number.",
+          "obligations": [
+            "Ensure folios contain complete and updated KYC attributes"
+          ],
+          "actionables": [
+            "Review incomplete KYC cases periodically",
+            "Track remediation of missing KYC attributes",
+            "Prioritise updates for PAN, bank details and mobile number"
+          ],
+          "department": "Compliance",
+          "risk": "Medium",
+          "status": "Assigned",
+          "pageNo": 3
+        }
+      ]
+    },
+    {
+      "num": 4.2,
+      "title": "Third Party Assurances",
+      "clauses": [
+        {
+          "id": "4.2.1(a)",
+          "text": "Overseeing that AMCs manage the operations of Mutual Fund schemes independently from other activities.",
+          "obligations": [
+            "Ensure AMC scheme operations remain independent from other business activities"
+          ],
+          "actionables": [
+            "Review segregation of scheme operations",
+            "Assess conflicts with non-mutual fund activities",
+            "Obtain assurance from third party fiduciaries"
+          ],
+          "department": "Compliance",
+          "risk": "Medium",
+          "status": "Assigned",
+          "pageNo": 3
+        },
+        {
+          "id": "4.2.1(c)",
+          "text": "Reviewing the networth of the AMC on a periodic basis to ensure compliance with prescribed threshold.",
+          "obligations": [
+            "Ensure AMC net worth complies with prescribed threshold"
+          ],
+          "actionables": [
+            "Review AMC financial statements periodically",
+            "Track net worth levels against regulatory threshold",
+            "Escalate shortfalls immediately"
+          ],
+          "department": "Risk",
+          "risk": "High",
+          "status": "Assigned",
+          "pageNo": 3
+        }
+      ]
+    },
+    {
+      "num": 4.3,
+      "title": "Unit Holder Protection Committee",
+      "clauses": [
+        {
+          "id": "4.3.2(a)",
+          "text": "Protection of interest of unit holders of Mutual Fund schemes vis-a-vis all products and services provided by the AMC.",
+          "obligations": [
+            "Ensure protection of unit holder interests across AMC products and services"
+          ],
+          "actionables": [
+            "Review investor impact of products and services",
+            "Escalate issues affecting unitholders",
+            "Monitor investor complaints and feedback"
+          ],
+          "department": "Compliance",
+          "risk": "High",
+          "status": "Assigned",
+          "pageNo": 4
+        },
+        {
+          "id": "4.3.2(b)",
+          "text": "Ensuring adoption of sound and healthy market practices in terms of investments, sales, marketing, advertisement, management of conflict of interests, redressal of unit holder’s grievances, investor awareness.",
+          "obligations": [
+            "Ensure adoption of fair market and investor protection practices"
+          ],
+          "actionables": [
+            "Review sales and marketing practices",
+            "Assess grievance redressal processes",
+            "Monitor conflict of interest controls"
+          ],
+          "department": "Compliance",
+          "risk": "High",
+          "status": "Assigned",
+          "pageNo": 4
+        },
+        {
+          "id": "4.3.2(c)",
+          "text": "Compliance with laws and regulations and other related processes with specific reference to operation of the Mutual Fund business.",
+          "obligations": [
+            "Ensure compliance with laws and regulations applicable to mutual fund business"
+          ],
+          "actionables": [
+            "Perform regulatory compliance reviews",
+            "Track non-compliance incidents",
+            "Implement corrective actions for breaches"
+          ],
+          "department": "Compliance",
+          "risk": "High",
+          "status": "Assigned",
+          "pageNo": 4
+        }
+      ]
+    },
+    {
+      "num": 5,
+      "title": "Meetings between the Trustee Company and the AMC",
+      "clauses": [
+        {
+          "id": "4.5.2",
+          "text": "The board of directors of the AMCs and the board of directors of the Trustee Company shall meet at least once a year to discuss the issues concerning the Mutual Fund, if any, and future course of action, wherever required.",
+          "obligations": [
+            "Ensure annual meeting between AMC board and Trustee Company board"
+          ],
+          "actionables": [
+            "Schedule annual joint board meeting",
+            "Document issues discussed and actions agreed",
+            "Track follow-up items from meeting"
+          ],
+          "department": "Compliance",
+          "risk": "Medium",
+          "status": "Assigned",
+          "pageNo": 5
         }
       ]
     }
   ],
-
   "annexures": [
     {
       "id": "Annexure 1",
@@ -313,13 +821,30 @@ const CMS_DATA = {
       "clauses": [
         {
           "id": "1(a)",
-          "text": "Chairperson of the Committee shall be an independent director.",
+          "text": "The Chairperson of the Committee shall be an independent director.",
           "obligations": [
-            "Ensure UHPC Chairperson is independent"
+            "Ensure UHPC Chairperson is an independent director"
           ],
           "actionables": [
             "Verify independence criteria",
-            "Document board approval"
+            "Document board approval",
+            "Review composition periodically"
+          ],
+          "department": "Compliance",
+          "risk": "Medium",
+          "status": "Assigned",
+          "pageNo": 6
+        },
+        {
+          "id": "1(b)",
+          "text": "The UHPC of AMC shall have minimum three directors as members.",
+          "obligations": [
+            "Ensure UHPC has minimum three directors"
+          ],
+          "actionables": [
+            "Verify committee composition",
+            "Maintain updated membership records",
+            "Escalate vacancies promptly"
           ],
           "department": "Compliance",
           "risk": "Medium",
@@ -328,13 +853,14 @@ const CMS_DATA = {
         },
         {
           "id": "2(a)",
-          "text": "At least four meetings shall be held in a financial year.",
+          "text": "The Chairperson of the UHPC shall call the meeting as and when required. However, at least four meetings shall be held in a financial year.",
           "obligations": [
             "Ensure minimum four UHPC meetings annually"
           ],
           "actionables": [
             "Schedule quarterly meetings",
-            "Track meeting completion"
+            "Track meeting completion",
+            "Maintain meeting calendar"
           ],
           "department": "Compliance",
           "risk": "Medium",
@@ -343,13 +869,30 @@ const CMS_DATA = {
         },
         {
           "id": "4.1(a)",
-          "text": "Review of unit holder complaints and grievances periodically.",
+          "text": "Review of unit holder complaints and grievances with ageing of outstanding complaints on a periodical basis.",
           "obligations": [
-            "Ensure periodic review of complaints"
+            "Ensure periodic review of complaints and ageing"
           ],
           "actionables": [
             "Track complaint ageing",
-            "Perform root cause analysis"
+            "Review pending complaints periodically",
+            "Escalate long outstanding grievances"
+          ],
+          "department": "Compliance",
+          "risk": "High",
+          "status": "Assigned",
+          "pageNo": 6
+        },
+        {
+          "id": "4.1(b)",
+          "text": "Review of complaints / grievances handling mechanism including reported instances of mis-selling and frauds, if any. Analyse the root cause of investor complaints, identify market conduct issues and advise the management appropriately about rectifying systemic issues, if any.",
+          "obligations": [
+            "Ensure effective grievance handling and root cause analysis"
+          ],
+          "actionables": [
+            "Review complaint handling mechanism",
+            "Analyse root causes of complaints",
+            "Recommend rectification of systemic issues"
           ],
           "department": "Compliance",
           "risk": "High",
@@ -358,75 +901,128 @@ const CMS_DATA = {
         },
         {
           "id": "4.3(a)",
-          "text": "Ensure compliance with applicable laws for complaints and disclosures.",
+          "text": "Ensure that the AMC adopts a standard operating procedure for its processes including timeframe for processing and confirmation of financial and non-financial transactions, treats unit holders fairly and equally and there is no preferential treatment given to different classes of investors.",
           "obligations": [
-            "Ensure regulatory compliance in grievance handling"
+            "Ensure fair treatment of all unit holders",
+            "Ensure standard operating procedures are established"
           ],
           "actionables": [
-            "Implement compliance checks",
-            "Audit complaint processes"
+            "Implement SOPs for investor servicing",
+            "Review turnaround times for transactions",
+            "Monitor preferential treatment risks"
           ],
           "department": "Compliance",
           "risk": "High",
           "status": "Assigned",
           "pageNo": 7
+        },
+        {
+          "id": "4.3(b)",
+          "text": "Ensure compliances with applicable laws with respect to resolving, reporting and disclosures of complaints and grievances.",
+          "obligations": [
+            "Ensure regulatory compliance in complaint resolution and disclosures"
+          ],
+          "actionables": [
+            "Implement compliance checks",
+            "Audit complaint reporting processes",
+            "Monitor grievance disclosure timelines"
+          ],
+          "department": "Compliance",
+          "risk": "High",
+          "status": "Assigned",
+          "pageNo": 7
+        },
+        {
+          "id": "4.3(j)",
+          "text": "Ensure that all conflicts are adequately managed and/or disclosed as per the conflict-of-interest policy.",
+          "obligations": [
+            "Ensure conflicts are managed and disclosed appropriately"
+          ],
+          "actionables": [
+            "Review conflict disclosures periodically",
+            "Monitor compliance with conflict-of-interest policy",
+            "Escalate material conflict breaches"
+          ],
+          "department": "Legal",
+          "risk": "High",
+          "status": "Assigned",
+          "pageNo": 7
+        },
+        {
+          "id": "4.4(a)",
+          "text": "Ensure that the AMC has approved internal policy for measurement of various parameters through appropriate UP metrics.",
+          "obligations": [
+            "Ensure AMC has approved policy for UP metrics"
+          ],
+          "actionables": [
+            "Define UP metrics and benchmarks",
+            "Obtain committee approval for metrics",
+            "Review investor impact indicators periodically"
+          ],
+          "department": "Risk",
+          "risk": "Medium",
+          "status": "Assigned",
+          "pageNo": 8
+        },
+        {
+          "id": "4.4(c)",
+          "text": "Review the reports generated with respect to the UP metrics at least once in a half year.",
+          "obligations": [
+            "Ensure half-yearly review of UP metrics reports"
+          ],
+          "actionables": [
+            "Schedule half-yearly UP metric review meetings",
+            "Analyse trends in investor protection indicators",
+            "Document corrective actions for adverse trends"
+          ],
+          "department": "Risk",
+          "risk": "Medium",
+          "status": "Assigned",
+          "pageNo": 8
         }
       ]
     }
   ],
-
   "amendments": []
 },
 //HDFC Doc 2
 {
   "id": "SEBI-MF-2023-160",
-  "title": "Nomination for Mutual Fund Unit Holders – Extension of timelines",
+  "title": "Nomination for Mutual Fund Unit Holders – Extension of Timelines",
   "regulator": "SEBI",
   "issuedDate": "2023-09-27",
   "effectiveDate": "2024-01-01",
   "type": "Circular",
   "status": "Active",
-  "libraryStatus": "Reviewed & Applicable",
-  "docUrl": "./2023-09-27 - Nomination for Mutual Fund Unit Holders – Extension of timelines.pdf",
-  "departments": ["Compliance", "Operations"],
-  "risk": "High",
+  "libraryStatus": "Assigned",
+  "sebiEntities": [
+  "Mutual Funds",
+  "Asset Management Companies",
+  "Trustee Companies / Boards of Trustees of Mutual Funds",
+  "Registrars to an Issue and Share Transfer Agents",
+  "Association of Mutual Funds in India"
+],
+  "docUrl": "./Nomination for Mutual Fund Unit Holders – Extension of Timelines.pdf",
+  "departments": ["Compliance", "Operations", "Investor Services"],
+  "risk": "Medium",
   "complianceScore": 0,
-  "summary": "SEBI extended the timeline for nomination compliance for mutual fund unit holders and mandated periodic communication to non-compliant investors.",
-  
+  "summary": "Extends the deadline for nomination or opting out of nomination for mutual fund folios and prescribes periodic communication to investors for compliance.",
   "chapters": [
     {
       "num": 1,
-      "title": "Nomination Compliance and Timeline Extension",
+      "title": "Requirement for Nomination / Opting Out",
       "clauses": [
         {
-          "id": "Para 2",
-          "text": "Freezing of folios for non-compliance with nomination requirement shall be effective from January 01, 2024 instead of September 30, 2023.",
+          "id": "1",
+          "text": "The requirement for nomination/ opting out of nomination for all the existing individual unit holder(s) holding mutual fund units either solely or jointly, failing which the folios shall be frozen for debits.",
           "obligations": [
-            "Ensure enforcement of folio freezing only from January 01, 2024",
-            "Align systems with revised compliance timeline"
+            "Ensure all existing individual unit holders provide nomination or opt out of nomination",
+            "Ensure non-compliant folios are identified for debit freeze"
           ],
           "actionables": [
-            "Update system logic to reflect new deadline",
-            "Communicate revised deadline internally",
-            "Ensure no premature freezing before January 01, 2024"
-          ],
-          "department": "Operations",
-          "risk": "High",
-          "status": "Assigned",
-          "pageNo": 1
-        },
-        {
-          "id": "Para 3",
-          "text": "AMCs and RTAs shall encourage unit holders to complete nomination or opt out by sending fortnightly communications via email and SMS.",
-          "obligations": [
-            "Ensure periodic communication to non-compliant unit holders",
-            "Provide guidance for nomination or opting out"
-          ],
-          "actionables": [
-            "Identify non-compliant unit holders",
-            "Send fortnightly emails and SMS",
-            "Include clear guidance in communication",
-            "Track communication delivery and response"
+            "Track folios without nomination details",
+            "Identify investors who have not opted out formally",
+            "Prepare system controls for freezing non-compliant folios"
           ],
           "department": "Compliance",
           "risk": "High",
@@ -434,14 +1030,77 @@ const CMS_DATA = {
           "pageNo": 1
         },
         {
-          "id": "Para 4",
-          "text": "All other provisions of earlier SEBI circulars on nomination shall remain unchanged.",
+          "id": "2",
+          "text": "The provision with regard to freezing of folios, shall come into force with effect from January 01, 2024 instead of September 30, 2023.",
           "obligations": [
-            "Ensure compliance with previous nomination circular provisions"
+            "Ensure revised effective date for folio freezing is implemented",
+            "Ensure systems reflect January 01, 2024 deadline"
           ],
           "actionables": [
-            "Refer and align with earlier SEBI circulars",
-            "Validate existing processes remain compliant"
+            "Update compliance tracker with revised deadline",
+            "Modify system configuration for folio freeze date",
+            "Communicate revised implementation timeline internally"
+          ],
+          "department": "Operations",
+          "risk": "Medium",
+          "status": "Assigned",
+          "pageNo": 1
+        }
+      ]
+    },
+    {
+      "num": 2,
+      "title": "Investor Communication Requirements",
+      "clauses": [
+        {
+          "id": "3(a)",
+          "text": "AMCs and RTAs shall encourage the unit holder(s) to fulfil the requirement for nomination/ opting out of nomination by sending a communication on fortnightly basis by way of emails and SMS to all such unit holder(s) who are not in compliance with the requirement of nomination.",
+          "obligations": [
+            "Ensure periodic communication is sent to non-compliant unit holders",
+            "Ensure both email and SMS channels are used for communication"
+          ],
+          "actionables": [
+            "Prepare fortnightly communication schedule",
+            "Identify non-compliant investors periodically",
+            "Send reminder emails and SMS alerts"
+          ],
+          "department": "Investor Services",
+          "risk": "Medium",
+          "status": "Assigned",
+          "pageNo": 1
+        },
+        {
+          "id": "3(b)",
+          "text": "The communication shall provide guidance by which the unit holder(s) can provide nomination or opt out of nomination.",
+          "obligations": [
+            "Ensure investor communication includes clear guidance for nomination compliance"
+          ],
+          "actionables": [
+            "Include nomination process instructions in communication",
+            "Provide opt-out declaration guidance",
+            "Share digital and physical submission methods"
+          ],
+          "department": "Investor Services",
+          "risk": "Low",
+          "status": "Assigned",
+          "pageNo": 1
+        }
+      ]
+    },
+    {
+      "num": 3,
+      "title": "Continuity of Existing Requirements",
+      "clauses": [
+        {
+          "id": "4",
+          "text": "All other provisions of Circular dated June 15, 2022 and July 29, 2022 shall remain unchanged.",
+          "obligations": [
+            "Ensure compliance with previously issued nomination circulars continues unchanged"
+          ],
+          "actionables": [
+            "Review existing nomination compliance framework",
+            "Continue adherence to previous circular requirements",
+            "Map unchanged provisions into current compliance checklist"
           ],
           "department": "Compliance",
           "risk": "Medium",
@@ -451,371 +1110,235 @@ const CMS_DATA = {
       ]
     }
   ],
-
-  "annexures": [],
-
-  "amendments": [
-    {
-      "date": "2022-06-15",
-      "version": "1.0",
-      "description": "Initial nomination requirement introduced."
-    },
-   {
-  "id": "RBI-HF-2024-001",
-  "title": "Master Circular on Housing Finance",
-  "regulator": "RBI",
-  "issuedDate": "2024-04-02",
-  "effectiveDate": "2024-04-02",
-  "dueDate": "2024-12-31",
-  "type": "Master",
+  "amendments": []
+}, 
+// HDFC MAster Circular 
+{
+  "id": "SEBI-MF-2023-074",
+  "title": "Master Circular for Mutual Funds",
+  "regulator": "SEBI",
+  "issuedDate": "2023-05-19",
+  "effectiveDate": "2023-05-19",
+  "type": "Master Circular",
   "status": "Active",
   "libraryStatus": "Assigned",
-  "departments": ["Credit", "Risk", "Operations"],
-  "risk": "High",
-  "complianceScore": 70,
-  "summary": "The Master Circular on Housing Finance consolidates RBI guidelines for banks on housing loans, including eligible purposes such as purchase, construction, repairs, lending restrictions, exposure norms, loan-to-value ratios, risk weights, fair lending practices, and regulatory compliance requirements.",
-  "chapters": [
-   
-    {
-      "num": 2,
-      "title": "Housing Loan Regulations",
-      "clauses": [
-        {
-          "id": "C2.1",
-          "text": "Banks may grant loans for purchase, construction, repair, and improvement of housing units.",
-          "obligations": "Ensure loans are sanctioned only for permitted housing purposes.",
-          "actionables": "Define eligible housing loan categories in policy.",
-          "department": "Credit",
-          "risk": "High",
-          "status": "Assigned"
-        },
-        {
-          "id": "C2.2",
-          "text": "Loans shall not be granted for speculative real estate activities or unauthorized constructions.",
-          "obligations": "Restrict financing to compliant and authorized properties.",
-          "actionables": "Implement due diligence checks including approvals and sanctioned plans.",
-          "department": "Risk",
-          "risk": "High",
-          "status": "Assigned"
-        },
-        {
-          "id": "C2.3",
-          "text": "Banks must ensure borrower compliance with sanctioned plans and obtain necessary certificates.",
-          "obligations": "Ensure documentation such as sanctioned plan and completion certificate.",
-          "actionables": "Update loan documentation checklist.",
-          "department": "Operations",
-          "risk": "Medium",
-          "status": "Assigned"
-        }
-      ],
-      "sections": [
-        {
-          "id": "Section 1",
-          "text": "Eligible Housing Finance Activities",
-          "clauses": ["C2.1"]
-        },
-        {
-          "id": "Section 2",
-          "text": "Restrictions and Compliance",
-          "clauses": ["C2.2", "C2.3"]
-        }
-      ]
-    },
-    {
-      "num": 3,
-      "title": "Loan Exposure and Risk Management",
-      "clauses": [
-        {
-          "id": "C3.1",
-          "text": "Banks must adhere to prescribed Loan-to-Value (LTV) ratios and risk weights.",
-          "obligations": "Ensure housing loans comply with RBI LTV and capital adequacy norms.",
-          "actionables": "Configure systems to enforce LTV thresholds.",
-          "department": "Risk",
-          "risk": "High",
-          "status": "Assigned"
-        },
-        {
-          "id": "C3.2",
-          "text": "Banks must frame board-approved policies on real estate exposure limits.",
-          "obligations": "Establish prudential norms for exposure to housing sector.",
-          "actionables": "Draft and approve exposure policy at Board level.",
-          "department": "Risk",
-          "risk": "High",
-          "status": "Assigned"
-        }
-      ]
-    },
-    {
-      "num": 4,
-      "title": "Disbursement and Product Guidelines",
-      "clauses": [
-        {
-          "id": "C4.1",
-          "text": "Loan disbursement must be linked to stages of construction.",
-          "obligations": "Avoid upfront disbursement in under-construction projects.",
-          "actionables": "Implement stage-wise disbursement controls.",
-          "department": "Operations",
-          "risk": "High",
-          "status": "Assigned"
-        },
-        {
-          "id": "C4.2",
-          "text": "Banks must ensure customers are informed of risks in innovative loan products.",
-          "obligations": "Ensure transparency and suitability of loan products.",
-          "actionables": "Update product disclosures and customer communication.",
-          "department": "Compliance",
-          "risk": "Medium",
-          "status": "Assigned"
-        }
-      ]
-    },
-    {
-      "num": 5,
-      "title": "Regulatory Compliance and Fair Practices",
-      "clauses": [
-        {
-          "id": "C5.1",
-          "text": "Banks must comply with RBI directions on interest rates and EMI reset.",
-          "obligations": "Ensure adherence to RBI interest rate guidelines.",
-          "actionables": "Align loan systems with RBI directions.",
-          "department": "Finance",
-          "risk": "Medium",
-          "status": "Assigned"
-        },
-        {
-          "id": "C5.2",
-          "text": "Disclosure of mortgage details by builders must be ensured.",
-          "obligations": "Ensure transparency in housing projects financed.",
-          "actionables": "Include disclosure clauses in loan agreements.",
-          "department": "Legal",
-          "risk": "Medium",
-          "status": "Assigned"
-        },
-        {
-          "id": "C5.3",
-          "text": "Banks must follow fair lending practices including penal charges and document release.",
-          "obligations": "Ensure customer protection and transparency.",
-          "actionables": "Update fair lending policy as per RBI circulars.",
-          "department": "Compliance",
-          "risk": "High",
-          "status": "Assigned"
-        }
-      ]
-    }
-  ],
-  "amendments": [
-    {
-      "date": "2023-08-18",
-      "version": "1.1",
-      "description": "Guidelines on penal charges and EMI reset incorporated."
-    },
-    {
-      "date": "2023-09-13",
-      "version": "1.2",
-      "description": "Responsible lending conduct guidelines added."
-    }
-  ]
-},
-   {
-  "id": "SEBI-AIF-2024-135",
-  "title": "Specific Due Diligence of Investors and Investments of AIFs",
-  "regulator": "SEBI",
-  "issuedDate": "2024-10-08",
-  "effectiveDate": "2024-10-08",
-  "dueDate": "2025-04-07",
-  "type": "Regulatory",
-  "status": "Active",
-  "libraryStatus": "Reviewed & Applicable",
+  "sebiEntities": [
+  "Mutual Funds",
+  "Asset Management Companies",
+  "Trustee Companies / Boards of Trustees of Mutual Funds",
+  "Registrars to an Issue and Share Transfer Agents",
+  "Association of Mutual Funds in India",
+  "Recognized Stock Exchanges & Clearing Corporations",
+  "Stock Brokers",
+  "Depositories",
+  "Custodians"
+],
+  "docUrl": "./SEBI Master Circular for Mutual Funds.pdf",
   "departments": ["Compliance", "Risk", "Operations", "Legal"],
   "risk": "High",
-  "complianceScore": 40,
-  "summary": "SEBI circular mandating specific due diligence for AIFs, managers, and KMPs to prevent regulatory circumvention across QIB/QB benefits, RBI norms, and cross-border investments, along with strict reporting obligations.",
-  
+  "complianceScore": 0,
+  "summary": "Consolidated SEBI requirements for mutual funds covering offer documents, governance, risk management, disclosures, expenses and investor protection.",
   "chapters": [
     {
       "num": 1,
-      "title": "Due Diligence Obligations",
+      "title": "Offer Document for Schemes",
       "clauses": [
         {
-          "id": "C1.1",
-          "text": "AIFs, managers, and KMPs shall exercise specific due diligence on investors and investments.",
-          "obligation": "Perform due diligence.",
-          "actionables": "Implement due diligence framework.",
+          "id": "1.1.1",
+          "text": "The Offer Document shall have two parts i.e. Scheme Information Document (SID) and Statement of Additional Information (SAI).",
+          "obligations": [
+            "Ensure offer documents contain both SID and SAI"
+          ],
+          "actionables": [
+            "Prepare SID for scheme-specific details",
+            "Prepare SAI for statutory mutual fund information",
+            "Review document completeness before filing"
+          ],
           "department": "Compliance",
-          "risk": "High",
-          "status": "Assigned"
-        }
-      ]
-    },
-    {
-      "num": 2,
-      "title": "QIB-related Due Diligence",
-      "clauses": [
+          "risk": "Medium",
+          "status": "Assigned",
+          "pageNo": 7
+        },
         {
-          "id": "C2.1",
-          "text": "Schemes with ≥50% contribution from a single/group investor must undergo due diligence before availing QIB benefits.",
-          "obligation": "Validate investor eligibility.",
-          "actionables": "Apply SFA standards before QIB benefits.",
-          "department": "Risk",
-          "risk": "High",
-          "status": "Assigned"
-        }
-      ]
-    },
-    {
-      "num": 3,
-      "title": "QB (SARFAESI) Compliance",
-      "clauses": [
-        {
-          "id": "C3.1",
-          "text": "Schemes with ≥50% concentration must undergo due diligence before investing in Security Receipts.",
-          "obligation": "Ensure QB eligibility.",
-          "actionables": "Perform due diligence before SR investments.",
+          "id": "1.1.3.1(a)",
+          "text": "Draft SID of schemes of Mutual Funds filed with the Board shall also be available on SEBI's website for 21 working days from the date of filing.",
+          "obligations": [
+            "Ensure draft SID is available for public review"
+          ],
+          "actionables": [
+            "File draft SID with SEBI",
+            "Track 21 working day review timeline",
+            "Address SEBI observations promptly"
+          ],
           "department": "Compliance",
-          "risk": "High",
-          "status": "Assigned"
+          "risk": "Medium",
+          "status": "Assigned",
+          "pageNo": 7
         }
       ]
     },
     {
       "num": 4,
-      "title": "RBI Norms & Evergreening Prevention",
+      "title": "Risk Management Framework",
       "clauses": [
         {
-          "id": "C4.1",
-          "text": "Schemes with RBI-regulated investors (≥25% or control rights) must undergo due diligence.",
-          "obligation": "Prevent regulatory circumvention.",
-          "actionables": "Identify RBI-regulated exposure.",
+          "id": "4.1",
+          "text": "AMCs should have in place sound internal liquidity management tools for schemes.",
+          "obligations": [
+            "Ensure robust liquidity management framework exists"
+          ],
+          "actionables": [
+            "Implement liquidity monitoring tools",
+            "Conduct stress testing periodically",
+            "Review liquidity risks across schemes"
+          ],
           "department": "Risk",
           "risk": "High",
-          "status": "Assigned"
+          "status": "Assigned",
+          "pageNo": 18
         },
         {
-          "id": "C4.2",
-          "text": "AIFs shall not enable indirect exposure disallowed for RBI-regulated entities.",
-          "obligation": "Restrict indirect exposure.",
-          "actionables": "Block non-permissible investments.",
-          "department": "Compliance",
+          "id": "4.2",
+          "text": "Restriction on redemption cannot be used as an ordinary tool in order to manage the liquidity of a scheme.",
+          "obligations": [
+            "Ensure redemption restrictions are used only in exceptional cases"
+          ],
+          "actionables": [
+            "Define exceptional circumstances for redemption restrictions",
+            "Obtain board approval before imposing restrictions",
+            "Disclose restrictions to investors"
+          ],
+          "department": "Risk",
           "risk": "High",
-          "status": "Assigned"
+          "status": "Assigned",
+          "pageNo": 18
         }
       ]
     },
     {
       "num": 5,
-      "title": "Investment Decision Controls",
+      "title": "Disclosures & Reporting Norms",
       "clauses": [
         {
-          "id": "C5.1",
-          "text": "Investments failing due diligence must be rejected or investors excluded.",
-          "obligation": "Enforce investment restrictions.",
-          "actionables": "Implement investment approval checks.",
-          "department": "Operations",
+          "id": "5.1",
+          "text": "SAI shall be updated within 3 months from end of financial year and filed with SEBI.",
+          "obligations": [
+            "Ensure periodic updation of SAI"
+          ],
+          "actionables": [
+            "Review SAI annually",
+            "Update material changes on ongoing basis",
+            "File revised SAI with SEBI"
+          ],
+          "department": "Compliance",
+          "risk": "Medium",
+          "status": "Assigned",
+          "pageNo": 8
+        },
+        {
+          "id": "5.2",
+          "text": "A copy of all changes made to the scheme shall be filed with SEBI within 7 days of the change.",
+          "obligations": [
+            "Ensure timely reporting of scheme changes to SEBI"
+          ],
+          "actionables": [
+            "Track scheme modifications",
+            "File changes within 7 days",
+            "Maintain audit trail of submissions"
+          ],
+          "department": "Compliance",
           "risk": "High",
-          "status": "Assigned"
+          "status": "Assigned",
+          "pageNo": 11
         }
       ]
     },
     {
       "num": 6,
-      "title": "Existing Investment Review",
+      "title": "Governance Norms",
       "clauses": [
         {
-          "id": "C6.1",
-          "text": "Existing investments must be reviewed against due diligence standards.",
-          "obligation": "Review legacy investments.",
-          "actionables": "Conduct retrospective due diligence.",
-          "department": "Compliance",
+          "id": "6.1",
+          "text": "The Board of the AMC and the Trustees shall exercise necessary due diligence ensuring that the SID/SAI are in conformity with the Mutual Funds Regulations.",
+          "obligations": [
+            "Ensure due diligence over SID and SAI"
+          ],
+          "actionables": [
+            "Review SID and SAI before approval",
+            "Verify compliance with SEBI regulations",
+            "Document trustee approval"
+          ],
+          "department": "Legal",
           "risk": "High",
-          "status": "Assigned"
+          "status": "Assigned",
+          "pageNo": 7
         },
         {
-          "id": "C6.2",
-          "text": "Non-compliant investments must be reported to custodians by April 07, 2025.",
-          "obligation": "Report exceptions.",
-          "actionables": "Submit Annexure I report.",
-          "department": "Operations",
-          "risk": "High",
-          "status": "Assigned"
-        }
-      ]
-    },
-    {
-      "num": 7,
-      "title": "Cross-border Investment Checks",
-      "clauses": [
-        {
-          "id": "C7.1",
-          "text": "Schemes with ≥50% investors from land-border countries require due diligence.",
-          "obligation": "Identify high-risk jurisdictions.",
-          "actionables": "Apply enhanced due diligence.",
+          "id": "6.2",
+          "text": "Any change at a later date in the benchmark index shall be recorded and reasonably justified.",
+          "obligations": [
+            "Ensure benchmark changes are documented and justified"
+          ],
+          "actionables": [
+            "Review benchmark appropriateness periodically",
+            "Document reasons for benchmark changes",
+            "Obtain trustee approval for benchmark revisions"
+          ],
           "department": "Risk",
+          "risk": "Medium",
+          "status": "Assigned",
+          "pageNo": 13
+        }
+      ]
+    },
+    {
+      "num": 10,
+      "title": "Loads, Fees, Charges and Expenses",
+      "clauses": [
+        {
+          "id": "10.1",
+          "text": "Aggregate fees and expenses charged to the scheme form part of the fundamental attributes.",
+          "obligations": [
+            "Ensure fees and expenses are transparently disclosed"
+          ],
+          "actionables": [
+            "Review scheme expense structure",
+            "Disclose fees in SID and KIM",
+            "Monitor changes in load structure"
+          ],
+          "department": "Finance",
           "risk": "High",
-          "status": "Assigned"
-        },
-        {
-          "id": "C7.2",
-          "text": "Investments ≥10% in investee companies must be reported to custodians.",
-          "obligation": "Report material investments.",
-          "actionables": "Submit investment details within 30 days.",
-          "department": "Operations",
-          "risk": "Medium",
-          "status": "Assigned"
+          "status": "Assigned",
+          "pageNo": 20
         }
       ]
     },
     {
-      "num": 8,
-      "title": "Custodian & SEBI Reporting",
+      "num": 14,
+      "title": "Investor Rights & Obligations",
       "clauses": [
         {
-          "id": "C8.1",
-          "text": "Custodians shall report compiled data to SEBI.",
-          "obligation": "Ensure regulatory reporting.",
-          "actionables": "Coordinate with custodian.",
+          "id": "14.1",
+          "text": "No redemption requests up to INR 2 lakh shall be subject to such restriction.",
+          "obligations": [
+            "Ensure investor redemption rights are protected"
+          ],
+          "actionables": [
+            "Configure systems to exempt first INR 2 lakh",
+            "Disclose restriction policy to investors",
+            "Monitor compliance during liquidity events"
+          ],
           "department": "Operations",
-          "risk": "Medium",
-          "status": "Assigned"
-        }
-      ]
-    },
-    {
-      "num": 9,
-      "title": "Governance & Compliance Reporting",
-      "clauses": [
-        {
-          "id": "C9.1",
-          "text": "Compliance Test Report must include adherence to this circular.",
-          "obligation": "Integrate into compliance reporting.",
-          "actionables": "Update CTR framework.",
-          "department": "Compliance",
-          "risk": "Medium",
-          "status": "Assigned"
+          "risk": "High",
+          "status": "Assigned",
+          "pageNo": 19
         }
       ]
     }
   ],
-
-  "amendments": [
-    {
-      "date": "2024-04-25",
-      "version": "1.1",
-      "description": "Insertion of Regulation 20(20) requiring due diligence."
-    }
-  ]
+  "amendments": []
 },
-    {
-      "date": "2022-07-29",
-      "version": "1.1",
-      "description": "Further clarification on nomination requirements."
-    },
-    {
-      "date": "2023-03-28",
-      "version": "1.2",
-      "description": "Additional guidance on nomination compliance."
-    }
-  ]
-},
+// HDFC Master Circykar 
 {
   "id": "SEBI-2023-193",
   "title": "Extension of timelines for providing choice of nomination in eligible demat accounts and mutual fund folios",
@@ -1262,352 +1785,969 @@ const CMS_DATA = {
         { date: '2024-04-02', version: '1.0', description: 'Initial issuance consolidating all RBI housing finance guidelines up to March 31, 2024.' },
         { date: '2024-06-15', version: 'Withdrawn', description: 'Circular withdrawn by RBI. Superseded by updated Master Circular issued subsequently.' }
       ]
-    }
+    },
+     {
+      "id": "RBI-HF-2024-001",
+      "title": "Master Circular on Housing Finance",
+      "regulator": "RBI",
+      "issuedDate": "2024-04-02",
+      "effectiveDate": "2024-04-02",
+      "dueDate": "2024-12-31",
+      "type": "Master",
+      "status": "Active",
+      "libraryStatus": "Reviewed & Applicable",
+      "docUrl": "./RBI Master Circular.pdf",
+      "departments": ["Credit", "Risk", "Operations"],
+      "risk": "High",
+      "complianceScore": 70,
+      "summary": "The Master Circular on Housing Finance consolidates RBI guidelines for banks on housing loans.",
+      "chapters": [
+        {
+          "num": 2,
+          "title": "Housing Loan Regulations",
+          "clauses": [
+            {
+              "id": "C2.1",
+              "text": "Banks may grant loans for purchase, construction, repair, and improvement of housing units.",
+              "obligations": [
+                "Ensure loans are sanctioned only for eligible housing purposes.",
+                "Ensure internal policy clearly defines permissible loan categories.",
+                "Ensure end-use of funds aligns with approved housing purpose."
+              ],
+              "actionables": [
+                "Define eligible housing loan categories in credit policy.",
+                "Implement purpose validation in loan origination system (LOS).",
+                "Conduct post-disbursement end-use verification."
+              ],
+              "department": "Credit",
+              "risk": "High",
+              "status": "Assigned",
+              "pageNo": 4
+            },
+            {
+              "id": "C2.2",
+              "text": "Loans shall not be granted for speculative real estate activities or unauthorized constructions.",
+              "obligations": [
+                "Restrict financing to authorized and legally compliant properties.",
+                "Ensure no exposure to speculative real estate activities.",
+                "Ensure property approvals and legal clearances are verified."
+              ],
+              "actionables": [
+                "Perform legal due diligence including title verification.",
+                "Verify sanctioned building plans and approvals.",
+                "Implement negative list for speculative projects."
+              ],
+              "department": "Risk",
+              "risk": "High",
+              "status": "Assigned"
+            },
+            {
+              "id": "C2.3",
+              "text": "Banks must ensure borrower compliance with sanctioned plans and obtain necessary certificates.",
+              "obligations": [
+                "Ensure sanctioned building plan is obtained before loan approval.",
+                "Obtain borrower undertaking for adherence to sanctioned plan.",
+                "Ensure architect certification during construction stages.",
+                "Ensure completion certificate is obtained post construction."
+              ],
+              "actionables": [
+                "Include sanctioned plan in documentation checklist.",
+                "Collect borrower affidavit for compliance.",
+                "Empanel architects for stage-wise certification.",
+                "Track and obtain completion certificate within defined timeline."
+              ],
+              "department": "Operations",
+              "risk": "Medium",
+              "status": "Unassigned"
+            }
+          ],
+          "sections": [
+            {
+              "id": "Section 1",
+              "text": "Eligible Housing Finance Activities",
+              "clauses": ["C2.1"]
+            },
+            {
+              "id": "Section 2",
+              "text": "Restrictions and Compliance",
+              "clauses": ["C2.2", "C2.3"]
+            }
+          ]
+        },
+        {
+          "num": 3,
+          "title": "Loan Exposure and Risk Management",
+          "clauses": [
+            {
+              "id": "C3.1",
+              "text": "Banks must adhere to prescribed Loan-to-Value (LTV) ratios and risk weights.",
+              "obligations": [
+                "Ensure LTV ratios are within RBI prescribed limits.",
+                "Ensure risk weights are applied as per regulatory norms.",
+                "Ensure property valuation excludes ineligible components."
+              ],
+              "actionables": [
+                "Configure LOS to auto-calculate LTV.",
+                "Implement system validation to restrict breaches.",
+                "Update valuation policy excluding stamp duty where applicable."
+              ],
+              "department": "Risk",
+              "risk": "High",
+              "status": "Unassigned"
+            },
+            {
+              "id": "C3.2",
+              "text": "Banks must frame board-approved policies on real estate exposure limits.",
+              "obligations": [
+                "Establish board-approved exposure limits for housing sector.",
+                "Ensure periodic review of exposure policies.",
+                "Ensure compliance with prudential norms."
+              ],
+              "actionables": [
+                "Draft exposure policy and present to Board.",
+                "Set exposure thresholds in risk systems.",
+                "Conduct periodic policy review and update."
+              ],
+              "department": "Risk",
+              "risk": "High",
+              "status": "Unassigned"
+            }
+          ]
+        },
+        {
+          "num": 4,
+          "title": "Disbursement and Product Guidelines",
+          "clauses": [
+            {
+              "id": "C4.1",
+              "text": "Loan disbursement must be linked to stages of construction.",
+              "obligations": [
+                "Ensure disbursement is linked to construction progress.",
+                "Avoid upfront disbursement in under-construction projects.",
+                "Ensure inspection before each disbursement."
+              ],
+              "actionables": [
+                "Define stage-wise disbursement matrix.",
+                "Link disbursement to inspection approval.",
+                "Restrict bulk disbursement in LOS."
+              ],
+              "department": "Operations",
+              "risk": "High",
+              "status": "Assigned"
+            },
+            {
+              "id": "C4.2",
+              "text": "Banks must ensure customers are informed of risks in innovative loan products.",
+              "obligations": [
+                "Ensure transparency in loan product features.",
+                "Ensure customers are informed of associated risks.",
+                "Ensure suitability of loan products for borrowers."
+              ],
+              "actionables": [
+                "Update product disclosure documents.",
+                "Implement customer acknowledgment process.",
+                "Train staff on product suitability assessment."
+              ],
+              "department": "Compliance",
+              "risk": "Medium",
+              "status": "Assigned"
+            }
+          ]
+        },
+        {
+          "num": 5,
+          "title": "Regulatory Compliance and Fair Practices",
+          "clauses": [
+            {
+              "id": "C5.1",
+              "text": "Banks must comply with RBI directions on interest rates and EMI reset.",
+              "obligations": [
+                "Ensure compliance with RBI interest rate guidelines.",
+                "Ensure proper implementation of EMI reset norms.",
+                "Ensure transparency in interest rate changes."
+              ],
+              "actionables": [
+                "Align loan systems with RBI rate guidelines.",
+                "Automate EMI reset calculations.",
+                "Notify customers of rate changes."
+              ],
+              "department": "Finance",
+              "risk": "Medium",
+              "status": "Assigned"
+            },
+            {
+              "id": "C5.2",
+              "text": "Disclosure of mortgage details by builders must be ensured.",
+              "obligations": [
+                "Ensure builder discloses mortgage details to buyers.",
+                "Ensure disclosure in project marketing materials.",
+                "Restrict funding where disclosure is absent."
+              ],
+              "actionables": [
+                "Include disclosure clause in agreements.",
+                "Verify builder disclosures before disbursement.",
+                "Maintain disclosure records."
+              ],
+              "department": "Legal",
+              "risk": "Medium",
+              "status": "Assigned"
+            },
+            {
+              "id": "C5.3",
+              "text": "Banks must follow fair lending practices including penal charges and document release.",
+              "obligations": [
+                "Ensure compliance with RBI fair lending guidelines.",
+                "Ensure transparency in penal charges.",
+                "Ensure timely release of property documents.",
+                "Ensure customer protection standards are followed."
+              ],
+              "actionables": [
+                "Update fair lending policy.",
+                "Disclose penal charges clearly.",
+                "Define document release timelines.",
+                "Monitor customer complaints and grievances."
+              ],
+              "department": "Compliance",
+              "risk": "High",
+              "status": "Assigned"
+            }
+          ]
+        }
+      ],
+      "amendments": [
+        {
+          "date": "2023-08-18",
+          "version": "1.1",
+          "description": "Guidelines on penal charges and EMI reset incorporated."
+        },
+        {
+          "date": "2023-09-13",
+          "version": "1.2",
+          "description": "Responsible lending conduct guidelines added."
+        }
+      ]
+    },
   ],
 
   /* =============================================================
      TASKS
      ============================================================= */
+  // tasks: [
+  //   {
+  //     id: 'ACT-001',
+  //     obligationId: 'OB-001',
+  //     title: 'Establish Board Cybersecurity Committee',
+  //     circularId: 'CIRC-2024-001',
+  //     clauseRef: 'C1.1',
+  //     department: 'IT',
+  //     dueDate: '2024-06-15',
+  //     priority: 'High',
+  //     risk: 'High',
+  //     status: 'Complete',
+  //     assignee: 'Ravi Sharma'
+  //   },
+  //   {
+  //     id: 'ACT-002',
+  //     obligationId: 'OB-002',
+  //     title: 'Appoint CISO – Credentials Verification',
+  //     circularId: 'CIRC-2024-001',
+  //     clauseRef: 'C1.2',
+  //     department: 'HR',
+  //     dueDate: '2024-05-30',
+  //     priority: 'High',
+  //     risk: 'High',
+  //     status: 'Complete',
+  //     assignee: 'Priya Nair'
+  //   },
+  //   {
+  //     id: 'ACT-003',
+  //     obligationId: 'OB-003',
+  //     title: 'Annual Cybersecurity Risk Assessment – Q2',
+  //     circularId: 'CIRC-2024-001',
+  //     clauseRef: 'C2.1',
+  //     department: 'Risk',
+  //     dueDate: '2024-06-30',
+  //     priority: 'High',
+  //     risk: 'High',
+  //     status: 'Open',
+  //     assignee: 'Anand Krishnan'
+  //   },
+  //   {
+  //     id: 'ACT-004',
+  //     obligationId: 'OB-004',
+  //     title: 'Implement SIEM for Cyber Incident Detection',
+  //     circularId: 'CIRC-2024-001',
+  //     clauseRef: 'C3.1',
+  //     department: 'IT',
+  //     dueDate: '2024-05-15',
+  //     priority: 'Critical',
+  //     risk: 'High',
+  //     status: 'Open',
+  //     assignee: 'Vikram Singh'
+  //   },
+  //   {
+  //     id: 'ACT-005',
+  //     obligationId: 'OB-005',
+  //     title: 'Update Transaction Monitoring Thresholds',
+  //     circularId: 'CIRC-2024-002',
+  //     clauseRef: 'C1.1',
+  //     department: 'Compliance',
+  //     dueDate: '2024-07-15',
+  //     priority: 'High',
+  //     risk: 'High',
+  //     status: 'Open',
+  //     assignee: 'Meera Pillai'
+  //   },
+  //   {
+  //     id: 'ACT-006',
+  //     obligationId: 'OB-006',
+  //     title: 'PEP Screening API Integration',
+  //     circularId: 'CIRC-2024-002',
+  //     clauseRef: 'C2.1',
+  //     department: 'IT',
+  //     dueDate: '2024-08-01',
+  //     priority: 'High',
+  //     risk: 'High',
+  //     status: 'Closed',
+  //     assignee: 'Karthik Reddy'
+  //   },
+  //   {
+  //     id: 'ACT-007',
+  //     obligationId: 'OB-007',
+  //     title: 'Cloud Data Migration – Sensitive PII',
+  //     circularId: 'CIRC-2024-003',
+  //     clauseRef: 'C1.1',
+  //     department: 'IT',
+  //     dueDate: '2024-09-30',
+  //     priority: 'Medium',
+  //     risk: 'Medium',
+  //     status: 'Closed',
+  //     assignee: 'Sunita Bhatt'
+  //   },
+  //   {
+  //     id: 'ACT-008',
+  //     obligationId: 'OB-008',
+  //     title: 'ESG Scope 1 & 2 Emissions Measurement',
+  //     circularId: 'CIRC-2024-004',
+  //     clauseRef: 'C1.1',
+  //     department: 'Operations',
+  //     dueDate: '2024-10-31',
+  //     priority: 'Medium',
+  //     risk: 'Medium',
+  //     status: 'Open',
+  //     assignee: 'Deepak Mehta'
+  //   },
+  //   {
+  //     id: 'ACT-009',
+  //     obligationId: 'OB-009',
+  //     title: 'Vendor Classification Matrix Development',
+  //     circularId: 'CIRC-2024-005',
+  //     clauseRef: 'C1.1',
+  //     department: 'Procurement',
+  //     dueDate: '2024-07-31',
+  //     priority: 'High',
+  //     risk: 'High',
+  //     status: 'Complete',
+  //     assignee: 'Pooja Agarwal'
+  //   },
+  //   {
+  //     id: 'ACT-010',
+  //     obligationId: 'OB-0010',
+  //     title: 'Quarterly Risk Register Review – Q2',
+  //     circularId: 'CIRC-2024-001',
+  //     clauseRef: 'C2.2',
+  //     department: 'Risk',
+  //     dueDate: '2024-06-30',
+  //     priority: 'Medium',
+  //     risk: 'Medium',
+  //     status: 'Assigned',
+  //     assignee: 'Anand Krishnan'
+  //   },
+  //   {
+  //     id: 'ACT-011',
+  //     obligationId: 'OB-011',
+  //     title: 'EDD Training for Compliance Officers',
+  //     circularId: 'CIRC-2024-002',
+  //     clauseRef: 'C1.1',
+  //     department: 'Compliance',
+  //     dueDate: '2024-05-20',
+  //     priority: 'Medium',
+  //     risk: 'Medium',
+  //     status: 'Assigned',
+  //     assignee: 'Meera Pillai'
+  //   },
+  //   {
+  //     id: 'ACT-012',
+  //     obligationId: 'OB-0012',
+  //     title: 'Legal Review – Updated Vendor Contracts',
+  //     circularId: 'CIRC-2024-005',
+  //     clauseRef: 'C1.1',
+  //     department: 'Legal',
+  //     dueDate: '2024-09-15',
+  //     priority: 'Low',
+  //     risk: 'Low',
+  //     status: 'Assigned',
+  //     assignee: 'Suresh Iyer'
+  //   },
+  //   {
+  //     id: 'ACT-013',
+  //     obligationId: 'OB-013',
+  //     title: 'Housing Finance Policy Gap Analysis',
+  //     circularId: 'CIRC-2024-HF-001',
+  //     clauseRef: 'HF-C1.1',
+  //     department: 'Compliance',
+  //     dueDate: '2024-05-15',
+  //     priority: 'High',
+  //     risk: 'High',
+  //     status: 'Assigned',
+  //     assignee: 'Meera Pillai'
+  //   },
+  //   {
+  //     id: 'ACT-014',
+  //     obligationId: 'OB-014',
+  //     title: 'Update Loan Origination Policy – Eligible Purposes (Sec 2A)',
+  //     circularId: 'CIRC-2024-HF-001',
+  //     clauseRef: 'HF-C2A.1',
+  //     department: 'Finance',
+  //     dueDate: '2024-06-30',
+  //     priority: 'High',
+  //     risk: 'High',
+  //     status: 'Assigned',
+  //     assignee: 'Ravi Sharma'
+  //   },
+  //   {
+  //     id: 'ACT-015',
+  //     obligationId: 'OB-015',
+  //     title: 'Portfolio Audit – Segregate Land-Only Loans (Sec 2B)',
+  //     circularId: 'CIRC-2024-HF-001',
+  //     clauseRef: 'HF-C2B.1',
+  //     department: 'Finance',
+  //     dueDate: '2024-07-15',
+  //     priority: 'Medium',
+  //     risk: 'Medium',
+  //     status: 'Assigned',
+  //     assignee: 'Anand Krishnan'
+  //   },
+  //   {
+  //     id: 'ACT-016',
+  //     obligationId: 'OB-016',
+  //     title: 'LTV Ratio Validation – Loan Origination System (Sec 2C)',
+  //     circularId: 'CIRC-2024-HF-001',
+  //     clauseRef: 'HF-C2C.1',
+  //     department: 'Risk',
+  //     dueDate: '2024-06-15',
+  //     priority: 'High',
+  //     risk: 'High',
+  //     status: 'Assigned',
+  //     assignee: 'Vikram Singh'
+  //   },
+  //   {
+  //     id: 'ACT-017',
+  //     obligationId: 'OB-017',
+  //     title: 'Update Risk Weights in CBS – Capital Adequacy (Sec 3)',
+  //     circularId: 'CIRC-2024-HF-001',
+  //     clauseRef: 'HF-C3.1',
+  //     department: 'Risk',
+  //     dueDate: '2024-06-30',
+  //     priority: 'High',
+  //     risk: 'High',
+  //     status: 'Assigned',
+  //     assignee: 'Anand Krishnan'
+  //   },
+  //   {
+  //     id: 'ACT-018',
+  //     obligationId: 'OB-018',
+  //     title: 'PSL Classification Rules Update – Housing Loans (Sec 4)',
+  //     circularId: 'CIRC-2024-HF-001',
+  //     clauseRef: 'HF-C4.1',
+  //     department: 'Compliance',
+  //     dueDate: '2024-07-31',
+  //     priority: 'High',
+  //     risk: 'High',
+  //     status: 'Assigned',
+  //     assignee: 'Meera Pillai'
+  //   },
+  //   {
+  //     id: 'ACT-019',
+  //     obligationId: 'OB-019',
+  //     title: 'Migrate MCLR-Linked Housing Loans to Repo Rate (Sec 5)',
+  //     circularId: 'CIRC-2024-HF-001',
+  //     clauseRef: 'HF-C5.1',
+  //     department: 'Finance',
+  //     dueDate: '2024-08-31',
+  //     priority: 'High',
+  //     risk: 'Medium',
+  //     status: 'Assigned',
+  //     assignee: 'Priya Nair'
+  //   },
+  //   {
+  //     id: 'ACT-020',
+  //     obligationId: 'OB-020',
+  //     title: 'Configure EMI Cap and Tenor Limit in LOS (Sec 6)',
+  //     circularId: 'CIRC-2024-HF-001',
+  //     clauseRef: 'HF-C6.1',
+  //     department: 'Operations',
+  //     dueDate: '2024-07-15',
+  //     priority: 'Medium',
+  //     risk: 'Medium',
+  //     status: 'Assigned',
+  //     assignee: 'Sunita Bhatt'
+  //   },
+  //   {
+  //     id: 'ACT-021',
+  //     obligationId: 'OB-021',
+  //     title: 'Design and Deploy Key Fact Statement – KFS (Sec 7)',
+  //     circularId: 'CIRC-2024-HF-001',
+  //     clauseRef: 'HF-C7.1',
+  //     department: 'Compliance',
+  //     dueDate: '2024-06-30',
+  //     priority: 'High',
+  //     risk: 'High',
+  //     status: 'Assigned',
+  //     assignee: 'Karthik Reddy'
+  //   },
+  //   {
+  //     id: 'ACT-022',
+  //     obligationId: 'OB-022',
+  //     title: 'Set Up NHB Refinance Quarterly Reporting (Sec 8)',
+  //     circularId: 'CIRC-2024-HF-001',
+  //     clauseRef: 'HF-C8.1',
+  //     department: 'Operations',
+  //     dueDate: '2024-07-31',
+  //     priority: 'Medium',
+  //     risk: 'Medium',
+  //     status: 'Assigned',
+  //     assignee: 'Deepak Mehta'
+  //   },
+  //   {
+  //     id: 'ACT-023',
+  //     obligationId: 'OB-023',
+  //     title: 'Remove Foreclosure Charges – Floating Rate Loans (Sec 9)',
+  //     circularId: 'CIRC-2024-HF-001',
+  //     clauseRef: 'HF-C9.1',
+  //     department: 'Legal',
+  //     dueDate: '2024-06-15',
+  //     priority: 'High',
+  //     risk: 'High',
+  //     status: 'Unassigned',
+  //     assignee: 'Suresh Iyer'
+  //   },
+  //   {
+  //     id: 'ACT-024',
+  //     obligationId: 'OB-024',
+  //     title: 'Board Approval – Housing Finance Policy (Sec 10)',
+  //     circularId: 'CIRC-2024-HF-001',
+  //     clauseRef: 'HF-C10.1',
+  //     department: 'Risk',
+  //     dueDate: '2024-08-15',
+  //     priority: 'High',
+  //     risk: 'High',
+  //     status: 'Assigned',
+  //     assignee: 'Pooja Agarwal'
+  //   },
+  //   {
+  //     id: 'ACT-025',
+  //     obligationId: 'OB-025',
+  //     title: 'Half-Yearly RBI Housing Loan Portfolio Return (Sec 11)',
+  //     circularId: 'CIRC-2024-HF-001',
+  //     clauseRef: 'HF-C11.1',
+  //     department: 'Compliance',
+  //     dueDate: '2024-07-21',
+  //     priority: 'High',
+  //     risk: 'High',
+  //     status: 'Assigned',
+  //     assignee: 'Meera Pillai'
+  //   },
+  //   {
+  //     id: 'ACT-026',
+  //     obligationId: 'OB-026',
+  //     title: 'Reclassify Builder Finance Loans – Credit Policy Update (Sec 12)',
+  //     circularId: 'CIRC-2024-HF-001',
+  //     clauseRef: 'HF-C12.1',
+  //     department: 'Legal',
+  //     dueDate: '2024-08-31',
+  //     priority: 'Medium',
+  //     risk: 'Medium',
+  //     status: 'Unassigned',
+  //     assignee: 'Suresh Iyer'
+  //   }
+  // ],
   tasks: [
+  {
+  id: 'ACT-111-001',
+  obligationId: 'OB-111-001',
+  title: 'Ensure all digital platforms comply with accessibility standards under RPwD Act',
+  circularId: 'SEBI-ITD-2025-111',
+  clauseRef: '5(1)',
+  department: 'Digital',
+  dueDate: '2025-08-31',
+  priority: 'High',
+  risk: 'High',
+  status: 'Assigned',
+  assignee: 'Harish',
+  assigneeStatus:"Open",
+  activities: [
     {
-      id: 'ACT-001',
-      obligationId: 'OB-001',
-      title: 'Establish Board Cybersecurity Committee',
-      circularId: 'CIRC-2024-001',
-      clauseRef: 'C1.1',
-      department: 'IT',
-      dueDate: '2024-06-15',
-      priority: 'High',
-      risk: 'High',
+      id: 'SUB-111-001',
+      name: 'Identify all investor-facing web platforms',
+      dueDate: '2025-08-20',
       status: 'Assigned',
-      assignee: 'Ravi Sharma'
+      assigneeStatus:"Open"
     },
     {
-      id: 'ACT-002',
-      obligationId: 'OB-002',
-      title: 'Appoint CISO – Credentials Verification',
-      circularId: 'CIRC-2024-001',
-      clauseRef: 'C1.2',
-      department: 'HR',
-      dueDate: '2024-05-30',
-      priority: 'High',
-      risk: 'High',
+      id: 'SUB-111-002',
+      name: 'Prepare platform inventory sheet',
+      dueDate: '2025-08-25',
       status: 'Assigned',
-      assignee: 'Priya Nair'
+      assigneeStatus:"Open"
     },
     {
-      id: 'ACT-003',
-      obligationId: 'OB-003',
-      title: 'Annual Cybersecurity Risk Assessment – Q2',
-      circularId: 'CIRC-2024-001',
-      clauseRef: 'C2.1',
-      department: 'Risk',
-      dueDate: '2024-06-30',
-      priority: 'High',
-      risk: 'High',
+      id: 'SUB-111-003',
+      name: 'Validate inventory with Digital team',
+      dueDate: '2025-08-28',
       status: 'Assigned',
-      assignee: 'Anand Krishnan'
-    },
-    {
-      id: 'ACT-004',
-      obligationId: 'OB-004',
-      title: 'Implement SIEM for Cyber Incident Detection',
-      circularId: 'CIRC-2024-001',
-      clauseRef: 'C3.1',
-      department: 'IT',
-      dueDate: '2024-05-15',
-      priority: 'Critical',
-      risk: 'High',
-      status: 'Assigned',
-      assignee: 'Vikram Singh'
-    },
-    {
-      id: 'ACT-005',
-      obligationId: 'OB-005',
-      title: 'Update Transaction Monitoring Thresholds',
-      circularId: 'CIRC-2024-002',
-      clauseRef: 'C1.1',
-      department: 'Compliance',
-      dueDate: '2024-07-15',
-      priority: 'High',
-      risk: 'High',
-      status: 'Assigned',
-      assignee: 'Meera Pillai'
-    },
-    {
-      id: 'ACT-006',
-      obligationId: 'OB-006',
-      title: 'PEP Screening API Integration',
-      circularId: 'CIRC-2024-002',
-      clauseRef: 'C2.1',
-      department: 'IT',
-      dueDate: '2024-08-01',
-      priority: 'High',
-      risk: 'High',
-      status: 'Assigned',
-      assignee: 'Karthik Reddy'
-    },
-    {
-      id: 'ACT-007',
-      obligationId: 'OB-007',
-      title: 'Cloud Data Migration – Sensitive PII',
-      circularId: 'CIRC-2024-003',
-      clauseRef: 'C1.1',
-      department: 'IT',
-      dueDate: '2024-09-30',
-      priority: 'Medium',
-      risk: 'Medium',
-      status: 'Assigned',
-      assignee: 'Sunita Bhatt'
-    },
-    {
-      id: 'ACT-008',
-      obligationId: 'OB-008',
-      title: 'ESG Scope 1 & 2 Emissions Measurement',
-      circularId: 'CIRC-2024-004',
-      clauseRef: 'C1.1',
-      department: 'Operations',
-      dueDate: '2024-10-31',
-      priority: 'Medium',
-      risk: 'Medium',
-      status: 'Assigned',
-      assignee: 'Deepak Mehta'
-    },
-    {
-      id: 'ACT-009',
-      obligationId: 'OB-009',
-      title: 'Vendor Classification Matrix Development',
-      circularId: 'CIRC-2024-005',
-      clauseRef: 'C1.1',
-      department: 'Procurement',
-      dueDate: '2024-07-31',
-      priority: 'High',
-      risk: 'High',
-      status: 'Assigned',
-      assignee: 'Pooja Agarwal'
-    },
-    {
-      id: 'ACT-010',
-      obligationId: 'OB-0010',
-      title: 'Quarterly Risk Register Review – Q2',
-      circularId: 'CIRC-2024-001',
-      clauseRef: 'C2.2',
-      department: 'Risk',
-      dueDate: '2024-06-30',
-      priority: 'Medium',
-      risk: 'Medium',
-      status: 'Assigned',
-      assignee: 'Anand Krishnan'
-    },
-    {
-      id: 'ACT-011',
-      obligationId: 'OB-011',
-      title: 'EDD Training for Compliance Officers',
-      circularId: 'CIRC-2024-002',
-      clauseRef: 'C1.1',
-      department: 'Compliance',
-      dueDate: '2024-05-20',
-      priority: 'Medium',
-      risk: 'Medium',
-      status: 'Assigned',
-      assignee: 'Meera Pillai'
-    },
-    {
-      id: 'ACT-012',
-      obligationId: 'OB-0012',
-      title: 'Legal Review – Updated Vendor Contracts',
-      circularId: 'CIRC-2024-005',
-      clauseRef: 'C1.1',
-      department: 'Legal',
-      dueDate: '2024-09-15',
-      priority: 'Low',
-      risk: 'Low',
-      status: 'Assigned',
-      assignee: 'Suresh Iyer'
-    },
-    {
-      id: 'ACT-013',
-      obligationId: 'OB-013',
-      title: 'Housing Finance Policy Gap Analysis',
-      circularId: 'CIRC-2024-HF-001',
-      clauseRef: 'HF-C1.1',
-      department: 'Compliance',
-      dueDate: '2024-05-15',
-      priority: 'High',
-      risk: 'High',
-      status: 'Assigned',
-      assignee: 'Meera Pillai'
-    },
-    {
-      id: 'ACT-014',
-      obligationId: 'OB-014',
-      title: 'Update Loan Origination Policy – Eligible Purposes (Sec 2A)',
-      circularId: 'CIRC-2024-HF-001',
-      clauseRef: 'HF-C2A.1',
-      department: 'Finance',
-      dueDate: '2024-06-30',
-      priority: 'High',
-      risk: 'High',
-      status: 'Assigned',
-      assignee: 'Ravi Sharma'
-    },
-    {
-      id: 'ACT-015',
-      obligationId: 'OB-015',
-      title: 'Portfolio Audit – Segregate Land-Only Loans (Sec 2B)',
-      circularId: 'CIRC-2024-HF-001',
-      clauseRef: 'HF-C2B.1',
-      department: 'Finance',
-      dueDate: '2024-07-15',
-      priority: 'Medium',
-      risk: 'Medium',
-      status: 'Assigned',
-      assignee: 'Anand Krishnan'
-    },
-    {
-      id: 'ACT-016',
-      obligationId: 'OB-016',
-      title: 'LTV Ratio Validation – Loan Origination System (Sec 2C)',
-      circularId: 'CIRC-2024-HF-001',
-      clauseRef: 'HF-C2C.1',
-      department: 'Risk',
-      dueDate: '2024-06-15',
-      priority: 'High',
-      risk: 'High',
-      status: 'Assigned',
-      assignee: 'Vikram Singh'
-    },
-    {
-      id: 'ACT-017',
-      obligationId: 'OB-017',
-      title: 'Update Risk Weights in CBS – Capital Adequacy (Sec 3)',
-      circularId: 'CIRC-2024-HF-001',
-      clauseRef: 'HF-C3.1',
-      department: 'Risk',
-      dueDate: '2024-06-30',
-      priority: 'High',
-      risk: 'High',
-      status: 'Assigned',
-      assignee: 'Anand Krishnan'
-    },
-    {
-      id: 'ACT-018',
-      obligationId: 'OB-018',
-      title: 'PSL Classification Rules Update – Housing Loans (Sec 4)',
-      circularId: 'CIRC-2024-HF-001',
-      clauseRef: 'HF-C4.1',
-      department: 'Compliance',
-      dueDate: '2024-07-31',
-      priority: 'High',
-      risk: 'High',
-      status: 'Assigned',
-      assignee: 'Meera Pillai'
-    },
-    {
-      id: 'ACT-019',
-      obligationId: 'OB-019',
-      title: 'Migrate MCLR-Linked Housing Loans to Repo Rate (Sec 5)',
-      circularId: 'CIRC-2024-HF-001',
-      clauseRef: 'HF-C5.1',
-      department: 'Finance',
-      dueDate: '2024-08-31',
-      priority: 'High',
-      risk: 'Medium',
-      status: 'Assigned',
-      assignee: 'Priya Nair'
-    },
-    {
-      id: 'ACT-020',
-      obligationId: 'OB-020',
-      title: 'Configure EMI Cap and Tenor Limit in LOS (Sec 6)',
-      circularId: 'CIRC-2024-HF-001',
-      clauseRef: 'HF-C6.1',
-      department: 'Operations',
-      dueDate: '2024-07-15',
-      priority: 'Medium',
-      risk: 'Medium',
-      status: 'Assigned',
-      assignee: 'Sunita Bhatt'
-    },
-    {
-      id: 'ACT-021',
-      obligationId: 'OB-021',
-      title: 'Design and Deploy Key Fact Statement – KFS (Sec 7)',
-      circularId: 'CIRC-2024-HF-001',
-      clauseRef: 'HF-C7.1',
-      department: 'Compliance',
-      dueDate: '2024-06-30',
-      priority: 'High',
-      risk: 'High',
-      status: 'Assigned',
-      assignee: 'Karthik Reddy'
-    },
-    {
-      id: 'ACT-022',
-      obligationId: 'OB-022',
-      title: 'Set Up NHB Refinance Quarterly Reporting (Sec 8)',
-      circularId: 'CIRC-2024-HF-001',
-      clauseRef: 'HF-C8.1',
-      department: 'Operations',
-      dueDate: '2024-07-31',
-      priority: 'Medium',
-      risk: 'Medium',
-      status: 'Assigned',
-      assignee: 'Deepak Mehta'
-    },
-    {
-      id: 'ACT-023',
-      obligationId: 'OB-023',
-      title: 'Remove Foreclosure Charges – Floating Rate Loans (Sec 9)',
-      circularId: 'CIRC-2024-HF-001',
-      clauseRef: 'HF-C9.1',
-      department: 'Legal',
-      dueDate: '2024-06-15',
-      priority: 'High',
-      risk: 'High',
-      status: 'Unassigned',
-      assignee: 'Suresh Iyer'
-    },
-    {
-      id: 'ACT-024',
-      obligationId: 'OB-024',
-      title: 'Board Approval – Housing Finance Policy (Sec 10)',
-      circularId: 'CIRC-2024-HF-001',
-      clauseRef: 'HF-C10.1',
-      department: 'Risk',
-      dueDate: '2024-08-15',
-      priority: 'High',
-      risk: 'High',
-      status: 'Assigned',
-      assignee: 'Pooja Agarwal'
-    },
-    {
-      id: 'ACT-025',
-      obligationId: 'OB-025',
-      title: 'Half-Yearly RBI Housing Loan Portfolio Return (Sec 11)',
-      circularId: 'CIRC-2024-HF-001',
-      clauseRef: 'HF-C11.1',
-      department: 'Compliance',
-      dueDate: '2024-07-21',
-      priority: 'High',
-      risk: 'High',
-      status: 'Assigned',
-      assignee: 'Meera Pillai'
-    },
-    {
-      id: 'ACT-026',
-      obligationId: 'OB-026',
-      title: 'Reclassify Builder Finance Loans – Credit Policy Update (Sec 12)',
-      circularId: 'CIRC-2024-HF-001',
-      clauseRef: 'HF-C12.1',
-      department: 'Legal',
-      dueDate: '2024-08-31',
-      priority: 'Medium',
-      risk: 'Medium',
-      status: 'Unassigned',
-      assignee: 'Suresh Iyer'
+      assigneeStatus:"Open"
     }
-  ],
+  ]
+},
+  {
+  id: 'ACT-111-002',
+  obligationId: 'OB-111-002',
+  title: 'Provide accessible information and communication technology to persons with disabilities',
+  circularId: 'SEBI-ITD-2025-111',
+  clauseRef: '5(1)',
+  department: 'Compliance',
+  dueDate: '2025-08-31',
+  priority: 'High',
+  risk: 'High',
+  status: 'Assigned',
+  assignee: 'Meera Pillai',
+  assigneeStatus:"Open",
+  activities: [
+    {
+      id: 'SUB-111-004',
+      name: 'Ensure content is available in accessible formats',
+      dueDate: '2025-08-20',
+      status: 'Assigned',
+      assigneeStatus:"Closed"
+
+    },
+    {
+      id: 'SUB-111-005',
+      name: 'Draft action taken report',
+      dueDate: '2025-08-25',
+      status: 'Assigned',
+      assigneeStatus:"Closed"
+    },
+    {
+      id: 'SUB-111-006',
+      name: 'Submit report to SEBI',
+      dueDate: '2025-08-30',
+      status: 'Assigned',
+      assigneeStatus:"Closed"
+    }
+  ]
+},
+{
+  id: 'ACT-111-003',
+  obligationId: 'OB-111-003',
+  title: 'Ensure website follows Government website accessibility guidelines',
+  circularId: 'SEBI-ITD-2025-111',
+  clauseRef: '5(2)',
+  department: 'Compliance',
+  dueDate: '2025-09-14',
+  priority: 'High',
+  risk: 'High',
+  status: 'Assigned',
+  assignee: 'Harish',
+  assigneeStatus:"Open",
+  activities: [
+    {
+      id: 'SUB-111-007',
+      name: 'Ensure timely submission of it',
+      dueDate: '2025-08-30',
+      status: 'Assigned',
+      assigneeStatus:"Open"
+    },
+    {
+      id: 'SUB-111-008',
+      name: 'Evaluate auditor credentials',
+      dueDate: '2025-09-05',
+      status: 'Assigned',
+      assigneeStatus:"Open"
+    },
+    {
+      id: 'SUB-111-009',
+      name: 'Finalize and onboard auditor',
+      dueDate: '2025-09-10',
+      status: 'Assigned',
+      assigneeStatus:"Open"
+    }
+  ]
+},
+{
+  id: 'ACT-111-004',
+  obligationId: 'OB-111-004',
+  title: 'Submit compliance report within one month',
+  circularId: 'SEBI-ITD-2025-111',
+  clauseRef: '5(3)',
+  department: 'IT',
+  dueDate: '2025-10-31',
+  priority: 'Critical',
+  risk: 'High',
+  status: 'Assigned',
+  assignee: 'Sandip',
+  assigneeStatus:"Open",
+  activities: [
+    {
+      id: 'SUB-111-010',
+      name: 'Schedule audit sessions',
+      dueDate: '2025-10-05',
+      status: 'Assigned',
+      assigneeStatus:"Open"
+    },
+    {
+      id: 'SUB-111-011',
+      name: 'Audit website and mobile app',
+      dueDate: '2025-10-15',
+      status: 'Assigned',
+      assigneeStatus:"Open"
+    },
+    {
+      id: 'SUB-111-012',
+      name: 'Prepare audit findings report',
+      dueDate: '2025-10-25',
+      status: 'Assigned',
+      assigneeStatus:"Open"
+    }
+  ]
+},
+{
+  id: 'ACT-111-005',
+  obligationId: 'OB-111-005',
+  title: 'Ensure ICT systems comply with IS 17802 accessibility requirement',
+  circularId: 'SEBI-ITD-2025-111',
+  clauseRef: '5(4)',
+  department: 'IT',
+  dueDate: '2026-01-31',
+  priority: 'Critical',
+  risk: 'High',
+  status: 'Assigned',
+  assignee: 'Sandip',
+  activities: [
+    {
+      id: 'SUB-111-013',
+      name: 'Categorize audit findings by severity',
+      dueDate: '2025-11-10',
+      status: 'Assigned'
+    },
+    {
+      id: 'SUB-111-014',
+      name: 'Implement accessibility fixes',
+      dueDate: '2025-12-20',
+      status: 'Assigned'
+    },
+    {
+      id: 'SUB-111-015',
+      name: 'Retest remediated platforms',
+      dueDate: '2026-01-20',
+      status: 'Assigned'
+    }
+  ]
+},
+{
+  id: 'ACT-111-006',
+  obligationId: 'OB-111-006',
+  title: 'Nominate Nodal Officer for Digital Accessibility Compliance',
+  circularId: 'SEBI-ITD-2025-111',
+  clauseRef: '1.1',
+  department: 'Compliance',
+  dueDate: '2025-08-15',
+  priority: 'High',
+  risk: 'Medium',
+  status: 'Assigned',
+  assignee: 'Harish',
+  activities: [
+    {
+      id: 'SUB-111-016',
+      name: 'Identify nodal officer candidates',
+      dueDate: '2025-08-05',
+      status: 'Assigned'
+    },
+    {
+      id: 'SUB-111-017',
+      name: 'Obtain leadership approval',
+      dueDate: '2025-08-10',
+      status: 'Assigned'
+    },
+    {
+      id: 'SUB-111-018',
+      name: 'Issue nomination communication',
+      dueDate: '2025-08-13',
+      status: 'Assigned'
+    }
+  ]
+},
+  // {
+  //   id: 'ACT-111-007',
+  //   obligationId: 'OB-111-007',
+  //   title: 'Obtain MD Approval for Accessibility Compliance Framework',
+  //   circularId: 'SEBI-ITD-2025-111',
+  //   clauseRef: '1.1',
+  //   department: 'Compliance',
+  //   dueDate: '2025-08-20',
+  //   priority: 'High',
+  //   risk: 'High',
+  //   status: 'Assigned',
+  //   assignee: 'MD Office'
+  // },
+  // {
+  //   id: 'ACT-111-008',
+  //   obligationId: 'OB-111-008',
+  //   title: 'Implement Accessibility Grievance Redressal Mechanism',
+  //   circularId: 'SEBI-ITD-2025-111',
+  //   clauseRef: '1.3',
+  //   department: 'Customer Service',
+  //   dueDate: '2025-09-30',
+  //   priority: 'High',
+  //   risk: 'High',
+  //   status: 'Assigned',
+  //   assignee: 'Priya Nair'
+  // },
+  // {
+  //   id: 'ACT-111-009',
+  //   obligationId: 'OB-111-009',
+  //   title: 'Update Website and Mobile App with ISL Videos, Captions and Alt Text',
+  //   circularId: 'SEBI-ITD-2025-111',
+  //   clauseRef: '2.1',
+  //   department: 'Digital',
+  //   dueDate: '2025-11-15',
+  //   priority: 'High',
+  //   risk: 'High',
+  //   status: 'Assigned',
+  //   assignee: 'Sandip'
+  // },
+  // {
+  //   id: 'ACT-111-010',
+  //   obligationId: 'OB-111-010',
+  //   title: 'Convert Investor Documents to Tagged PDF and OCR-Based Accessible Format',
+  //   circularId: 'SEBI-ITD-2025-111',
+  //   clauseRef: '2.2',
+  //   department: 'Legal',
+  //   dueDate: '2025-11-30',
+  //   priority: 'High',
+  //   risk: 'High',
+  //   status: 'Assigned',
+  //   assignee: 'Suresh Iyer'
+  // },
+  // {
+  //   id: 'ACT-111-011',
+  //   obligationId: 'OB-111-011',
+  //   title: 'Conduct Internal Training on Accessible Document Uploads',
+  //   circularId: 'SEBI-ITD-2025-111',
+  //   clauseRef: '3.1',
+  //   department: 'HR',
+  //   dueDate: '2025-10-15',
+  //   priority: 'Medium',
+  //   risk: 'Medium',
+  //   status: 'Assigned',
+  //   assignee: 'Sandip'
+  // },
+  // {
+  //   id: 'ACT-111-012',
+  //   obligationId: 'OB-111-012',
+  //   title: 'Update Digital KYC Journey for PwD Users',
+  //   circularId: 'SEBI-ITD-2025-111',
+  //   clauseRef: '4.1',
+  //   department: 'Operations',
+  //   dueDate: '2025-11-15',
+  //   priority: 'High',
+  //   risk: 'High',
+  //   status: 'Assigned',
+  //   assignee: 'Karthik Reddy'
+  // },
+  // {
+  //   id: 'ACT-111-013',
+  //   obligationId: 'OB-111-013',
+  //   title: 'Modify Client Registration Forms to Capture Disability Status',
+  //   circularId: 'SEBI-ITD-2025-111',
+  //   clauseRef: '4.2',
+  //   department: 'Operations',
+  //   dueDate: '2025-11-30',
+  //   priority: 'High',
+  //   risk: 'Medium',
+  //   status: 'Assigned',
+  //   assignee: 'Sunita Bhatt'
+  // },
+  {
+  id: 'ACT-111-014',
+  obligationId: 'OB-111-014',
+  title: 'Submit Annual Accessibility Compliance Report to SEBI',
+  circularId: 'SEBI-ITD-2025-111',
+  clauseRef: '6',
+  department: 'Compliance',
+  dueDate: '2026-04-30',
+  priority: 'High',
+  risk: 'High',
+  status: 'Assigned',
+  assignee: 'Meera Pillai',
+  activities: [
+    {
+      id: 'SUB-111-043',
+      name: 'Collect annual accessibility metrics',
+      dueDate: '2026-04-10',
+      status: 'Assigned'
+    },
+    {
+      id: 'SUB-111-044',
+      name: 'Prepare annual compliance report',
+      dueDate: '2026-04-20',
+      status: 'Assigned'
+    },
+    {
+      id: 'SUB-111-045',
+      name: 'Submit final report to SEBI',
+      dueDate: '2026-04-28',
+      status: 'Assigned'
+    }
+  ]
+},
+  {
+  id: 'ACT-111-015',
+  obligationId: 'OB-111-015',
+  title: 'Submit Annual Accessibility Compliance Report to SEBI',
+  circularId: 'SEBI-ITD-2025-111',
+  clauseRef: '6',
+  department: 'Compliance',
+  dueDate: '2026-04-30',
+  priority: 'High',
+  risk: 'High',
+  status: 'Assigned',
+  assignee: 'Meera Pillai',
+  activities: [
+    {
+      id: 'SUB-111-043',
+      name: 'Collect annual accessibility metrics',
+      dueDate: '2026-04-10',
+      status: 'Assigned'
+    },
+    {
+      id: 'SUB-111-044',
+      name: 'Prepare annual compliance report',
+      dueDate: '2026-04-20',
+      status: 'Assigned'
+    },
+    {
+      id: 'SUB-111-045',
+      name: 'Submit final report to SEBI',
+      dueDate: '2026-04-28',
+      status: 'Assigned'
+    }
+  ]
+}
+],
+
+
 
   /* =============================================================
      NOTIFICATIONS
@@ -1840,6 +2980,75 @@ CMS_DATA.updateTaskStatus = function (taskId, newStatus) {
    SPOC DASHBOARD DATA
    ================================================================ */
 CMS_DATA.spocDashboard = {
+spocProfiles: [
+  {
+    id: 'spoc-001',
+    name: 'Priya Sharma',
+    initials: 'PS',
+    email: 'priya@cms.co.in',
+    /* single branch */
+    branch: 'Bangalore',
+    branchCode: 'BLR',
+    /* multi-branch support — add branches array */
+    branches: ['Bangalore'],
+    departments: ['IT', 'Risk', 'Compliance'],
+    color: '#eef2ff',
+    textColor: '#4338ca'
+  },
+  {
+    id: 'spoc-002',
+    name: 'Arjun Shah',
+    initials: 'AS',
+    email: 'arjun@cms.co.in',
+    branch: 'Mumbai',
+    branchCode: 'MUM',
+    /* example: Arjun covers both Mumbai and Pune */
+    branches: ['Mumbai', 'Pune'],
+    departments: ['Legal', 'Finance', 'Operations'],
+    color: '#f5f3ff',
+    textColor: '#6d28d9'
+  },
+],
+
+spocObligations: [
+  /* Bangalore branch — IT, Risk, Compliance */
+  { id:'OB-3(a)', title:'Ensure all digital platforms comply with accessibility standards under RPwD Act',action:"Identify all digital platforms such as website, mobile app, investor portal and WhatsApp-based servicing", department:'IT', assignee:'Raj Iyer', approver:'Vikram Nair', status:'In Progress', dueDate:'2025-06-30', risk:'High', circular:'CIRC-001', branch:'Bangalore', _workflowState:'' },
+  { id:'OB-3(a)', title:'Ensure all digital platforms comply with accessibility standards under RPwD Act',action:'Review whether distributor platforms such as Groww, PhonePe and Upstox are covered', department:'IT', assignee:'Raj Iyer', approver:'Vikram Nair', status:'In Progress', dueDate:'2025-06-30', risk:'High', circular:'CIRC-001', branch:'Bangalore', _workflowState:'' },
+  { id:'OB-3(a)', title:'Ensure all digital platforms comply with accessibility standards under RPwD Act',action:'Map all digital channels against Section 40 accessibility requirements',action:"Identify all digital platforms such as website, mobile app, investor portal and WhatsApp-based servicing", department:'IT', assignee:'Raj Iyer', approver:'Vikram Nair', status:'In Progress', dueDate:'2025-06-30', risk:'High', circular:'CIRC-001', branch:'Bangalore', _workflowState:'' },
+  { id:'OB-3(b)', title:'Provide accessible information and communication technology to persons with disabilities', action:"Ensure content is available in accessible formats",department:'IT', assignee:'Anand Kumar', approver:'Vikram Nair', status:'In Progress', dueDate:'2025-05-15', risk:'High', circular:'CIRC-001', branch:'Bangalore', _workflowState:'' },
+  { id:'OB-3(b)', title:'Provide accessible information and communication technology to persons with disabilities', action:"Provide sign language interpretation, audio description and closed captioning",department:'IT', assignee:'Anand Kumar', approver:'Vikram Nair', status:'In Progress', dueDate:'2025-05-15', risk:'High', circular:'CIRC-001', branch:'Bangalore', _workflowState:'' },
+  { id:'OB-3(b)', title:'Provide accessible information and communication technology to persons with disabilities', action:"Review all website and mobile content for hearing and visual accessibility",department:'IT', assignee:'Anand Kumar', approver:'Vikram Nair', status:'In Progress', dueDate:'2025-05-15', risk:'High', circular:'CIRC-001', branch:'Bangalore', _workflowState:'' },
+  { id:'OB-3(d)', title:'Ensure websites and uploaded documents comply with accessibility standards',action:"Ensure website follows Government website accessibility guidelines", department:'IT', assignee:'Sneha Mehta', approver:'Vikram Nair', status:'Overdue', dueDate:'2025-04-01', risk:'Medium', circular:'CIRC-002', branch:'Bangalore', _workflowState:'' },
+  { id:'OB-3(d)', title:'Ensure websites and uploaded documents comply with accessibility standards',department:'IT', assignee:'Sneha Mehta', action:"Publish documents in OCR-based PDF or ePUB format",approver:'Vikram Nair', status:'Overdue', dueDate:'2025-04-01', risk:'Medium', circular:'CIRC-002', branch:'Bangalore', _workflowState:'' },
+  { id:'OB-3(d)', title:'Ensure websites and uploaded documents comply with accessibility standards',department:'IT', assignee:'Sneha Mehta', action:"Review all uploaded documents for accessibility before publishing",approver:'Vikram Nair', status:'Overdue', dueDate:'2025-04-01', risk:'Medium', circular:'CIRC-002', branch:'Bangalore', _workflowState:'' },
+  { id:'OB-OB-004', title:'Ensure ICT systems comply with IS 17802 accessibility requirements',action:"Review all uploaded documents for accessibility before publishing", department:'IT', assignee:'Rahul Verma', approver:'Anita Singh', status:'In Progress', dueDate:'2025-07-15', risk:'High', circular:'CIRC-003', branch:'Bangalore', _workflowState:'' },
+  { id:'OB-OB-005', title:'Validate accessibility of ICT products and services', department:'IT',action:"Review all uploaded documents for accessibility before publishing", assignee:'Deepak Joshi', approver:'Anita Singh', status:'In Progress', dueDate:'2025-06-01', risk:'High', circular:'CIRC-003', branch:'Bangalore', _workflowState:'' },
+  { id:'OB-OB-006', title:'Conduct annual accessibility audits', department:'IT', assignee:'Priya Nair',action:"Review all uploaded documents for accessibility before publishing", approver:'Suresh Pillai', status:'In Progress', dueDate:'2025-08-01', risk:'High', circular:'CIRC-002', branch:'Bangalore', _workflowState:'' },
+  { id:'OB-OB-007', title:'Schedule yearly audits by IAAP certified professionals', department:'CoITmpliance',action:"Review all uploaded documents for accessibility before publishing", assignee:'Meera Rao', approver:'Suresh Pillai', status:'Overdue', dueDate:'2025-03-31', risk:'High', circular:'CIRC-002', branch:'Bangalore', _workflowState:'' },
+
+  /* Mumbai branch — Legal, Finance, Operations */
+  { id:'OB-OB-008', title:'Regulatory Filing Q1 2025', department:'Legal', assignee:'Kavitha Menon', approver:'Arjun Shah', status:'Open', dueDate:'2025-06-30', risk:'High', circular:'CIRC-004', branch:'Mumbai', _workflowState:'' },
+  { id:'OB-OB-009', title:'Contract Review — Vendor Agreements', department:'Legal', assignee:'Deepak Iyer', approver:'Arjun Shah', status:'In Progress', dueDate:'2025-05-20', risk:'Medium', circular:'CIRC-004', branch:'Mumbai', _workflowState:'' },
+  { id:'OB-OB-010', title:'Litigation Risk Disclosure', department:'Legal', assignee:'Nisha Gupta', approver:'Arjun Shah', status:'Overdue', dueDate:'2025-03-15', risk:'High', circular:'CIRC-004', branch:'Mumbai', _workflowState:'' },
+  { id:'SPOC-OB-011', title:'Budget Variance Reporting', department:'Finance', assignee:'Neha Patel', approver:'Ravi Krishnan', status:'Open', dueDate:'2025-07-01', risk:'Medium', circular:'CIRC-005', branch:'Mumbai', _workflowState:'' },
+  { id:'SPOC-OB-012', title:'Tax Compliance Filing', department:'Finance', assignee:'Ravi Krishnan', approver:'Neha Patel', status:'In Progress', dueDate:'2025-05-31', risk:'High', circular:'CIRC-005', branch:'Mumbai', _workflowState:'' },
+  { id:'SPOC-OB-013', title:'Vendor Risk Register Update', department:'Operations', assignee:'Suresh Kumar', approver:'Divya Iyer', status:'Open', dueDate:'2025-08-15', risk:'Medium', circular:'CIRC-005', branch:'Mumbai', _workflowState:'' },
+  { id:'SPOC-OB-014', title:'Business Continuity Plan Test', department:'Operations', assignee:'Divya Iyer', approver:'Suresh Kumar', status:'Overdue', dueDate:'2025-04-10', risk:'High', circular:'CIRC-005', branch:'Mumbai', _workflowState:'' },
+],
+
+spocActivities: [
+  { id:'SPOC-ACT-001', title:'Submit MFA implementation report', obligation:'SPOC-OB-001', assignee:'Raj Iyer', department:'IT', status:'Open', dueDate:'2025-06-25', branch:'Bangalore' },
+  { id:'SPOC-ACT-002', title:'Upload vulnerability scan results', obligation:'SPOC-OB-002', assignee:'Anand Kumar', department:'IT', status:'In Progress', dueDate:'2025-05-10', branch:'Bangalore' },
+  { id:'SPOC-ACT-003', title:'Draft encryption policy document', obligation:'SPOC-OB-003', assignee:'Sneha Mehta', department:'IT', status:'Overdue', dueDate:'2025-03-28', branch:'Bangalore' },
+  { id:'SPOC-ACT-004', title:'Update risk register entries', obligation:'SPOC-OB-004', assignee:'Rahul Verma', department:'Risk', status:'Open', dueDate:'2025-07-10', branch:'Bangalore' },
+  { id:'SPOC-ACT-005', title:'Prepare AML training materials', obligation:'SPOC-OB-006', assignee:'Priya Nair', department:'Compliance', status:'Open', dueDate:'2025-07-25', branch:'Bangalore' },
+  { id:'SPOC-ACT-006', title:'File Q1 regulatory return', obligation:'SPOC-OB-008', assignee:'Kavitha Menon', department:'Legal', status:'Open', dueDate:'2025-06-25', branch:'Mumbai' },
+  { id:'SPOC-ACT-007', title:'Review vendor contract clauses', obligation:'SPOC-OB-009', assignee:'Deepak Iyer', department:'Legal', status:'In Progress', dueDate:'2025-05-15', branch:'Mumbai' },
+  { id:'SPOC-ACT-008', title:'Prepare budget variance report', obligation:'SPOC-OB-011', assignee:'Neha Patel', department:'Finance', status:'Open', dueDate:'2025-06-28', branch:'Mumbai' },
+  { id:'SPOC-ACT-009', title:'Complete tax computation sheet', obligation:'SPOC-OB-012', assignee:'Ravi Krishnan', department:'Finance', status:'In Progress', dueDate:'2025-05-28', branch:'Mumbai' },
+  { id:'SPOC-ACT-010', title:'Test BCP scenarios', obligation:'SPOC-OB-014', assignee:'Divya Iyer', department:'Operations', status:'Overdue', dueDate:'2025-04-05', branch:'Mumbai' },
+],
+
   kpi: {
     pendingReview: 7,
     overdueObligations: 3,
@@ -1928,6 +3137,7 @@ CMS_DATA.spocDashboard = {
   ]
 };
 
+
 /* ================================================================
    FLAGGED EVIDENCE DATA
    ================================================================ */
@@ -1997,3 +3207,66 @@ CMS_DATA.flaggedEvidence = [
     dateFlagged: '2024-05-25'
   }
 ];
+
+
+// Transform circular JSON into flat tasks array
+function flattenCircularToTasks(circularData) {
+  const tasks = [];
+  
+  // Process chapters
+  const allSections = [
+    ...(circularData.chapters || []),
+    ...(circularData.annexures || [])
+  ];
+
+  allSections.forEach(section => {
+    (section.clauses || []).forEach(clause => {
+      if (!clause.id) return; // skip empty clauses
+      
+      const actionables = clause.actionables || [];
+      
+      if (actionables.length === 0) {
+        // No actionables → still show the obligation as 1 row
+        tasks.push({
+          id:           `${circularData.id}-${clause.id}`,
+          obligationId: clause.id,
+          title:        clause.obligations?.[0] || clause.text.slice(0, 80),
+          actionable:   '—',
+          circularId:   circularData.id,
+          clauseRef:    clause.id,
+          department:   clause.department || 'Compliance',
+          dueDate:      clause.dueDate || null,
+          assignee:     clause.assignee || 'Unassigned',
+          risk:         clause.risk || 'Medium',
+          status:       clause.status || 'Open',
+          priority:     clause.risk || 'Medium',
+          _workflowState: null,
+        });
+      } else {
+        // One row per actionable
+        actionables.forEach((actionable, idx) => {
+          tasks.push({
+            id:           `${circularData.id}-${clause.id}-A${idx + 1}`,
+            obligationId: clause.id,           // same for all rows of this clause
+            title:        clause.obligations?.[0] || clause.text.slice(0, 80), // same
+            actionable:   actionable,           // unique per row
+            circularId:   circularData.id,
+            clauseRef:    clause.id,
+            department:   clause.department || 'Compliance',
+            dueDate:      clause.dueDate || null,
+            assignee:     clause.assignee || 'Unassigned',
+            risk:         clause.risk || 'Medium',
+            status:       clause.status || 'Open',
+            priority:     clause.risk || 'Medium',
+            _workflowState: null,
+          });
+        });
+      }
+    });
+  });
+
+  return tasks;
+}
+
+// Then initialize:
+CMS_DATA.tasks = flattenCircularToTasks(YOUR_CIRCULAR_JSON);

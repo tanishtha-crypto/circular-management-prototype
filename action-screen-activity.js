@@ -259,6 +259,39 @@ window.actdSwitchTab = function(tab) {
 /* ══════════════════════════════════════════════════════════════
    PANE: OVERVIEW
    ══════════════════════════════════════════════════════════════ */
+function actdDueDateColored(dateStr) {
+  if (!dateStr) return `<span style="color:#94a3b8;font-weight:600">N/A</span>`;
+  const due = new Date(dateStr), now = new Date();
+  const diff = Math.ceil((due - now) / (1000*60*60*24));
+  let color='#10b981', bg='#dcfce7';
+  if (diff < 0)      { color='#ef4444'; bg='#fee2e2'; }
+  else if (diff <= 7){ color='#f59e0b'; bg='#fef9c3'; }
+  else if (diff > 60){ color='#94a3b8'; bg='#f1f5f9'; }
+  return `<span style="background:${bg};color:${color};font-weight:700;padding:2px 9px;border-radius:99px;font-size:12px;">${actdFmtDate(dateStr)}</span>`;
+}
+
+function actdApplyActionStatus(act, type) {
+  const cfg = {
+    'Send for Clarification': { label:'💬 Sent for Clarification', color:'#854d0e', bg:'#fef9c3', border:'#fde68a', icon:'💬', time:'just now' },
+    'Send for Closure':       { label:'✅ Sent for Closure',       color:'#166534', bg:'#dcfce7', border:'#86efac', icon:'✅', time:'just now' },
+    'Send for Recall':        { label:'🔁 Sent for Recall',        color:'#991b1b', bg:'#fee2e2', border:'#fca5a5', icon:'🔁', time:'just now' },
+  };
+  act._actionStatus = cfg[type] || { label:type, color:'#475569', bg:'#f1f5f9', border:'#e2e8f0', icon:'→', time:'just now' };
+  /* refresh list table cell if visible */
+  const cell = document.getElementById(`act-action-cell-${act.id}`);
+  if (cell) cell.innerHTML = `<span style="background:${act._actionStatus.bg};color:${act._actionStatus.color};border:1px solid ${act._actionStatus.border};padding:3px 10px;border-radius:99px;font-size:11px;font-weight:700;">${act._actionStatus.label}</span>`;
+}
+
+function actdToggleAcc(id) {
+  const body = document.getElementById('actd-acc-' + id);
+  const arr  = document.getElementById('actd-arr-' + id);
+  if (!body) return;
+  const open = body.style.display !== 'none';
+  body.style.display = open ? 'none' : 'block';
+  if (arr) arr.style.transform = open ? 'rotate(-90deg)' : 'rotate(0deg)';
+}
+window.actdToggleAcc = actdToggleAcc;
+
 function actdPaneOverview(a) {
   const sc = s => ({Complete:'#10b981','In Progress':'#f59e0b',Overdue:'#ef4444',Open:'#6366f1'})[s]||'#64748b';
   const sb = s => ({Complete:'#dcfce7','In Progress':'#fef9c3',Overdue:'#fee2e2',Open:'#eef2ff'})[s]||'#f1f5f9';
@@ -273,134 +306,155 @@ function actdPaneOverview(a) {
     { step:'Closed',    role:'Approver', name:a.owner   ||'—', dept:'',          level:5 },
   ];
 
-  // sibling activities
-  const siblings = Object.values(ACTD_DUMMY).filter(x => x.obligationId === a.obligationId);
-  const doneCount = siblings.filter(x => x.status === 'Complete').length;
-  const pct = siblings.length ? Math.round(doneCount / siblings.length * 100) : 0;
-  const pctColor = pct === 100 ? '#10b981' : pct >= 50 ? '#f59e0b' : '#ef4444';
-
-  // requests thread
   if (!a._requests) a._requests = [];
+
+  const actionStatus = a._actionStatus;
+  const actionBannerHTML = actionStatus ? `
+    <div style="display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:8px;margin-bottom:16px;
+      background:${actionStatus.bg};border:1px solid ${actionStatus.border};font-size:13px;font-weight:600;color:${actionStatus.color};">
+      ${actionStatus.icon} <span>${actionStatus.label}</span>
+      <span style="margin-left:auto;font-size:11px;font-weight:500;opacity:.75;">${actionStatus.time}</span>
+    </div>` : '';
 
   return `
   <div class="tdp-inner">
 
-    <!-- ── ACTIVITY DETAILS ── -->
-    <div class="tdp-section-label">Activity Details</div>
-    <div class="tdp-dl" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px 20px;">
-      ${actdRow('Obligation',  `<span class="tdp-link"
-                                  onclick="openTaskDetail('${a.obligationId}')"
-                                  style="color:#6366f1;cursor:pointer;font-weight:600">
-                                  ${a.obligationId} — ${a.obligationTitle}</span>`)}
-      ${actdRow('Circular',    `<span class="tdp-link"
-                                  onclick="_actdGoToAI('${a.circularId}')"
-                                  style="color:#6366f1;cursor:pointer;font-weight:600">
-                                  ${a.circularId}</span>`)}
-      ${actdRow('Assigned To', a.assignee||'—')}
-      ${actdRow('Department',  a.dept||'—')}
-      ${actdRow('Due Date',    actdFmtDate(a.dueDate))}
-      ${actdRow('Priority',    a.priority||'—')}
-      ${actdRow('Status',      `<span style="color:${sc(a.status)};font-weight:700">${a.status}</span>`)}
-    </div>
+    ${actionBannerHTML}
 
-    <!-- ── RAISE A REQUEST ── -->
-    <div class="tdp-section-label" style="margin-top:28px">Raise a Request</div>
-    <div class="tdp-action-row-card">
-
-      <!-- Form -->
-      <div class="tdp-action-row-inner">
-        <div class="tdp-ar-field">
-          <label class="tdp-ar-label">Request Type</label>
-          <select class="tdp-input tdp-ar-sel" id="actd-ar-type-${a.id}"
-                  onchange="actdArChange('${a.id}',this)">
-            <option value="">— Select type —</option>
-            <option value="Ask for Clarification">Ask for Clarification</option>
-            ${document.body?.dataset?.userRole === 'assignee' ? '' : '<option value="Update">Update</option>'}
-            <option value="Ask for Closure">Ask for Closure</option>
-            ${document.body?.dataset?.userRole === 'assignee' ? '' : '<option value="Ask for Open">Ask for Open</option>'}
-          </select>
-        </div>
-        <div class="tdp-ar-field">
-          <label class="tdp-ar-label">Send To</label>
-          <select class="tdp-input tdp-ar-sel" id="actd-ar-person-${a.id}">
-            <option value="">— Select person —</option>
-            ${a.assignee?`<option value="${a.assignee}">Assignee: ${a.assignee}</option>`:''}
-            ${a.reviewer?`<option value="${a.reviewer}">Reviewer: ${a.reviewer}</option>`:''}
-            ${a.owner   ?`<option value="${a.owner}">Owner / Approver: ${a.owner}</option>`:''}
-          </select>
-        </div>
-        <div class="tdp-ar-field tdp-ar-field-grow">
-          <label class="tdp-ar-label">Note (optional)</label>
-          <input class="tdp-input" id="actd-ar-note-${a.id}" placeholder="Add a brief note…"/>
-        </div>
-        <button class="tdp-btn tdp-btn-primary" style="align-self:flex-end"
-                onclick="actdArSubmit('${a.id}')">Send →</button>
-      </div>
-
-      <!-- Type hint -->
-      <div class="tdp-ar-status-note" id="actd-ar-note-disp-${a.id}" style="display:none"></div>
-
-      <!-- Request Thread — always in DOM, toggled by JS -->
-      <div id="actd-req-thread-${a.id}"
-           style="display:${(a._requests && a._requests.length) ? 'block' : 'none'};
-                  border-top:1px solid var(--border,#e2e8f0);">
-        <div style="display:flex;align-items:center;justify-content:space-between;
-                    padding:10px 16px 8px;">
-          <span style="font-size:10px;font-weight:800;color:#94a3b8;
-                       text-transform:uppercase;letter-spacing:.07em">
-            Request History
-          </span>
-          <span id="actd-req-count-${a.id}"
-                style="font-size:10px;font-weight:700;color:#6366f1;
-                       background:#eef2ff;border:1px solid #c7d2fe;
-                       padding:2px 8px;border-radius:99px;">
-            ${(a._requests||[]).length} sent
-          </span>
-        </div>
-        <div style="padding:0 16px 14px;display:flex;flex-direction:column;gap:8px;"
-             id="actd-req-list-${a.id}">
-          ${(a._requests||[]).map(r => actdReqRowHTML(r)).join('')}
-        </div>
-      </div>
-
-    </div>
-
-    
-
-    <!-- ── WORKFLOW ── -->
-    <div class="tdp-section-label" style="margin-top:28px">Workflow</div>
-    <div class="tdp-wf-details-card">
-      <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px">
-        <span style="font-size:10px;font-weight:700;color:#94a3b8;
-                     text-transform:uppercase;letter-spacing:.07em">Current Level</span>
-        <span style="background:#eef2ff;color:#4338ca;border:1px solid #c7d2fe;
-                     border-radius:20px;font-size:12px;font-weight:800;padding:3px 12px;">
-          Level ${a.workflowLevel||0} — ${a.workflowStage||'—'}
+    <!-- ① RAISE A REQUEST — open by default -->
+    <div style="border:1px solid #e2e8f0;border-radius:10px;overflow:hidden;margin-bottom:12px;">
+      <div onclick="actdToggleAcc('raise-req-${a.id}')" style="display:flex;align-items:center;justify-content:space-between;padding:13px 16px;background:#fff7ed;cursor:pointer;user-select:none;">
+        <span style="font-size:12px;font-weight:800;color:#92400e;text-transform:uppercase;letter-spacing:.07em;display:flex;align-items:center;gap:8px;">
+          <span style="width:3px;height:14px;background:#f59e0b;border-radius:2px;display:inline-block;"></span>
+          Take Action 
         </span>
+        <span id="actd-arr-raise-req-${a.id}" style="color:#94a3b8;font-size:14px;transition:transform .2s;">▼</span>
       </div>
-      <div class="tdp-wf-stepper-people">
-        ${wfSteps.map((st,i) => {
-          const p    = stepPeople[i];
-          const done = i <= wfIdx;
-          const curr = st === a.workflowStage;
-          return `
-          <div class="tdp-wfsp-col ${done?'done':''} ${curr?'current':''}">
-            <div class="tdp-wfsp-level-badge ${done?'done':''} ${curr?'current':''}">L${p.level}</div>
-            <div class="tdp-wfsp-dot">${i < wfIdx ? '✓' : i+1}</div>
-            <div class="tdp-wfsp-step-lbl">${st}</div>
-            <div class="tdp-wfsp-person-card">
-              <span class="tdp-av tdp-av-sm">${actdInitials(p.name)}</span>
-              <div>
-                <div class="tdp-wfsp-role">${p.role}</div>
-                <div class="tdp-wfsp-name">${p.name}</div>
-                ${p.dept?`<div class="tdp-wfsp-dept">${p.dept}</div>`:''}
-              </div>
+      <div id="actd-acc-raise-req-${a.id}" style="border-top:1px solid #fde68a;background:#fff;">
+        <div class="tdp-action-row-card" style="border:none;border-radius:0;box-shadow:none;">
+          <div class="tdp-action-row-inner">
+            <div class="tdp-ar-field">
+              <label class="tdp-ar-label">Request Action</label>
+              <select class="tdp-input tdp-ar-sel" id="actd-ar-type-${a.id}" onchange="actdArChange('${a.id}',this)">
+                <option value="">— Select type —</option>
+                <option value="Send for Clarification">Send for Clarification</option>
+                <option value="Send for Closure">Send for Closure</option>
+                <option value="Send for Recall">Send for Recall</option>
+              </select>
             </div>
+            <div class="tdp-ar-field">
+              <label class="tdp-ar-label">Send To</label>
+              <select class="tdp-input tdp-ar-sel" id="actd-ar-person-${a.id}">
+                <option value="">— Select person —</option>
+                ${a.assignee?`<option value="${a.assignee}"> ${a.assignee}</option>`:''}
+                ${a.reviewer?`<option value="${a.reviewer}">${a.reviewer}</option>`:''}
+                ${a.owner   ?`<option value="${a.owner}">${a.owner}</option>`:''}
+              </select>
+            </div>
+            <button class="tdp-btn tdp-btn-primary" style="align-self:flex-end" onclick="actdArSubmit('${a.id}')">Send →</button>
           </div>
-          ${i<wfSteps.length-1
-            ?`<div class="tdp-wfsp-connector ${i<wfIdx?'done':''}"></div>`
-            :''}`;
-        }).join('')}
+          <div style="padding:0 16px 12px;">
+            <label class="tdp-ar-label">Note / Message</label>
+            <textarea class="tdp-input" id="actd-ar-note-${a.id}" rows="3"
+              placeholder="Describe the clarification needed or reason for closure…"
+              style="width:100%;margin-top:4px;resize:vertical;line-height:1.6;"></textarea>
+          </div>
+          <div style="margin:0 16px 12px;padding:14px 16px;background:#f8fafc;border:1.5px dashed #cbd5e1;border-radius:8px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;">
+            <div>
+              <div style="font-size:13px;font-weight:700;color:#334155;">Attach Evidence (optional)</div>
+              <div style="font-size:11px;color:#64748b;margin-top:2px;">Upload supporting documents for this request</div>
+            </div>
+            <label style="display:inline-flex;align-items:center;gap:7px;padding:8px 16px;background:#fff;border:1.5px solid #6366f1;border-radius:7px;font-size:12px;font-weight:700;color:#6366f1;cursor:pointer;white-space:nowrap;">
+              📎 Attach File
+              <input type="file" style="display:none;" onchange="actdArAttachWithScore(this,'${a.id}')"/>
+            </label>
+          </div>
+          <div id="actd-ar-attach-list-${a.id}" style="margin:0 16px 12px;display:flex;flex-wrap:wrap;gap:6px;"></div>
+          <div class="tdp-ar-status-note" id="actd-ar-note-disp-${a.id}" style="display:none;margin:0 16px 12px;border-radius:7px;"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ② ACTIVITY DETAILS — collapsed -->
+    <div style="border:1px solid #e2e8f0;border-radius:10px;overflow:hidden;margin-bottom:12px;">
+      <div onclick="actdToggleAcc('act-details-${a.id}')" style="display:flex;align-items:center;justify-content:space-between;padding:13px 16px;background:#f8fafc;cursor:pointer;user-select:none;">
+        <span style="font-size:12px;font-weight:800;color:#475569;text-transform:uppercase;letter-spacing:.07em;display:flex;align-items:center;gap:8px;">
+          <span style="width:3px;height:14px;background:#6366f1;border-radius:2px;display:inline-block;"></span>
+          Activity Details
+        </span>
+        <span id="actd-arr-act-details-${a.id}" style="color:#94a3b8;font-size:14px;transition:transform .2s;transform:rotate(-90deg);">▼</span>
+      </div>
+      <div id="actd-acc-act-details-${a.id}" style="display:none;padding:16px;border-top:1px solid #e2e8f0;background:#fff;">
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;">
+          <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:10px 13px;">
+            <div style="font-size:10px;font-weight:800;color:#94a3b8;text-transform:uppercase;letter-spacing:.07em;margin-bottom:5px;">Due Date</div>
+            <div>${actdDueDateColored(a.dueDate)}</div>
+          </div>
+          <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:10px 13px;">
+            <div style="font-size:10px;font-weight:800;color:#94a3b8;text-transform:uppercase;letter-spacing:.07em;margin-bottom:5px;">Department</div>
+            <div style="font-size:13px;font-weight:600;color:#1e293b;">${a.dept||'—'}</div>
+          </div>
+          <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:10px 13px;">
+            <div style="font-size:10px;font-weight:800;color:#94a3b8;text-transform:uppercase;letter-spacing:.07em;margin-bottom:5px;">Status</div>
+            <span style="background:${sb(a.status)};color:${sc(a.status)};border:1px solid ${sc(a.status)}44;padding:3px 11px;border-radius:99px;font-size:12px;font-weight:700;">${a.status}</span>
+          </div>
+          <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:10px 13px;">
+            <div style="font-size:10px;font-weight:800;color:#94a3b8;text-transform:uppercase;letter-spacing:.07em;margin-bottom:5px;">Assigned To</div>
+            <div style="font-size:13px;font-weight:600;color:#1e293b;">${a.assignee||'—'}</div>
+          </div>
+          <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:10px 13px;grid-column:span 2;">
+            <div style="font-size:10px;font-weight:800;color:#94a3b8;text-transform:uppercase;letter-spacing:.07em;margin-bottom:5px;">Parent Obligation</div>
+            <span style="font-size:13px;font-weight:600;color:#6366f1;cursor:pointer;" onclick="openTaskDetail('${a.obligationId}')">${a.obligationId} — ${a.obligationTitle} ↗</span>
+          </div>
+          <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:10px 13px;grid-column:span 3;">
+            <div style="font-size:10px;font-weight:800;color:#94a3b8;text-transform:uppercase;letter-spacing:.07em;margin-bottom:5px;">Action Taken</div>
+            <span style="font-size:12px;font-weight:600;color:${a._actionStatus?a._actionStatus.color:'#94a3b8'}">
+              ${a._actionStatus?a._actionStatus.label:'— No action yet —'}
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ③ WORKFLOW — collapsed -->
+    <div style="border:1px solid #e2e8f0;border-radius:10px;overflow:hidden;">
+      <div onclick="actdToggleAcc('workflow-${a.id}')" style="display:flex;align-items:center;justify-content:space-between;padding:13px 16px;background:#f8fafc;cursor:pointer;user-select:none;">
+        <span style="font-size:12px;font-weight:800;color:#475569;text-transform:uppercase;letter-spacing:.07em;display:flex;align-items:center;gap:8px;">
+          <span style="width:3px;height:14px;background:#10b981;border-radius:2px;display:inline-block;"></span>
+          Workflow
+        </span>
+        <span id="actd-arr-workflow-${a.id}" style="color:#94a3b8;font-size:14px;transition:transform .2s;transform:rotate(-90deg);">▼</span>
+      </div>
+      <div id="actd-acc-workflow-${a.id}" style="display:none;border-top:1px solid #e2e8f0;background:#fff;">
+        <div class="tdp-wf-details-card" style="border:none;border-radius:0;box-shadow:none;">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px">
+            <span style="font-size:10px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.07em">Current Level</span>
+            <span style="background:#eef2ff;color:#4338ca;border:1px solid #c7d2fe;border-radius:20px;font-size:12px;font-weight:800;padding:3px 12px;">
+              Level ${a.workflowLevel||0} — ${a.workflowStage||'—'}
+            </span>
+          </div>
+          <div class="tdp-wf-stepper-people">
+            ${wfSteps.map((st,i) => {
+              const p = stepPeople[i];
+              const done = i <= wfIdx, curr = st === a.workflowStage;
+              return `
+              <div class="tdp-wfsp-col ${done?'done':''} ${curr?'current':''}">
+                <div class="tdp-wfsp-level-badge ${done?'done':''} ${curr?'current':''}">L${p.level}</div>
+                <div class="tdp-wfsp-dot">${i < wfIdx ? '✓' : i+1}</div>
+                <div class="tdp-wfsp-step-lbl">${st}</div>
+                <div class="tdp-wfsp-person-card">
+                  <span class="tdp-av tdp-av-sm">${actdInitials(p.name)}</span>
+                  <div>
+                    <div class="tdp-wfsp-role">${p.role}</div>
+                    <div class="tdp-wfsp-name">${p.name}</div>
+                    ${p.dept?`<div class="tdp-wfsp-dept">${p.dept}</div>`:''}
+                  </div>
+                </div>
+              </div>
+              ${i<wfSteps.length-1?`<div class="tdp-wfsp-connector ${i<wfIdx?'done':''}"></div>`:''}`;
+            }).join('')}
+          </div>
+        </div>
       </div>
     </div>
 
@@ -568,93 +622,147 @@ function actdPaneActivities(a) {
    PANE: EVIDENCE — mirrors obligation evidence exactly
    ══════════════════════════════════════════════════════════════ */
 function actdPaneEvidence(a) {
-  const evs = a.evidence || [];
+  const uploadedEvs = (a.evidence || []).map(ev => ({ ...ev, activityName: a.name }));
+
+  const DUMMY_EV = [
+    { id:'ADEV-001', activityName:a.name, type:'Policy Document',  file:'Activity_SOP_v1.pdf',         uploadedBy:a.assignee||'Priya Nair',  date:'12 Jan 2025', status:'Verified',       score:92, scoreLabel:'Excellent', scoreBg:'#dcfce7', scoreColor:'#15803d' },
+    { id:'ADEV-002', activityName:a.name, type:'Audit Report',     file:'Internal_Review_Q1.pdf',       uploadedBy:a.reviewer||'Anita Verma', date:'20 Jan 2025', status:'Pending Review', score:71, scoreLabel:'Good',      scoreBg:'#fef9c3', scoreColor:'#b45309' },
+    { id:'ADEV-003', activityName:a.name, type:'Training Record',  file:'Staff_Completion_Log.xlsx',    uploadedBy:'Raj Iyer',               date:'05 Feb 2025', status:'Pending Review', score:55, scoreLabel:'Moderate',  scoreBg:'#fef3c7', scoreColor:'#d97706' },
+    { id:'ADEV-004', activityName:a.name, type:'Board Resolution', file:'Board_Sign_Off.pdf',           uploadedBy:a.assignee||'Priya Nair',  date:'14 Feb 2025', status:'Verified',       score:87, scoreLabel:'Strong',   scoreBg:'#dcfce7', scoreColor:'#15803d' },
+  ];
+
+  const allEvs = [...uploadedEvs, ...DUMMY_EV];
   const sc  = s => s==='Verified'?'#10b981':'#f59e0b';
   const sb  = s => s==='Verified'?'#dcfce7':'#fef9c3';
 
+  const avgScore = Math.round(allEvs.reduce((sum, e) => sum + (e.score||70), 0) / allEvs.length);
+  const overallLabel = avgScore>=90?'Excellent':avgScore>=75?'Strong':avgScore>=60?'Good':'Needs Improvement';
+  const overallColor = avgScore>=90?'#15803d':avgScore>=75?'#0369a1':avgScore>=60?'#b45309':'#dc2626';
+  const overallBg    = avgScore>=90?'#dcfce7':avgScore>=75?'#dbeafe':avgScore>=60?'#fef9c3':'#fee2e2';
+
   return `
   <div class="tdp-inner">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
-      <div class="tdp-section-label" style="margin-bottom:0">
-        Evidence Documents
-        <span style="font-size:13px;font-weight:500;color:#64748b;text-transform:none;letter-spacing:0">
-          — ${evs.length} document${evs.length!==1?'s':''}
-        </span>
+
+    <!-- Header row -->
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px;">
+      <div>
+        <div style="font-size:12px;font-weight:800;color:#475569;text-transform:uppercase;letter-spacing:.07em;">Evidence Documents</div>
+        <div style="font-size:13px;color:#64748b;margin-top:2px;">${allEvs.length} document${allEvs.length!==1?'s':''} uploaded</div>
       </div>
-      <button class="tdp-btn tdp-btn-ghost tdp-btn-sm"
-              onclick="actdToggleAddEv('${a.id}')">＋ Add Evidence</button>
+      <button onclick="actdToggleAddEv('${a.id}')"
+        style="display:inline-flex;align-items:center;gap:7px;padding:9px 18px;background:#6366f1;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;"
+        onmouseover="this.style.background='#4f46e5'" onmouseout="this.style.background='#6366f1'">
+        📎 Upload Evidence
+      </button>
     </div>
 
-    <!-- Add form -->
+    <!-- Add form (hidden by default) -->
     <div id="actd-add-ev-${a.id}"
-         style="display:none;background:#fafbff;border:1px solid #c7d2fe;
-                border-radius:9px;padding:16px;margin-bottom:16px">
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+         style="display:none;background:#fafbff;border:1px solid #c7d2fe;border-radius:9px;padding:16px;margin-bottom:16px;">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">
         <div class="tdp-ar-field">
           <label class="tdp-ar-label">Evidence Type</label>
           <select class="tdp-input" id="actd-ev-type-${a.id}">
-            <option>Policy Document</option><option>API Logs</option>
-            <option>Training Records</option><option>Audit Trail</option>
-            <option>Screenshot</option><option>Board Resolution</option><option>Other</option>
+            <option>Policy Document</option><option>Audit Report</option>
+            <option>Training Records</option><option>Board Resolution</option>
+            <option>System Log</option><option>Screenshot</option><option>Other</option>
           </select>
         </div>
         <div class="tdp-ar-field">
           <label class="tdp-ar-label">File / Link</label>
-          <input class="tdp-input" id="actd-ev-file-${a.id}"
-                 placeholder="filename.pdf or https://…"/>
+          <input class="tdp-input" id="actd-ev-file-${a.id}" placeholder="filename.pdf or https://…"/>
         </div>
       </div>
-      <div style="display:flex;gap:8px;justify-content:flex-end">
-        <button class="tdp-btn tdp-btn-ghost tdp-btn-sm"
-                onclick="actdToggleAddEv('${a.id}')">Cancel</button>
-        <button class="tdp-btn tdp-btn-primary tdp-btn-sm"
-                onclick="actdSaveEv('${a.id}')">Save Evidence</button>
+
+      <!-- AI hint -->
+      <div style="background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:10px 14px;font-size:12px;color:#92400e;line-height:1.6;margin-bottom:10px;">
+        💡 <strong>AI Relevance Scoring:</strong> Once uploaded, AI will analyse the document and assign a relevance score (0–100).
+      </div>
+
+      <div style="display:flex;gap:8px;justify-content:flex-end;">
+        <button class="tdp-btn tdp-btn-ghost tdp-btn-sm" onclick="actdToggleAddEv('${a.id}')">Cancel</button>
+        <button class="tdp-btn tdp-btn-primary tdp-btn-sm" onclick="actdSaveEvWithScore('${a.id}')">📎 Upload & Score</button>
       </div>
     </div>
 
-    ${!evs.length
-      ? `<div class="tdp-empty">
-           <div style="font-size:36px;margin-bottom:12px">📎</div>
-           <p>No evidence uploaded yet.</p>
-         </div>`
-      : `<div class="tdp-tbl-wrap" style="margin-top:4px">
-           <table class="tdp-tbl">
-             <thead>
-               <tr>
-                 <th>Activity</th><th>Type</th><th>File</th>
-                 <th>Uploaded By</th><th>Date</th><th>Status</th><th></th>
-               </tr>
-             </thead>
-             <tbody>
-               ${evs.map(ev => `
-               <tr>
-                 <td style="max-width:160px;font-size:13px;font-weight:600;color:#1e293b">
-                   ${a.name}
-                 </td>
-                 <td><span class="tdp-ev-type-chip">${ev.type}</span></td>
-                 <td style="font-size:13px">${actdFIcon(ev.file)} ${ev.file}</td>
-                 <td style="font-size:13px">${ev.uploadedBy}</td>
-                 <td style="font-size:13px;color:#64748b">${ev.date}</td>
-                 <td>
-                   <span class="tdp-ev-chip"
-                         style="background:${sb(ev.status)};color:${sc(ev.status)}">
-                     ${ev.status==='Verified'?'✓ ':''}${ev.status}
-                   </span>
-                 </td>
-                 <td>
-                   ${ev.status!=='Verified'
-                     ? `<button class="tdp-btn tdp-btn-success tdp-btn-xs"
-                                onclick="actdVerifyEv('${ev.id}','${a.id}')">Verify</button>`
-                     : `<span style="color:#10b981;font-size:12px;font-weight:700">✓</span>`}
-                 </td>
-               </tr>`).join('')}
-             </tbody>
-           </table>
-         </div>`
-    }
+    <!-- Score card -->
+    <div style="background:linear-gradient(135deg,${overallBg} 0%,#fff 100%);border:1.5px solid #e2e8f0;border-radius:12px;padding:16px 20px;margin-bottom:16px;display:flex;align-items:center;gap:20px;flex-wrap:wrap;">
+      <div style="text-align:center;flex-shrink:0;">
+        <div style="width:72px;height:72px;border-radius:50%;background:${overallBg};border:3px solid ${overallColor};display:flex;flex-direction:column;align-items:center;justify-content:center;">
+          <span style="font-size:22px;font-weight:800;color:${overallColor};line-height:1;">${avgScore}</span>
+          <span style="font-size:8px;font-weight:700;color:${overallColor};text-transform:uppercase;letter-spacing:.04em;">Score</span>
+        </div>
+      </div>
+      <div style="flex:1;min-width:180px;">
+        <div style="font-size:14px;font-weight:800;color:#1e293b;">Evidence Relevance Score</div>
+        <div style="font-size:12px;color:#64748b;margin-top:3px;line-height:1.6;">AI-assessed — <strong style="color:${overallColor};">${overallLabel}</strong></div>
+        <div style="margin-top:10px;height:6px;background:#e2e8f0;border-radius:99px;overflow:hidden;">
+          <div style="height:100%;width:${avgScore}%;background:${overallColor};border-radius:99px;"></div>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:6px;flex-shrink:0;">
+        ${[['Verified',allEvs.filter(e=>e.status==='Verified').length,'#10b981'],['Pending',allEvs.filter(e=>e.status!=='Verified').length,'#f59e0b']].map(([l,n,c])=>`
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span style="width:8px;height:8px;border-radius:50%;background:${c};display:inline-block;"></span>
+          <span style="font-size:12px;font-weight:600;color:#334155;">${l}: ${n}</span>
+        </div>`).join('')}
+      </div>
+    </div>
+
+    <!-- Table -->
+    <div style="border:1px solid #e2e8f0;border-radius:10px;overflow:hidden;overflow-x:auto;">
+      <table style="width:100%;border-collapse:collapse;font-size:13px;min-width:700px;">
+        <thead>
+          <tr style="background:#f8fafc;border-bottom:2px solid #e2e8f0;">
+            <th style="padding:11px 14px;text-align:left;font-size:10px;font-weight:800;color:#64748b;text-transform:uppercase;letter-spacing:.07em;">Activity</th>
+            <th style="padding:11px 14px;text-align:left;font-size:10px;font-weight:800;color:#64748b;text-transform:uppercase;letter-spacing:.07em;">Type</th>
+            <th style="padding:11px 14px;text-align:left;font-size:10px;font-weight:800;color:#64748b;text-transform:uppercase;letter-spacing:.07em;">File</th>
+            <th style="padding:11px 14px;text-align:left;font-size:10px;font-weight:800;color:#64748b;text-transform:uppercase;letter-spacing:.07em;">Uploaded By</th>
+            <th style="padding:11px 14px;text-align:left;font-size:10px;font-weight:800;color:#64748b;text-transform:uppercase;letter-spacing:.07em;">Date</th>
+            <th style="padding:11px 14px;text-align:left;font-size:10px;font-weight:800;color:#64748b;text-transform:uppercase;letter-spacing:.07em;">AI Score</th>
+            <th style="padding:11px 14px;text-align:left;font-size:10px;font-weight:800;color:#64748b;text-transform:uppercase;letter-spacing:.07em;">Status</th>
+            
+          </tr>
+        </thead>
+        <tbody>
+          ${allEvs.map(ev => {
+            const score = ev.score||70;
+            const scoreBg    = ev.scoreBg    || (score>=80?'#dcfce7':score>=60?'#fef9c3':'#fee2e2');
+            const scoreColor = ev.scoreColor || (score>=80?'#15803d':score>=60?'#b45309':'#dc2626');
+            return `
+            <tr style="border-bottom:1px solid #f1f5f9;" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='transparent'">
+              <td style="padding:12px 14px;max-width:160px;">
+                <span style="font-size:12px;font-weight:600;color:#1e293b;display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${ev.activityName||a.name}</span>
+              </td>
+              <td style="padding:12px 14px;">
+                <span style="background:#ede9fe;color:#6d28d9;padding:2px 9px;border-radius:10px;font-size:11px;font-weight:700;">${ev.type}</span>
+              </td>
+              <td style="padding:12px 14px;font-size:12px;color:#334155;">${actdFIcon(ev.file)} <span style="font-weight:500;">${ev.file}</span></td>
+              <td style="padding:12px 14px;font-size:12px;color:#64748b;">${ev.uploadedBy}</td>
+              <td style="padding:12px 14px;font-size:12px;color:#94a3b8;white-space:nowrap;">${ev.date}</td>
+              <td style="padding:12px 14px;">
+                <div style="display:flex;align-items:center;gap:7px;">
+                  <div style="width:36px;height:36px;border-radius:50%;background:${scoreBg};border:2px solid ${scoreColor};display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:${scoreColor};flex-shrink:0;">${score}</div>
+                  <div>
+                    <div style="height:4px;background:#e2e8f0;border-radius:99px;overflow:hidden;width:60px;">
+                      <div style="height:100%;width:${score}%;background:${scoreColor};border-radius:99px;"></div>
+                    </div>
+                    <div style="font-size:10px;color:${scoreColor};font-weight:700;margin-top:2px;">${ev.scoreLabel||(score>=80?'Strong':score>=60?'Good':'Moderate')}</div>
+                  </div>
+                </div>
+              </td>
+              <td style="padding:12px 14px;">
+                <span style="background:${sb(ev.status)};color:${sc(ev.status)};padding:3px 10px;border-radius:10px;font-size:11px;font-weight:700;">${ev.status==='Verified'?'✓ ':''}${ev.status}</span>
+              </td>
+             
+            </tr>`;
+          }).join('')}
+        </tbody>
+      </table>
+    </div>
+
   </div>`;
 }
-
 /* ══════════════════════════════════════════════════════════════
    PANE: COMMENTS — mirrors obligation comments exactly
    ══════════════════════════════════════════════════════════════ */
@@ -707,10 +815,9 @@ window.actdArChange = function(actId, sel) {
   const nd = document.getElementById(`actd-ar-note-disp-${actId}`);
   if (!nd) return;
   const notes = {
-    'Ask for Clarification':{ bg:'#fef9c3',color:'#854d0e',text:'A clarification request will be sent. Activity stays open until resolved.' },
-    'Update':               { bg:'#e0f2fe',color:'#0369a1',text:'An update request will be sent to the selected person.' },
-    'Ask for Closure':      { bg:'#dcfce7',color:'#166534',text:'A closure request will be sent to your reviewer for approval.' },
-    'Ask for Open':         { bg:'#ede9fe',color:'#5b21b6',text:'The activity will be re-opened and the selected person notified.' },
+    'Send for Clarification': { bg:'#fef9c3', color:'#854d0e', text:'A clarification request will be sent. Activity stays open until resolved.' },
+    'Send for Closure':       { bg:'#dcfce7', color:'#166534', text:'A closure request will be sent to your reviewer for approval.' },
+    'Send for Recall':        { bg:'#fee2e2', color:'#991b1b', text:'The activity will be recalled and the selected person notified.' },
   };
   const n = notes[sel.value];
   if (n) { nd.style.display='block'; nd.style.background=n.bg; nd.style.color=n.color; nd.textContent=n.text; }
@@ -730,12 +837,42 @@ window.actdArChange = function(actId, sel) {
     } else {
       personSel.innerHTML = `
         <option value="">— Select person —</option>
-        ${a.assignee ? `<option value="${a.assignee}">Assignee: ${a.assignee}</option>` : ''}
-        ${a.reviewer ? `<option value="${a.reviewer}">Reviewer: ${a.reviewer}</option>` : ''}
-        ${a.owner    ? `<option value="${a.owner}">Owner / Approver: ${a.owner}</option>` : ''}
+        ${a.assignee ? `<option value="${a.assignee}"> ${a.assignee}</option>` : ''}
+        ${a.reviewer ? `<option value="${a.reviewer}"> ${a.reviewer}</option>` : ''}
+        ${a.owner    ? `<option value="${a.owner}">${a.owner}</option>` : ''}
       `;
     }
   }
+};
+
+window.actdArAttachWithScore = function(input, actId) {
+  const file = input.files[0]; if (!file) return;
+  const list = document.getElementById(`actd-ar-attach-list-${actId}`);
+  if (list) {
+    const chip = document.createElement('div');
+    chip.style.cssText = 'display:inline-flex;align-items:center;gap:6px;padding:4px 10px;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:20px;font-size:12px;font-weight:600;color:#334155;';
+    chip.innerHTML = `${actdFIcon(file.name)} ${file.name} <button onclick="this.parentElement.remove()" style="background:none;border:none;color:#94a3b8;cursor:pointer;font-size:14px;line-height:1;">×</button>`;
+    list.appendChild(chip);
+  }
+  const aiScore = Math.floor(60 + Math.random() * 38);
+  const scoreLabel = aiScore >= 90 ? 'Excellent' : aiScore >= 75 ? 'Strong' : aiScore >= 60 ? 'Good' : 'Moderate';
+  const scoreColor = aiScore >= 80 ? '#15803d' : aiScore >= 60 ? '#b45309' : '#dc2626';
+  const toastDiv = document.createElement('div');
+  toastDiv.style.cssText = `position:fixed;bottom:28px;right:28px;z-index:9999;background:#fff;border:1.5px solid #e2e8f0;border-radius:12px;padding:16px 20px;box-shadow:0 8px 28px rgba(0,0,0,.14);max-width:320px;animation:tdpIn .22s ease;display:flex;flex-direction:column;gap:8px;`;
+  toastDiv.innerHTML = `
+    <div style="display:flex;align-items:center;gap:10px;">
+      <div style="width:46px;height:46px;border-radius:50%;background:${aiScore>=80?'#dcfce7':aiScore>=60?'#fef9c3':'#fee2e2'};border:2px solid ${scoreColor};display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:800;color:${scoreColor};flex-shrink:0;">${aiScore}</div>
+      <div>
+        <div style="font-size:13px;font-weight:700;color:#1e293b;">Evidence Attached ✓</div>
+        <div style="font-size:11px;color:${scoreColor};font-weight:700;">AI Relevance Score: ${aiScore}/100 — ${scoreLabel}</div>
+      </div>
+    </div>
+    <div style="height:5px;background:#e2e8f0;border-radius:99px;overflow:hidden;">
+      <div style="height:100%;width:${aiScore}%;background:${scoreColor};border-radius:99px;"></div>
+    </div>
+    <div style="font-size:11px;color:#64748b;line-height:1.5;">${aiScore>=75?'Strong alignment detected.':'Some gaps — consider adding additional supporting documents.'}</div>`;
+  document.body.appendChild(toastDiv);
+  setTimeout(() => toastDiv.remove(), 6000);
 };
 
 window.actdArSubmit = function(actId) {
@@ -766,6 +903,12 @@ window.actdArSubmit = function(actId) {
     if (!_actdTask._requests) _actdTask._requests=[];
     _actdTask._requests.push(req);
   }
+
+  /* apply action status */
+  if (a) actdApplyActionStatus(a, type);
+  if (_actdTask && _actdTask.id === actId) actdApplyActionStatus(_actdTask, type);
+  /* re-render to show banner */
+  actdSwitchTab('overview');
 
   // show thread container
   const thread = document.getElementById(`actd-req-thread-${actId}`);
@@ -804,23 +947,48 @@ window.actdToggleAddEv = function(actId) {
   if (f) f.style.display = f.style.display==='none' ? 'block' : 'none';
 };
 
-window.actdSaveEv = function(actId) {
+window.actdSaveEvWithScore = function(actId) {
   const a = ACTD_DUMMY[actId]; if (!a) return;
   const file = document.getElementById(`actd-ev-file-${actId}`)?.value.trim();
   if (!file) { if (typeof showToast==='function') showToast('Enter a file or link','warning'); return; }
   const ev = {
-    id:         `AEV-${Date.now().toString().slice(-5)}`,
+    id:         `ADEV-${Date.now().toString().slice(-5)}`,
     type:       document.getElementById(`actd-ev-type-${actId}`)?.value || 'Document',
-    file,
+    file, activityName: a.name,
     status:     'Pending Review',
     uploadedBy: 'You',
     date:       new Date().toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'})
   };
   a.evidence.push(ev);
   if (_actdTask && _actdTask.id===actId) _actdTask.evidence.push(ev);
-  if (typeof showToast==='function') showToast('Evidence added ✓','success');
+
+  document.getElementById(`actd-add-ev-${actId}`)?.style && (document.getElementById(`actd-add-ev-${actId}`).style.display='none');
+
+  /* score popup */
+  const aiScore = Math.floor(60 + Math.random() * 38);
+  const scoreLabel = aiScore>=90?'Excellent':aiScore>=75?'Strong':aiScore>=60?'Good':'Moderate';
+  const scoreColor = aiScore>=80?'#15803d':aiScore>=60?'#b45309':'#dc2626';
+  const toastDiv = document.createElement('div');
+  toastDiv.style.cssText = `position:fixed;bottom:28px;right:28px;z-index:9999;background:#fff;border:1.5px solid #e2e8f0;border-radius:12px;padding:16px 20px;box-shadow:0 8px 28px rgba(0,0,0,.14);max-width:320px;animation:tdpIn .22s ease;display:flex;flex-direction:column;gap:8px;`;
+  toastDiv.innerHTML = `
+    <div style="display:flex;align-items:center;gap:10px;">
+      <div style="width:46px;height:46px;border-radius:50%;background:${aiScore>=80?'#dcfce7':aiScore>=60?'#fef9c3':'#fee2e2'};border:2px solid ${scoreColor};display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:800;color:${scoreColor};flex-shrink:0;">${aiScore}</div>
+      <div>
+        <div style="font-size:13px;font-weight:700;color:#1e293b;">Evidence Uploaded ✓</div>
+        <div style="font-size:11px;color:${scoreColor};font-weight:700;">AI Relevance Score: ${aiScore}/100 — ${scoreLabel}</div>
+      </div>
+    </div>
+    <div style="height:5px;background:#e2e8f0;border-radius:99px;overflow:hidden;">
+      <div style="height:100%;width:${aiScore}%;background:${scoreColor};border-radius:99px;"></div>
+    </div>
+    <div style="font-size:11px;color:#64748b;line-height:1.5;">${aiScore>=75?'Strong alignment detected.':'Some gaps — consider adding additional supporting documents.'}</div>`;
+  document.body.appendChild(toastDiv);
+  setTimeout(() => toastDiv.remove(), 6000);
+
   actdSwitchTab('evidence');
 };
+
+window.actdSaveEv = window.actdSaveEvWithScore;
 
 window.actdVerifyEv = function(evId, actId) {
   const a = ACTD_DUMMY[actId]; if (!a) return;
@@ -1022,9 +1190,9 @@ function actdInjectStyles() {
   .tdp-st-sel{font-size:13px;font-weight:700;padding:4px 10px;border-radius:7px;border:1.5px solid;cursor:pointer;outline:none;font-family:inherit;transition:all .15s;}
   .tdp-body{display:flex;flex:1;min-height:0;}
   .tdp-vtabs{width:84px;flex-shrink:0;display:flex;flex-direction:column;gap:2px;padding:14px 6px;border-right:1px solid var(--border,#e2e8f0);background:#f8fafc;}
-  .tdp-vtab{display:flex;flex-direction:column;align-items:center;gap:4px;padding:11px 4px;border-radius:8px;border:none;background:transparent;cursor:pointer;color:#94a3b8;font-family:inherit;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.3px;transition:all .15s;text-align:center;}
-  .tdp-vtab:hover{background:#fff;color:#475569;}
-  .tdp-vtab.active{background:#eef2ff;color:#4338ca;}
+  .tdp-vtab{display:flex;flex-direction:column;align-items:center;gap:4px;padding:11px 4px;border-radius:8px;border:none;background:transparent;cursor:pointer;color:#1e293b;font-family:inherit;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.3px;transition:all .15s;text-align:center;}
+  .tdp-vtab:hover{background:#e2e8f0;color:#1e293b;}
+  .tdp-vtab.active{background:#1e293b;color:#fff;}
   .tdp-vt-icon{font-size:18px;line-height:1;}
   .tdp-vt-lbl{line-height:1.2;font-size:10px;}
   .tdp-pane{flex:1;overflow-y:auto;animation:tdpIn .2s ease;background:#fafbff;}

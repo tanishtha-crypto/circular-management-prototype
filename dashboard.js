@@ -155,41 +155,49 @@ function renderDashboard() {
   area.innerHTML = buildDashboardHTML();
   initMetricCards();
   initCharts();
-  renderTodaysCirculars(null);
-  renderCalendar();
+ renderCOInbox();          // ← ADD
+  renderCOAssignQueue();    // ← ADD
+  renderCOAISuggestions();  // ← ADD
   renderAlertBanner();
-  showCalEvents(TODAY);
 }
 
 /* ═══════════════════════════════════════════════════════════════
    METRICS — 5 cards
    ═══════════════════════════════════════════════════════════════ */
 function getMetrics() {
-  const { tasks, circulars } = DATA();
-  const completed     = tasks.filter(t => t.status === 'Complete').length;
-  const completionPct = Math.round((completed / tasks.length) * 100);
+  const { tasks } = DATA();
   return [
-    { filter:'total',      icon:'◫', accent:'#3b82f6', label:'Total Circulars',
-      value: circulars.length,
-      sub: `${circulars.filter(c=>c.type==='Master').length} master · ${circulars.filter(c=>c.type==='Regular').length} regular`,
-      trend:'↑ +2 this month', trendUp:true },
-    // { filter:'active',     icon:'◉', accent:'#10b981', label:'Active Circulars',
-    //   value: circulars.filter(c=>c.status==='Active').length,
-    //   sub:'Currently monitored', trend:'✓ All tracked', trendUp:true },
-    { filter:'open',       icon:'⊡', accent:'#f59e0b', label:'Open Actionables',
-      value: tasks.filter(t=>t.status==='Open').length,
-      sub:`${tasks.filter(t=>t.status==='In Progress').length} in progress`,
-      trend:'↑ Needs attention', trendUp:false },
-    { filter:'overdue',    icon:'⚠', accent:'#ef4444', label:'Overdue Actions',
-      value: tasks.filter(t=>t.status==='Overdue').length,
-      sub:'Past due date — act now', trend:'↑ Immediate action', trendUp:false },
-    { filter:'completion', icon:'◎', accent:'#0ea5e9', label:'Completion Rate',
-      value: completionPct+'%',
-      sub:`${completed} of ${tasks.length} tasks done`,
-      trend:'↑ +8% vs last month', trendUp:true }
+    { filter:'pending-ai',  icon:'🤖', accent:'#6366f1',
+      label:'AI Suggestions Pending',
+      value: 8,
+      sub: '3 high risk · Awaiting acceptance',
+      trend:'↑ Review now', trendUp:false },
+
+    { filter:'unassigned',  icon:'⊡', accent:'#f59e0b',
+      label:'Unassigned Obligations',
+      value: tasks.filter(t => !t.assignee || t.assignee === 'Unassigned').length || 11,
+      sub:'Needs dept + assignee',
+      trend:'→ Assign now', trendUp:false },
+
+    { filter:'inbox',       icon:'📥', accent:'#3b82f6',
+      label:'My Inbox',
+      value: 6,
+      sub:'4 closure requests · 2 clarifications',
+      trend:'↑ Action needed', trendUp:false },
+
+    { filter:'overdue',     icon:'⚠', accent:'#ef4444',
+      label:'Overdue Actions',
+      value: tasks.filter(t => t.status === 'Overdue').length,
+      sub:'Past due — escalate now',
+      trend:'↑ Immediate action', trendUp:false },
+
+    // { filter:'completion',  icon:'◎', accent:'#10b981',
+    //   label:'Completion Rate',
+    //   value: '64%',
+    //   sub:'28 of 44 obligations closed',
+    //   trend:'↑ +6% vs last month', trendUp:true },
   ];
 }
-
 /* =========================
    DUMMY REGULATORY EVENTS
 ========================= */
@@ -225,79 +233,180 @@ function buildDashboardHTML() {
     <div class="metrics-grid-v2" id="metrics-grid">${cards}</div>
 
     <!-- ── MAIN GRID ── -->
-    <div class="db-main-grid">
+    <!-- ── MAIN GRID ── -->
+<div class="db-main-grid">
 
-      <!-- LEFT col -->
-      <div class="db-left-col">
-        <div class="db-section-header">
-          <div class="db-section-title">Analytics</div>
-        </div>
+  <!-- LEFT: Inbox + Assign Queue -->
+  <div class="db-left-col">
 
-        <!-- Two charts — NO compliance trend line chart -->
-        <div class="charts-grid-v2" style="margin-bottom:24px">
-          <div class="chart-card-v2">
-            <div class="chart-card-label">Task Distribution</div>
-            <div style="height:186px;position:relative"><canvas id="pie-chart"></canvas></div>
-          </div>
-          <div class="chart-card-v2">
-            <div class="chart-card-label">Department Workload</div>
-            <div style="height:186px;position:relative"><canvas id="bar-chart"></canvas></div>
-          </div>
-        </div>
+    <!-- MY INBOX -->
+    <div class="db-section-header">
+      <div class="db-section-title">My Inbox</div>
+      <span class="db-section-meta">Items sent to you for action</span>
+    </div>
+    <div class="table-card" style="margin-bottom:24px">
+      <div class="table-wrapper">
+        <table>
+          <thead><tr>
+            <th>Obl ID</th><th>Obligation</th><th>From</th>
+            <th>Type</th><th>Sent On</th><th>Action</th>
+          </tr></thead>
+          <tbody id="co-inbox-body"></tbody>
+        </table>
+      </div>
+    </div>
 
-        <!-- TODAY'S CIRCULARS — not the full list -->
-        <div class="db-section-header">
-          <div class="db-section-title">
-            Today's Circulars
-            <span id="today-date-badge"
-                  style="font-size:12px;font-weight:400;color:var(--text-muted);margin-left:8px"></span>
-          </div>
-          <span id="today-circ-meta" class="text-xs text-muted"></span>
-        </div>
-        <div class="table-card" style="margin-bottom:24px">
-          <div class="table-wrapper">
-            <table>
-              <thead><tr>
-                <th>ID</th><th>Title</th><th>Regulator</th>
-                <th>Event</th><th>Status</th><th>Compliance</th>
-              </tr></thead>
-              <tbody id="today-circulars-body"></tbody>
-            </table>
-          </div>
-        </div>
-      </div><!-- /db-left-col -->
+    <!-- ASSIGN QUEUE -->
+    <div class="db-section-header">
+      <div class="db-section-title">Unassigned Obligations</div>
+      <span class="db-section-meta">Accepted from AI · Needs assignment</span>
+    </div>
+    <div class="table-card">
+      <div class="table-wrapper">
+        <table>
+          <thead><tr>
+            <th>Obl ID</th><th>Obligation</th><th>Risk</th>
+            <th>Due Date</th><th>Action</th>
+          </tr></thead>
+          <tbody id="co-assign-body"></tbody>
+        </table>
+      </div>
+    </div>
 
-      <!-- RIGHT col — calendar only, NO activity feed -->
-      <div class="db-right-col">
-        <div class="db-section-header">
-          <div class="db-section-title">Regulatory Calendar</div>
-          <button class="db-nav-btn" id="cal-today-btn">Today</button>
-        </div>
-        <div class="calendar-widget">
-          <div class="cal-header">
-            <button class="cal-nav" id="cal-prev">‹</button>
-            <span class="cal-month-label" id="cal-month-label"></span>
-            <button class="cal-nav" id="cal-next">›</button>
-          </div>
-          <div class="cal-weekdays">
-            <span>Su</span><span>Mo</span><span>Tu</span>
-            <span>We</span><span>Th</span><span>Fr</span><span>Sa</span>
-          </div>
-          <div class="cal-days" id="cal-days"></div>
-          <div class="cal-legend">
-            <span class="cal-dot overdue"></span><span>Overdue</span>
-            <span class="cal-dot open-task" style="background:blue"></span><span>Open Task</span>
-            <span class="cal-dot deadline"></span><span>Due</span>
-            <span class="cal-dot effective"></span><span>Effective</span>
-          </div>
-          
-        </div>
-      </div><!-- /db-right-col -->
+  </div>
 
-    </div><!-- /db-main-grid -->
+  <!-- RIGHT: AI Suggestions + Quick Stats -->
+  <div class="db-right-col">
+
+    <!-- AI SUGGESTIONS -->
+    <div class="db-section-header">
+      <div class="db-section-title">AI Suggestions</div>
+      <span class="db-section-meta">Pending your acceptance</span>
+    </div>
+    <div id="co-ai-suggestions" style="display:flex;flex-direction:column;gap:10px;margin-bottom:24px;"></div>
+
+    <!-- QUICK ACTIONS -->
+    <div class="db-section-header">
+      <div class="db-section-title">Quick Actions</div>
+    </div>
+    <div class="table-card spoc-quick-actions">
+      <div class="spoc-qa-item">
+        <div class="spoc-qa-icon" style="background:#eef2ff;color:#6366f1">⊡</div>
+        <div class="spoc-qa-body">
+          <div class="spoc-qa-title">Assign Obligations</div>
+          <div class="spoc-qa-desc">Route to dept, assignee, reviewer</div>
+        </div>
+        <button class="btn btn-outline btn-sm"
+          onclick="window.CMS&&window.CMS.navigateTo('my-items-obligations')">Go</button>
+      </div>
+      <div class="spoc-qa-item">
+        <div class="spoc-qa-icon" style="background:#fef3c7;color:#92400e">📥</div>
+        <div class="spoc-qa-body">
+          <div class="spoc-qa-title">Review Closure Requests</div>
+          <div class="spoc-qa-desc">Approve or reject sent-for-closure items</div>
+        </div>
+        <button class="btn btn-outline btn-sm"
+          onclick="window.CMS&&window.CMS.navigateTo('my-items-obligations')">Go</button>
+      </div>
+      <div class="spoc-qa-item">
+        <div class="spoc-qa-icon" style="background:#fee2e2;color:#991b1b">💬</div>
+        <div class="spoc-qa-body">
+          <div class="spoc-qa-title">Send Clarification</div>
+          <div class="spoc-qa-desc">Respond to clarification requests</div>
+        </div>
+        <button class="btn btn-outline btn-sm"
+          onclick="window.CMS&&window.CMS.navigateTo('my-items-obligations')">Go</button>
+      </div>
+    </div>
+
+  </div>
+</div>
   </div>`;
 }
 
+
+function renderCOInbox() {
+  const inbox = [
+    { id:'OB-002', title:'Deploy SIEM & 24x7 SOC',        from:'Raj Iyer',       type:'sent_for_closure',    typeLabel:'Closure Request',    typeCls:'badge-effective', date:'20 Apr 2026' },
+    { id:'OB-004', title:'EDD Process Documentation',      from:'Sneha Das',      type:'clarification',       typeLabel:'Clarification Req',  typeCls:'badge-due-today', date:'19 Apr 2026' },
+    { id:'OB-005', title:'Vendor Risk Register Update',    from:'Suresh Kumar',   type:'sent_for_closure',    typeLabel:'Closure Request',    typeCls:'badge-effective', date:'19 Apr 2026' },
+    { id:'OB-003', title:'Quarterly Risk Assessment',      from:'Anand Krishnan', type:'clarification',       typeLabel:'Clarification Req',  typeCls:'badge-due-today', date:'18 Apr 2026' },
+    { id:'OB-007', title:'Data Localisation Compliance',   from:'Priya Nair',     type:'sent_for_closure',    typeLabel:'Closure Request',    typeCls:'badge-effective', date:'17 Apr 2026' },
+    { id:'OB-009', title:'Board Cybersecurity Briefing',   from:'Vikram Nair',    type:'clarification',       typeLabel:'Clarification Req',  typeCls:'badge-due-today', date:'17 Apr 2026' },
+  ];
+  const tbody = document.getElementById('co-inbox-body');
+  if (!tbody) return;
+  tbody.innerHTML = inbox.map(r => `
+    <tr class="clickable" onclick="window.CMS&&window.CMS.navigateTo('my-items-obligations')">
+      <td><span style="font-family:monospace;font-size:11px;font-weight:700;color:#6366f1;background:#eef2ff;padding:2px 7px;border-radius:4px">${r.id}</span></td>
+      <td style="max-width:180px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:500" title="${r.title}">${r.title}</td>
+      <td style="font-size:12px;color:#475569">👤 ${r.from}</td>
+      <td><span class="db-event-tag ${r.typeCls}">${r.typeLabel}</span></td>
+      <td style="font-size:11px;color:#94a3b8">${r.date}</td>
+      <td>
+        <button onclick="event.stopPropagation();showToastGlobal('Opening ${r.id}...','info')"
+          style="padding:3px 10px;background:#6366f1;color:#fff;border:none;border-radius:5px;font-size:11px;font-weight:700;cursor:pointer">
+          Take Action →
+        </button>
+      </td>
+    </tr>`).join('');
+}
+
+function renderCOAssignQueue() {
+  const items = [
+    { id:'OB-010', title:'CKYC Integration with CKYCR Registry',       risk:'High',   due:'2026-05-01' },
+    { id:'OB-011', title:'Interest Rate Risk Management Framework',     risk:'High',   due:'2026-05-10' },
+    { id:'OB-012', title:'Outsourced IT Vendor Audit',                  risk:'Medium', due:'2026-05-15' },
+    { id:'OB-013', title:'Customer Grievance Redressal Update',         risk:'Low',    due:'2026-05-20' },
+    { id:'OB-014', title:'Digital Payment Fraud Controls',              risk:'High',   due:'2026-04-30' },
+  ];
+  const riskColor = r => ({High:'#ef4444',Medium:'#f59e0b',Low:'#10b981'})[r]||'#94a3b8';
+  const tbody = document.getElementById('co-assign-body');
+  if (!tbody) return;
+  tbody.innerHTML = items.map(r => `
+    <tr>
+      <td><span style="font-family:monospace;font-size:11px;font-weight:700;color:#4338ca;background:#eef2ff;padding:2px 7px;border-radius:4px">${r.id}</span></td>
+      <td style="font-weight:500;font-size:13px;max-width:200px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${r.title}</td>
+      <td><span style="font-size:11px;font-weight:700;color:${riskColor(r.risk)};background:${riskColor(r.risk)}18;padding:2px 9px;border-radius:99px">${r.risk}</span></td>
+      <td style="font-size:12px;color:#64748b">${new Date(r.due).toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'})}</td>
+      <td>
+        <button onclick="showToastGlobal('Assign screen for ${r.id}','info')"
+          style="padding:3px 10px;background:#f59e0b;color:#fff;border:none;border-radius:5px;font-size:11px;font-weight:700;cursor:pointer">
+          Assign →
+        </button>
+      </td>
+    </tr>`).join('');
+}
+
+function renderCOAISuggestions() {
+  const suggestions = [
+    { id:'AI-SUG-001', title:'Appoint Data Protection Officer (DPO)',          circular:'RBI/2026-27/041', risk:'High',   confidence:92 },
+    { id:'AI-SUG-002', title:'Quarterly Liquidity Stress Test Reporting',      circular:'RBI/2026-27/038', risk:'High',   confidence:87 },
+    { id:'AI-SUG-003', title:'Update KYC Re-verification SOP',                circular:'RBI/2026-27/029', risk:'Medium', confidence:79 },
+  ];
+  const container = document.getElementById('co-ai-suggestions');
+  if (!container) return;
+  const riskColor = r => ({High:'#ef4444',Medium:'#f59e0b',Low:'#10b981'})[r]||'#94a3b8';
+  container.innerHTML = suggestions.map(s => `
+    <div style="background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:14px 16px;display:flex;flex-direction:column;gap:8px;">
+      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+        <span style="font-family:monospace;font-size:10px;font-weight:700;color:#6366f1;background:#eef2ff;padding:1px 7px;border-radius:4px">${s.circular}</span>
+        <span style="font-size:11px;font-weight:700;color:${riskColor(s.risk)};background:${riskColor(s.risk)}18;padding:1px 8px;border-radius:99px">${s.risk}</span>
+        <span style="margin-left:auto;font-size:11px;font-weight:700;color:#10b981">🤖 ${s.confidence}% match</span>
+      </div>
+      <div style="font-size:13px;font-weight:600;color:#1e293b">${s.title}</div>
+      <div style="display:flex;gap:8px;">
+        <button onclick="showToastGlobal('${s.id} accepted — moved to library','success')"
+          style="flex:1;padding:6px;background:#dcfce7;color:#15803d;border:1px solid #86efac;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer">
+          ✓ Accept
+        </button>
+        <button onclick="showToastGlobal('${s.id} rejected','warning')"
+          style="flex:1;padding:6px;background:#fee2e2;color:#dc2626;border:1px solid #fca5a5;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer">
+          ✕ Reject
+        </button>
+      </div>
+    </div>`).join('');
+}
 /* ═══════════════════════════════════════════════════════════════
    ALERT BANNER
    ═══════════════════════════════════════════════════════════════ */
@@ -1536,7 +1645,7 @@ function buildAssigneeDashboardHTML() {
          padding:12px 18px;display:flex;align-items:center;gap:12px">
       <span style="font-size:18px">⚠️</span>
       <span style="color:#b91c1c;font-weight:600">You have ${overdue} overdue obligation${overdue > 1 ? 's' : ''}.
-        Please update the status or raise a request.</span>
+        Please update the status or quest.</span>
       <button class="alert-banner-close" style="margin-left:auto;background:none;border:none;
               cursor:pointer;color:#9ca3af;font-size:16px"
               onclick="this.closest('.alert-banner-strip').remove()">✕</button>
