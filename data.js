@@ -3269,4 +3269,4 @@ function flattenCircularToTasks(circularData) {
 }
 
 // Then initialize:
-CMS_DATA.tasks = flattenCircularToTasks(YOUR_CIRCULAR_JSON);
+CMS_DATA.library_tasks = flattenCircularToTasks(CMS_DATA.circulars);

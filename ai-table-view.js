@@ -13,25 +13,35 @@ window._mlShowTableView = function () {
                   '<div class="ml-row-kebab-wrap" id="ml-toolbar-kebab-wrap">' +
             '<button class="ml-row-kebab-btn" id="ml-toolbar-kebab-btn" style="width:32px;height:32px;font-size:18px;">&#x22EE;</button>' +
             '<div class="ml-row-kebab-menu" id="ml-toolbar-kebab-menu" style="display:none;right:0;top:calc(100% + 4px);">' +
-              '<button class="ml-rkm-item" id="ml-toolbar-add-obl-btn">+ Add Obligation</button>' +
-              '<button class="ml-rkm-item" id="ml-toolbar-add-btn">+ Add Action</button>' +
-              '<button class="ml-rkm-item" id="ml-dl-template-btn">&#x1F4E5; Export / Download</button>' +
-              '<label class="ml-rkm-item" style="cursor:pointer;">&#x1F4E4; Import Excel<input type="file" accept=".xlsx,.xls,.csv" style="display:none;" id="ml-excel-upload"/></label>' +
+             '<button class="ml-rkm-item" id="ml-toolbar-add-obl-btn">+ Add Obligation</button>' +
+'<button class="ml-rkm-item" id="ml-toolbar-add-btn">+ Add Action</button>' +
+'<button class="ml-rkm-item" id="ml-dl-template-btn">&#x1F4E5; Export / Download</button>' +
+
+'<label class="ml-rkm-item" style="cursor:pointer;">&#x1F4E4; Import Excel<input type="file" accept=".xlsx,.xls,.csv" style="display:none;" id="ml-excel-upload"/></label>' +
+'<button class="ml-rkm-item" id="ml-toolbar-addcols-btn">&#x2295; Add / Remove Columns</button>' +  // ← ADD THIS
             '</div>' +
           '</div>' +
         '</div>' +
       '</div>' +
       '<div class="table-wrapper">' +
         '<table>' +
-          '<thead><tr>' +
-            '<th>Obl ID</th>' +
-            '<th>Obligation</th>' +
-            '<th>Action</th>' +
-            '<th>Department(s)</th>' +
-            '<th>Assigned To</th>' +
-            '<th>Assignment Status</th>' +
-            '<th>Due Date</th>' +
-          '</tr></thead>' +
+          '<thead>' +
+  // Group row
+  '<tr>' +
+    
+  '</tr>' +
+  // Column headers
+  '<tr>' +
+    '<th>Obl ID</th>' +
+    '<th>Obligation</th>' +
+    '<th>Action</th>' +
+    '<th>Department(s)</th>' +
+    '<th>Assigned To</th>' +
+    '<th>Assignment Status</th>' +
+   '<th>Due Date</th>' +
+'<th style="color:#3730a3;text-align:center;min-width:140px;">Linked Reference</th>' +
+  '</tr>' +
+'</thead>'  +
           '<tbody id="ml-tbody"></tbody>' +
         '</table>' +
       '</div>' +
@@ -73,9 +83,112 @@ window._mlShowTableView = function () {
   if (upBtn) upBtn.addEventListener('change', function() {
     showToast('Excel uploaded. Processing action items...', 'success');
   });
+
+  var crossBtn = document.getElementById('ml-toolbar-crosscirc-btn');
+if (crossBtn) crossBtn.addEventListener('click', function() {
+  tkMenu.style.display = 'none';
+  _mlOpenCrossCircularView();
+});
+var addColsBtn = document.getElementById('ml-toolbar-addcols-btn');
+if (addColsBtn) addColsBtn.addEventListener('click', function() {
+  tkMenu.style.display = 'none';
+  _mlOpenAddColumnsPopup();
+});
 }
 
+window._mlOpenAddColumnsPopup = function() {
+  var ex = document.getElementById('ml-addcols-modal'); if (ex) ex.remove();
 
+  // Column definitions — which are active, which can be added
+  var allColumns = [
+    { id: 'obl_id',       label: 'Obl ID',            active: true,  removable: false },
+    { id: 'obligation',   label: 'Obligation',         active: true,  removable: false },
+    { id: 'action',       label: 'Action',             active: true,  removable: true  },
+    { id: 'department',   label: 'Department(s)',       active: true,  removable: true  },
+    { id: 'assigned_to',  label: 'Assigned To',         active: true,  removable: true  },
+    { id: 'status',       label: 'Assignment Status',   active: true,  removable: true  },
+    { id: 'due_date',     label: 'Due Date',            active: true,  removable: true  },
+    { id: 'linked_ref',   label: 'Linked Reference',    active: true,  removable: true  },
+    // Demo extra columns
+    { id: 'board_meeting', label: 'Board Meeting Date', active: false, removable: true  },
+    { id: 'risk_level',    label: 'Risk Level',         active: false, removable: true  },
+    { id: 'frequency',     label: 'Frequency',          active: false, removable: true  },
+    { id: 'circular_id',   label: 'Circular ID',        active: false, removable: true  },
+    { id: 'evidence',      label: 'Evidence Required',  active: false, removable: true  },
+    { id: 'effective_date',label: 'Effective Date',     active: false, removable: true  },
+  ];
+
+  // Store on window so changes persist within session
+  if (!window._mlColumnConfig) {
+    window._mlColumnConfig = {};
+    allColumns.forEach(function(c) { window._mlColumnConfig[c.id] = c.active; });
+  }
+
+  var overlay = document.createElement('div');
+  overlay.className = 'dr-modal-overlay';
+  overlay.id = 'ml-addcols-modal';
+  overlay.innerHTML =
+    '<div class="dr-modal" style="max-width:520px;">' +
+      '<div class="dr-modal-head">' +
+        '<div class="dr-modal-head-left">' +
+          '<div class="dr-modal-eyebrow">Customise Table</div>' +
+          '<div class="dr-modal-subject">Add or Remove Columns</div>' +
+        '</div>' +
+        '<button class="dr-modal-close" onclick="document.getElementById(\'ml-addcols-modal\').remove()">&#x2715;</button>' +
+      '</div>' +
+      '<div class="dr-modal-body" style="padding:20px;display:flex;flex-direction:column;gap:8px;">' +
+
+        '<div style="font-size:11px;color:#6b7280;margin-bottom:4px;">Toggle columns on or off. Greyed columns are required and cannot be removed.</div>' +
+
+        // Active columns section
+        '<div style="font-size:10px;font-weight:700;color:#374151;text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px;margin-top:4px;">Active Columns</div>' +
+        allColumns.filter(function(c){ return window._mlColumnConfig[c.id]; }).map(function(col) {
+          return '<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;">' +
+            '<div style="display:flex;align-items:center;gap:10px;">' +
+              '<span style="font-size:12px;color:#6b7280;cursor:grab;">⠿</span>' +
+              '<span style="font-size:13px;font-weight:500;color:#1f2937;">' + col.label + '</span>' +
+              (col.removable ? '' : '<span style="font-size:9px;background:#f3f4f6;border:1px solid #e5e7eb;color:#9ca3af;padding:1px 6px;border-radius:4px;">Required</span>') +
+            '</div>' +
+            (col.removable
+              ? '<button onclick="_mlToggleColumn(\'' + col.id + '\', false)" style="padding:4px 10px;background:#fee2e2;border:1px solid #fca5a5;border-radius:6px;font-size:11px;font-weight:600;color:#dc2626;cursor:pointer;">Remove</button>'
+              : '<span style="font-size:11px;color:#d1d5db;">—</span>') +
+          '</div>';
+        }).join('') +
+
+        // Available to add section
+        '<div style="font-size:10px;font-weight:700;color:#374151;text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px;margin-top:12px;">Available to Add</div>' +
+        allColumns.filter(function(c){ return !window._mlColumnConfig[c.id]; }).map(function(col) {
+          return '<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:#fff;border:1px dashed #d1d5db;border-radius:8px;">' +
+            '<span style="font-size:13px;font-weight:500;color:#6b7280;">' + col.label + '</span>' +
+            '<button onclick="_mlToggleColumn(\'' + col.id + '\', true)" style="padding:4px 10px;background:#eff6ff;border:1px solid #bfdbfe;border-radius:6px;font-size:11px;font-weight:600;color:#2563eb;cursor:pointer;">+ Add</button>' +
+          '</div>';
+        }).join('') +
+
+      '</div>' +
+      '<div class="dr-modal-foot">' +
+        '<button class="dr-btn dr-btn-ghost" onclick="document.getElementById(\'ml-addcols-modal\').remove()">Cancel</button>' +
+        '<button class="dr-btn dr-btn-pri" onclick="_mlApplyColumnChanges()">Apply Changes</button>' +
+      '</div>' +
+    '</div>';
+
+  document.body.appendChild(overlay);
+  overlay.addEventListener('click', function(e){ if(e.target===overlay) overlay.remove(); });
+};
+
+window._mlToggleColumn = function(colId, active) {
+  if (!window._mlColumnConfig) window._mlColumnConfig = {};
+  window._mlColumnConfig[colId] = active;
+  // Re-open to reflect changes
+  document.getElementById('ml-addcols-modal').remove();
+  _mlOpenAddColumnsPopup();
+};
+
+window._mlApplyColumnChanges = function() {
+  document.getElementById('ml-addcols-modal').remove();
+  showToast('Column changes applied.', 'success');
+  // In a real impl this would re-render the table with new columns
+  // For demo just show a toast confirming
+};
 
 window._mlExtractActionItems = function(circs) {
   if (!CMS_DATA || !CMS_DATA.circulars) return [];
@@ -83,6 +196,7 @@ window._mlExtractActionItems = function(circs) {
   var items = [];
 
   circs.forEach(function(circ) {
+    
     var sections = (circ.chapters || []).concat(circ.annexures || []);
 
     sections.forEach(function(ch) {
@@ -116,35 +230,42 @@ window._mlExtractActionItems = function(circs) {
 
       // Match task by exact actionId first, then fall back to clauseRef
       var matchingTask = null;
-      if (CMS_DATA.tasks) {
-        matchingTask = CMS_DATA.tasks.find(function(t) {
+      if (CMS_DATA.library_tasks) {
+        matchingTask = CMS_DATA.library_tasks.find(function(t) {
           return t.id === computedId || (t.circularId === circ.id && t.clauseRef === cl.id);
         });
       }
 
-      items.push({
-        actionId:       computedId,
-        action:         matchingTask && matchingTask.title ? matchingTask.title : actText,
-        department:     (matchingTask ? matchingTask.department : cl.department) || '',
-        status:         (matchingTask ? matchingTask.status : cl.status) || 'Assigned',
-        assignedTo:     (matchingTask && matchingTask.assignee && (typeof matchingTask.assignee === 'object' ? Object.keys(matchingTask.assignee).length : matchingTask.assignee)) ? matchingTask.assignee : {},
-        tags:           (matchingTask ? matchingTask.tags : []) || [],
-        risk:           (matchingTask ? (matchingTask.risk || matchingTask.priority) : cl.risk) || 'Medium',
-        obligationId:   obId,
-        obligationName: oblText,
-        clauseId:       cl.id,
-        circId:         circ.id,
-        circTitle:      circ.title || '',
-        dueDate:        (matchingTask ? matchingTask.dueDate : cl.dueDate) || '',
-        frequency:      (matchingTask ? matchingTask.frequency : '') || 'Monthly',
-        chapterTitle:   ch.title || ''
-      });
+     items.push({
+  actionId:       computedId,
+action: matchingTask && matchingTask.title ? matchingTask.title : actText,  department:     (matchingTask ? matchingTask.department : cl.department) || '',
+  status:         (matchingTask ? matchingTask.status : cl.status) || 'Assigned',
+  assignedTo:     (matchingTask && matchingTask.assignee) ? matchingTask.assignee : {},
+  tags:           (matchingTask ? matchingTask.tags : []) || [],
+  risk:           (matchingTask ? (matchingTask.risk || matchingTask.priority) : cl.risk) || 'Medium',
+  obligationId:   obId,
+  obligationName: oblText,
+  clauseId:       cl.id,
+  circId:         circ.id,
+  circTitle:      circ.title || '',
+  dueDate:        (matchingTask ? matchingTask.dueDate : cl.dueDate) || '',
+  frequency:      (matchingTask ? matchingTask.frequency : '') || 'Monthly',
+  chapterTitle:   ch.title || '',
+  // ── ADD THESE ──
+  changeType: (matchingTask && matchingTask.changeType) || 'Original',
+  version:    (matchingTask && matchingTask.version)    || 'v1',
+  lastCircId: (matchingTask && matchingTask.lastCircId) || circ.id,
+  refSection: (matchingTask && matchingTask.refSection) || cl.id || '',
+  history:    (matchingTask && matchingTask.history)    || [
+    { version:'v1', circId:circ.id, section:cl.id||'—', changeType:'Original', summary:'Initial obligation extracted from circular.', date: circ.issuedDate||circ.issueDate||'' }
+  ],
+});
     });
   } else {
     var computedId = circ.id + '-' + cl.id + '-OB' + (oi + 1) + '-A1';
     var matchingTask = null;
-    if (CMS_DATA.tasks) {
-      matchingTask = CMS_DATA.tasks.find(function(t) {
+    if (CMS_DATA.library_tasks) {
+      matchingTask = CMS_DATA.library_tasks.find(function(t) {
         return t.id === computedId || (t.circularId === circ.id && t.clauseRef === cl.id);
       });
     }
@@ -174,7 +295,277 @@ window._mlExtractActionItems = function(circs) {
   return items;
 };
 
-  
+window._mlOpenCrossCircularView = function(selectedItem) {
+  var ex = document.getElementById('ml-crosscirc-modal'); if (ex) ex.remove();
+
+  // ── Dummy data ──
+  var dummyCirculars = [
+    { id: 'SEBI/2025/111', date: '31 July 2025' },
+    { id: 'SEBI/2025/142', date: '29 August 2025' },
+    { id: 'SEBI/2025/198', date: '08 December 2025' },
+  ];
+
+  var allDummyObligations = [
+    {
+      sn: 1, id: 'OBL-111-001',
+      title: 'REs shall submit a list of digital platforms provided by them for the investors',
+      cells: {
+        'SEBI/2025/111': { type: 'Original',  content: 'August 31, 2025',    contentType: 'date', dept: 'Digital',     status: 'Done' },
+        'SEBI/2025/142': { type: 'Revised',   content: 'September 30, 2025', contentType: 'date', dept: 'Digital',     status: 'Done' },
+        'SEBI/2025/198': { type: 'No Change', content: '',                   contentType: 'none', dept: '',            status: '' },
+      },
+      remarks: 'Done'
+    },
+    {
+      sn: 2, id: 'OBL-111-002',
+      title: 'REs shall submit a compliance / action taken report pertaining to the clauses of this circular',
+      cells: {
+        'SEBI/2025/111': { type: 'Original',  content: 'August 31, 2025',    contentType: 'date', dept: 'Compliance', status: 'Done' },
+        'SEBI/2025/142': { type: 'Revised',   content: 'September 30, 2025', contentType: 'date', dept: 'Compliance', status: 'Done' },
+        'SEBI/2025/198': { type: 'No Change', content: '',                   contentType: 'none', dept: '',           status: '' },
+      },
+      remarks: 'Done'
+    },
+    {
+      sn: 3, id: 'OBL-111-003',
+      title: 'Appointment of IAAP certified accessibility professionals as Auditor',
+      cells: {
+        'SEBI/2025/111': { type: 'Original',   content: 'September 14, 2025', contentType: 'date', dept: 'Legal', status: 'Assigned' },
+        'SEBI/2025/142': { type: 'Revised',    content: 'December 14, 2025',  contentType: 'date', dept: 'Legal', status: 'In Progress' },
+        'SEBI/2025/198': {
+          type: 'Clarified',
+          contentType: 'mixed',
+          content: 'March 31, 2026',
+          note: 'Instead of meeting the compliance requirement for appointment of accessibility auditor by December 14, 2025, REs shall submit a status of their readiness and compliance to the accessibility requirements for each of their digital platforms latest by March 31, 2026 to SEBI',
+          dept: 'Legal', status: 'In Progress'
+        },
+      },
+      remarks: 'Auditor Appointed already'
+    },
+    {
+      sn: 4, id: 'OBL-111-004',
+      title: 'Conduct of Accessibility Audit for the digital platforms.',
+      cells: {
+        'SEBI/2025/111': { type: 'Original',  content: 'October 31, 2025', contentType: 'date', dept: 'IT', status: 'Assigned' },
+        'SEBI/2025/142': { type: 'Revised',   content: 'April 30, 2026',   contentType: 'date', dept: 'IT', status: 'Assigned' },
+        'SEBI/2025/198': { type: 'No Change', content: 'No clear extension', contentType: 'text', dept: '', status: '' },
+      },
+      remarks: ''
+    },
+    {
+      sn: 5, id: 'OBL-111-005',
+      title: 'Remediation of findings from the audit and ensuring compliance with this circular.',
+      cells: {
+        'SEBI/2025/111': { type: 'Original',  content: 'January 31, 2026', contentType: 'date', dept: 'IT', status: 'Assigned' },
+        'SEBI/2025/142': { type: 'Revised',   content: 'July 31, 2026',    contentType: 'date', dept: 'IT', status: 'Assigned' },
+        'SEBI/2025/198': { type: 'No Change', content: 'No clear extension', contentType: 'text', dept: '', status: '' },
+      },
+      remarks: ''
+    },
+    {
+      sn: 6, id: 'OBL-111-006',
+      title: 'The compliance reporting for this circular shall be done on annual basis within 30 days from end of each financial year.',
+      cells: {
+        'SEBI/2025/111': { type: 'Original', content: 'April 30, 2026', contentType: 'date', dept: 'Compliance', status: 'Assigned' },
+        'SEBI/2025/142': { type: 'Revised',  content: 'April 30, 2027', contentType: 'date', dept: 'Compliance', status: 'Assigned' },
+        'SEBI/2025/198': { type: 'Revised',  content: 'April 30, 2027', contentType: 'date', note: 'Same, April 30, 2027 and to be continued annually', dept: 'Compliance', status: 'Assigned' },
+      },
+      remarks: ''
+    },
+  ];
+
+  var circulars = dummyCirculars;
+
+  // ── Filter: if a specific item clicked, show only that OBL ──
+  var obligations = allDummyObligations;
+  var isFiltered = false;
+  if (selectedItem) {
+    var matched = allDummyObligations.filter(function(o) {
+      return o.id === selectedItem.obligationId || o.title.toLowerCase().includes((selectedItem.obligationName || '').substring(0,30).toLowerCase());
+    });
+    if (matched.length > 0) {
+      obligations = matched;
+      isFiltered = true;
+    }
+  }
+
+  // ── Cell renderer ──
+  var typeStyles = {
+    'Original':   { badge: '#dcfce7', text: '#15803d', bg: '#fff' },
+    'Revised':    { badge: '#fef3c7', text: '#b45309', bg: '#fffde7' },
+    'Clarified':  { badge: '#fef9c3', text: '#854d0e', bg: '#fffde7' },
+    'Superseded': { badge: '#fee2e2', text: '#991b1b', bg: '#fff9f9' },
+    'No Change':  { badge: '#f3f4f6', text: '#6b7280', bg: '#fafafa' },
+  };
+
+  var renderCell = function(cell, ci, rowBg) {
+    if (!cell) return '<td style="padding:12px 14px;border-right:1px solid #f0f0f0;vertical-align:top;text-align:center;background:' + rowBg + ';"><span style="color:#d1d5db;font-size:18px;">—</span></td>';
+
+    var st = typeStyles[cell.type] || typeStyles['Original'];
+    var tdBg = st.bg;
+
+    // Content block based on contentType
+    var contentHtml = '';
+    if (cell.contentType === 'date') {
+      contentHtml =
+        '<div style="font-size:14px;font-weight:700;color:' + (ci === 0 ? '#1f2937' : '#b45309') + ';margin:6px 0;">' + cell.content + '</div>';
+    } else if (cell.contentType === 'text') {
+      contentHtml =
+        '<div style="font-size:11px;color:#6b7280;font-style:italic;margin:6px 0;line-height:1.5;">' + cell.content + '</div>';
+    } else if (cell.contentType === 'mixed') {
+      contentHtml =
+        '<div style="font-size:14px;font-weight:700;color:#b45309;margin:6px 0;">' + cell.content + '</div>';
+    }
+
+    // Note block — paragraph change, clarification etc
+    var noteHtml = '';
+    if (cell.note) {
+      noteHtml =
+        '<div style="margin-top:8px;padding:8px 10px;background:' + (cell.type === 'Clarified' ? '#fffbeb' : '#f9fafb') + ';border-left:3px solid ' + (cell.type === 'Clarified' ? '#f59e0b' : '#e5e7eb') + ';border-radius:0 4px 4px 0;font-size:11px;color:#374151;line-height:1.6;">' +
+          cell.note +
+        '</div>';
+    }
+
+    return '<td style="padding:12px 14px;border-right:1px solid #f0f0f0;vertical-align:top;background:' + tdBg + ';">' +
+      // Badge
+      '<span style="font-size:10px;font-weight:700;padding:2px 9px;border-radius:10px;background:' + st.badge + ';color:' + st.text + ';">' + cell.type + '</span>' +
+      // Main content
+      contentHtml +
+      // Note / paragraph change
+      noteHtml +
+      // Meta
+      (cell.dept ? '<div style="margin-top:6px;font-size:10px;color:#9ca3af;">Dept: <b style="color:#6b7280;">' + cell.dept + '</b></div>' : '') +
+      (cell.status ? '<div style="margin-top:4px;"><span style="font-size:10px;padding:2px 7px;border-radius:4px;background:#ede9fe;color:#5b21b6;font-weight:600;">' + cell.status + '</span></div>' : '') +
+    '</td>';
+  };
+
+  // ── Clean header ──
+  var theadHtml =
+    '<thead>' +
+      // Main header row
+      '<tr>' +
+        '<th style="padding:12px 14px;background:#1e293b;color:#fff;font-size:11px;font-weight:700;border-right:1px solid #334155;width:40px;text-align:center;">S/N</th>' +
+        '<th style="padding:12px 14px;background:#1e293b;color:#fff;font-size:11px;font-weight:700;border-right:1px solid #334155;min-width:280px;text-align:left;">Compliance Required</th>' +
+        circulars.map(function(c, i) {
+          return '<th style="padding:0;background:#1e293b;border-right:1px solid #334155;min-width:220px;">' +
+            // Circular ID top
+            '<div style="padding:8px 14px 4px;font-size:10px;color:#94a3b8;text-align:center;border-bottom:1px solid #334155;">' + c.id + '</div>' +
+            // Date bottom
+            '<div style="padding:4px 14px 8px;font-size:12px;font-weight:700;color:#fff;text-align:center;">' + c.date + '</div>' +
+          '</th>';
+        }).join('') +
+        '<th style="padding:12px 14px;background:#1e293b;color:#fff;font-size:11px;font-weight:700;min-width:160px;text-align:left;">Compliance Remarks</th>' +
+      '</tr>' +
+      // Sub-label row: Original / Revised
+      '<tr>' +
+        '<th style="padding:6px 14px;background:#f1f5f9;border-right:1px solid #e2e8f0;border-bottom:2px solid #cbd5e1;"></th>' +
+        '<th style="padding:6px 14px;background:#f1f5f9;border-right:1px solid #e2e8f0;border-bottom:2px solid #cbd5e1;"></th>' +
+        circulars.map(function(c, i) {
+          var label = i === 0 ? '&#x25CF; Original ' : '&#x25CF; Revised ';
+          var color = i === 0 ? '#16a34a' : '#dc2626';
+          return '<th style="padding:7px 14px;background:#f1f5f9;border-right:1px solid #e2e8f0;border-bottom:2px solid #cbd5e1;text-align:center;font-size:10px;font-weight:700;color:' + color + ';">' + label + '</th>';
+        }).join('') +
+        '<th style="padding:6px 14px;background:#f1f5f9;border-bottom:2px solid #cbd5e1;"></th>' +
+      '</tr>' +
+    '</thead>';
+
+  // ── Body ──
+  var tbodyHtml = '<tbody>' +
+    obligations.map(function(obl, ri) {
+      var rowBg = ri % 2 === 0 ? '#fff' : '#fafafa';
+      return '<tr style="border-bottom:1px solid #f0f0f0;">' +
+        '<td style="padding:12px 14px;text-align:center;font-size:12px;font-weight:700;color:#94a3b8;border-right:1px solid #f0f0f0;vertical-align:top;background:' + rowBg + ';">' + obl.sn + '</td>' +
+        '<td style="padding:12px 14px;border-right:1px solid #f0f0f0;vertical-align:top;background:' + rowBg + ';">' +
+          '<div style="font-size:9px;font-family:monospace;color:#7c3aed;font-weight:700;margin-bottom:4px;background:#f5f3ff;display:inline-block;padding:1px 6px;border-radius:3px;">' + obl.id + '</div>' +
+          '<div style="font-size:12px;color:#1f2937;line-height:1.55;margin-top:4px;">' + obl.title + '</div>' +
+        '</td>' +
+        circulars.map(function(c, ci) {
+          return renderCell(obl.cells[c.id], ci, rowBg);
+        }).join('') +
+        '<td style="padding:12px 14px;font-size:11px;color:#374151;vertical-align:top;background:' + rowBg + ';line-height:1.5;">' +
+          (obl.remarks || '<span style="color:#d1d5db;">—</span>') +
+        '</td>' +
+      '</tr>';
+    }).join('') +
+  '</tbody>';
+
+  // ── Modal ──
+  var overlay = document.createElement('div');
+  overlay.className = 'dr-modal-overlay';
+  overlay.id = 'ml-crosscirc-modal';
+  overlay.innerHTML =
+    '<div class="dr-modal" style="max-width:96vw;width:96vw;">' +
+      '<div class="dr-modal-head">' +
+        '<div class="dr-modal-head-left">' +
+          '<div class="dr-modal-eyebrow">Cross-Circular Comparison</div>' +
+          '<div class="dr-modal-subject">' +
+            (isFiltered
+              ? 'Showing: ' + (selectedItem.obligationId || selectedItem.obligationName || 'Selected Obligation')
+              : 'All Obligations across ' + circulars.length + ' Circulars') +
+            (isFiltered ? ' &nbsp;<button onclick="window._mlOpenCrossCircularView()" style="font-size:10px;padding:2px 8px;background:#f3f4f6;border:1px solid #e5e7eb;border-radius:4px;cursor:pointer;color:#374151;">View All</button>' : '') +
+          '</div>' +
+        '</div>' +
+        '<div style="display:flex;gap:8px;align-items:center;">' +
+          '<button class="dr-btn dr-btn-sec" style="font-size:11px;" onclick="_mlExportCrossCircular()">&#x1F4CA; Export</button>' +
+          '<button class="dr-modal-close" onclick="document.getElementById(\'ml-crosscirc-modal\').remove()">&#x2715;</button>' +
+        '</div>' +
+      '</div>' +
+
+      '<div class="dr-modal-body" style="padding:0;max-height:80vh;overflow:auto;">' +
+        '<table style="width:100%;border-collapse:collapse;font-size:12px;">' +
+          theadHtml + tbodyHtml +
+        '</table>' +
+      '</div>' +
+
+      '<div class="dr-modal-foot">' +
+        '<div style="display:flex;gap:14px;align-items:center;flex-wrap:wrap;">' +
+          '<span style="font-size:11px;color:#6b7280;font-weight:600;">Legend:</span>' +
+          '<span style="font-size:11px;display:flex;align-items:center;gap:5px;"><span style="width:10px;height:10px;background:#dcfce7;border:1px solid #86efac;border-radius:2px;display:inline-block;"></span>Original</span>' +
+          '<span style="font-size:11px;display:flex;align-items:center;gap:5px;"><span style="width:10px;height:10px;background:#fef3c7;border:1px solid #fcd34d;border-radius:2px;display:inline-block;"></span>Revised (date/timeline)</span>' +
+          '<span style="font-size:11px;display:flex;align-items:center;gap:5px;"><span style="width:10px;height:10px;background:#fffde7;border:1px solid #fcd34d;border-radius:2px;display:inline-block;"></span>Clarified (paragraph/scope change)</span>' +
+          '<span style="font-size:11px;display:flex;align-items:center;gap:5px;"><span style="width:10px;height:10px;background:#fee2e2;border:1px solid #fca5a5;border-radius:2px;display:inline-block;"></span>Superseded</span>' +
+          '<span style="font-size:11px;display:flex;align-items:center;gap:5px;"><span style="width:10px;height:10px;background:#f3f4f6;border:1px solid #e5e7eb;border-radius:2px;display:inline-block;"></span>No Change</span>' +
+        '</div>' +
+        '<button class="dr-btn dr-btn-pri" onclick="document.getElementById(\'ml-crosscirc-modal\').remove()">Close</button>' +
+      '</div>' +
+    '</div>';
+
+  document.body.appendChild(overlay);
+  overlay.addEventListener('click', function(e){ if(e.target===overlay) overlay.remove(); });
+};
+// ── Export cross-circular data as CSV ──
+window._mlExportCrossCircular = function() {
+  var allTasks = CMS_DATA.library_tasks || [];
+  var allCirculars = CMS_DATA.circulars || [];
+  var circMap = {};
+  allCirculars.forEach(function(c) { circMap[c.id] = c; });
+  var circIds = [];
+  allTasks.forEach(function(t) {
+    if (t.circularId && circIds.indexOf(t.circularId) === -1) circIds.push(t.circularId);
+  });
+  var oblMap = {};
+  allTasks.forEach(function(t) {
+    var key = t.obligationId || t.id;
+    if (!oblMap[key]) oblMap[key] = { title: t.title, rows: {} };
+    oblMap[key].rows[t.circularId] = t;
+  });
+  var header = ['S/N', 'Obligation ID', 'Compliance Required'].concat(circIds).concat(['Remarks']);
+  var rows = Object.keys(oblMap).map(function(key, i) {
+    var obl = oblMap[key];
+    var cells = circIds.map(function(cid) {
+      var t = obl.rows[cid];
+      return t ? (t.dueDate || t.status || '') : '—';
+    });
+    return [i+1, key, '"' + obl.title + '"'].concat(cells).concat(['']);
+  });
+  var csv = [header].concat(rows).map(function(r){ return r.join(','); }).join('\n');
+  var blob = new Blob([csv], {type:'text/csv'});
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'cross-circular-comparison.csv';
+  a.click();
+};
+
 
 window._mlRenderTable= function(circs) {
   var tbody   = document.getElementById('ml-tbody');
@@ -185,9 +576,10 @@ window._mlRenderTable= function(circs) {
   if (countEl) countEl.textContent = items.length + ' action item' + (items.length !== 1 ? 's' : '');
 
   if (items.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:32px 16px;color:var(--dr-t3);font-style:italic;">No action items match your filters</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;padding:32px 16px;color:var(--dr-t3);font-style:italic;">No action items match your filters</td></tr>';
     return;
   }
+
 
   var statusColors = { 
   'Open':'#fef3c7;color:#b45309', 
@@ -203,44 +595,68 @@ window._mlRenderTable= function(circs) {
 
   tbody.innerHTML = items.map(function(item, idx) {
     var sc = statusColors[item.status] || '#f3f4f6;color:#6b7280';
+   
+   var displayAction = (item.activities && item.activities.length > 0 && item.activities[0] && item.activities[0].name)
+  ? item.activities[0].name
+  : (item.action || item.title || '');
     return '<tr class="ml-action-row" data-idx="' + idx + '" style="cursor:pointer;">' +
-      '<td style="position:relative;">' +
-      '<span class="ml-obl-id ml-clickable-oblid" data-oblid="' + item.obligationId + '" style="cursor:pointer;font-family:monospace;font-size:11px;font-weight:700;color:#7c3aed;background:#f5f3ff;border:1px solid #e9d5ff;padding:2px 7px;border-radius:4px;" title="View obligation details">' + item.obligationId + '</span>' +
-      '</td>' +
-      '<td style="max-width:220px;padding:8px;">' +
-        '<div style="font-size:11px;color:#374151;line-height:1.45;" title="' + item.obligationName.replace(/"/g,'&quot;') + '">' +
-          item.obligationName.substring(0, 60) + (item.obligationName.length > 60 ? '..' : '') +
-        '</div>' +
-      '</td>' +
-      '<td style="max-width:280px;font-size:12px;color:var(--dr-t1);cursor:pointer;" class="ml-clickable-action" data-idx="' + idx + '">' + (item.action||'').substring(0,80) + ((item.action||'').length>80?'…':'') + '</td>' +
-'<td class="ml-inline-dept" data-idx="' + idx + '" style="cursor:pointer;padding:6px 8px;border-radius:4px;transition:background 0.2s;" title="Click to assign departments">' +
-  (item.department
-  ? item.department.split(',').map(function(d){ return '<span style="background:#e0f2fe;color:#0369a1;padding:2px 6px;border-radius:3px;font-size:11px;font-weight:600;display:inline-block;margin:1px;">' + d.trim() + '</span>'; }).join('')
-  : '<span style="color:#9ca3af;font-style:italic;">Assign</span>') +
+  '<td style="position:relative;">' +
+    '<span class="ml-obl-id ml-clickable-oblid" data-oblid="' + item.obligationId + '" style="cursor:pointer;font-family:monospace;font-size:11px;font-weight:700;color:#7c3aed;background:#f5f3ff;border:1px solid #e9d5ff;padding:2px 7px;border-radius:4px;" title="View obligation details">' + item.obligationId + '</span>' +
+  '</td>' +
+  '<td style="max-width:220px;padding:8px;">' +
+    '<div style="font-size:11px;color:#374151;line-height:1.45;" title="' + item.obligationName.replace(/"/g,'&quot;') + '">' +
+      item.obligationName.substring(0, 60) + (item.obligationName.length > 60 ? '..' : '') +
+    '</div>' +
+  '</td>' +
+'<td style="max-width:280px;font-size:12px;color:var(--dr-t1);cursor:pointer;" class="ml-clickable-action" data-idx="' + idx + '">' + (item.activities && item.activities[0] ? item.activities[0].name || '' : item.action || '').substring(0,80) + ((item.activities && item.activities[0] ? item.activities[0].name || '' : item.action || '').length>80?'…':'') + '</td>' +
+  '<td class="ml-inline-dept" data-idx="' + idx + '" style="cursor:pointer;padding:6px 8px;border-radius:4px;transition:background 0.2s;" title="Click to assign departments">' +
+    (item.department
+      ? item.department.split(',').map(function(d){ return '<span style="background:#e0f2fe;color:#0369a1;padding:2px 6px;border-radius:3px;font-size:11px;font-weight:600;display:inline-block;margin:1px;">' + d.trim() + '</span>'; }).join('')
+      : '<span style="color:#9ca3af;font-style:italic;">Assign</span>') +
+  '</td>' +
+  '<td class="ml-inline-assignee" data-idx="' + idx + '" style="cursor:pointer;padding:6px 8px;border-radius:4px;transition:background 0.2s;" title="Click to assign">' +
+    (function() {
+      var a = item.assignedTo;
+      var empty = !a ||
+        (typeof a === 'string' && !a.trim()) ||
+        (typeof a === 'object' && !Array.isArray(a) && Object.keys(a).length === 0);
+      if (empty) return '<span style="color:#9ca3af;font-style:italic;font-size:12px;">Assign</span>';
+      if (typeof a === 'string' && a.trim()) {
+        return '<span style="background:#ede9fe;color:#5b21b6;border:1px solid #ddd6fe;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:600;">' + a + '</span>';
+      }
+      return Object.entries(a).map(function(entry) {
+        return '<div style="display:flex;align-items:center;gap:4px;margin:2px 0;">' +
+          '<span style="font-size:9px;color:#6b7280;background:#f3f4f6;padding:1px 5px;border-radius:3px;min-width:52px;text-align:center;">' + entry[0] + '</span>' +
+          '<span style="background:#ede9fe;color:#5b21b6;border:1px solid #ddd6fe;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:600;">' + entry[1] + '</span>' +
+        '</div>';
+      }).join('');
+    })() +
+  '</td>' +
+  '<td class="ml-inline-status" data-idx="' + idx + '" style="cursor:pointer;padding:4px 0;transition:opacity 0.2s;" title="Click to change status">' +
+    '<span style="padding:4px 12px;border-radius:12px;font-size:11px;font-weight:700;background:' + sc + ';cursor:pointer;">' + item.status + '</span>' +
+  '</td>' +
+ '<td style="font-size:12px;color:#374151;">' + (item.dueDate || '—') + '</td>' +
+'<td style="padding:0;vertical-align:middle;">' +
+  '<div style="display:flex;align-items:stretch;height:100%;divide-x:1px solid #c7d2fe;">' +
+
+    // Circ ID cell
+    '<span class="ml-linked-ref-circid" data-idx="' + idx + '" data-circid="' + item.circId + '" ' +
+      'style="flex:1;display:flex;align-items:center;justify-content:center;padding:8px 6px;font-family:monospace;font-size:10px;font-weight:700;color:#4f46e5;cursor:pointer;text-decoration:underline;white-space:nowrap;border-right:1px solid #c7d2fe;border-left:1px solid #c7d2fe;text-align:center;" ' +
+      'title="Open circular document">' + item.circId + '</span>' +
+
+    // Section cell
+    '<span class="ml-linked-ref-section" data-idx="' + idx + '" data-circid="' + item.circId + '" ' +
+      'style="flex:0 0 auto;display:flex;align-items:center;justify-content:center;padding:8px 8px;font-size:10px;font-weight:600;color:#0369a1;cursor:pointer;text-decoration:underline;white-space:nowrap;border-right:1px solid #c7d2fe;" ' +
+      'title="Open this section">' + (item.refSection || item.clauseId || '§') + '</span>' +
+
+    // More cell
+    '<span class="ml-linked-ref-view" data-idx="' + idx + '" ' +
+      'style="flex:0 0 auto;display:flex;align-items:center;justify-content:center;padding:8px 8px;font-size:10px;font-weight:600;color:#7c3aed;cursor:pointer;white-space:nowrap;" ' +
+      'title="View all references">Others</span>' +
+
+  '</div>' +
 '</td>' +
-'<td class="ml-inline-assignee" data-idx="' + idx + '" style="cursor:pointer;padding:6px 8px;border-radius:4px;transition:background 0.2s;" title="Click to assign">' +
-  (function() {
-    var a = item.assignedTo;
-    var empty = !a ||
-      (typeof a === 'string' && !a.trim()) ||
-      (typeof a === 'object' && !Array.isArray(a) && Object.keys(a).length === 0);
-    if (empty) return '<span style="color:#9ca3af;font-style:italic;font-size:12px;">Assign</span>';
-    if (typeof a === 'string' && a.trim()) {
-      return '<span style="background:#ede9fe;color:#5b21b6;border:1px solid #ddd6fe;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:600;">' + a + '</span>';
-    }
-    return Object.entries(a).map(function(entry) {
-      return '<div style="display:flex;align-items:center;gap:4px;margin:2px 0;">' +
-        '<span style="font-size:9px;color:#6b7280;background:#f3f4f6;padding:1px 5px;border-radius:3px;min-width:52px;text-align:center;">' + entry[0] + '</span>' +
-        '<span style="background:#ede9fe;color:#5b21b6;border:1px solid #ddd6fe;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:600;">' + entry[1] + '</span>' +
-      '</div>';
-    }).join('');
-  })() +
-'</td>' +
-      '<td class="ml-inline-status" data-idx="' + idx + '" style="cursor:pointer;padding:4px 0;transition:opacity 0.2s;" title="Click to change status">' +
-  '<span style="padding:4px 12px;border-radius:12px;font-size:11px;font-weight:700;background:' + sc + ';cursor:pointer;">' + item.status + '</span>' +
-'</td>' +
-'<td style="font-size:12px;color:#374151;">' + (item.dueDate || '—') + '</td>'
-    '</tr>';
+'</tr>';
   }).join('');
 
   window._mlActionItems = items;
@@ -292,7 +708,7 @@ window._mlRenderTable= function(circs) {
     });
   });
 
-  // Status column click handler
+  // Stus column click handler
   tbody.querySelectorAll('.ml-inline-status').forEach(function(cell) {
     cell.addEventListener('click', function(e) {
       e.stopPropagation();
@@ -301,8 +717,513 @@ window._mlRenderTable= function(circs) {
     });
   });
 
+tbody.querySelectorAll('.ml-clickable-oblref').forEach(function(el) {
+  el.addEventListener('click', function(e) {
+    e.stopPropagation();
+    var idx = parseInt(el.dataset.idx);
+    _mlOpenOblRefPopup(window._mlActionItems[idx]);
+  });
+});
+
+tbody.querySelectorAll('.ml-view-ref-btn').forEach(function(btn) {
+  btn.addEventListener('click', function(e) {
+    e.stopPropagation();
+    var idx = parseInt(btn.dataset.idx);
+    _mlOpenReferenceModal(window._mlActionItems[idx]);
+  });
+});
+
+
+// Linked Ref — circular ID click → open circular PDF/page
+tbody.querySelectorAll('.ml-linked-ref-circid').forEach(function(el) {
+  el.addEventListener('click', function(e) {
+    e.stopPropagation();
+    var circId = el.dataset.circid;
+    var circular = (CMS_DATA.circulars || []).find(function(c){ return c.id === circId; }) || {};
+    // Try all common PDF/doc URL field names
+    var pdfUrl = circular.pdfUrl 
+      || circular.documentUrl 
+      || circular.fileUrl 
+      || circular.url 
+      || circular.pdf
+      || circular.document
+      || null;
+    if (pdfUrl) {
+      window.open(pdfUrl, '_blank');
+    } else {
+      // Fallback — open a blank window with the circular ID as title
+      var win = window.open('', '_blank');
+      win.document.write(
+        '<html><head><title>' + circId + '</title></head>' +
+        '<body style="font-family:sans-serif;padding:40px;color:#374151;">' +
+          '<h2 style="color:#4f46e5;font-size:16px;margin-bottom:8px;">📄 ' + circId + '</h2>' +
+          '<p style="font-size:13px;color:#6b7280;">No PDF document is attached to this circular.</p>' +
+          '<p style="font-size:12px;color:#9ca3af;">Check <code>circular.pdfUrl</code> or <code>circular.documentUrl</code> in your data.</p>' +
+        '</body></html>'
+      );
+      win.document.close();
+    }
+  });
+});
+
+// Section click → open circular page at that section
+tbody.querySelectorAll('.ml-linked-ref-section').forEach(function(el) {
+  el.addEventListener('click', function(e) {
+    e.stopPropagation();
+    var circId = el.dataset.circid;
+    var circular = (CMS_DATA.circulars || []).find(function(c){ return c.id === circId; }) || {};
+    var pdfUrl = circular.pdfUrl || circular.documentUrl || circular.fileUrl || circular.url || null;
+    var win = window.open('', '_blank');
+    win.document.write(
+      '<html><head><title>' + circId + '</title></head>' +
+      '<body style="font-family:sans-serif;padding:40px;color:#374151;">' +
+        '<h2 style="color:#4f46e5;font-size:16px;margin-bottom:8px;">📄 ' + circId + '</h2>' +
+        '<p style="font-size:13px;color:#0369a1;font-weight:600;">Section: ' + (el.textContent.trim()) + '</p>' +
+        (pdfUrl
+          ? '<p><a href="' + pdfUrl + '" target="_blank" style="color:#4f46e5;">Open full document →</a></p>'
+          : '<p style="font-size:12px;color:#9ca3af;">No PDF attached — attach <code>circular.pdfUrl</code> to navigate directly to this section.</p>') +
+      '</body></html>'
+    );
+    win.document.close();
+  });
+});
+
+// Linked Ref — View More click → open reference modal
+tbody.querySelectorAll('.ml-linked-ref-view').forEach(function(el) {
+  el.addEventListener('click', function(e) {
+    e.stopPropagation();
+    var idx = parseInt(el.dataset.idx);
+    _mlOpenReferenceModal(window._mlActionItems[idx]);
+  });
+});
+
 
 }
+
+
+window._mlOpenReferenceModal = function(item) {
+  var ex = document.getElementById('ml-ref-modal'); if (ex) ex.remove();
+
+  // ── Dummy reference data ──
+  var dummyRefs = [
+    {
+      circId: 'SEBI/2025/111',
+      issueDate: '31 July 2025',
+      oblId: 'OBL-111-001',
+      section: '5(1)',
+      oblName: 'REs shall submit a list of digital platforms provided by them for the investors',
+      dueDate: 'August 31, 2025',
+      docUrl: 'https://www.sebi.gov.in/sebi_data/attachdocs/aug-2025/1234567890.pdf'
+    },
+    {
+      circId: 'SEBI/2025/142',
+      issueDate: '29 August 2025',
+      oblId: 'OBL-111-001',
+      section: '3(2)',
+      oblName: 'REs shall submit a list of digital platforms provided by them for the investors',
+      dueDate: 'September 30, 2025',
+      docUrl: 'https://www.sebi.gov.in/sebi_data/attachdocs/aug-2025/1234567890.pdf'
+    },
+    {
+      circId: 'SEBI/2025/198',
+      issueDate: '08 December 2025',
+      oblId: 'OBL-111-001',
+      section: '4(c)',
+      oblName: 'REs shall submit a list of digital platforms provided by them for the investors',
+      dueDate: 'March 31, 2026',
+      docUrl: 'https://www.sebi.gov.in/sebi_data/attachdocs/aug-2025/1234567890.pdf'
+    },
+  ];
+
+  var overlay = document.createElement('div');
+  overlay.className = 'dr-modal-overlay';
+  overlay.id = 'ml-ref-modal';
+  overlay.innerHTML =
+    '<div class="dr-modal" style="max-width:860px;">' +
+      '<div class="dr-modal-head">' +
+        '<div class="dr-modal-head-left">' +
+          '<div class="dr-modal-eyebrow">Circular Reference</div>' +
+          '<div class="dr-modal-subject">Obligation: ' + item.obligationId + '</div>' +
+        '</div>' +
+        '<button class="dr-modal-close" onclick="document.getElementById(\'ml-ref-modal\').remove()">&#x2715;</button>' +
+      '</div>' +
+
+      '<div class="dr-modal-body" style="padding:0;max-height:75vh;overflow-y:auto;">' +
+
+        '<table style="width:100%;border-collapse:collapse;font-size:12px;">' +
+          '<tbody>' +
+  // Header row using td not th
+  '<tr>' +
+    '<td style="padding:11px 14px;font-size:11px;font-weight:700;color:#ffffff;background:#1e293b;white-space:nowrap;">Circular ID</td>' +
+    '<td style="padding:11px 14px;font-size:11px;font-weight:700;color:#ffffff;background:#1e293b;white-space:nowrap;">Issue Date</td>' +
+    
+    '<td style="padding:11px 14px;font-size:11px;font-weight:700;color:#ffffff;background:#1e293b;white-space:nowrap;">Section</td>' +
+    '<td style="padding:11px 14px;font-size:11px;font-weight:700;color:#ffffff;background:#1e293b;">Obligation Name</td>' +
+
+    '<td style="padding:11px 14px;font-size:11px;font-weight:700;color:#ffffff;background:#1e293b;text-align:center;white-space:nowrap;">Document</td>' +
+    // Add this as the LAST <td> in the header row
+'<td style="padding:10px 14px;font-size:11px;font-weight:700;color:#ffffff;background:#1e293b;text-align:center;width:40px;">' +
+  '<button id="ml-ref-edit-btn" title="Edit table" style="width:26px;height:26px;border-radius:6px;background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.3);cursor:pointer;color:#fff;font-size:13px;display:inline-flex;align-items:center;justify-content:center;" onclick="_mlToggleRefTableEdit()">✎</button>' +
+'</td>' +
+  '</tr>' +
+
+          '<tbody>' +
+            dummyRefs.map(function(ref, ri) {
+              var rowBg = ri % 2 === 0 ? '#fff' : '#fafafa';
+              var isOriginal = ri === 0;
+              return '<tr style="border-bottom:1px solid #f0f0f0;background:' + rowBg + ';">' +
+
+                // Circular ID
+                '<td style="padding:12px 14px;white-space:nowrap;vertical-align:top;">' +
+                  '<span style="font-size:12px;font-weight:700;color:#4f46e5;">' + ref.circId + '</span>' +
+                  (isOriginal ? '<div style="margin-top:4px;"><span style="font-size:9px;font-weight:700;padding:1px 7px;border-radius:10px;background:#dcfce7;color:#15803d;">Original</span></div>' : '<div style="margin-top:4px;"><span style="font-size:9px;font-weight:700;padding:1px 7px;border-radius:10px;background:#fef3c7;color:#b45309;">Amended</span></div>') +
+                '</td>' +
+
+                // Issue Date
+                '<td style="padding:12px 14px;font-size:11px;color:#6b7280;white-space:nowrap;vertical-align:top;">' + ref.issueDate + '</td>' +
+
+                // Obl ID — clickable → opens obl popup
+                
+
+                // Section — clickable → opens obl popup
+                '<td style="padding:12px 14px;white-space:nowrap;vertical-align:top;">' +
+                  '<span class="ml-ref-section-link" data-ref-idx="' + ri + '" ' +
+                    'style="font-size:11px;font-weight:600;color:#0369a1;cursor:pointer;text-decoration:underline;">' +
+                    ref.section +
+                  '</span>' +
+                '</td>' +
+
+                // Obligation Name
+                '<td style="padding:12px 14px;font-size:11px;color:#374151;line-height:1.55;max-width:260px;vertical-align:top;">' +
+                  ref.oblName.substring(0, 80) + (ref.oblName.length > 80 ? '…' : '') +
+                '</td>' +
+
+                // Due Date
+               
+
+               // Document button
+'<td style="padding:12px 14px;text-align:center;vertical-align:top;">' +
+  '<button class="ml-ref-doc-btn" data-url="' + ref.docUrl + '" ' +
+    'style="padding:5px 12px;background:#f3f4f6;border:1px solid #e5e7eb;border-radius:6px;font-size:11px;font-weight:600;color:#374151;cursor:pointer;white-space:nowrap;">&#x1F4C4; View Doc</button>' +
+'</td>' +
+
+// Add row button (shown in edit mode)
+'<td style="padding:10px 14px;text-align:center;vertical-align:top;">' +
+  '<button class="ml-ref-add-btn" onclick="_mlAddRefRow(this)" style="padding:3px 8px;background:#dcfce7;border:1px solid #86efac;border-radius:4px;color:#15803d;font-size:11px;font-weight:600;cursor:pointer;display:none;">➕</button>' +
+'</td>' +
+
+// Remove row button (shown in edit mode)
+'<td style="padding:10px 14px;text-align:center;vertical-align:top;">' +
+  '<button class="ml-ref-remove-btn" onclick="_mlRemoveRefRow(this)" style="padding:3px 8px;background:#fee2e2;border:1px solid #fca5a5;border-radius:4px;color:#dc2626;font-size:11px;font-weight:600;cursor:pointer;display:none;">✕</button>' +
+'</td>'
+
+              '</tr>';
+            }).join('') +
+          '</tbody>' +
+        '</table>' +
+
+      '</div>' +
+
+      '<div class="dr-modal-foot">' +
+        '<span class="dr-modal-foot-note">' + dummyRefs.length + ' circular reference' + (dummyRefs.length !== 1 ? 's' : '') + ' for this obligation</span>' +
+        '<button class="dr-btn dr-btn-pri" onclick="document.getElementById(\'ml-ref-modal\').remove()">Close</button>' +
+      '</div>' +
+    '</div>';
+
+  document.body.appendChild(overlay);
+  overlay.addEventListener('click', function(e){ if(e.target===overlay) overlay.remove(); });
+
+  // Obl ID click → open obl ref popup
+  overlay.querySelectorAll('.ml-ref-obl-link, .ml-ref-section-link').forEach(function(el) {
+    el.addEventListener('click', function(e) {
+      e.stopPropagation();
+      _mlOpenOblRefPopup(item);
+    });
+  });
+
+  // View Doc click → open dummy PDF
+  overlay.querySelectorAll('.ml-ref-doc-btn').forEach(function(btn) {
+    btn.addEventListener('click', function(e) {
+      e.stopPropagation();
+      var url = btn.dataset.url;
+      if (url) {
+        window.open(url, '_blank');
+      } else {
+        showToast('No document available.', 'error');
+      }
+    });
+  });
+};
+
+
+window._mlToggleRefTableEdit = function() {
+  var btn = document.getElementById('ml-ref-edit-btn');
+  var isEditing = btn && btn.dataset.editing === 'true';
+
+  if (!isEditing) {
+    // Enter edit mode
+    if (btn) { btn.dataset.editing = 'true'; btn.textContent = '✓'; btn.style.background = 'rgba(34,197,94,0.3)'; btn.title = 'Done editing'; }
+
+    // Make text cells editable
+    document.querySelectorAll('#ml-ref-modal tbody tr:not(:first-child) td').forEach(function(td) {
+      if (!td.querySelector('button')) {
+        td.contentEditable = 'true';
+        td.style.outline = '1.5px dashed #bfdbfe';
+        td.style.borderRadius = '3px';
+        td.style.minWidth = '60px';
+      }
+    });
+
+    // Show remove buttons
+  // Show buttons in edit mode
+document.querySelectorAll('#ml-ref-modal .ml-ref-remove-btn, #ml-ref-modal .ml-ref-add-btn').forEach(function(b) {
+  b.style.display = 'inline-block';
+});
+
+
+    showToast('Edit mode on — click cells to edit, ✕ to remove a row.', 'info');
+  } else {
+    // Exit edit mode
+    if (btn) { btn.dataset.editing = 'false'; btn.textContent = '✎'; btn.style.background = 'rgba(255,255,255,0.15)'; btn.title = 'Edit table'; }
+
+    document.querySelectorAll('#ml-ref-modal tbody tr:not(:first-child) td').forEach(function(td) {
+      td.contentEditable = 'false';
+      td.style.outline = 'none';
+    });
+
+  document.querySelectorAll('#ml-ref-modal .ml-ref-remove-btn, #ml-ref-modal .ml-ref-add-btn').forEach(function(b) {
+  b.style.display = 'none';
+});
+
+    showToast('Changes saved.', 'success');
+  }
+};
+
+window._mlRemoveRefRow = function(btn) {
+  var row = btn.closest('tr');
+  if (row) {
+    row.style.opacity = '0.3';
+    row.style.pointerEvents = 'none';
+    showToast('Row removed.', 'success');
+  }
+};
+
+
+window._mlOpenOblRefPopup = function(item) {
+  var ex = document.getElementById('ml-oblref-modal'); if (ex) ex.remove();
+
+  var circular = (CMS_DATA.circulars || []).find(function(c){ return c.id === item.circId; }) || {};
+  var task = (CMS_DATA.library_tasks || []).find(function(t){ return t.id === item.actionId; }) || {};
+
+  var clauseText = task.clauseText || circular.clauseText ||
+    'The entity shall ensure compliance with all reporting requirements as specified under the relevant circular, including timely submission of returns and maintenance of records as directed by the regulatory authority.';
+
+  var overlay = document.createElement('div');
+  overlay.className = 'dr-modal-overlay';
+  overlay.id = 'ml-oblref-modal';
+  overlay.innerHTML =
+    '<div class="dr-modal" style="max-width:600px;">' +
+      '<div class="dr-modal-head">' +
+        '<div class="dr-modal-head-left">' +
+          '<div class="dr-modal-eyebrow">Obligation Reference</div>' +
+          '<div class="dr-modal-subject">' + item.obligationId + '</div>' +
+        '</div>' +
+        '<button class="dr-modal-close" onclick="document.getElementById(\'ml-oblref-modal\').remove()">&#x2715;</button>' +
+      '</div>' +
+      '<div class="dr-modal-body" style="padding:20px;display:flex;flex-direction:column;gap:14px;">' +
+
+        // Obligation text banner
+        '<div style="background:#f5f3ff;border:1px solid #e9d5ff;border-radius:6px;padding:12px 14px;">' +
+          '<div style="font-size:10px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px;">Obligation</div>' +
+          '<div style="font-size:13px;color:#1f2937;line-height:1.7;">' + item.obligationName + '</div>' +
+        '</div>' +
+
+        // Meta fields
+        '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">' +
+          '<div style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:6px;padding:10px 12px;">' +
+            '<div style="font-size:10px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px;">Due Date</div>' +
+            '<div style="font-size:13px;font-weight:700;color:#1f2937;">' + (item.dueDate || '—') + '</div>' +
+          '</div>' +
+          '<div style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:6px;padding:10px 12px;">' +
+            '<div style="font-size:10px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px;">Frequency</div>' +
+            '<div style="font-size:13px;font-weight:700;color:#1f2937;">' + (item.frequency || 'Monthly') + '</div>' +
+          '</div>' +
+          '<div style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:6px;padding:10px 12px;">' +
+            '<div style="font-size:10px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px;">Effective Date</div>' +
+            '<div style="font-size:13px;font-weight:700;color:#1f2937;">' + (circular.effectiveDate || '—') + '</div>' +
+          '</div>' +
+          '<div style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:6px;padding:10px 12px;">' +
+            '<div style="font-size:10px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px;">Section</div>' +
+            '<div style="font-size:13px;font-weight:700;color:#1f2937;">' + (circular.section || item.clauseId || '—') + '</div>' +
+          '</div>' +
+          '<div style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:6px;padding:10px 12px;">' +
+            '<div style="font-size:10px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px;">Regulatory Body</div>' +
+            '<div style="font-size:13px;font-weight:700;color:#1f2937;">' + (circular.regulator || 'Reserve Bank of India') + '</div>' +
+          '</div>' +
+          '<div style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:6px;padding:10px 12px;">' +
+            '<div style="font-size:10px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px;">Circular ID</div>' +
+            '<div style="font-size:12px;font-weight:700;color:#7c3aed;cursor:pointer;text-decoration:underline;" onclick="document.getElementById(\'ml-oblref-modal\').remove();renderAISuggestionPage(\'' + item.circId + '\')">' + item.circId + '</div>' +
+          '</div>' +
+        '</div>' +
+
+        // Extracted clause
+        '<div style="background:#f3f4f6;border:1px solid #e5e7eb;border-radius:6px;padding:14px;">' +
+          '<div style="font-size:10px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;">Extracted Clause Text</div>' +
+          '<div style="font-size:12px;color:#374151;line-height:1.8;">' + clauseText + '</div>' +
+        '</div>' +
+
+      '</div>' +
+      '<div class="dr-modal-foot">' +
+        '<button class="dr-btn dr-btn-sec" onclick="document.getElementById(\'ml-oblref-modal\').remove();renderAISuggestionPage(\'' + item.circId + '\')">📄 View Full Circular Page</button>' +
+        '<button class="dr-btn dr-btn-pri" onclick="document.getElementById(\'ml-oblref-modal\').remove()">Close</button>' +
+      '</div>' +
+    '</div>';
+
+  document.body.appendChild(overlay);
+  overlay.addEventListener('click', function(e){ if(e.target===overlay) overlay.remove(); });
+};
+
+
+
+window._mlOpenHistoryModal = function(item) {
+  var ex = document.getElementById('ml-history-modal'); if (ex) ex.remove();
+
+  var changeTypeColors = {
+    'Original':   '#EAF3DE;color:#27500A',
+    'Amended':    '#FAEEDA;color:#633806',
+    'Clarified':  '#E6F1FB;color:#0C447C',
+    'Superseded': '#FCEBEB;color:#791F1F',
+    'No Change':  '#f3f4f6;color:#6b7280',
+    'New':        '#EEEDFE;color:#3C3489'
+  };
+
+  var history = item.history && item.history.length ? item.history : [
+    { version:'v1', circId: item.circId, section: item.clauseId || '—', changeType:'Original', summary:'Initial obligation extracted from circular.', date:'', changes:[] }
+  ];
+
+  // ── Timeline dots ──
+  var timelineDots = history.map(function(h, i) {
+    var isLast = i === history.length - 1;
+    return '<div style="display:flex;flex-direction:column;align-items:center;gap:0;">' +
+      '<div style="width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;' +
+        (isLast ? 'background:#7c3aed;color:#fff;border:2px solid #5b21b6;' : 'background:#f3f4f6;color:#374151;border:2px solid #e5e7eb;') +
+      '" title="' + h.circId + '">' + h.version + '</div>' +
+      (isLast ? '<div style="font-size:9px;color:#7c3aed;font-weight:700;margin-top:2px;">current</div>' : '<div style="font-size:9px;color:#9ca3af;margin-top:2px;">&nbsp;</div>') +
+    '</div>' +
+    (i < history.length - 1 ? '<div style="flex:1;height:2px;background:#e5e7eb;margin:0 4px;align-self:center;min-width:24px;"></div>' : '');
+  }).join('');
+
+  // ── Version history table rows ──
+  var tableRows = history.map(function(h, i) {
+    var isLast = i === history.length - 1;
+    var cc = changeTypeColors[h.changeType] || '#f3f4f6;color:#6b7280';
+
+    var changesHtml = '';
+    if (!h.changes || h.changes.length === 0) {
+      changesHtml = h.changeType === 'Original'
+        ? '<span style="font-size:11px;color:#9ca3af;font-style:italic;">Original version</span>'
+        : '<span style="font-size:11px;color:#9ca3af;font-style:italic;">No changes to this OBL</span>';
+    } else {
+      changesHtml =
+        '<table style="border-collapse:collapse;width:100%;">' +
+          '<tr>' +
+            '<td style="font-size:10px;font-weight:700;color:#6b7280;padding:2px 8px 4px 0;white-space:nowrap;">Field</td>' +
+            '<td style="font-size:10px;font-weight:700;color:#6b7280;padding:2px 8px 4px 0;white-space:nowrap;">Before</td>' +
+            '<td style="font-size:10px;font-weight:700;color:#6b7280;padding:2px 0 4px 0;white-space:nowrap;">After</td>' +
+          '</tr>' +
+          h.changes.map(function(ch) {
+            return '<tr>' +
+              '<td style="padding:3px 8px 3px 0;font-size:11px;font-weight:600;color:#374151;white-space:nowrap;">' + ch.field + '</td>' +
+              '<td style="padding:3px 8px 3px 0;">' +
+                '<span style="background:#fcebeb;color:#7f1d1d;padding:2px 8px;border-radius:4px;font-size:11px;font-family:monospace;white-space:nowrap;">' + ch.from + '</span>' +
+              '</td>' +
+              '<td style="padding:3px 0;">' +
+                '<span style="background:#eaf3de;color:#14532d;padding:2px 8px;border-radius:4px;font-size:11px;font-family:monospace;white-space:nowrap;">' + ch.to + '</span>' +
+              '</td>' +
+            '</tr>';
+          }).join('') +
+        '</table>';
+    }
+
+    return '<tr style="border-bottom:1px solid #e5e7eb;background:' + (isLast ? '#faf5ff' : (h.changes && h.changes.length ? '#fff' : '#fafafa')) + ';">' +
+      '<td style="padding:10px 12px;white-space:nowrap;vertical-align:top;">' +
+        '<span style="font-family:monospace;font-size:11px;font-weight:700;color:#7c3aed;background:#f5f3ff;border:1px solid #e9d5ff;padding:2px 7px;border-radius:4px;">' + h.version + '</span>' +
+        (isLast ? '<div style="font-size:9px;color:#7c3aed;font-weight:700;margin-top:4px;">★ current</div>' : '') +
+      '</td>' +
+      '<td style="padding:10px 12px;font-size:11px;font-weight:600;color:#374151;white-space:nowrap;vertical-align:top;">' + h.circId + '</td>' +
+      '<td style="padding:10px 12px;font-size:11px;color:#6b7280;white-space:nowrap;vertical-align:top;">' + (h.section || '—') + '</td>' +
+      '<td style="padding:10px 12px;font-size:11px;color:#6b7280;white-space:nowrap;vertical-align:top;">' + (h.date || '—') + '</td>' +
+      '<td style="padding:10px 12px;vertical-align:top;">' +
+        '<span style="padding:3px 10px;border-radius:12px;font-size:10px;font-weight:700;background:' + cc + ';white-space:nowrap;">' + h.changeType + '</span>' +
+      '</td>' +
+      '<td style="padding:10px 12px;font-size:11px;color:#374151;vertical-align:top;max-width:180px;line-height:1.5;">' + (h.summary || '') + '</td>' +
+      '<td style="padding:10px 12px;vertical-align:top;min-width:240px;">' + changesHtml + '</td>' +
+    '</tr>';
+  }).join('');
+
+  var overlay = document.createElement('div');
+  overlay.className = 'dr-modal-overlay';
+  overlay.id = 'ml-history-modal';
+
+  overlay.innerHTML =
+    '<div class="dr-modal" style="max-width:860px;">' +
+
+      // ── HEAD ──
+      '<div class="dr-modal-head">' +
+        '<div class="dr-modal-head-left">' +
+          '<div class="dr-modal-eyebrow">Amendment History</div>' +
+          '<div class="dr-modal-subject">Obligation: ' + item.obligationId + '</div>' +
+        '</div>' +
+        '<button class="dr-modal-close" onclick="document.getElementById(\'ml-history-modal\').remove()">&#x2715;</button>' +
+      '</div>' +
+
+      // ── BODY ──
+      '<div class="dr-modal-body" style="padding:20px;max-height:75vh;overflow-y:auto;">' +
+
+        // Obligation name banner
+        '<div style="background:#f5f3ff;border:1px solid #e9d5ff;border-radius:6px;padding:10px 14px;margin-bottom:20px;font-size:12px;color:#374151;line-height:1.5;">' +
+          '<b style="font-size:10px;color:#6b7280;text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:4px;">Obligation</b>' +
+          item.obligationName +
+        '</div>' +
+
+        // Timeline dots
+        '<div style="font-size:10px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.05em;margin-bottom:10px;">Version Timeline</div>' +
+        '<div style="display:flex;align-items:flex-start;margin-bottom:24px;padding:16px 20px;background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;">' +
+          timelineDots +
+        '</div>' +
+
+        // Version history table
+        '<div style="font-size:10px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.05em;margin-bottom:10px;">Version Details</div>' +
+        '<div style="overflow-x:auto;">' +
+        '<table style="width:100%;border-collapse:collapse;font-size:12px;">' +
+          '<thead>' +
+            '<tr style="background:#f3f4f6;border-bottom:2px solid #e5e7eb;">' +
+              '<th style="padding:10px 12px;text-align:left;font-weight:700;color:#374151;white-space:nowrap;">Version</th>' +
+              '<th style="padding:10px 12px;text-align:left;font-weight:700;color:#374151;white-space:nowrap;">Circular ID</th>' +
+              '<th style="padding:10px 12px;text-align:left;font-weight:700;color:#374151;white-space:nowrap;">Section</th>' +
+              '<th style="padding:10px 12px;text-align:left;font-weight:700;color:#374151;white-space:nowrap;">Date</th>' +
+              '<th style="padding:10px 12px;text-align:left;font-weight:700;color:#374151;">Change Type</th>' +
+              '<th style="padding:10px 12px;text-align:left;font-weight:700;color:#374151;">Summary</th>' +
+              '<th style="padding:10px 12px;text-align:left;font-weight:700;color:#374151;">What Changed</th>' +
+            '</tr>' +
+          '</thead>' +
+          '<tbody>' + tableRows + '</tbody>' +
+        '</table>' +
+        '</div>' +
+
+      '</div>' +
+
+      // ── FOOT ──
+      '<div class="dr-modal-foot">' +
+        '<span class="dr-modal-foot-note">Latest: ' + (history[history.length-1] ? history[history.length-1].circId : '—') + '</span>' +
+        '<button class="dr-btn dr-btn-pri" onclick="document.getElementById(\'ml-history-modal\').remove()">Close</button>' +
+      '</div>' +
+
+    '</div>';
+
+  document.body.appendChild(overlay);
+  overlay.addEventListener('click', function(e){ if(e.target===overlay) overlay.remove(); });
+};
 
 window._mlOpenDetailPopup = function (item, idx) {
   var existing = document.getElementById('ml-detail-modal');
@@ -311,7 +1232,7 @@ var overlay = document.createElement('div');
   overlay.className = 'dr-modal-overlay'; overlay.id = 'ml-detail-modal';
   var circular = CMS_DATA.circulars.find(function(c) { return c.id === item.circId; }) || {};
   var obligation = (CMS_DATA.obligations || []).find(function(o){ return o.id === item.obligationId; }) || {};
-  var task = CMS_DATA.tasks.find(function(t){ return t.id === item.actionId; }) || {};
+  var task = CMS_DATA.library_tasks.find(function(t){ return t.id === item.actionId; }) || {};
   var clauseText = obligation.clauseText || task.clauseText || 'The entity shall ensure compliance with all reporting requirements as specified under the relevant circular, including timely submission of returns and maintenance of records as directed by the regulatory authority.';
   overlay.innerHTML =
     '<div class="dr-modal" style="max-width:680px;">' +
@@ -327,6 +1248,7 @@ var overlay = document.createElement('div');
       '<button class="ml-rkm-item" data-action="edit" data-idx="' + idx + '">&#x270E; Edit</button>' +
       '<button class="ml-rkm-item" data-action="mapped" data-idx="' + idx + '">&#x21C4; Mapped Actions</button>' +
       '<button class="ml-rkm-item" data-action="add" data-idx="' + idx + '">+ Add Action</button>' +
+      '<button class="ml-rkm-item" id="ml-toolbar-crosscirc-btn">&#x1F4CB; Circular History</button>' +
     '</div>' +
           '</div>' +
           '<button class="dr-modal-close" onclick="document.getElementById(\'ml-detail-modal\').remove()">&#x2715;</button>' +
@@ -435,6 +1357,12 @@ var overlay = document.createElement('div');
       });
     });
   }
+
+  var crossBtn = document.getElementById('ml-toolbar-crosscirc-btn');
+if (crossBtn) crossBtn.addEventListener('click', function() {
+  tkMenu.style.display = 'none';
+  _mlOpenCrossCircularView();
+});
 }
 
 /* ── EXPORT POPUP ── */
@@ -617,10 +1545,63 @@ window._mlOpenOblDetailPopup = function(item, idx) {
           '</div>' +
         '</div>' +
 
+        // /* LINKED REFERENCE accordion */
+'<div style="border-top:1px solid #e5e7eb;">' +
+  '<div style="padding:12px 20px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;background:#f9fafb;" onclick="var el=document.getElementById(\'ml-obl-linked-ref-body\');el.style.display=el.style.display===\'none\'?\'block\':\'none\';this.querySelector(\'.ml-acc-arrow\').textContent=el.style.display===\'none\'?\'▶\':\'▼\';">' +
+    '<span style="font-weight:700;color:#374151;font-size:12px;display:flex;align-items:center;gap:8px;"><span class="ml-acc-arrow">▶</span> Linked Reference</span>' +
+  '</div>' +
+  '<div id="ml-obl-linked-ref-body" style="display:none;padding:0;">' +
+    (function() {
+      var dummyRefs = [
+        { circId:'SEBI/2025/111', issueDate:'31 July 2025',     section:'5(1)', oblName:'REs shall submit a list of digital platforms provided by them for the investors', dueDate:'August 31, 2025',    docUrl:'https://www.sebi.gov.in/sebi_data/attachdocs/aug-2025/1234567890.pdf', isOriginal:true },
+        { circId:'SEBI/2025/142', issueDate:'29 August 2025',   section:'3(2)', oblName:'REs shall submit a list of digital platforms provided by them for the investors', dueDate:'September 30, 2025', docUrl:'https://www.sebi.gov.in/sebi_data/attachdocs/aug-2025/1234567890.pdf', isOriginal:false },
+        { circId:'SEBI/2025/198', issueDate:'08 December 2025', section:'4(c)', oblName:'REs shall submit a list of digital platforms provided by them for the investors', dueDate:'March 31, 2026',    docUrl:'https://www.sebi.gov.in/sebi_data/attachdocs/aug-2025/1234567890.pdf', isOriginal:false },
+      ];
+      return '<table style="width:100%;border-collapse:collapse;font-size:12px;">' +
+        // Header row using td
+        '<tbody>' +
+        '<tr>' +
+          '<td style="padding:10px 14px;font-size:11px;font-weight:700;color:#ffffff;background:#1e293b;white-space:nowrap;">Circular ID</td>' +
+          '<td style="padding:10px 14px;font-size:11px;font-weight:700;color:#ffffff;background:#1e293b;white-space:nowrap;">Issue Date</td>' +
+          '<td style="padding:10px 14px;font-size:11px;font-weight:700;color:#ffffff;background:#1e293b;white-space:nowrap;">Section</td>' +
+          '<td style="padding:10px 14px;font-size:11px;font-weight:700;color:#ffffff;background:#1e293b;">Obligation Name</td>' +
+          '<td style="padding:10px 14px;font-size:11px;font-weight:700;color:#ffffff;background:#1e293b;white-space:nowrap;">Due Date</td>' +
+          '<td style="padding:10px 14px;font-size:11px;font-weight:700;color:#ffffff;background:#1e293b;text-align:center;white-space:nowrap;">Document</td>' +
+        '</tr>' +
+        dummyRefs.map(function(ref, ri) {
+          var rowBg = ri % 2 === 0 ? '#fff' : '#fafafa';
+          return '<tr style="border-bottom:1px solid #f0f0f0;background:' + rowBg + ';">' +
+            '<td style="padding:10px 14px;white-space:nowrap;vertical-align:top;">' +
+              '<span style="font-size:11px;font-weight:700;color:#4f46e5;">' + ref.circId + '</span>' +
+              '<div style="margin-top:3px;">' +
+                (ref.isOriginal
+                  ? '<span style="font-size:9px;font-weight:700;padding:1px 7px;border-radius:10px;background:#dcfce7;color:#15803d;">Original</span>'
+                  : '<span style="font-size:9px;font-weight:700;padding:1px 7px;border-radius:10px;background:#fef3c7;color:#b45309;">Amended</span>') +
+              '</div>' +
+            '</td>' +
+            '<td style="padding:10px 14px;font-size:11px;color:#6b7280;white-space:nowrap;vertical-align:top;">' + ref.issueDate + '</td>' +
+            '<td style="padding:10px 14px;white-space:nowrap;vertical-align:top;">' +
+              '<span style="font-size:11px;font-weight:600;color:#0369a1;cursor:pointer;text-decoration:underline;" onclick="_mlOpenOblRefPopup(window._mlOblDetailItem)">' + ref.section + '</span>' +
+            '</td>' +
+            '<td style="padding:10px 14px;font-size:11px;color:#374151;line-height:1.5;max-width:220px;vertical-align:top;">' +
+              ref.oblName.substring(0, 70) + (ref.oblName.length > 70 ? '…' : '') +
+            '</td>' +
+            '<td style="padding:10px 14px;font-size:12px;font-weight:600;color:' + (ref.isOriginal ? '#1f2937' : '#b45309') + ';white-space:nowrap;vertical-align:top;">' + ref.dueDate + '</td>' +
+            '<td style="padding:10px 14px;text-align:center;vertical-align:top;">' +
+              '<button onclick="window.open(\'' + ref.docUrl + '\',\'_blank\')" style="padding:4px 10px;background:#f3f4f6;border:1px solid #e5e7eb;border-radius:6px;font-size:11px;font-weight:600;color:#374151;cursor:pointer;white-space:nowrap;">&#x1F4C4; View Doc</button>' +
+            '</td>' +
+          '</tr>';
+        }).join('') +
+        '</tbody>' +
+        '</table>';
+    })() +
+  '</div>' +
+'</div>' +
+
       '</div>' +
       '<div class="dr-modal-foot"><span class="dr-modal-foot-note">Circular: ' + ((circular.title||'').substring(0,50)) + '</span><button class="dr-btn dr-btn-pri" onclick="document.getElementById(\'ml-obl-detail-modal\').remove()">Close</button></div>' +
     '</div>';
-
+window._mlOblDetailItem = item;
   document.body.appendChild(overlay);
   overlay.addEventListener('click', function(e){ if(e.target===overlay) overlay.remove(); });
 
@@ -681,7 +1662,7 @@ window._mlOpenMappedClausesPopup = function(oblId) {
           '<thead><tr style="background:#f3f4f6;border-bottom:2px solid #e5e7eb;"><th style="padding:10px 14px;text-align:left;font-weight:700;color:#374151;">Clause ID</th><th style="padding:10px 14px;text-align:left;font-weight:700;color:#374151;">Clause Text</th><th style="padding:10px 14px;text-align:left;font-weight:700;color:#374151;">Dept</th><th style="padding:10px 14px;text-align:left;font-weight:700;color:#374151;">Status</th><th style="padding:10px 14px;"></th></tr></thead>' +
           '<tbody>' +
             mockClauses.map(function(c){
-              return '<tr style="border-bottom:1px solid #f3f4f6;">' +
+              // Change Type badge style="border-bottom:1px solid #f3f4f6;">' +
                 '<td style="padding:10px 14px;font-family:monospace;font-size:11px;font-weight:700;color:#7c3aed;">' + c.clauseId + '</td>' +
                 '<td style="padding:10px 14px;font-size:11px;color:#374151;max-width:260px;line-height:1.45;">' + c.clauseText.substring(0,80) + (c.clauseText.length>80?'…':'') + '</td>' +
                 '<td style="padding:10px 14px;"><span style="background:#e0f2fe;color:#0369a1;padding:2px 8px;border-radius:4px;font-size:10px;font-weight:600;">' + c.dept + '</span></td>' +
@@ -828,7 +1809,7 @@ window._mlSaveAssignee = function(idx) {
 
   window._mlActionItems[idx].assignedTo = assigneeMap;
 
-  var task = CMS_DATA.tasks.find(function(t){ return t.id === actionId; });
+  var task = CMS_DATA.library_tasks.find(function(t){ return t.id === actionId; });
   if (task) task.assignee = assigneeMap;
 
   document.getElementById('ml-assignee-selector-modal').remove();
@@ -1071,7 +2052,7 @@ window._mlOpenAddActionPopup = function(obligationId, parentActionId) {
   var allAssignees = _mlGetUniqueAssignees();
   var overlay = document.createElement('div');
   overlay.className = 'dr-modal-overlay'; overlay.id = 'ml-add-action-modal';
-  var lastId = CMS_DATA.tasks.length ? CMS_DATA.tasks[CMS_DATA.tasks.length-1].id : 'ACT-000';
+  var lastId = CMS_DATA.library_tasks.length ? CMS_DATA.library_tasks[CMS_DATA.library_tasks.length-1].id : 'ACT-000';
   var nextNum = parseInt((lastId.split('-')[1] || '0')) + 1;
   var nextId = 'ACT-' + nextNum.toString().padStart(3, '0');
   var dummyDescs = [
@@ -1300,26 +2281,75 @@ var newTask = {
     dueDate: dueDate
   };
   
-  CMS_DATA.tasks.push(newTask);
+  CMS_DATA.library_tasks.push(newTask);
   document.getElementById('ml-add-action-modal').remove();
   _mlRenderTable(CMS_DATA.circulars);
   showToast('Action ' + actionId + ' added successfully.', 'success');
 }
 
 // ── DEMO SEED: give first task two depts + two assignees for visual demo ──
-if (CMS_DATA && CMS_DATA.tasks && CMS_DATA.tasks.length > 0 && !CMS_DATA._demoSeeded) {
+if (CMS_DATA && CMS_DATA.library_tasks && CMS_DATA.library_tasks.length > 0 && !CMS_DATA._demoSeeded) {
   CMS_DATA._demoSeeded = true;
-  CMS_DATA.tasks[0].department = 'Compliance, Risk, Digital';
-CMS_DATA.tasks[0].assignee = 'Ananya Sharma';
-  if (CMS_DATA.tasks[1]) {
-    CMS_DATA.tasks[1].department = 'Legal, IT';
-    CMS_DATA.tasks[1].assignee = { 'Legal': 'Priya Nair', 'IT': 'Vikram Das' };
+  CMS_DATA.library_tasks[0].department = 'Compliance, Risk, Digital';
+CMS_DATA.library_tasks[0].assignee = 'Ananya Sharma';
+  if (CMS_DATA.library_tasks[1]) {
+    CMS_DATA.library_tasks[1].department = 'Legal, IT';
+    CMS_DATA.library_tasks[1].assignee = { 'Legal': 'Priya Nair', 'IT': 'Vikram Das' };
+  }
+}
+
+// ── DEMO SEED: amendment history ──
+if (CMS_DATA && CMS_DATA.library_tasks && CMS_DATA.library_tasks.length > 0) {
+  CMS_DATA.library_tasks[0].changeType = 'Amended';
+  CMS_DATA.library_tasks[0].version = 'v3';
+  CMS_DATA.library_tasks[0].lastCircId = 'SEBI/2024/11';
+  CMS_DATA.library_tasks[0].refSection = '4(c)';
+  CMS_DATA.library_tasks[0].history = [
+  {
+    version: 'v1', circId: 'SEBI/2022/01', section: '4(b)',
+    changeType: 'Original', date: '2022-04-01',
+    summary: 'Initial obligation created.',
+    changes: []
+  },
+  {
+    version: 'v2', circId: 'SEBI/2023/05', section: '4(b)',
+    changeType: 'Amended', date: '2023-07-15',
+    summary: 'Timeline extended from 30 to 45 days.',
+    changes: [
+      { field: 'Due Date', from: '30 days', to: '45 days' }
+    ]
+  },
+  {
+    version: 'v3', circId: 'SEBI/2023/11', section: '4(b)',
+    changeType: 'No Change', date: '2023-11-01',
+    summary: 'Circular issued but this OBL was not affected.',
+    changes: []
+  },
+  {
+    version: 'v4', circId: 'SEBI/2024/11', section: '4(c)',
+    changeType: 'Amended', date: '2024-02-01',
+    summary: 'Timeline updated again, section renumbered.',
+    changes: [
+      { field: 'Due Date', from: '45 days', to: '60 days' },
+      { field: 'Section', from: '4(b)', to: '4(c)' }
+    ]
+  }
+];
+
+  if (CMS_DATA.library_tasks[1]) {
+    CMS_DATA.library_tasks[1].changeType = 'Superseded';
+    CMS_DATA.library_tasks[1].version = 'v2';
+    CMS_DATA.library_tasks[1].lastCircId = 'RBI/2023/22';
+    CMS_DATA.library_tasks[1].history = [
+      { version:'v1', circId:'RBI/2021/07', section:'3.1', changeType:'Original',   summary:'Original KYC threshold set at ₹50,000.', date:'2021-10-01' },
+      { version:'v2', circId:'RBI/2023/22', section:'3.1', changeType:'Superseded', summary:'KYC threshold superseded — now governed by PMLA guidelines directly.', date:'2023-03-15' }
+    ];
   }
 }
 
 window._mlGetUniqueAssignees = function() {
   var assignees = [];
-  CMS_DATA.tasks.forEach(function(t) {
+  CMS_DATA.library_tasks.forEach(function(t) {
     var a = t.assignee;
     if (!a) return;
     if (typeof a === 'string' && a.trim()) {
@@ -1350,7 +2380,7 @@ window._mlOpenEditablePopup = function(item, idx) {
   if (existing) existing.remove();
   var circular = CMS_DATA.circulars.find(function(c){ return c.id === item.circId; }) || {};
   var obligation = (CMS_DATA.obligations || []).find(function(o){ return o.id === item.obligationId; }) || {};
-  var task = CMS_DATA.tasks.find(function(t){ return t.id === item.actionId; }) || {};
+  var task = CMS_DATA.library_tasks.find(function(t){ return t.id === item.actionId; }) || {};
   var allDepts = ['Compliance','Risk','Legal','IT','Operations','HR','Finance','Credit','Procurement'];
   var allAssignees = _mlGetUniqueAssignees();
   var statusOptions = ['Not Applicable','Unassigned','Assigned'];
@@ -1467,7 +2497,7 @@ window._mlSaveInlineEdit = function(idx) {
   item.status     = document.getElementById('ml-edit-status').value;
   var tagsRaw     = document.getElementById('ml-edit-tags').value;
   item.tags       = tagsRaw.split(',').map(function(t){ return t.trim(); }).filter(Boolean);
-  var task = CMS_DATA.tasks.find(function(t){ return t.id === item.actionId; });
+  var task = CMS_DATA.library_tasks.find(function(t){ return t.id === item.actionId; });
   if (task) {
     task.title      = item.action;
     task.dueDate    = item.dueDate;
@@ -1507,7 +2537,7 @@ window._mlSaveDepartment = function(idx) {
   // Reset assignee map so stale per-dept assignments are cleared
   window._mlActionItems[idx].assignedTo = {};
 
-  var task = CMS_DATA.tasks.find(function(t){ return t.id === actionId; });
+  var task = CMS_DATA.library_tasks.find(function(t){ return t.id === actionId; });
   if (task) {
     task.department = depts.join(', ');
     task.assignee = {};

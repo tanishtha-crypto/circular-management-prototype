@@ -917,11 +917,30 @@ function _clOblRowHTML(r) {
     <div class="cl-obl-stack-row" data-uid="${uid}" style="display:flex;align-items:center;gap:8px;padding:10px 14px;background:#fff;cursor:pointer;transition:background .12s;">
 
       <!-- left: accordion arrow + expand zone -->
-      <div style="display:flex;align-items:center;gap:8px;flex:1;min-width:0;">
-        <span style="font-size:9px;color:#9ca3af;transition:transform .2s;flex-shrink:0;" id="cl-obl-sarr-${uid}">▶</span>
-        <span style="font-family:monospace;font-size:10px;font-weight:700;color:#fff;background:#7c3aed;padding:2px 8px;border-radius:4px;flex-shrink:0;white-space:nowrap;">${obId}</span>
-        <span style="flex:1;font-size:12px;font-weight:500;color:#1f2937;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0;">${obText.substring(0, 80)}${obText.length > 80 ? '…' : ''}</span>
-      </div>
+      <!-- left: accordion arrow + expand zone -->
+<div style="display:flex;align-items:center;gap:8px;flex:1;min-width:0;">
+  <span style="font-size:9px;color:#9ca3af;transition:transform .2s;flex-shrink:0;" id="cl-obl-sarr-${uid}">▶</span>
+  
+  <!-- Circ ID chip → opens doc -->
+  <span onclick="event.stopPropagation();window.open(window._CL_ACTIVE_CIRC?.docUrl||'#','_blank')"
+    style="font-family:monospace;font-size:10px;font-weight:700;color:#2563eb;background:#eff6ff;border:1px solid #bfdbfe;padding:2px 8px;border-radius:4px;flex-shrink:0;white-space:nowrap;cursor:pointer;"
+    title="Open circular document">
+    ${window._CL_ACTIVE_CIRC?.id || '—'}
+  </span>
+
+ <!-- Section chip → opens doc -->
+<span onclick="event.stopPropagation();window.open(window._CL_ACTIVE_CIRC?.docUrl||'#','_blank')"
+  style="font-size:10px;font-weight:700;color:#0369a1;background:#e0f2fe;border:1px solid #bae6fd;padding:2px 8px;border-radius:4px;flex-shrink:0;white-space:nowrap;cursor:pointer;"
+  title="Open section in document">
+  §${_clObligMeta(oi).section.replace('Section ','')}
+</span>
+
+  <!-- Obl ID chip -->
+  <span style="font-family:monospace;font-size:10px;font-weight:700;color:#fff;background:#7c3aed;padding:2px 8px;border-radius:4px;flex-shrink:0;white-space:nowrap;">${obId}</span>
+
+  <!-- Obl text -->
+  <span style="flex:1;font-size:12px;font-weight:500;color:#1f2937;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0;">${obText.substring(0, 80)}${obText.length > 80 ? '…' : ''}</span>
+</div>
 
       <!-- right: badges + eye -->
       <div style="display:flex;align-items:center;gap:5px;flex-shrink:0;">
@@ -929,6 +948,9 @@ function _clOblRowHTML(r) {
         ${cl.department ? `<span style="font-size:9px;font-weight:600;padding:2px 7px;border-radius:10px;background:#eff6ff;border:1px solid #bfdbfe;color:#2563eb;white-space:nowrap;">${cl.department}</span>` : ''}
         <span class="cl-obl-applic-badge" onclick="event.stopPropagation();_clShowApplicabilityReason('${uid}','${obId}')" style="font-size:9px;font-weight:700;padding:2px 7px;border-radius:10px;cursor:pointer;white-space:nowrap;${isApplicable ? 'background:#eff6ff;color:#1d4ed8;border:1px solid #93c5fd;' : 'background:#f3f4f6;color:#6b7280;border:1px solid #d1d5db;'}">${isApplicable ? '⊕ Applicable' : 'N/A'}</span>
         <button onclick="event.stopPropagation();_clCycleOblStatus('${uid}','${cl.id}',${oi})" style="padding:2px 9px;border-radius:10px;font-size:9px;font-weight:700;cursor:pointer;border:1px solid;white-space:nowrap;${oblStatus==='Accepted'?'background:#dcfce7;color:#15803d;border-color:#6ee7b7;':oblStatus==='Rejected'?'background:#fee2e2;color:#dc2626;border-color:#fca5a5;':'background:#f3f4f6;color:#6b7280;border-color:#d1d5db;'}">${oblStatus||'Set Status'}</button>
+        <span onclick="event.stopPropagation();_clOpenOblSectionPopup('${uid}','${obId}',${oi})"
+  style="font-size:9px;font-weight:700;padding:2px 9px;border-radius:10px;background:#f0f9ff;border:1px solid #bae6fd;color:#0369a1;white-space:nowrap;cursor:pointer;"
+  title="View all circular references">Others</span>
         <button class="cl-row-eye-btn" onclick="event.stopPropagation();clOpenOblEyeModal('${uid}','${cl.id}',${oi})" title="View obligation" style="width:22px;height:22px;border-radius:50%;background:none;border:1px solid #e5e7eb;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#9ca3af;transition:all .12s;">
           <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
         </button>
@@ -988,6 +1010,9 @@ window._clPickActDept = function(actUid) {
   overlay.addEventListener('click', e => { if(e.target===overlay) overlay.remove(); });
 };
 
+
+
+
 window._clCycleOblStatus = function(uid, clauseId, oblIdx) {
   if (!window._CL_OBL_STATUS) window._CL_OBL_STATUS = {};
   const cur = window._CL_OBL_STATUS[uid] || '';
@@ -1033,6 +1058,162 @@ window._clToggleOblStackRow = function(uid) {
     if (arr)  arr.style.transform = 'rotate(90deg)';
     if (card) card.style.borderColor = '#3b82f6';
   }
+};
+
+window._clOpenOblSectionPopup = function(uid, oblId, oblIdx) {
+  var ex = document.getElementById('cl-obl-sec-popup'); if(ex) ex.remove();
+  const m = _clObligMeta(oblIdx);
+  const circ = window._CL_ACTIVE_CIRC;
+  const allClauses = window._CL_ACTIVE_SECTION_CLAUSES || [];
+  const clauseId = uid.split('-').slice(0, -1).join('-');
+  const cl = allClauses.find(c => c.id === clauseId);
+
+  const DUMMY_OBL_NAMES = [
+    'REs shall submit a list of digital platforms provided by them for the investors',
+    'Entities shall maintain records of all transactions for a minimum period of 5 years',
+    'All regulated entities shall file quarterly compliance reports with the authority',
+  ];
+
+  const refs = [
+    { circId: circ?.id || 'SEBI/2025/111', issueDate: '31 July 2025',     section: m.section, subset: m.subset, oblName: DUMMY_OBL_NAMES[0], dueDate: m.dueDate,            docUrl: circ?.docUrl || '#', isOriginal: true  },
+    { circId: 'SEBI/2025/142',             issueDate: '29 August 2025',   section: '3(2)',    subset: 'Clause (b)', oblName: DUMMY_OBL_NAMES[1], dueDate: 'September 30, 2025', docUrl: '#',                isOriginal: false },
+    { circId: 'SEBI/2025/198',             issueDate: '08 December 2025', section: '4(c)',    subset: 'Clause (c)', oblName: DUMMY_OBL_NAMES[2], dueDate: 'March 31, 2026',    docUrl: '#',                isOriginal: false },
+  ];
+
+  var overlay = document.createElement('div');
+  overlay.className = 'cl-eye-overlay'; overlay.id = 'cl-obl-sec-popup';
+  overlay.style.zIndex = '6500';
+  overlay.innerHTML = `
+  <div class="cl-eye-box cl-eye-box-wide" style="max-width:780px;" onclick="event.stopPropagation()">
+
+    <!-- DARK HEADER -->
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 20px;background:#1e293b;flex-shrink:0;border-radius:14px 14px 0 0;">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <span style="font-family:monospace;font-size:11px;font-weight:700;color:#fff;background:#7c3aed;padding:3px 10px;border-radius:5px;">${oblId}</span>
+        <span style="font-size:14px;font-weight:700;color:#fff;">Circular Reference</span>
+      </div>
+      <button onclick="document.getElementById('cl-obl-sec-popup').remove()" style="width:28px;height:28px;border-radius:50%;background:rgba(255,255,255,.12);border:none;color:#fff;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;">✕</button>
+    </div>
+
+    <div class="cl-eye-body" style="padding:0;max-height:65vh;overflow-y:auto;">
+      <table style="width:100%;border-collapse:collapse;font-size:12px;">
+        <thead>
+          <tr style="background:#1e293b;">
+            <th style="padding:10px 14px;text-align:left;font-weight:700;color:#94a3b8;font-size:10px;text-transform:uppercase;letter-spacing:.06em;white-space:nowrap;">Circular ID</th>
+            <th style="padding:10px 14px;text-align:left;font-weight:700;color:#94a3b8;font-size:10px;text-transform:uppercase;letter-spacing:.06em;white-space:nowrap;">Issue Date</th>
+            <th style="padding:10px 14px;text-align:left;font-weight:700;color:#94a3b8;font-size:10px;text-transform:uppercase;letter-spacing:.06em;white-space:nowrap;">Section</th>
+            <th style="padding:10px 14px;text-align:left;font-weight:700;color:#94a3b8;font-size:10px;text-transform:uppercase;letter-spacing:.06em;">Obligation Name</th>
+            <th style="padding:10px 14px;text-align:left;font-weight:700;color:#94a3b8;font-size:10px;text-transform:uppercase;letter-spacing:.06em;white-space:nowrap;">Due Date</th>
+            <th style="padding:10px 14px;text-align:center;font-weight:700;color:#94a3b8;font-size:10px;text-transform:uppercase;letter-spacing:.06em;white-space:nowrap;">Document</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${refs.map(function(ref, ri) {
+            var rowBg = ri % 2 === 0 ? '#fff' : '#f8fafc';
+            return '<tr style="border-bottom:1px solid #f0f0f0;background:' + rowBg + ';">' +
+
+              /* Circular ID → opens doc */
+              '<td style="padding:10px 14px;vertical-align:top;">' +
+                '<button onclick="window.open(\'' + (ref.docUrl||'#') + '\',\'_blank\')" style="font-size:11px;font-weight:700;color:#4f46e5;background:none;border:none;cursor:pointer;text-decoration:underline;padding:0;font-family:inherit;display:block;">' + ref.circId + '</button>' +
+                '<div style="margin-top:4px;">' +
+                  (ref.isOriginal
+                    ? '<span style="font-size:9px;font-weight:700;padding:1px 7px;border-radius:10px;background:#dcfce7;color:#15803d;">Original</span>'
+                    : '<span style="font-size:9px;font-weight:700;padding:1px 7px;border-radius:10px;background:#fef3c7;color:#b45309;">Amended</span>') +
+                '</div>' +
+              '</td>' +
+
+              /* Issue Date */
+              '<td style="padding:10px 14px;font-size:11px;color:#6b7280;white-space:nowrap;vertical-align:top;">' + ref.issueDate + '</td>' +
+
+              /* Section → opens doc */
+              '<td style="padding:10px 14px;vertical-align:top;">' +
+                '<button onclick="window.open(\'' + (ref.docUrl||'#') + '\',\'_blank\')" style="font-size:11px;font-weight:600;color:#0369a1;background:#e0f2fe;border:1px solid #bae6fd;border-radius:4px;cursor:pointer;padding:2px 8px;font-family:inherit;white-space:nowrap;">' + ref.section + '</button>' +
+              '</td>' +
+
+              /* Obligation Name → opens obl eye modal */
+              '<td style="padding:10px 14px;font-size:11px;color:#374151;line-height:1.5;max-width:220px;vertical-align:top;">' +
+                '<button onclick="document.getElementById(\'cl-obl-sec-popup\').remove();setTimeout(()=>clOpenOblEyeModal(\'' + uid + '\',\'' + clauseId + '\',' + oblIdx + '),50)" style="font-size:11px;font-weight:500;color:#374151;background:none;border:none;cursor:pointer;text-align:left;padding:0;font-family:inherit;line-height:1.5;text-decoration:underline;text-underline-offset:2px;">' + ref.oblName.substring(0,70) + (ref.oblName.length>70?'…':'') + '</button>' +
+              '</td>' +
+
+              /* Due Date */
+              '<td style="padding:10px 14px;font-size:12px;font-weight:600;color:' + (ref.isOriginal?'#1f2937':'#b45309') + ';white-space:nowrap;vertical-align:top;">' + ref.dueDate + '</td>' +
+
+              /* View Doc */
+              '<td style="padding:10px 14px;text-align:center;vertical-align:top;">' +
+                '<button onclick="window.open(\'' + (ref.docUrl||'#') + '\',\'_blank\')" style="padding:4px 10px;background:#f3f4f6;border:1px solid #e5e7eb;border-radius:6px;font-size:11px;font-weight:600;color:#374151;cursor:pointer;white-space:nowrap;">📄 View Doc</button>' +
+              '</td>' +
+
+            '</tr>';
+          }).join('')}
+        </tbody>
+      </table>
+    </div>
+
+    <div class="cl-eye-foot" style="justify-content:space-between;">
+      <span style="font-size:11px;color:#9ca3af;">${refs.length} circular references for this obligation</span>
+      <button class="cl-eye-cancel-btn" onclick="document.getElementById('cl-obl-sec-popup').remove()">Close</button>
+    </div>
+  </div>`;
+
+  document.body.appendChild(overlay);
+  overlay.addEventListener('click', e => { if(e.target===overlay) overlay.remove(); });
+};
+
+window._clOpenSectionDetailPopup = function(circId, section, subset, oblId) {
+  var ex = document.getElementById('cl-sec-detail-popup'); if(ex) ex.remove();
+  const circ = window._CL_ACTIVE_CIRC;
+  const m = _clObligMeta(0);
+  var overlay = document.createElement('div');
+  overlay.className = 'cl-eye-overlay'; overlay.id = 'cl-sec-detail-popup';
+  overlay.style.zIndex = '7000';
+  overlay.innerHTML = `
+  <div class="cl-eye-box cl-eye-box-wide" style="max-width:580px;" onclick="event.stopPropagation()">
+    <div class="cl-eye-head">
+      <div class="cl-eye-head-left">
+        <span class="cl-eye-id-chip" style="background:#0369a1;">${section}</span>
+        <span class="cl-eye-head-title">Section Reference</span>
+      </div>
+      <button class="cl-eye-close" onclick="document.getElementById('cl-sec-detail-popup').remove()">✕</button>
+    </div>
+    <div class="cl-eye-body" style="padding:18px 20px;display:flex;flex-direction:column;gap:12px;">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+        <div style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:6px;padding:10px 12px;">
+          <div style="font-size:10px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px;">Circular ID</div>
+          <div style="font-size:13px;font-weight:700;color:#4f46e5;">${circId}</div>
+        </div>
+        <div style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:6px;padding:10px 12px;">
+          <div style="font-size:10px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px;">Section</div>
+          <div style="font-size:13px;font-weight:700;color:#0369a1;">${section}</div>
+        </div>
+        <div style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:6px;padding:10px 12px;">
+          <div style="font-size:10px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px;">Sub-Section</div>
+          <div style="font-size:13px;font-weight:700;color:#1f2937;">${subset}</div>
+        </div>
+        <div style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:6px;padding:10px 12px;">
+          <div style="font-size:10px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px;">Obligation ID</div>
+          <div style="font-size:12px;font-weight:700;color:#7c3aed;">${oblId}</div>
+        </div>
+        <div style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:6px;padding:10px 12px;">
+          <div style="font-size:10px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px;">Frequency</div>
+          <div style="font-size:13px;font-weight:700;color:#1f2937;">${m.frequency}</div>
+        </div>
+        <div style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:6px;padding:10px 12px;">
+          <div style="font-size:10px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px;">Regulatory Body</div>
+          <div style="font-size:13px;font-weight:700;color:#1f2937;">SEBI</div>
+        </div>
+      </div>
+      <div style="background:#f3f4f6;border:1px solid #e5e7eb;border-radius:6px;padding:14px;">
+        <div style="font-size:10px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;">Extracted Clause Text</div>
+        <div style="font-size:12px;color:#374151;line-height:1.8;">${(window._CL_ACTIVE_SECTION_CLAUSES||[]).find(c=>c.id===oblId.split('-').slice(1,-1).join('-'))?.text || 'The entity shall ensure compliance with all reporting requirements as specified under the relevant circular, including timely submission of returns and maintenance of records.'}</div>
+      </div>
+    </div>
+    <div class="cl-eye-foot">
+      <button class="cl-eye-cancel-btn" onclick="document.getElementById('cl-sec-detail-popup').remove()">Close</button>
+      <button class="cl-eye-save-btn" style="opacity:1;pointer-events:auto;" onclick="window.open('${circ?.docUrl||'#'}','_blank')">📄 Open Document</button>
+    </div>
+  </div>`;
+  document.body.appendChild(overlay);
+  overlay.addEventListener('click', e => { if(e.target===overlay) overlay.remove(); });
 };
 
 /* Clause row: white bg, ID chip + title text left, counts right
@@ -1558,6 +1739,61 @@ window.clOpenOblEyeModal = function (uid, clauseId, oblIdx) {
         </div>
       </div>
 
+
+
+      <!-- LINKED REFERENCE accordion -->
+      <div style="border-bottom:1px solid #c7d2fe;background:#f5f7ff;">
+        <div onclick="var el=document.getElementById('cl-obl-linked-ref-body-${uid}');el.style.display=el.style.display==='none'?'block':'none';this.querySelector('.cl-macc-arr').textContent=el.style.display==='none'?'▶':'▼';" style="cursor:pointer;display:flex;align-items:center;justify-content:space-between;padding:12px 20px;">
+          <div style="font-size:10px;font-weight:800;color:#3730a3;text-transform:uppercase;letter-spacing:.08em;display:flex;align-items:center;gap:6px;">
+            <span style="width:3px;height:14px;background:#4f46e5;border-radius:2px;display:inline-block;"></span>
+            <span class="cl-macc-arr">▶</span> Linked Reference
+          </div>
+        </div>
+        <div id="cl-obl-linked-ref-body-${uid}" style="display:none;padding:0;">
+          <table style="width:100%;border-collapse:collapse;font-size:12px;">
+            <tbody>
+              <tr>
+                <td style="padding:10px 14px;font-size:11px;font-weight:700;color:#ffffff;background:#1e293b;white-space:nowrap;">Circular ID</td>
+                <td style="padding:10px 14px;font-size:11px;font-weight:700;color:#ffffff;background:#1e293b;white-space:nowrap;">Issue Date</td>
+                <td style="padding:10px 14px;font-size:11px;font-weight:700;color:#ffffff;background:#1e293b;white-space:nowrap;">Section</td>
+                <td style="padding:10px 14px;font-size:11px;font-weight:700;color:#ffffff;background:#1e293b;">Obligation Name</td>
+                <td style="padding:10px 14px;font-size:11px;font-weight:700;color:#ffffff;background:#1e293b;white-space:nowrap;">Due Date</td>
+                <td style="padding:10px 14px;font-size:11px;font-weight:700;color:#ffffff;background:#1e293b;text-align:center;white-space:nowrap;">Document</td>
+              </tr>
+              ${[
+                { circId:'SEBI/2025/111', issueDate:'31 July 2025',     section:'5(1)', oblName:'REs shall submit a list of digital platforms provided by them for the investors', dueDate:'August 31, 2025',    docUrl:'https://www.sebi.gov.in/sebi_data/attachdocs/aug-2025/1234567890.pdf', isOriginal:true },
+                { circId:'SEBI/2025/142', issueDate:'29 August 2025',   section:'3(2)', oblName:'REs shall submit a list of digital platforms provided by them for the investors', dueDate:'September 30, 2025', docUrl:'https://www.sebi.gov.in/sebi_data/attachdocs/aug-2025/1234567890.pdf', isOriginal:false },
+                { circId:'SEBI/2025/198', issueDate:'08 December 2025', section:'4(c)', oblName:'REs shall submit a list of digital platforms provided by them for the investors', dueDate:'March 31, 2026',    docUrl:'https://www.sebi.gov.in/sebi_data/attachdocs/aug-2025/1234567890.pdf', isOriginal:false },
+              ].map(function(ref, ri) {
+                var rowBg = ri % 2 === 0 ? '#fff' : '#fafafa';
+                return '<tr style="border-bottom:1px solid #f0f0f0;background:' + rowBg + ';">' +
+                  '<td style="padding:10px 14px;white-space:nowrap;vertical-align:top;">' +
+                    '<span style="font-size:11px;font-weight:700;color:#4f46e5;">' + ref.circId + '</span>' +
+                    '<div style="margin-top:3px;">' +
+                      (ref.isOriginal
+                        ? '<span style="font-size:9px;font-weight:700;padding:1px 7px;border-radius:10px;background:#dcfce7;color:#15803d;">Original</span>'
+                        : '<span style="font-size:9px;font-weight:700;padding:1px 7px;border-radius:10px;background:#fef3c7;color:#b45309;">Amended</span>') +
+                    '</div>' +
+                  '</td>' +
+                  '<td style="padding:10px 14px;font-size:11px;color:#6b7280;white-space:nowrap;vertical-align:top;">' + ref.issueDate + '</td>' +
+                  '<td style="padding:10px 14px;white-space:nowrap;vertical-align:top;">' +
+                    '<span class="cl-obl-ref-section-link" data-circid="' + ref.circId + '" data-uid="${uid}" style="font-size:11px;font-weight:600;color:#0369a1;cursor:pointer;text-decoration:underline;">' + ref.section + '</span>' +
+                  '</td>' +
+                  '<td style="padding:10px 14px;font-size:11px;color:#374151;line-height:1.5;max-width:200px;vertical-align:top;">' + ref.oblName.substring(0,70) + (ref.oblName.length>70?'…':'') + '</td>' +
+                  '<td style="padding:10px 14px;font-size:12px;font-weight:600;color:' + (ref.isOriginal?'#1f2937':'#b45309') + ';white-space:nowrap;vertical-align:top;">' + ref.dueDate + '</td>' +
+                  '<td style="padding:10px 14px;text-align:center;vertical-align:top;">' +
+                    '<button class="cl-obl-ref-doc-btn" data-url="' + ref.docUrl + '" style="padding:4px 10px;background:#f3f4f6;border:1px solid #e5e7eb;border-radius:6px;font-size:11px;font-weight:600;color:#374151;cursor:pointer;white-space:nowrap;">&#x1F4C4; View Doc</button>' +
+                  '</td>' +
+                '</tr>';
+              }).join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+
+      
+
     </div>
 
     <div class="cl-eye-foot">
@@ -1575,6 +1811,88 @@ window.clOpenOblEyeModal = function (uid, clauseId, oblIdx) {
   });
   document.body.appendChild(modal);
 
+  // Wire section link clicks → open OBL ref popup
+modal.querySelectorAll('.cl-obl-ref-section-link').forEach(function(el) {
+  el.addEventListener('click', function(e) {
+    e.stopPropagation();
+    var ex = document.getElementById('cl-obl-ref-section-modal'); if(ex) ex.remove();
+    var sectionOverlay = document.createElement('div');
+    sectionOverlay.className = 'cl-eye-overlay';
+    sectionOverlay.id = 'cl-obl-ref-section-modal';
+    sectionOverlay.style.zIndex = '6000';
+    sectionOverlay.innerHTML =
+      '<div class="cl-eye-box cl-eye-box-wide" style="max-width:600px;" onclick="event.stopPropagation()">' +
+        '<div class="cl-eye-head">' +
+          '<div class="cl-eye-head-left">' +
+            '<span class="cl-eye-id-chip" style="background:#7c3aed;">' + oblId + '</span>' +
+            '<span class="cl-eye-head-title">Obligation Reference</span>' +
+          '</div>' +
+          '<button class="cl-eye-close" onclick="document.getElementById(\'cl-obl-ref-section-modal\').remove()">✕</button>' +
+        '</div>' +
+        '<div class="cl-eye-body" style="padding:20px;display:flex;flex-direction:column;gap:14px;">' +
+
+          // Obligation text banner
+          '<div style="background:#f5f3ff;border:1px solid #e9d5ff;border-radius:6px;padding:12px 14px;">' +
+            '<div style="font-size:10px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px;">Obligation</div>' +
+            '<div style="font-size:13px;color:#1f2937;line-height:1.7;">' + ob.text + '</div>' +
+          '</div>' +
+
+          // Meta grid
+          '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">' +
+            '<div style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:6px;padding:10px 12px;">' +
+              '<div style="font-size:10px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px;">Due Date</div>' +
+              '<div style="font-size:13px;font-weight:700;color:#1f2937;">' + m.dueDate + '</div>' +
+            '</div>' +
+            '<div style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:6px;padding:10px 12px;">' +
+              '<div style="font-size:10px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px;">Frequency</div>' +
+              '<div style="font-size:13px;font-weight:700;color:#1f2937;">' + m.frequency + '</div>' +
+            '</div>' +
+            '<div style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:6px;padding:10px 12px;">' +
+              '<div style="font-size:10px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px;">Section</div>' +
+              '<div style="font-size:13px;font-weight:700;color:#1f2937;">' + el.textContent + '</div>' +
+            '</div>' +
+            '<div style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:6px;padding:10px 12px;">' +
+              '<div style="font-size:10px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px;">Effective Date</div>' +
+              '<div style="font-size:13px;font-weight:700;color:#1f2937;">—</div>' +
+            '</div>' +
+            '<div style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:6px;padding:10px 12px;">' +
+              '<div style="font-size:10px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px;">Regulatory Body</div>' +
+              '<div style="font-size:13px;font-weight:700;color:#1f2937;">SEBI</div>' +
+            '</div>' +
+            '<div style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:6px;padding:10px 12px;">' +
+              '<div style="font-size:10px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px;">Circular ID</div>' +
+              '<div style="font-size:12px;font-weight:700;color:#7c3aed;">' + (el.dataset.circid || clauseId) + '</div>' +
+            '</div>' +
+          '</div>' +
+
+          // Extracted clause text
+          '<div style="background:#f3f4f6;border:1px solid #e5e7eb;border-radius:6px;padding:14px;">' +
+            '<div style="font-size:10px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;">Extracted Clause Text</div>' +
+            '<div style="font-size:12px;color:#374151;line-height:1.8;">' + (cl.text || 'The entity shall ensure compliance with all reporting requirements as specified under the relevant circular, including timely submission of returns and maintenance of records as directed by the regulatory authority.') + '</div>' +
+          '</div>' +
+
+        '</div>' +
+        '<div class="cl-eye-foot">' +
+          '<button class="cl-eye-cancel-btn" onclick="document.getElementById(\'cl-obl-ref-section-modal\').remove()">Close</button>' +
+        '</div>' +
+      '</div>';
+
+    document.body.appendChild(sectionOverlay);
+    sectionOverlay.addEventListener('click', function(e) {
+      if (e.target === sectionOverlay) sectionOverlay.remove();
+    });
+  });
+});
+
+// Wire View Doc clicks
+modal.querySelectorAll('.cl-obl-ref-doc-btn').forEach(function(btn) {
+  btn.addEventListener('click', function(e) {
+    e.stopPropagation();
+    var url = btn.dataset.url;
+    if (url) window.open(url, '_blank');
+    else showToast('No document available.', 'error');
+  });
+});
   /* wire dots menu display */
   const dotsWrapObl = document.getElementById(`cl-obl-dots-${uid}`);
   const dotsMenuObl = document.getElementById(`cl-obl-dots-menu-${uid}`);

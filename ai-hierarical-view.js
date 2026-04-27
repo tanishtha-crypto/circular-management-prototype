@@ -79,6 +79,7 @@ window._mlRenderHierCards = function (circs) {
             '<th style="padding:10px 12px;text-align:left;font-weight:700;color:#374151;font-size:11px;">Assigned To</th>' +
             '<th style="padding:10px 12px;text-align:left;font-weight:700;color:#374151;font-size:11px;">Status</th>' +
             '<th style="padding:10px 12px;text-align:left;font-weight:700;color:#374151;font-size:11px;">Due Date</th>' +
+'<th style="padding:10px 12px;text-align:center;font-weight:700;color:#3730a3;font-size:11px;background:#eef2ff;min-width:160px;">Linked Ref</th>' +
           '</tr></thead>' +
           '<tbody>' +
             items.map(function(item) {
@@ -93,12 +94,25 @@ window._mlRenderHierCards = function (circs) {
                   (item.department ? item.department.split(',').map(function(d){ return '<span style="background:#e0f2fe;color:#0369a1;padding:2px 6px;border-radius:3px;font-size:11px;font-weight:600;display:inline-block;margin:1px;">' + d.trim() + '</span>'; }).join('') : '<span style="color:#9ca3af;font-style:italic;font-size:11px;">Assign</span>') +
                 '</td>' +
                 '<td class="ml-obl-inline-assignee" data-gidx="' + globalIdx + '" style="padding:10px 12px;cursor:pointer;font-size:12px;color:#374151;" title="Click to assign">' +
-                  (item.assignedTo || '<span style="color:#9ca3af;font-style:italic;">Assign</span>') +
+                  (item.assignedTo[0] || '<span style="color:#9ca3af;font-style:italic;">Assign</span>') +
                 '</td>' +
                 '<td class="ml-obl-inline-status" data-gidx="' + globalIdx + '" style="padding:10px 12px;cursor:pointer;">' +
                   '<span style="padding:4px 10px;border-radius:12px;font-size:11px;font-weight:700;background:' + sc + ';cursor:pointer;">' + item.status + '</span>' +
                 '</td>' +
                 '<td style="padding:10px 12px;font-size:12px;color:#374151;">' + (item.dueDate || '—') + '</td>' +
+'<td style="padding:0;vertical-align:middle;background:#eef2ff;border-left:2px solid #c7d2fe;">' +
+  '<div style="display:flex;align-items:stretch;height:100%;">' +
+    '<span class="ml-hier-ref-circid" data-gidx="' + globalIdx + '" data-circid="' + item.circId + '" ' +
+      'style="flex:1;display:flex;align-items:center;justify-content:center;padding:8px 6px;font-family:monospace;font-size:10px;font-weight:700;color:#4f46e5;cursor:pointer;text-decoration:underline;white-space:nowrap;border-right:1px solid #c7d2fe;" ' +
+      'title="Open circular document">' + item.circId + '</span>' +
+    '<span class="ml-hier-ref-section" data-gidx="' + globalIdx + '" data-circid="' + item.circId + '" ' +
+      'style="flex:0 0 auto;display:flex;align-items:center;justify-content:center;padding:8px 7px;font-size:10px;font-weight:600;color:#0369a1;cursor:pointer;text-decoration:underline;white-space:nowrap;border-right:1px solid #c7d2fe;" ' +
+      'title="Open this section">' + (item.refSection || item.clauseId || '§') + '</span>' +
+    '<span class="ml-hier-ref-more" data-gidx="' + globalIdx + '" ' +
+      'style="flex:0 0 auto;display:flex;align-items:center;justify-content:center;padding:8px 7px;font-size:10px;font-weight:600;color:#7c3aed;cursor:pointer;white-space:nowrap;" ' +
+      'title="View all references">More</span>' +
+  '</div>' +
+'</td>' +
               '</tr>';
             }).join('') +
           '</tbody>' +
@@ -149,6 +163,55 @@ window._mlRenderHierCards = function (circs) {
       _mlOpenStatusDropdown(parseInt(cell.dataset.gidx));
     });
   });
+
+  mount.querySelectorAll('.ml-hier-ref-circid').forEach(function(el) {
+  el.addEventListener('click', function(e) {
+    e.stopPropagation();
+    var circId = el.dataset.circid;
+    var circular = (CMS_DATA.circulars || []).find(function(c){ return c.id === circId; }) || {};
+    var pdfUrl = circular.pdfUrl || circular.documentUrl || circular.fileUrl || circular.url || null;
+    var win = window.open('', '_blank');
+    win.document.write(
+      '<html><head><title>' + circId + '</title></head>' +
+      '<body style="font-family:sans-serif;padding:40px;color:#374151;">' +
+        '<h2 style="color:#4f46e5;font-size:16px;margin-bottom:8px;">📄 ' + circId + '</h2>' +
+        (pdfUrl
+          ? '<p><a href="' + pdfUrl + '" target="_blank" style="color:#4f46e5;">Open full document →</a></p>'
+          : '<p style="font-size:13px;color:#6b7280;">No PDF document attached to this circular.</p>') +
+      '</body></html>'
+    );
+    win.document.close();
+  });
+});
+
+mount.querySelectorAll('.ml-hier-ref-section').forEach(function(el) {
+  el.addEventListener('click', function(e) {
+    e.stopPropagation();
+    var circId = el.dataset.circid;
+    var circular = (CMS_DATA.circulars || []).find(function(c){ return c.id === circId; }) || {};
+    var pdfUrl = circular.pdfUrl || circular.documentUrl || circular.fileUrl || circular.url || null;
+    var win = window.open('', '_blank');
+    win.document.write(
+      '<html><head><title>' + circId + ' — ' + el.textContent.trim() + '</title></head>' +
+      '<body style="font-family:sans-serif;padding:40px;color:#374151;">' +
+        '<h2 style="color:#4f46e5;font-size:16px;margin-bottom:8px;">📄 ' + circId + '</h2>' +
+        '<p style="font-size:13px;font-weight:600;color:#0369a1;">Section: ' + el.textContent.trim() + '</p>' +
+        (pdfUrl
+          ? '<p><a href="' + pdfUrl + '" target="_blank" style="color:#4f46e5;">Open full document →</a></p>'
+          : '<p style="font-size:12px;color:#9ca3af;">No PDF attached.</p>') +
+      '</body></html>'
+    );
+    win.document.close();
+  });
+});
+
+mount.querySelectorAll('.ml-hier-ref-more').forEach(function(el) {
+  el.addEventListener('click', function(e) {
+    e.stopPropagation();
+    var idx = parseInt(el.dataset.gidx);
+    _mlOpenReferenceModal(window._mlActionItems[idx]);
+  });
+});
 }
 
 // Toggle three dots menu

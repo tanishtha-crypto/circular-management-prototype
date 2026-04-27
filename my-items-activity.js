@@ -216,8 +216,8 @@ function actBuildHTML() {
   let depts = [];
   if (typeof ACTD_DUMMY !== 'undefined') {
     depts = [...new Set(Object.values(ACTD_DUMMY).map(a => a.dept).filter(Boolean))].sort();
-  } else if (typeof CMS_DATA !== 'undefined' && CMS_DATA.tasks) {
-    depts = [...new Set(CMS_DATA.tasks.map(t => t.department))].sort();
+  } else if (typeof CMS_DATA !== 'undefined' && CMS_DATA.my_tasks) {
+    depts = [...new Set(CMS_DATA.my_tasks.map(t => t.department))].sort();
   }
 
   return `
@@ -320,7 +320,7 @@ function actRenderTasks() {
   }
   // FALLBACK — DUMMY_ACTIONS from action-screen.js if ACTD_DUMMY not available
   else if (typeof DUMMY_ACTIONS !== 'undefined' && typeof CMS_DATA !== 'undefined') {
-    const tasks = CMS_DATA.tasks || [];
+    const tasks = CMS_DATA.my_tasks || [];
     tasks.forEach(task => {
       (DUMMY_ACTIONS[task.id] || []).forEach(a => {
         activities.push({
